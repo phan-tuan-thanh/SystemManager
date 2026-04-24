@@ -1,0 +1,111 @@
+# Project Progress Log
+
+A chronological record of project milestones, updates, and sprint summaries.
+
+---
+
+## 2026-04-24: Sprint 16 — App Group Restructure & Catalog Unification ✅ Implemented
+
+- ✅ S16-01: Schema — thêm `GroupType` enum + `group_type` vào `ApplicationGroup`
+- ✅ S16-02: Schema — thêm `eol_date`, `vendor` vào `Application`
+- ✅ S16-03: Data migration — copy `SystemSoftware` → `Application(type=SYSTEM)`; set `INFRASTRUCTURE` cho nhóm đúng loại
+- ✅ S16-04: AppGroup DTO & Service — thêm `group_type` filter + required field khi tạo
+- ✅ S16-05: Application DTO & Service — validate group_type vs application_type, xử lý eol_date/vendor
+- ✅ S16-06: SystemSoftware endpoint — delegate hoàn toàn sang `ApplicationService`
+- ✅ S16-07: Frontend Types & Hooks — thêm `GroupType`, cập nhật `Application` interface, hooks params
+- ✅ S16-08: AppGroupModal — thêm field `group_type` (disabled khi edit)
+- ✅ S16-09: AppGroupList — badge phân loại + filter dropdown
+- ✅ S16-10: ApplicationForm — lọc nhóm theo `application_type`, thêm SYSTEM fields (sw_type, vendor, eol_date)
+- ✅ S16-11: Application page — tái cấu trúc thành 3 tabs: Nghiệp vụ / Hạ tầng / Nhóm ứng dụng
+- ✅ S16-12: Sidebar & Route — `/system-software` redirect sang `/applications?tab=infra`
+- ✅ S16-13: Import service — auto-create group với đúng `group_type`
+- Branch: `feat/sprint-16-app-group-restructure`
+
+## 2026-04-24: Sprint 16 — App Group Restructure & Centralized Deployments
+**Status:** 🔄 Planning
+ 
+- Lập kế hoạch tái cấu trúc nhóm ứng dụng (Business vs Infra).
+- Quy hoạch lại module Deployments để quản lý tập trung và theo dõi thay đổi (Change Management).
+- Kế hoạch hợp nhất Catalog phần mềm hệ thống (SystemSoftware) vào Application Catalog.
+- Tài liệu: [sprint-16-app-group-restructure.md](docs/plans/sprint-16-app-group-restructure.md)
+
+---
+
+## 2026-04-24: Sprint 15 — Server Import & OS Lifecycle
+**Status:** ✅ Completed
+ 
+- Triển khai logic Import Server chi tiết (OS, CPU, RAM, Storage).
+- **OS Lifecycle Tracking**: Tách OS thành catalog + bảng `ServerOsInstall` lưu lịch sử cài đặt/nâng cấp.
+- Interactive Import: Hỗ trợ người dùng ánh xạ (map) OS từ file CSV vào danh mục hệ thống.
+- UI: Bổ sung tab **Vòng đời OS** trong chi tiết Server và cập nhật OS Display trên danh sách.
+- Branch: `feat/sprint-15-server-import-enrichment`
+
+---
+
+## 2026-04-23: Sprint 14 — UX Polish & Floating Filters
+**Status:** ✅ Completed
+
+- Cải thiện Topology UI: Chuyển bộ lọc sang dạng thanh ngang (Horizontal Bar) luôn hiển thị ở top (kể cả fullscreen).
+- Đồng bộ lọc: Áp dụng bộ lọc môi trường và loại node trên tất cả engine (ReactFlow, Cytoscape, Vis-network, 3D).
+- UI/UX: Set Vis-network làm engine mặc định, cải thiện phân biệt Server/App nodes.
+
+---
+
+## 2026-04-22: Sprint 13 — Topology 2D UX Improvements
+**Status:** ✅ Completed
+
+- Yêu cầu mới ghi nhận vào `SRS.md` section 4.5.4
+- Kế hoạch kỹ thuật ghi vào `IMPLEMENTATION_DETAILS.md` mục 6
+- Sprint tasks S13-07 đến S13-10 hoàn thành trong `TASKS.md`
+- Frontend: Nút fullscreen, kéo nhãn kết nối, giữ vị trí node sau drag, cải thiện auto-arrange fitView.
+
+---
+
+## 2026-04-21: Sprint 13 — Interactive Topology 2D & Networks Layout
+**Status:** ✅ Completed
+
+- Yêu cầu mới được ghi nhận vào `SRS.md` section 4.5.3
+- Kế hoạch implementation lập tại `IMPLEMENTATION_DETAILS.md` mục 5
+- Hệ thống hỗ trợ "Networks Layout" (Server Box) và kéo thả tạo kết nối trực tiếp.
+- Backend: Thêm `target_port_id` vào `AppConnection`.
+
+---
+
+## 2026-04-17: Sprint 9 Completion & UI Refinements
+**Status:** ✅ Merged to `feature/improve-ui-csv-import`
+
+### Highlights
+- **Infrastructure CSV Import**: Complete overhaul with support for System/Site/Env overrides, real-time local preview via `papaparse`, and detailed tabbed results reporting.
+- **Access Control**: Implemented `InfraSystemAccess` for granular user/group permissions on infrastructure systems.
+- **UI Bug Fixes**:
+  - Resolved global scroll issues by modifying `AppLayout` overflow properties.
+  - Fixed topology rendering bugs where the canvas would collapse to 0px height.
+  - Added "Changed Badge" indicators to list pages.
+- **Backend Optimizations**: Fixed `infra_system_id` mapping and `systemCode` undefined errors during bulk imports.
+
+---
+
+## 2026-04-16: Sprint 8 Completion - Topology 2D
+**Status:** ✅ Completed
+
+### Highlights
+- **Topology 2D Page**: Complete implementation using React Flow.
+- **Components**: Custom nodes for Servers (rectangular card) and Apps (pills with gradients).
+- **Auto-Layout**: Integrated `dagre` library for automatic node positioning with "Auto Arrange" functionality.
+- **Snapshots**: Architecture for saving and restoring full topology states.
+- **GraphQL**: Registered global middleware and established the core topology query engine.
+
+---
+
+## Sprint 1–7 Summary: Core Modules
+**Status:** ✅ COMPLETE
+
+- **Sprint 1 & 2**: User & Group Management (Backend & Frontend).
+- **Sprint 3 & 4**: Server, Hardware, and Network Inventory with IP conflict detection.
+- **Sprint 5 & 6**: Application management, Deployments, and a complete File Upload system for deployment documentation.
+- **Sprint 7**: App Connections, Dependency Tree visualization, and Audit Log CSV streaming exports.
+
+---
+
+### Sprint History & Reports
+Detailed sprint-by-sprint reports can be found in the [docs/reports/](file:///Users/ptud/Documents/Labs/SystemManager/docs/reports/) directory.

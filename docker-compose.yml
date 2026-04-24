@@ -1,0 +1,72 @@
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: system_manager
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./packages/backend
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/system_manager
+      JWT_ACCESS_SECRET: change-me-access-secret
+      JWT_REFRESH_SECRET: change-me-refresh-secret
+      JWT_ACCESS_EXPIRY: 15m
+      JWT_REFRESH_EXPIRY: 7d
+      PORT: "3000"
+      NODE_ENV: development
+      FRONTEND_URL: http://localhost:5173
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./packages/backend/prisma:/app/prisma
+    restart: unless-stopped
+
+  migrate:
+    build:
+      context: ./packages/backend
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/system_manager
+    command: sh -c "npx prisma migrate deploy && npx ts-node --transpile-only prisma/seed.ts"
+    volumes:
+      - ./packages/backend/prisma:/app/prisma
+
+  frontend:
+    build:
+      context: ./packages/frontend
+      dockerfile: Dockerfile
+    depends_on:
+      - backend
+    environment:
+      BACKEND_URL: http://backend:3000
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./packages/frontend/src:/app/src
+      - ./packages/frontend/index.html:/app/index.html
+      - ./packages/frontend/vite.config.ts:/app/vite.config.ts
+    restart: unless-stopped
+
+volumes:
+  pgdata:

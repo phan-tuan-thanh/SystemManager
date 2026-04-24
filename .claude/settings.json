@@ -1,0 +1,66 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "matcher": "/build-sprint",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$(git -C \"$PWD\" rev-parse --show-toplevel 2>/dev/null)/.claude/hooks/sprint-branch-create.sh\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$(git -C \"$PWD\" rev-parse --show-toplevel 2>/dev/null)/.claude/hooks/sprint-push.sh\""
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '⚠️  Ensure: no hardcoded secrets, no console.log in production code, no raw SQL queries'"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "file=\"$CLAUDE_FILE_PATH\"; if [ -n \"$file\" ] && echo \"$file\" | grep -qE '\\.(ts|tsx)$'; then if command -v npx &>/dev/null && [ -f \"$(git rev-parse --show-toplevel 2>/dev/null)/node_modules/.bin/eslint\" 2>/dev/null ]; then npx eslint --fix \"$file\" 2>/dev/null || true; fi; fi"
+          }
+        ]
+      }
+    ],
+    "PostCommit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '✅ Commit created. Remember: run tests before pushing.'"
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "TodoWrite"
+    ],
+    "deny": []
+  }
+}

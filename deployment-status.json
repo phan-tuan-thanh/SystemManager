@@ -1,0 +1,598 @@
+{
+  "_meta": {
+    "purpose": "AI Agent handoff file — tracks exact build state so any agent can continue without re-reading the entire codebase",
+    "updated_at": "2026-04-24T11:30:00+07:00",
+    "updated_by": "Claude Sonnet 4.6",
+    "schema_version": "2",
+    "agile_planning": {
+      "task_list": "TASKS.md",
+      "reports_folder": "docs/reports/",
+      "current_sprint": "Sprint 16 — App Group Restructure & Catalog Unification (S16-01 to S16-13 implemented)",
+      "sprint_report_template": "docs/reports/sprint-template.md",
+      "completed_sprint_reports": ["docs/reports/sprint-00-bootstrap.md", "docs/reports/sprint-01.md", "docs/reports/sprint-02.md", "docs/reports/sprint-03.md", "docs/reports/sprint-04.md", "docs/reports/sprint-05.md", "docs/reports/sprint-06.md", "docs/reports/sprint-07.md", "docs/reports/sprint-08.md", "docs/reports/sprint-09.md", "docs/reports/sprint-10.md", "docs/reports/sprint-11.md", "docs/reports/sprint-12.md", "docs/reports/sprint-13.md", "docs/reports/sprint-14.md", "docs/reports/sprint-15.md"]
+    }
+  },
+
+  "project": {
+    "name": "SystemManager",
+    "description": "Infrastructure & Deployment Management System",
+    "repo_root": "/Users/ptud/Documents/Labs/SystemManager",
+    "srs": "docs/SRS.md",
+    "tech_stack": {
+      "backend": "NestJS + TypeScript + Prisma + PostgreSQL",
+      "frontend": "React 18 + Vite + Ant Design + Zustand + TanStack Query",
+      "infra": "Docker Compose"
+    }
+  },
+
+  "runtime": {
+    "status": "RUNNING",
+    "environment": "development (Docker)",
+    "services": {
+      "db":       { "image": "postgres:15-alpine", "port": 5432,  "status": "healthy", "database": "system_manager" },
+      "backend":  { "port": 3000, "status": "running", "swagger": "http://localhost:3000/api/docs" },
+      "frontend": { "port": 5173, "status": "running", "url": "http://localhost:5173" }
+    },
+    "docker_commands": {
+      "start_all":      "docker compose up -d",
+      "stop_all":       "docker compose down",
+      "rebuild_backend":"docker compose up backend -d --build",
+      "logs":           "docker compose logs -f [service]",
+      "migrate":        "docker compose run --rm migrate sh -c 'npx prisma migrate deploy'",
+      "migrate_dev":    "docker compose run --rm migrate sh -c 'npx prisma migrate dev --name <name>'",
+      "seed_admin":     "docker compose run --rm migrate sh -c 'npx ts-node prisma/seed.ts'"
+    }
+  },
+
+  "database": {
+    "status": "RUNNING",
+    "migrations_applied": [
+      "20260407055541_init",
+      "20260407061453_add_business_models",
+      "20260409000000_add_logging_tables",
+      "20260410000000_add_topology_snapshots",
+      "20260416080802_add_infra_system_tables",
+      "20260416084125_add_infra_system_id_to_server",
+      "20260416084515_add_test_site_enum",
+      "20260417090426_add_application_type_to_applications",
+      "20260421000000_add_change_items"
+    ],
+    "tables": [
+      "users", "user_roles", "user_group_members", "user_groups",
+      "refresh_tokens", "module_configs", "audit_logs", "change_histories", "change_sets",
+      "servers", "hardware_components", "network_configs",
+      "application_groups", "applications", "system_software",
+      "app_deployments", "deployment_doc_types", "deployment_docs",
+      "ports", "app_connections", "topology_snapshots",
+      "infra_systems", "infra_system_servers", "infra_system_access"
+    ],
+    "seeded_data": {
+      "users": 1,
+      "module_configs": 17,
+      "user_groups": 5,
+      "servers": 8,
+      "applications": 4,
+      "app_deployments": 10,
+      "hardware_components": 29,
+      "network_configs": 8,
+      "app_connections": 5,
+      "ports": 12
+    },
+    "default_credentials": {
+      "email": "admin@system.local",
+      "password": "Admin@123",
+      "role": "ADMIN"
+    }
+  },
+
+  "backend": {
+    "base_path": "packages/backend",
+    "global_prefix": "/api/v1",
+    "global_guards": ["JwtAuthGuard (APP_GUARD)", "RolesGuard (APP_GUARD)"],
+    "global_interceptors": ["AuditLogInterceptor (APP_INTERCEPTOR — in AuditModule)"],
+    "global_pipes": ["ValidationPipe (whitelist, transform)"],
+    "swagger": "enabled at /api/docs",
+
+    "common": {
+      "status": "COMPLETE",
+      "path": "src/common/",
+      "guards": {
+        "JwtAuthGuard":  "guards/jwt-auth.guard.ts — extends AuthGuard('jwt'), respects @Public()",
+        "RolesGuard":    "guards/roles.guard.ts — checks user.roles[] against @Roles(...) metadata",
+        "ModuleGuard":   "guards/module.guard.ts — checks ModuleConfig.status=ENABLED, use per route"
+      },
+      "decorators": {
+        "@Public()":        "decorators/public.decorator.ts — bypass JwtAuthGuard",
+        "@Roles(...roles)": "decorators/roles.decorator.ts — pass string literals e.g. 'ADMIN'",
+        "@CurrentUser()":   "decorators/current-user.decorator.ts — extracts req.user or req.user[field]",
+        "@RequireModule()": "decorators/require-module.decorator.ts — used with ModuleGuard"
+      },
+      "interceptors": {
+        "AuditLogInterceptor":  "interceptors/audit-log.interceptor.ts — auto-logs POST/PATCH/DELETE",
+        "TransformInterceptor": "interceptors/transform.interceptor.ts — wraps response in { data, message, meta }"
+      },
+      "filters": {
+        "GlobalExceptionFilter": "filters/http-exception.filter.ts — returns { error: { code, message, statusCode } }"
+      },
+      "dto": {
+        "PaginationDto": "dto/pagination.dto.ts — page, limit, sortBy, sortOrder, get skip()"
+      },
+      "prisma": {
+        "PrismaService": "prisma/prisma.service.ts — extends PrismaClient, global module",
+        "PrismaModule":  "prisma/prisma.module.ts — @Global(), exports PrismaService"
+      },
+      "note": "TransformInterceptor + GlobalExceptionFilter registered globally in main.ts (Sprint 1). All responses now {data, message, meta?}."
+    },
+
+    "modules": {
+      "auth": {
+        "status": "COMPLETE",
+        "path": "src/modules/auth/",
+        "endpoints": [
+          "POST /api/v1/auth/login           — @Public, returns {data:{access_token,refresh_token,user}}",
+          "POST /api/v1/auth/register        — @Public, creates LOCAL account with VIEWER role",
+          "POST /api/v1/auth/refresh         — @Public, rotates refresh token",
+          "POST /api/v1/auth/logout          — authenticated, revokes all refresh tokens",
+          "POST /api/v1/auth/change-password — authenticated, changes own password + revokes tokens"
+        ],
+        "notes": "JWT includes union of direct + group roles. bcrypt salt=12. access=15m, refresh=7d."
+      },
+
+      "user": {
+        "status": "COMPLETE",
+        "path": "src/modules/user/",
+        "implemented": [
+          "GET /api/v1/users              — @Roles('ADMIN'), paginated list with search/filter",
+          "GET /api/v1/users/me           — current user profile",
+          "GET /api/v1/users/:id          — @Roles('ADMIN')",
+          "POST /api/v1/users             — admin create user (bcrypt hash)",
+          "PATCH /api/v1/users/:id        — update status, full_name, avatar",
+          "POST /api/v1/users/:id/roles   — assign role (conflict check)",
+          "DELETE /api/v1/users/:id/roles/:role — remove role (last ADMIN guard)",
+          "POST /api/v1/users/:id/reset-password — reset + revoke refresh tokens",
+          "GET /api/v1/users/:id/login-history   — paginated refresh token history"
+        ],
+        "notes": "All responses wrapped in {data, message} via TransformInterceptor"
+      },
+
+      "user-group": {
+        "status": "COMPLETE",
+        "path": "src/modules/user-group/",
+        "implemented": [
+          "GET /api/v1/user-groups              — paginated list with search/status filter",
+          "POST /api/v1/user-groups             — create group",
+          "GET /api/v1/user-groups/:id          — get single",
+          "PATCH /api/v1/user-groups/:id        — update",
+          "DELETE /api/v1/user-groups/:id       — soft delete",
+          "GET /api/v1/user-groups/:id/members  — paginated member list",
+          "POST /api/v1/user-groups/:id/members — bulk add (skip existing)",
+          "DELETE /api/v1/user-groups/:id/members — bulk remove"
+        ],
+        "notes": "ModuleGuard removed — USER_MGMT key not in seed; user/group mgmt is always-on"
+      },
+
+      "module-config": {
+        "status": "COMPLETE",
+        "path": "src/modules/module-config/",
+        "endpoints": [
+          "GET /api/v1/module-configs                    — list all modules",
+          "GET /api/v1/module-configs/:moduleKey         — get single",
+          "PATCH /api/v1/module-configs/:moduleKey/toggle — @Roles('ADMIN'), toggle ENABLED/DISABLED"
+        ],
+        "notes": "Dependency check on enable/disable. CORE modules cannot be toggled."
+      },
+
+      "system": {
+        "status": "COMPLETE",
+        "path": "src/modules/system/",
+        "endpoints": [
+          "GET  /api/v1/system/status     — @Public, { initialized, moduleCount, groupCount }",
+          "POST /api/v1/system/initialize — @Public, seeds 17 modules + 5 user groups (idempotent)",
+          "POST /api/v1/system/seed-demo  — @Roles('ADMIN'), seeds full demo data (idempotent)"
+        ],
+        "demo_data_seeded": {
+          "servers": "8 (DEV×2, UAT×2, PROD×4 including LB and DR)",
+          "app_groups": 3,
+          "applications": "4 (Core Banking, Payment, API Gateway, Admin Portal)",
+          "system_software": "5 (Ubuntu, OpenJDK, Nginx, PostgreSQL, Redis)",
+          "deployments": 10,
+          "connections": 5,
+          "doc_types": 5
+        }
+      },
+
+      "audit": {
+        "status": "COMPLETE",
+        "path": "src/modules/audit/",
+        "implemented": [
+          "GET /api/v1/audit-logs              — paginated, filter by action/resource/user/date",
+          "GET /api/v1/audit-logs/:id          — single entry detail with user info",
+          "GET /api/v1/audit-logs/export       — CSV streaming export (batched 500 rows)"
+        ]
+      },
+
+      "server": {
+        "status": "COMPLETE",
+        "path": "src/modules/server/",
+        "implemented": [
+          "GET /api/v1/servers               — list with filter (env, status, infra_type, site) + pagination",
+          "GET /api/v1/servers/:id           — detail with hardware_components, network_configs, app_deployments",
+          "POST /api/v1/servers              — @Roles('ADMIN','OPERATOR'), requires SERVER_MGMT module",
+          "PATCH /api/v1/servers/:id         — update, auto-snapshot to change_histories",
+          "DELETE /api/v1/servers/:id        — soft delete (set deleted_at)",
+          "GET /api/v1/servers/:id/change-history — paginated change history",
+          "GET /api/v1/servers/:id/applications — list all deployments (with app info) on this server"
+        ],
+        "notes": "ModuleGuard with SERVER_MGMT key. ChangeHistoryService auto-records all mutations."
+      },
+
+      "hardware": {
+        "status": "COMPLETE",
+        "path": "src/modules/hardware/",
+        "implemented": [
+          "GET /api/v1/hardware              — list with filter (server_id, type, search) + pagination",
+          "GET /api/v1/hardware/:id          — detail with server info",
+          "POST /api/v1/hardware             — create and attach to server, @Roles('ADMIN','OPERATOR')",
+          "PATCH /api/v1/hardware/:id        — update model/manufacturer/serial/specs",
+          "POST /api/v1/hardware/:id/attach  — move to different server (body: {server_id})",
+          "POST /api/v1/hardware/:id/detach  — soft delete (retire component)",
+          "GET /api/v1/hardware/:id/history  — paginated change/attach history"
+        ],
+        "notes": "ModuleGuard with HARDWARE_MGMT key. detach = soft-delete (server_id NOT NULL in schema)."
+      },
+
+      "change-history": {
+        "status": "COMPLETE",
+        "path": "src/modules/change-history/",
+        "notes": "Shared ChangeHistoryService — imported by ServerModule and HardwareModule. Auto-records all CREATE/UPDATE/DELETE/ATTACH/DETACH actions into change_histories table."
+      },
+
+      "network": {
+        "status": "COMPLETE",
+        "path": "src/modules/network/",
+        "implemented": [
+          "GET /api/v1/network-configs              — list with filter (server_id, environment, ip, search)",
+          "GET /api/v1/network-configs/lookup-domain — domain → server → apps",
+          "GET /api/v1/network-configs/:id           — single config",
+          "POST /api/v1/network-configs              — @Roles('ADMIN','OPERATOR'), IP conflict detection",
+          "PATCH /api/v1/network-configs/:id         — update with conflict check",
+          "DELETE /api/v1/network-configs/:id        — soft delete"
+        ],
+        "notes": "ModuleGuard with NETWORK_MGMT key. IP conflict: same private_ip + same environment. Unit tests written."
+      },
+
+      "app-group": {
+        "status": "COMPLETE",
+        "path": "src/modules/app-group/",
+        "implemented": [
+          "GET /api/v1/app-groups              — list with search filter + pagination",
+          "GET /api/v1/app-groups/:id          — detail with applications + system_software counts",
+          "POST /api/v1/app-groups             — @Roles('ADMIN','OPERATOR'), code uniqueness check",
+          "PATCH /api/v1/app-groups/:id        — update",
+          "DELETE /api/v1/app-groups/:id       — soft delete, @Roles('ADMIN')"
+        ],
+        "notes": "ModuleGuard APP_GROUP. Unit tests written."
+      },
+
+      "application": {
+        "status": "COMPLETE",
+        "path": "src/modules/application/",
+        "implemented": [
+          "GET /api/v1/applications             — list with search/group_id/environment filter",
+          "GET /api/v1/applications/:id         — detail with group, active deployments, ports",
+          "GET /api/v1/applications/:id/where-running — grouped by environment",
+          "POST /api/v1/applications            — @Roles('ADMIN','OPERATOR'), code uniqueness check",
+          "PATCH /api/v1/applications/:id       — update + ChangeHistory snapshot",
+          "DELETE /api/v1/applications/:id      — soft delete",
+          "GET /api/v1/system-software          — list with search/group_id/sw_type filter",
+          "GET /api/v1/system-software/:id      — detail",
+          "POST /api/v1/system-software         — @Roles('ADMIN','OPERATOR'), eol_date support",
+          "PATCH /api/v1/system-software/:id    — update",
+          "DELETE /api/v1/system-software/:id   — soft delete"
+        ],
+        "notes": "ModuleGuard SOFTWARE_MGMT. ChangeHistory for PATCH. Unit tests written."
+      },
+
+      "deployment": {
+        "status": "COMPLETE",
+        "path": "src/modules/deployment/",
+        "implemented": [
+          "GET /api/v1/deployments              — list with app/server/env/status filter",
+          "GET /api/v1/deployments/:id          — detail with docs + doc_progress (total/complete/waived/pct%)",
+          "POST /api/v1/deployments             — auto-creates DeploymentDoc records from active DocTypes",
+          "PATCH /api/v1/deployments/:id        — update + ChangeHistory snapshot",
+          "DELETE /api/v1/deployments/:id       — soft delete",
+          "POST /api/v1/deployments/:id/docs/:docTypeId/preview — upload preview (pdf/docx/xlsx, max 20MB)",
+          "POST /api/v1/deployments/:id/docs/:docTypeId/final   — upload final PDF only",
+          "PATCH /api/v1/deployments/:id/docs/:docTypeId/waive  — waive doc with reason",
+          "GET /api/v1/deployments/:id/docs/:docTypeId/file     — serve file inline (?type=preview|final)",
+          "GET /api/v1/deployment-doc-types     — list (behind DEPLOYMENT_DOCS module)",
+          "GET /api/v1/deployment-doc-types/:id — detail",
+          "POST /api/v1/deployment-doc-types    — @Roles('ADMIN') only",
+          "PATCH /api/v1/deployment-doc-types/:id — @Roles('ADMIN') only",
+          "DELETE /api/v1/deployment-doc-types/:id — deactivate (sets status=INACTIVE)"
+        ],
+        "notes": "Sprint 6: FileUploadService added (memoryStorage multer, MIME validate). File stored at uploads/deployments/{id}/preview|final/. Serve via streaming createReadStream."
+      },
+
+      "port": {
+        "status": "COMPLETE",
+        "path": "src/modules/port/",
+        "implemented": [
+          "GET /api/v1/ports              — list with app/deployment/protocol/port_number filter",
+          "GET /api/v1/ports/:id          — detail with app and deployment→server info",
+          "POST /api/v1/ports             — @Roles('ADMIN','OPERATOR'), conflict detection if deployment_id set",
+          "PATCH /api/v1/ports/:id        — update with conflict re-check",
+          "DELETE /api/v1/ports/:id       — soft delete"
+        ],
+        "notes": "ModuleGuard PORT_MGMT. Conflict: same server (via deployment) + same port_number + protocol → 409. Unit tests written."
+      },
+
+      "connection": {
+        "status": "COMPLETE",
+        "path": "src/modules/connection/",
+        "implemented": [
+          "GET /api/v1/connections              — list with filter (env, source_app_id, target_app_id, connection_type, search)",
+          "GET /api/v1/connections/:id          — detail with source_app + target_app info",
+          "POST /api/v1/connections             — @Roles('ADMIN','OPERATOR'), validates same-app check",
+          "PATCH /api/v1/connections/:id        — update with same-app check",
+          "DELETE /api/v1/connections/:id       — soft delete",
+          "GET /api/v1/applications/:id/dependencies — upstream + downstream with env filter"
+        ],
+        "notes": "ModuleGuard CONNECTION_MGMT. Unit tests written in __tests__/connection.service.spec.ts."
+      },
+
+      "topology": {
+        "status": "COMPLETE",
+        "path": "src/modules/topology/",
+        "implemented": [
+          "GraphQL query: topology(environment) — returns servers (with deployments + networkConfigs) + connections",
+          "GraphQL query: appDependency(appId) — returns upstream + downstream ConnectionEdge[]",
+          "GraphQLModule registered in AppModule with ApolloDriver, autoSchemaFile → src/schema.gql, playground at /graphql"
+        ],
+        "notes": "Code-first GraphQL with @ObjectType/@Field/@Query decorators. TopologyService injected by SnapshotModule."
+      },
+
+      "import": {
+        "status": "COMPLETE",
+        "path": "src/modules/import/",
+        "implemented": [
+          "POST /api/v1/import/preview — upload CSV/XLSX, validate, return preview with session_id (@Roles ADMIN/OPERATOR)",
+          "POST /api/v1/import/execute — confirm import using session_id"
+        ],
+        "notes": "Supports server, application, deployment entity types. CSV via csv-parse, Excel via dynamic import exceljs. Session TTL 10min."
+      },
+      "alert": {
+        "status": "COMPLETE",
+        "path": "src/modules/alert/",
+        "implemented": [
+          "GET /api/v1/alerts — list all active alerts (OS EOL, port conflicts, stopped deployments)",
+          "GET /api/v1/alerts/summary — count by severity (HIGH/MEDIUM/LOW)"
+        ],
+        "notes": "On-demand computation. No cron dependency needed."
+      },
+      "auth_sso": {
+        "status": "COMPLETE",
+        "path": "src/modules/auth/",
+        "new_endpoints": [
+          "GET /api/v1/auth/ms365 — @Public, redirect to Microsoft 365 login",
+          "GET /api/v1/auth/ms365/callback — @Public, handle OAuth2 code, create/link user, redirect to FE"
+        ],
+        "notes": "MS365Strategy in strategies/oidc.strategy.ts. No passport-openidconnect needed — uses native fetch Node 18+. Config: MS365_TENANT_ID, MS365_CLIENT_ID, MS365_CLIENT_SECRET, MS365_REDIRECT_URI, FRONTEND_URL"
+      },
+      "changeset": {
+        "status": "COMPLETE",
+        "path": "src/modules/changeset/",
+        "implemented": [
+          "POST /api/v1/changesets — create DRAFT ChangeSet, @Roles('ADMIN','OPERATOR')",
+          "GET /api/v1/changesets — list with filter (status, environment, created_by) + pagination",
+          "GET /api/v1/changesets/:id — detail with all ChangeItems",
+          "PATCH /api/v1/changesets/:id/discard — set status=DISCARDED",
+          "POST /api/v1/changesets/:id/items — add ChangeItem (DRAFT only)",
+          "DELETE /api/v1/changesets/:id/items/:itemId — remove ChangeItem (DRAFT only)",
+          "POST /api/v1/changesets/:id/preview — compute virtual topology + conflict detection (IP/Port/Circular)",
+          "POST /api/v1/changesets/:id/apply — ACID transaction apply + auto-snapshot"
+        ],
+        "notes": "ModuleGuard CHANGESET. PreviewEngineService detects IP conflicts, Port conflicts, Circular dependencies. Apply runs prisma.$transaction() and auto-creates TopologySnapshot."
+      },
+
+      "snapshot": {
+        "status": "COMPLETE",
+        "path": "src/modules/snapshot/",
+        "implemented": [
+          "POST /api/v1/topology-snapshots — capture + persist topology payload (requires TOPOLOGY_2D module)",
+          "GET /api/v1/topology-snapshots — paginated list, filter by environment (payload excluded)",
+          "GET /api/v1/topology-snapshots/:id — full snapshot including payload JSON"
+        ],
+        "notes": "Prisma migration 20260410000000_add_topology_snapshots adds topology_snapshots table. Unit tests written."
+      }
+    }
+  },
+
+  "frontend": {
+    "base_path": "packages/frontend",
+    "vite_proxy": "/api → http://backend:3000 (via BACKEND_URL env in Docker)",
+
+    "core_infrastructure": {
+      "status": "COMPLETE",
+      "files": {
+        "src/main.tsx":           "React root, QueryClientProvider, BrowserRouter, Ant Design ConfigProvider",
+        "src/App.tsx":            "Routing + ProtectedRoute (checks auth + system status → /setup if uninitialized)",
+        "src/api/client.ts":      "Axios instance, Bearer token injection, 401 → refresh token flow",
+        "src/stores/authStore.ts":"Zustand persisted store: user, accessToken, refreshToken, isAuthenticated",
+        "src/types/auth.ts":      "LoginRequest, LoginResponse, ApiResponse<T> interfaces",
+        "src/hooks/useSystemStatus.ts": "useQuery → GET /system/status, staleTime=Infinity"
+      }
+    },
+
+    "layout": {
+      "status": "COMPLETE",
+      "files": {
+        "src/components/layout/AppLayout.tsx": "Sider + Header + Content wrapper",
+        "src/components/layout/Sidebar.tsx":   "Ant Design Menu with nav links (dashboard, servers, apps, audit, admin)",
+        "src/components/layout/Header.tsx":    "Toggle sidebar + user dropdown with logout"
+      }
+    },
+
+    "pages": {
+      "auth/LoginPage": {
+        "status": "COMPLETE",
+        "route": "/login",
+        "notes": "Form with email/password + Microsoft 365 SSO button. Handles ?sso_error= query param."
+      },
+      "auth/AuthCallbackPage": {
+        "status": "COMPLETE",
+        "route": "/auth/callback",
+        "notes": "Handles SSO callback: extracts tokens from URL, fetches /users/me, stores auth, redirects to /dashboard"
+      },
+      "setup/SetupPage": {
+        "status": "COMPLETE",
+        "route": "/setup",
+        "notes": "3-step wizard: Welcome → Config preview (modules + user groups + optional demo data toggle) → Done. Calls POST /system/initialize then optionally POST /system/seed-demo"
+      },
+      "dashboard/DashboardPage": {
+        "status": "STUB",
+        "route": "/dashboard",
+        "notes": "4 static Statistic cards (all showing 0). Needs real data from APIs."
+      },
+
+      "admin/UsersPage":       { "status": "COMPLETE", "route": "/admin/users", "notes": "DataTable + Create + Edit + Role + Reset + LoginHistory" },
+      "admin/UserGroupsPage":  { "status": "COMPLETE", "route": "/admin/user-groups", "notes": "CRUD + Member management Transfer" },
+      "admin/ModulesPage":     { "status": "COMPLETE", "route": "/admin/modules", "notes": "Card layout CORE/EXTENDED + dependency check modal" },
+      "admin/SystemConfigPage":{ "status": "COMPLETE", "route": "/admin/system-config", "notes": "Log config UI (level, file, console toggles)" },
+      "auth/ProfilePage":      { "status": "COMPLETE", "route": "/profile", "notes": "Info tab + Change password tab" },
+      "server/ServerListPage": { "status": "COMPLETE", "route": "/servers", "notes": "DataTable + env tabs (DEV/UAT/PROD) + filter by status/search + create/edit/delete" },
+      "server/ServerDetailPage":{ "status": "COMPLETE", "route": "/servers/:id", "notes": "5 tabs: Info / Hardware (inline CRUD+detach) / Network (inline CRUD+conflict alert) / Apps / History (ChangeHistoryTimeline)" },
+      "hardware/HardwarePage": { "status": "NOT_STARTED", "route": "/hardware" },
+      "network/NetworkPage":   { "status": "NOT_STARTED", "route": "/networks" },
+      "application/AppListPage":    { "status": "COMPLETE", "route": "/applications", "notes": "List+filter by group/status + Tabs: Apps/Groups. Integrated AppGroupList." },
+      "application/AppDetailPage":  { "status": "COMPLETE", "route": "/applications/:id", "notes": "Tabs: Info/Deployments/Ports/Where-running. PortTab CRUD inline." },
+      "application/SystemSoftware": { "status": "COMPLETE", "route": "/system-software", "notes": "CRUD with EOL date warning, type filter." },
+      "deployment/DeploymentPage":  { "status": "COMPLETE", "route": "/deployments", "notes": "List+filter by env/status. Create form." },
+      "deployment/DeploymentDetail":{ "status": "COMPLETE", "route": "/deployments/:id", "notes": "Tabs: Info (progress stats)/Docs (DocUploadCard)/Ports. File upload+waive workflow." },
+      "admin/DocTypePage":          { "status": "COMPLETE", "route": "/admin/doc-types", "notes": "CRUD for DeploymentDocType. ADMIN only." },
+      "audit/AuditLogPage":    { "status": "COMPLETE", "route": "/audit-logs", "notes": "DataTable + filter (action/resource/time) + detail modal (old/new diff) + CSV export button" },
+      "topology/TopologyPage": {
+        "status": "COMPLETE",
+        "route": "/topology",
+        "notes": "React Flow 2D canvas. Interactive features: drag/drop connection creation (onConnect) with port selection, direct edge deletion, draggable protocol labels. Networks layout with nested ServerBoxes. Custom ServerFlowNode (purpose/status/IP/deployment count) + AppFlowNode (group/version/status). Custom ProtocolEdge with color-coded labels. Controls + MiniMap + Background. Filter panel (env/nodeType/layout/minimap). NodeDetailPanel drawer on click. Export PNG/SVG/JSON/Mermaid. Save snapshot modal. SnapshotBrowser drawer (list + view + compare diff)."
+      },
+      "infra-system/InfraSystemPage": {
+        "status": "COMPLETE",
+        "route": "/infra-systems",
+        "notes": "DataTable + filter by Environment/Site. Bulk delete. CSV Import Modal w/ Context Overrides. Access Management Modal."
+      },
+      "changeset/ChangeSetListPage":   { "status": "COMPLETE", "route": "/changesets", "notes": "DataTable + filter (status/env) + Create modal. Navigate to detail on click." },
+      "changeset/ChangeSetDetailPage": { "status": "COMPLETE", "route": "/changesets/:id", "notes": "Descriptions metadata + ChangeItemDiff table (old/new side-by-side) + Preview/Apply/Discard actions." },
+      "changeset/ChangeSetPreviewPage":{ "status": "COMPLETE", "route": "/changesets/:id/preview", "notes": "Virtual topology cards color-coded (NEW=green, MODIFIED=yellow, DELETED=red). Conflict warning panel. Apply button disabled if fatal conflicts." }
+    },
+
+    "shared_components": {
+      "DataTable":                "COMPLETE — src/components/common/DataTable.tsx",
+      "PageHeader":               "COMPLETE — src/components/common/PageHeader.tsx",
+      "StatusBadge":              "COMPLETE — src/components/common/StatusBadge.tsx",
+      "ChangeHistoryTimeline":    "COMPLETE — src/components/common/ChangeHistoryTimeline.tsx — shows CREATE/UPDATE/DELETE/ATTACH/DETACH with field diff",
+      "ChangedBadge":             "COMPLETE — src/components/common/ChangedBadge.tsx — badge icon for recent change count",
+      "FilterBar":                "NOT_STARTED — shared filter panel component (inline filters used instead per page)"
+    }
+  },
+
+  "progress": {
+    "phase": "Sprint 16 — App Group Restructure & Centralized Deployments",
+    "overall_pct": 42,
+    "breakdown": {
+      "infrastructure":   { "pct": 100, "note": "Docker, DB, migrations, monorepo, Dockerfiles, ESLint, Prettier" },
+      "backend_common":   { "pct": 100, "note": "Guards, decorators, interceptors, filters — all registered globally in main.ts" },
+      "backend_auth":     { "pct": 100, "note": "Login, register, refresh, logout, change-password, JWT/Local strategies, effective role resolution" },
+      "backend_user":     { "pct": 100, "note": "Full CRUD + role management + reset-password + login-history. Unit tests written." },
+      "backend_user_group":{ "pct": 100, "note": "Full CRUD + bulk member management. Unit tests written." },
+      "backend_module_config": { "pct": 100, "note": "Full toggle with dependency checks" },
+      "backend_server":   { "pct": 100, "note": "Full CRUD + change history. ModuleGuard SERVER_MGMT. Unit tests written." },
+      "backend_hardware": { "pct": 100, "note": "Full CRUD + attach/detach + history. ModuleGuard HARDWARE_MGMT. Unit tests written." },
+      "backend_network":  { "pct": 100, "note": "Full CRUD + IP conflict detection + domain lookup. ModuleGuard NETWORK_MGMT. Unit tests written." },
+      "backend_app_group":{ "pct": 100, "note": "CRUD complete. ModuleGuard APP_GROUP. Unit tests written." },
+      "backend_application":{ "pct": 100, "note": "CRUD + where-running + SystemSoftware. ChangeHistory. Unit tests written." },
+      "backend_deployment":{ "pct": 100, "note": "CRUD + DocType + file upload (Sprint 6) + progress tracking. Complete." },
+      "backend_port":     { "pct": 100,  "note": "CRUD + conflict detection. ModuleGuard PORT_MGMT. Unit tests written." },
+      "backend_connection":{ "pct": 100, "note": "CRUD + dependency endpoint. ModuleGuard CONNECTION_MGMT. Unit tests written." },
+      "backend_audit":    { "pct": 100, "note": "List + detail + CSV streaming export. Complete." },
+      "backend_system":   { "pct": 100, "note": "Status + initialize + seed-demo all working" },
+      "frontend_core":    { "pct": 100, "note": "Routing, auth flow, layout, setup wizard all working" },
+      "frontend_pages":   { "pct": 100, "note": "Sprint 9 complete: InfraSystems CSV advanced import + overrides + bulk delete. Topology overflow UI fixed." },
+      "backend_logging":  { "pct": 100, "note": "winston LoggerModule + SystemConfigModule + ClientLog endpoint complete" },
+      "e2e_tests":        { "pct": 80,  "note": "Sprint 12: sprint12-sso-polish.spec.ts + perf/api-performance.spec.ts added. Full suite covers auth, CRUD, SSO, search, alerts, import, dark mode, performance." },
+      "backend_import":   { "pct": 100, "note": "Sprint 12: BulkImport module — CSV/Excel preview+execute for Server/Application/Deployment." },
+      "backend_alert":    { "pct": 100, "note": "Sprint 12: Alert module — OS EOL, Port Conflict, Stopped Deployment alerts." },
+      "frontend_sso":     { "pct": 100, "note": "Sprint 12: MS365 SSO button on login + AuthCallbackPage." },
+      "frontend_search":  { "pct": 100, "note": "Sprint 12: Global search Omnibar in Header with TanStack Query autocomplete." },
+      "frontend_darkmode":{ "pct": 100, "note": "Sprint 12: Dark mode toggle in Header, Zustand persisted, Ant Design darkAlgorithm." },
+      "frontend_topology_interactive": { "pct": 100, "note": "Sprint 14 complete: Floating filters, node visual distinction, compact auto-arrange for disconnected nodes, vis-network default." },
+      "backend_server_enrichment": { "pct": 100, "note": "Sprint 15: Added 'os' field and detailed hardware specs import logic. Refactored Upload UI and Detail view. Complete." }
+    }
+  },
+
+  "known_issues": [
+    {
+      "id": "ISSUE-003",
+      "severity": "MEDIUM",
+      "description": "IDE shows 'Cannot find module' errors because node_modules not installed locally (only inside Docker). This does NOT affect runtime.",
+      "fix": "Run npm install at repo root on dev machine, or ignore IDE errors."
+    },
+    {
+      "id": "ISSUE-004",
+      "severity": "WATCH",
+      "description": "An external linter/AI tool auto-rewrites backend files when they are opened in IDE, replacing Prisma imports with mock types. This breaks the build.",
+      "fix": "After any session, verify prisma.service.ts extends PrismaClient (not MockPrismaClient). Run docker compose up backend --build to confirm no ReferenceError at startup."
+    },
+    {
+      "id": "ISSUE-005",
+      "severity": "MEDIUM",
+      "description": "Frontend (Sprint 0) calls API and expects flat JSON. TransformInterceptor now wraps all responses in {data, message, meta}. Frontend api/client.ts must be updated to unwrap .data.",
+      "fix": "Sprint 2: update src/api/client.ts axios response interceptor to unwrap data.data, or update each hook individually."
+    }
+  ],
+
+  "next_tasks": [
+    {
+      "priority": 1,
+      "task": "Production deployment — Docker Compose with nginx + SSL",
+      "description": "Configure nginx reverse proxy, SSL certificates, environment separation for PROD.",
+      "files": ["docker-compose.prod.yml", "nginx/nginx.conf"],
+      "srs_ref": "DevOps",
+      "sprint": "Backlog BL-09"
+    },
+    {
+      "priority": 2,
+      "task": "CI/CD GitHub Actions — lint + test + build + deploy",
+      "description": "Set up GitHub Actions pipeline: lint, unit tests, Docker build, deploy to staging.",
+      "files": [".github/workflows/ci.yml"],
+      "srs_ref": "DevOps",
+      "sprint": "Backlog BL-08"
+    },
+    {
+      "priority": 3,
+      "task": "Configure Azure AD app registration for MS365 SSO",
+      "description": "Register application in Azure AD portal, add MS365_TENANT_ID, MS365_CLIENT_ID, MS365_CLIENT_SECRET to .env",
+      "files": [".env.example"],
+      "srs_ref": "4.0.1",
+      "sprint": "Post-sprint config"
+    },
+    {
+      "priority": 4,
+      "task": "Install exceljs package (for Excel import support)",
+      "description": "Rebuild Docker backend to install exceljs: docker compose build backend && docker compose up -d backend",
+      "files": ["packages/backend/package.json"],
+      "srs_ref": "4.0b",
+      "sprint": "Post-sprint build"
+    }
+  ],
+
+  "architecture_decisions": [
+    "Module guards (ModuleGuard) must be applied PER ROUTE using @UseGuards(ModuleGuard) + @RequireModule('KEY') — not global. Core always-on modules (user, auth, audit) do NOT use ModuleGuard.",
+    "ALL responses now wrapped: {data, message} for single, {data, meta} for list — TransformInterceptor registered globally in main.ts since Sprint 1.",
+    "Soft delete pattern: always set deleted_at, never hard delete. Queries filter deleted_at: null.",
+    "Roles decorator accepts string literals ('ADMIN', 'OPERATOR', 'VIEWER') — not Prisma enum objects",
+    "Demo data seeding is idempotent: seed-demo throws 409 if servers already exist",
+    "Frontend /setup auto-redirects ADMIN users only when system status initialized=false"
+  ]
+}

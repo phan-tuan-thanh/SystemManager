@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker compose:*)",
+      "Bash(docker system:*)",
+      "Bash(docker build:*)",
+      "Bash(docker rmi:*)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(grep -v \"^#\\\\|Running\\\\|^$\\\\|DONE\")",
+      "Bash(grep -v \"^#\\\\|Running\\\\|Pulling\\\\|^$\")",
+      "Bash(docker exec:*)"
+    ]
+  }
+}

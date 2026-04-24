@@ -1,0 +1,687 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ──────────────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  OPERATOR
+  VIEWER
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  LOCKED
+}
+
+enum AccountType {
+  LOCAL
+  MICROSOFT_365
+}
+
+enum ModuleType {
+  CORE
+  EXTENDED
+}
+
+enum ModuleStatus {
+  ENABLED
+  DISABLED
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  ENABLE_MODULE
+  DISABLE_MODULE
+  VIEW_SENSITIVE
+}
+
+enum AuditResult {
+  SUCCESS
+  FAILED
+}
+
+// ─── Business Enums ─────────────────────────────────────────────
+
+enum GroupType {
+  BUSINESS
+  INFRASTRUCTURE
+}
+
+enum ApplicationType {
+  BUSINESS
+  SYSTEM
+}
+
+enum Environment {
+  DEV
+  UAT
+  PROD
+}
+
+enum ServerPurpose {
+  APP_SERVER
+  DB_SERVER
+  PROXY
+  LOAD_BALANCER
+  CACHE
+  MESSAGE_QUEUE
+  OTHER
+}
+
+enum SwType {
+  OS
+  MIDDLEWARE
+  DATABASE
+  RUNTIME
+  WEB_SERVER
+  OTHER
+}
+
+enum ServerStatus {
+  ACTIVE
+  INACTIVE
+  MAINTENANCE
+}
+
+enum InfraType {
+  VIRTUAL_MACHINE
+  PHYSICAL_SERVER
+  CONTAINER
+  CLOUD_INSTANCE
+}
+
+enum Site {
+  DC      // Data Center - Production
+  DR      // Disaster Recovery - Production
+  TEST    // Test Environment - UAT/DEV
+}
+
+enum HardwareType {
+  CPU
+  RAM
+  HDD
+  SSD
+  NETWORK_CARD
+}
+
+enum DeploymentStatus {
+  RUNNING
+  STOPPED
+  DEPRECATED
+}
+
+enum DocStatus {
+  PENDING
+  DRAFT
+  COMPLETE
+  WAIVED
+}
+
+enum ConnectionType {
+  HTTP
+  HTTPS
+  TCP
+  GRPC
+  AMQP
+  KAFKA
+  DATABASE
+}
+
+// ─── User & Auth ────────────────────────────────────────────────
+
+model User {
+  id             String      @id @default(uuid()) @db.Uuid
+  email          String      @unique @db.VarChar(255)
+  full_name      String      @db.VarChar(255)
+  password_hash  String?     @db.VarChar(255)
+  avatar_url     String?     @db.VarChar(500)
+  account_type   AccountType @default(LOCAL)
+  status         UserStatus  @default(ACTIVE)
+  microsoft_id   String?     @unique @db.VarChar(255)
+  last_login_at  DateTime?
+  created_at     DateTime    @default(now())
+  updated_at     DateTime    @updatedAt
+  deleted_at     DateTime?
+
+  user_roles          UserRole[]
+  user_group_members  UserGroupMember[]
+  refresh_tokens      RefreshToken[]
+  audit_logs          AuditLog[]
+  change_sets         ChangeSet[]
+  system_access       InfraSystemAccess[]
+  os_installs         ServerOsInstall[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id          String   @id @default(uuid()) @db.Uuid
+  user_id     String   @db.Uuid
+  token_hash  String   @unique @db.VarChar(255)
+  ip_address  String?  @db.VarChar(45)
+  user_agent  String?  @db.VarChar(500)
+  expires_at  DateTime
+  revoked_at  DateTime?
+  created_at  DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id])
+
+  @@index([user_id])
+  @@map("refresh_tokens")
+}
+
+model UserRole {
+  id         String   @id @default(uuid()) @db.Uuid
+  user_id    String   @db.Uuid
+  role       Role
+  created_at DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id])
+
+  @@unique([user_id, role], name: "user_id_role")
+  @@index([user_id])
+  @@map("user_roles")
+}
+
+model UserGroup {
+  id           String     @id @default(uuid()) @db.Uuid
+  code         String     @unique @db.VarChar(50)
+  name         String     @db.VarChar(255)
+  description  String?    @db.Text
+  default_role Role       @default(VIEWER)
+  leader_id    String?    @db.Uuid
+  status       UserStatus @default(ACTIVE)
+  created_at   DateTime   @default(now())
+  updated_at   DateTime   @updatedAt
+  deleted_at   DateTime?
+
+  members         UserGroupMember[]
+  system_access   InfraSystemAccess[]
+
+  @@map("user_groups")
+}
+
+model UserGroupMember {
+  id         String   @id @default(uuid()) @db.Uuid
+  user_id    String   @db.Uuid
+  group_id   String   @db.Uuid
+  created_at DateTime @default(now())
+
+  user  User      @relation(fields: [user_id], references: [id])
+  group UserGroup @relation(fields: [group_id], references: [id])
+
+  @@unique([user_id, group_id])
+  @@index([user_id])
+  @@index([group_id])
+  @@map("user_group_members")
+}
+
+// ─── Module Config ──────────────────────────────────────────────
+
+model ModuleConfig {
+  id            String       @id @default(uuid()) @db.Uuid
+  module_key    String       @unique @db.VarChar(50)
+  display_name  String       @db.VarChar(255)
+  description   String?      @db.Text
+  module_type   ModuleType   @default(CORE)
+  status        ModuleStatus @default(ENABLED)
+  dependencies  String[]     @default([])
+  updated_by    String?      @db.Uuid
+  created_at    DateTime     @default(now())
+  updated_at    DateTime     @updatedAt
+
+  @@map("module_configs")
+}
+
+// ─── Audit Log ──────────────────────────────────────────────────
+
+model AuditLog {
+  id            String      @id @default(uuid()) @db.Uuid
+  user_id       String?     @db.Uuid
+  action        AuditAction
+  resource_type String      @db.VarChar(100)
+  resource_id   String?     @db.VarChar(100)
+  old_value     Json?
+  new_value     Json?
+  ip_address    String?     @db.VarChar(45)
+  user_agent    String?     @db.VarChar(500)
+  result        AuditResult @default(SUCCESS)
+  created_at    DateTime    @default(now())
+
+  user User? @relation(fields: [user_id], references: [id])
+
+  @@index([user_id])
+  @@index([resource_type, resource_id])
+  @@index([created_at])
+  @@map("audit_logs")
+}
+
+// ─── Change History ─────────────────────────────────────────────
+
+model ChangeHistory {
+  id            String   @id @default(uuid()) @db.Uuid
+  resource_type String   @db.VarChar(100)
+  resource_id   String   @db.VarChar(100)
+  snapshot      Json
+  changed_by    String?  @db.Uuid
+  created_at    DateTime @default(now())
+
+  @@index([resource_type, resource_id])
+  @@index([created_at])
+  @@map("change_histories")
+}
+
+// ─── ChangeSet (Sprint 11) ───────────────────────────────────────
+// Status lifecycle: DRAFT → PREVIEWING → APPLIED | DISCARDED
+
+model ChangeSet {
+  id          String    @id @default(uuid()) @db.Uuid
+  title       String    @db.VarChar(255)
+  description String?   @db.Text
+  status      String    @default("DRAFT") @db.VarChar(20)
+  environment String?   @db.VarChar(10)
+  created_by  String    @db.Uuid
+  applied_at  DateTime?
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+
+  creator User         @relation(fields: [created_by], references: [id])
+  items   ChangeItem[]
+
+  @@index([created_by])
+  @@index([status])
+  @@map("change_sets")
+}
+
+model ChangeItem {
+  id            String   @id @default(uuid()) @db.Uuid
+  changeset_id  String   @db.Uuid
+  resource_type String   @db.VarChar(100)
+  resource_id   String?  @db.VarChar(100)
+  action        String   @db.VarChar(20)
+  old_value     Json?
+  new_value     Json?
+  created_at    DateTime @default(now())
+
+  changeset ChangeSet @relation(fields: [changeset_id], references: [id], onDelete: Cascade)
+
+  @@index([changeset_id])
+  @@map("change_items")
+}
+
+// ─── Server ─────────────────────────────────────────────────────
+
+model Server {
+  id               String        @id @default(uuid()) @db.Uuid
+  code             String        @unique @db.VarChar(50)
+  name             String        @db.VarChar(255)
+  hostname         String        @db.VarChar(255)
+  purpose          ServerPurpose @default(APP_SERVER)
+  status           ServerStatus  @default(ACTIVE)
+  environment      Environment
+  infra_type       InfraType     @default(VIRTUAL_MACHINE)
+  site             Site          @default(DC)
+  description      String?       @db.Text
+  current_os_install_id String?  @unique @db.Uuid
+  infra_system_id  String?       @db.Uuid
+  created_at       DateTime      @default(now())
+  updated_at       DateTime      @updatedAt
+  deleted_at       DateTime?
+
+  infra_system      InfraSystem?          @relation(fields: [infra_system_id], references: [id], onDelete: SetNull)
+  hardware_components   HardwareComponent[]
+  network_configs       NetworkConfig[]
+  app_deployments       AppDeployment[]
+  infra_systems         InfraSystemServer[]
+  current_os_install    ServerOsInstall?      @relation("CurrentOs", fields: [current_os_install_id], references: [id])
+  os_installs           ServerOsInstall[]     @relation("ServerInstalls")
+
+  @@index([environment])
+  @@index([status])
+  @@index([infra_system_id])
+  @@map("servers")
+}
+
+model HardwareComponent {
+  id           String       @id @default(uuid()) @db.Uuid
+  server_id    String       @db.Uuid
+  type         HardwareType
+  model        String?      @db.VarChar(255)
+  manufacturer String?      @db.VarChar(255)
+  serial       String?      @db.VarChar(100)
+  specs        Json?
+  created_at   DateTime     @default(now())
+  updated_at   DateTime     @updatedAt
+  deleted_at   DateTime?
+
+  server Server @relation(fields: [server_id], references: [id])
+
+  @@index([server_id])
+  @@map("hardware_components")
+}
+
+model NetworkConfig {
+  id         String    @id @default(uuid()) @db.Uuid
+  server_id  String    @db.Uuid
+  interface  String?   @db.VarChar(50)
+  private_ip String?   @db.VarChar(45)
+  public_ip  String?   @db.VarChar(45)
+  nat_ip     String?   @db.VarChar(45)
+  domain     String?   @db.VarChar(255)
+  subnet     String?   @db.VarChar(50)
+  gateway    String?   @db.VarChar(45)
+  dns        String[]  @default([])
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  server Server @relation(fields: [server_id], references: [id])
+
+  @@index([server_id])
+  @@index([private_ip])
+  @@map("network_configs")
+}
+
+// ─── Application ─────────────────────────────────────────────────
+
+model ApplicationGroup {
+  id          String    @id @default(uuid()) @db.Uuid
+  code        String    @unique @db.VarChar(50)
+  name        String    @db.VarChar(255)
+  description String?   @db.Text
+  group_type  GroupType @default(BUSINESS)
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  deleted_at  DateTime?
+
+  applications    Application[]
+  system_software SystemSoftware[]
+
+  @@map("application_groups")
+}
+
+model Application {
+  id               String          @id @default(uuid()) @db.Uuid
+  group_id         String          @db.Uuid
+  code             String          @unique @db.VarChar(50)
+  name             String          @db.VarChar(255)
+  version          String?         @db.VarChar(50)
+  description      String?         @db.Text
+  owner_team       String?         @db.VarChar(255)
+  application_type ApplicationType @default(BUSINESS)
+  sw_type          SwType?
+  eol_date         DateTime?
+  vendor           String?         @db.VarChar(255)
+  created_at       DateTime        @default(now())
+  updated_at       DateTime        @updatedAt
+  deleted_at       DateTime?
+
+  group              ApplicationGroup @relation(fields: [group_id], references: [id])
+  app_deployments    AppDeployment[]
+  ports              Port[]
+  source_connections AppConnection[] @relation("SourceApp")
+  target_connections AppConnection[] @relation("TargetApp")
+  os_installs        ServerOsInstall[]
+
+  @@index([group_id])
+  @@map("applications")
+}
+
+model SystemSoftware {
+  id         String    @id @default(uuid()) @db.Uuid
+  group_id   String    @db.Uuid
+  name       String    @db.VarChar(255)
+  version    String?   @db.VarChar(50)
+  sw_type    SwType?
+  eol_date   DateTime?
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  group ApplicationGroup @relation(fields: [group_id], references: [id])
+
+  @@index([group_id])
+  @@map("system_software")
+}
+
+// ─── Deployment ───────────────────────────────────────────────────
+
+model AppDeployment {
+  id             String           @id @default(uuid()) @db.Uuid
+  application_id String           @db.Uuid
+  server_id      String           @db.Uuid
+  environment    Environment
+  version        String           @db.VarChar(50)
+  status         DeploymentStatus @default(RUNNING)
+  title          String?          @db.VarChar(255)
+  deployed_at    DateTime?
+  planned_at     DateTime?
+  cmc_name       String?          @db.VarChar(255)
+  deployer       String?          @db.VarChar(255)
+  created_at     DateTime         @default(now())
+  updated_at     DateTime         @updatedAt
+  deleted_at     DateTime?
+
+  application Application @relation(fields: [application_id], references: [id])
+  server      Server      @relation(fields: [server_id], references: [id])
+  ports       Port[]
+  docs        DeploymentDoc[]
+
+  @@index([application_id])
+  @@index([server_id])
+  @@index([environment])
+  @@map("app_deployments")
+}
+
+model DeploymentDocType {
+  id          String    @id @default(uuid()) @db.Uuid
+  code        String    @unique @db.VarChar(50)
+  name        String    @db.VarChar(255)
+  description String?   @db.Text
+  sort_order  Int       @default(0)
+  required    Boolean   @default(false)
+  environments String[] @default([])
+  status      String    @default("ACTIVE") @db.VarChar(20)
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+
+  docs DeploymentDoc[]
+
+  @@map("deployment_doc_types")
+}
+
+model DeploymentDoc {
+  id            String    @id @default(uuid()) @db.Uuid
+  deployment_id String    @db.Uuid
+  doc_type_id   String    @db.Uuid
+  status        DocStatus @default(PENDING)
+  preview_path  String?   @db.VarChar(500)
+  final_path    String?   @db.VarChar(500)
+  waived_reason String?   @db.Text
+  uploaded_by   String?   @db.Uuid
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+
+  deployment AppDeployment     @relation(fields: [deployment_id], references: [id])
+  doc_type   DeploymentDocType @relation(fields: [doc_type_id], references: [id])
+
+  @@index([deployment_id])
+  @@map("deployment_docs")
+}
+
+// ─── Port & Connection ────────────────────────────────────────────
+
+model Port {
+  id             String    @id @default(uuid()) @db.Uuid
+  application_id String    @db.Uuid
+  deployment_id  String?   @db.Uuid
+  port_number    Int
+  protocol       String    @default("TCP") @db.VarChar(10)
+  service_name   String?   @db.VarChar(255)
+  url            String?   @db.VarChar(500)
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @updatedAt
+  deleted_at     DateTime?
+
+  application Application    @relation(fields: [application_id], references: [id])
+  deployment  AppDeployment? @relation(fields: [deployment_id], references: [id])
+  app_connections AppConnection[]
+
+  @@index([application_id])
+  @@index([deployment_id])
+  @@map("ports")
+}
+
+model SystemConfig {
+  id         String   @id @default(uuid()) @db.Uuid
+  key        String   @unique
+  value      String   @db.Text
+  updated_at DateTime @updatedAt
+  updated_by String?  @db.Uuid
+
+  @@map("system_configs")
+}
+
+model ClientLog {
+  id         String   @id @default(uuid()) @db.Uuid
+  level      String
+  message    String   @db.Text
+  context    String?
+  meta       Json?
+  user_id    String?  @db.Uuid
+  session_id String?
+  url        String?
+  user_agent String?
+  created_at DateTime @default(now())
+
+  @@index([level])
+  @@index([created_at])
+  @@index([user_id])
+  @@map("client_logs")
+}
+
+model AppConnection {
+  id              String         @id @default(uuid()) @db.Uuid
+  source_app_id   String         @db.Uuid
+  target_app_id   String         @db.Uuid
+  environment     Environment
+  connection_type ConnectionType @default(HTTPS)
+  description     String?        @db.Text
+  target_port_id  String?        @db.Uuid
+  created_at      DateTime       @default(now())
+  updated_at      DateTime       @updatedAt
+  deleted_at      DateTime?
+
+  source_app Application @relation("SourceApp", fields: [source_app_id], references: [id])
+  target_app Application @relation("TargetApp", fields: [target_app_id], references: [id])
+  target_port Port?      @relation(fields: [target_port_id], references: [id])
+
+  @@index([source_app_id])
+  @@index([target_app_id])
+  @@index([environment])
+  @@map("app_connections")
+}
+
+// ─── Topology Snapshot ───────────────────────────────────────────
+
+model TopologySnapshot {
+  id          String    @id @default(uuid()) @db.Uuid
+  label       String?   @db.VarChar(255)
+  environment String?   @db.VarChar(10)
+  payload     Json
+  created_by  String?   @db.Uuid
+  created_at  DateTime  @default(now())
+
+  @@index([environment])
+  @@index([created_at])
+  @@map("topology_snapshots")
+}
+
+// ─── InfraSystem (Business System) ───────────────────────────────
+
+model InfraSystem {
+  id          String    @id @default(uuid()) @db.Uuid
+  code        String    @unique @db.VarChar(50)
+  name        String    @db.VarChar(255)
+  description String?   @db.Text
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  deleted_at  DateTime?
+
+  servers              Server[]              // Direct assignment via infra_system_id
+  servers_link         InfraSystemServer[]   // Many-to-many via join table
+  access               InfraSystemAccess[]
+
+  @@index([code])
+  @@map("infra_systems")
+}
+
+model InfraSystemServer {
+  id        String @id @default(uuid()) @db.Uuid
+  system_id String @db.Uuid
+  server_id String @db.Uuid
+
+  system InfraSystem @relation(fields: [system_id], references: [id], onDelete: Cascade)
+  server Server      @relation(fields: [server_id], references: [id], onDelete: Cascade)
+
+  @@unique([system_id, server_id])
+  @@index([system_id])
+  @@index([server_id])
+  @@map("infra_system_servers")
+}
+
+model InfraSystemAccess {
+  id         String    @id @default(uuid()) @db.Uuid
+  system_id  String    @db.Uuid
+  user_id    String?   @db.Uuid
+  group_id   String?   @db.Uuid
+  created_at DateTime  @default(now())
+
+  system InfraSystem @relation(fields: [system_id], references: [id], onDelete: Cascade)
+  user   User?       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  group  UserGroup?  @relation(fields: [group_id], references: [id], onDelete: Cascade)
+
+  @@unique([system_id, user_id])
+  @@unique([system_id, group_id])
+  @@index([system_id])
+  @@index([user_id])
+  @@index([group_id])
+  @@map("infra_system_access")
+}
+
+model ServerOsInstall {
+  id              String    @id @default(uuid()) @db.Uuid
+  server_id       String    @db.Uuid
+  application_id  String    @db.Uuid
+  version         String    @db.VarChar(100)
+  installed_at    DateTime
+  installed_by_id String?   @db.Uuid
+  replaced_at     DateTime?
+  change_reason   String?   @db.VarChar(500)
+  change_ticket   String?   @db.VarChar(100)
+  notes           String?   @db.Text
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+
+  server       Server      @relation("ServerInstalls", fields: [server_id], references: [id])
+  application  Application @relation(fields: [application_id], references: [id])
+  installed_by User?       @relation(fields: [installed_by_id], references: [id])
+  current_for  Server?     @relation("CurrentOs")
+
+  @@index([server_id])
+  @@index([application_id])
+  @@index([server_id, replaced_at])
+  @@map("server_os_installs")
+}
