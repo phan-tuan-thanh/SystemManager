@@ -53,7 +53,8 @@ const menuItems = [
       { key: '/applications?tab=infra', icon: <CodeOutlined />, label: 'Phần mềm hạ tầng' },
       { key: '/deployments', icon: <DeploymentUnitOutlined />, label: 'Deployments' },
       { key: '/connections', icon: <ApiOutlined />, label: 'Connections' },
-      { key: '/app-upload', icon: <UploadOutlined />, label: 'Upload' },
+      { key: '/app-upload', icon: <UploadOutlined />, label: 'Upload Ứng dụng' },
+      { key: '/deployment-upload', icon: <UploadOutlined />, label: 'Upload Deployment' },
     ],
   },
   {
@@ -100,7 +101,7 @@ export default function Sidebar({ collapsed }: SidebarProps) {
     const path = location.pathname;
     const keys: string[] = [];
     if (['/infra-systems', '/servers', '/networks', '/infra-upload'].some((p) => path.startsWith(p))) keys.push('infra-group');
-    if (['/applications', '/deployments', '/connections', '/app-upload'].some((p) => path.startsWith(p))) keys.push('app-group');
+    if (['/applications', '/deployments', '/connections', '/app-upload', '/deployment-upload'].some((p) => path.startsWith(p))) keys.push('app-group');
     if (['/topology', '/changesets', '/audit-logs'].some((p) => path.startsWith(p))) keys.push('monitor-group');
     if (path.startsWith('/admin')) keys.push('admin-group');
     return keys;

@@ -4,6 +4,26 @@ This document consolidates all past implementation plans and detailed technical 
 
 ---
 
+## Sprint 17 — Deployment Upload UI (2026-04-25)
+
+**Status:** ✅ Completed
+**Context:** Backend đã hỗ trợ `type=deployment` trong import API nhưng chưa có UI. Người dùng phải dùng curl/Postman để import deployment CSV. `importDeployment` luôn `create` mới gây duplicate khi re-import.
+**Decision:**
+- Tạo trang `/deployment-upload` theo pattern của `app-upload` (4 bước: upload → column map → preview → result)
+- Thêm `DEPLOYMENT_HEADER_ALIASES` để backend normalize header CSV variants
+- Refactor `importDeployment` sang upsert thủ công: `findFirst` theo (app+server+env) → update/create
+**Files impacted:**
+- `packages/backend/src/modules/import/import.service.ts` — thêm aliases, upsert logic (update)
+- `packages/frontend/src/pages/deployment-upload/index.tsx` — trang mới (new)
+- `packages/frontend/src/App.tsx` — thêm route `/deployment-upload` (update)
+- `packages/frontend/src/components/layout/Sidebar.tsx` — thêm menu item (update)
+**Trade-offs:** Upsert thủ công (không có unique constraint trên AppDeployment) — nếu sau này thêm unique index thì có thể dùng Prisma upsert native thay thế.
+**Sprint plan ref:** `docs/plans/sprint-17-deployment-upload.md`
+**Outcome:** Trang `/deployment-upload` hoàn chỉnh 4 bước. Backend hỗ trợ upsert và header aliases. Sidebar + route cập nhật.
+**Completed:** 2026-04-25
+
+---
+
 ## Sprint 16 — Application Group Restructure & Catalog Unification (2026-04-24)
 
 **Status:** ✅ Completed

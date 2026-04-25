@@ -1,6 +1,6 @@
 # SystemManager — Agile Task List & Sprint Plan
 
-> **Trạng thái hiện tại:** Sprint 14 ✅ DONE — UX Polish & Floating Filters hoàn thành
+> **Trạng thái hiện tại:** Sprint 17 🔄 IN PROGRESS — Deployment Upload UI
 
 ---
 
@@ -479,6 +479,25 @@
 | S16-11 | `[FE]` SystemSoftware Page: Redirect sang /applications?tab=infra | 1 | ✅ | 4.8.3 |
 | S16-12 | `[BE]` Sidebar: Link Phần mềm hạ tầng | 1 | ✅ | 4.8.3 |
 | S16-13 | `[BE]` Import: Auto-create group với đúng GroupType | 1 | ✅ | 4.8.3 |
+
+---
+
+## Sprint 17 — Deployment Upload UI 🔄 IN PROGRESS
+
+**Mục tiêu:** Bổ sung trang UI import deployment từ CSV, hoàn chỉnh bộ 3 upload flow (Server → Application → Deployment). Fix upsert duplicate trong importDeployment.  
+**Thời gian:** 2026-04-25  
+**Branch:** `feat/sprint-17-deployment-upload`  
+**Plan:** [docs/plans/sprint-17-deployment-upload.md](docs/plans/sprint-17-deployment-upload.md)
+
+| # | Task | Points | Status | SRS Ref |
+|---|------|--------|--------|---------|
+| S17-01 | `[BE]` Thêm `DEPLOYMENT_HEADER_ALIASES` vào validateRows | 1 | ✅ | 4.7.4 |
+| S17-02 | `[BE]` Refactor `importDeployment`: upsert theo (app+server+env) | 1 | ✅ | 4.7.4 |
+| S17-03 | `[FE]` Tạo `pages/deployment-upload/index.tsx` | 3 | ✅ | 4.7.4 |
+| S17-04 | `[FE]` Thêm route `/deployment-upload` vào `App.tsx` | 1 | ✅ | 4.7.4 |
+| S17-05 | `[FE]` Thêm menu item "Upload Deployment" vào Sidebar | 1 | ✅ | 4.7.4 |
+
+**Sprint 17 Total: 7 points**
 
 ---
 

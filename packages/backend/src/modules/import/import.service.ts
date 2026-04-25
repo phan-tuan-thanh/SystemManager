@@ -66,6 +66,18 @@ const APP_TYPE_ALIASES: Record<string, 'BUSINESS' | 'SYSTEM'> = {
 };
 const DEPLOYMENT_COLUMNS = ['application_code', 'server_code', 'environment', 'version', 'status', 'deployer'];
 
+const DEPLOYMENT_HEADER_ALIASES: Record<string, string> = {
+  'app_code': 'application_code',
+  'application': 'application_code',
+  'server': 'server_code',
+  'host': 'server_code',
+  'host_code': 'server_code',
+  'env': 'environment',
+  'ver': 'version',
+  'deployed_by': 'deployer',
+  'team': 'deployer',
+};
+
 // Header aliases: map common spreadsheet header variants to canonical keys
 const SERVER_HEADER_ALIASES: Record<string, string> = {
   'ip_address': 'ip',
@@ -407,16 +419,25 @@ export class ImportService {
     const server = await this.prisma.server.findUnique({ where: { code: serverCode, deleted_at: null } });
     if (!server) throw new Error(`Server '${serverCode}' not found`);
 
-    await this.prisma.appDeployment.create({
-      data: {
-        application_id: app.id,
-        server_id: server.id,
-        environment: String(d['environment'] || 'DEV') as any,
-        version: String(d['version'] || '1.0.0'),
-        status: String(d['status'] || 'RUNNING') as any,
-        deployer: d['deployer'] ? String(d['deployer']) : null,
-      },
+    const environment = String(d['environment'] || 'DEV') as any;
+    const version = String(d['version'] || '1.0.0');
+    const status = String(d['status'] || 'RUNNING') as any;
+    const deployer = d['deployer'] ? String(d['deployer']) : null;
+
+    const existing = await this.prisma.appDeployment.findFirst({
+      where: { application_id: app.id, server_id: server.id, environment, deleted_at: null },
     });
+
+    if (existing) {
+      await this.prisma.appDeployment.update({
+        where: { id: existing.id },
+        data: { version, status, deployer },
+      });
+    } else {
+      await this.prisma.appDeployment.create({
+        data: { application_id: app.id, server_id: server.id, environment, version, status, deployer },
+      });
+    }
   }
 
   private validateRows(
@@ -441,6 +462,7 @@ export class ImportService {
         const canonical =
           type === 'server' ? (SERVER_HEADER_ALIASES[key] ?? key)
           : type === 'application' ? (APP_HEADER_ALIASES[key] ?? key)
+          : type === 'deployment' ? (DEPLOYMENT_HEADER_ALIASES[key] ?? key)
           : key;
         normalised[canonical] = typeof v === 'string' ? v.trim() : v;
       }

@@ -4,6 +4,25 @@ A chronological record of project milestones, updates, and sprint summaries.
 
 ---
 
+## 2026-04-25 — Sprint 17: Deployment Upload UI ✅ Hoàn thành
+
+- ✅ S17-01: `DEPLOYMENT_HEADER_ALIASES` — normalize header CSV variants
+- ✅ S17-02: `importDeployment` — upsert theo (app+server+env), tránh duplicate
+- ✅ S17-03: Trang `/deployment-upload` — 4 bước đầy đủ, inline edit, error table
+- ✅ S17-04: Route `/deployment-upload` thêm vào `App.tsx`
+- ✅ S17-05: Menu "Upload Deployment" trong Sidebar nhóm Ứng dụng
+- Branch: `feat/sprint-17-deployment-upload` pushed
+- Sprint plan: `docs/plans/sprint-17-deployment-upload.md`
+
+## 2026-04-25 — Sprint 17: Bắt đầu implement Deployment Upload UI
+
+- Yêu cầu ghi nhận vào SRS.md section 4.7.4
+- Sprint plan tạo mới: `docs/plans/sprint-17-deployment-upload.md`
+- Tasks mới: S17-01 đến S17-05 (7 points)
+- Nội dung: trang `/deployment-upload`, fix upsert duplicate, header aliases
+
+---
+
 ## 2026-04-24: Sprint 16 — App Group Restructure & Catalog Unification ✅ Implemented
 
 - ✅ S16-01: Schema — thêm `GroupType` enum + `group_type` vào `ApplicationGroup`
