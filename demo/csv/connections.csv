@@ -1,0 +1,31 @@
+source_app,target_app,environment,connection_type,target_port,description
+IB_PORTAL,IB_API,PROD,HTTP,8085,Internet Banking Portal gọi IB API lấy dữ liệu nghiệp vụ
+IB_PORTAL,IB_AUTH,PROD,HTTP,8090,Portal xác thực người dùng qua Auth Service
+IB_API,CORE_CBS,PROD,HTTP,8080,IB API gọi Core Banking REST để truy vấn tài khoản
+IB_API,CORE_TRAN,PROD,GRPC,9093,IB API gọi Transaction Engine qua gRPC để thực hiện giao dịch
+IB_AUTH,CORE_CBS,PROD,HTTP,8080,Auth Service kiểm tra tài khoản tồn tại trong Core Banking
+MB_APP,IB_API,PROD,HTTP,8085,Mobile Banking gọi IB API
+MB_APP,IB_AUTH,PROD,HTTP,8090,Mobile Banking xác thực qua Auth Service
+MB_APP,MB_BIOMETRIC,PROD,HTTP,8092,Mobile App gọi Biometric để xác thực sinh trắc học
+MB_APP,MB_PUSH,PROD,HTTP,8093,Mobile App gửi thông báo đẩy qua Push Service
+PAY_GATEWAY,CORE_CBS,PROD,HTTP,8080,Payment Gateway kiểm tra số dư tài khoản qua Core Banking
+PAY_SWITCH,PAY_GATEWAY,PROD,HTTPS,443,Payment Switch định tuyến giao dịch qua Payment Gateway
+PAY_QR,PAY_SWITCH,PROD,HTTP,8094,QR Payment định tuyến qua Payment Switch
+PAY_SETTLEMENT,CORE_ACCT,PROD,HTTP,8081,Settlement cập nhật số dư tài khoản sau quyết toán
+CORE_CBS,CORE_TRAN,PROD,GRPC,9093,Core Banking gọi Transaction Engine xử lý giao dịch lõi
+ADMIN_PORTAL,CORE_CBS,PROD,HTTP,8080,Admin Portal quản trị Core Banking
+AUDIT_SVC,CORE_CBS,PROD,HTTP,8080,Audit Service theo dõi hoạt động Core Banking
+IB_PORTAL,IB_API,UAT,HTTP,8085,Portal gọi IB API (UAT)
+IB_PORTAL,IB_AUTH,UAT,HTTP,8090,Portal xác thực qua Auth (UAT)
+IB_API,CORE_CBS,UAT,HTTP,8080,IB API gọi Core Banking (UAT)
+IB_API,CORE_TRAN,UAT,GRPC,9093,IB API gọi Transaction Engine gRPC (UAT)
+IB_AUTH,CORE_CBS,UAT,HTTP,8080,Auth kiểm tra tài khoản Core Banking (UAT)
+MB_APP,IB_API,UAT,HTTP,8085,Mobile Banking gọi IB API (UAT)
+PAY_GATEWAY,CORE_CBS,UAT,HTTP,8080,Payment Gateway kiểm tra Core Banking (UAT)
+PAY_QR,PAY_GATEWAY,UAT,HTTPS,443,QR Payment qua Gateway (UAT)
+CORE_CBS,CORE_TRAN,UAT,GRPC,9093,Core Banking gọi Transaction Engine (UAT)
+IB_PORTAL,IB_API,DEV,HTTP,8085,Portal gọi IB API (DEV)
+IB_API,CORE_CBS,DEV,HTTP,8080,IB API gọi Core Banking (DEV)
+IB_API,CORE_TRAN,DEV,GRPC,9093,IB API gọi Transaction Engine gRPC (DEV)
+MB_APP,IB_API,DEV,HTTP,8085,Mobile Banking gọi IB API (DEV)
+CORE_CBS,CORE_TRAN,DEV,GRPC,9093,Core Banking gọi Transaction Engine (DEV)

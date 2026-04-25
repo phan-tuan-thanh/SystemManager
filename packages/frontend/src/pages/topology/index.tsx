@@ -944,9 +944,15 @@ function TopologyPageInner() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       <PageHeader
-        title={
+        title="Topology"
+        helpKey="topology"
+        subtitle={
+          !loading && data
+            ? `${serverCount} server${serverCount !== 1 ? 's' : ''} · ${connectionCount} connection${connectionCount !== 1 ? 's' : ''}`
+            : 'Loading...'
+        }
+        extra={
           <Space>
-            Topology
             <Segmented
               value={viewMode}
               onChange={(v: string | number) => setViewMode(v as '2D' | '3D')}
@@ -970,16 +976,6 @@ function TopologyPageInner() {
                 size="small"
               />
             )}
-          </Space>
-        }
-        helpKey="topology"
-        subtitle={
-          !loading && data
-            ? `${serverCount} server${serverCount !== 1 ? 's' : ''} · ${connectionCount} connection${connectionCount !== 1 ? 's' : ''}`
-            : 'Loading...'
-        }
-        extra={
-          <Space>
             {/* Realtime event badge */}
             {realtimeEvents.length > 0 && (
               <Tag icon={<ThunderboltOutlined />} color="blue" style={{ maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>

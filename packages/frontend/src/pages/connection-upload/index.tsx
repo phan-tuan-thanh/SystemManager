@@ -67,44 +67,82 @@ interface ExecuteResult {
   errors: Array<{ row: number; name: string; ip: string; reason: string }>;
 }
 
-const APP_TYPE_OPTIONS = [
-  { label: 'BUSINESS - Ứng dụng nghiệp vụ', value: 'BUSINESS' },
-  { label: 'SYSTEM - Phần mềm hệ thống', value: 'SYSTEM' },
+const ENV_OPTIONS = [
+  { label: 'DEV', value: 'DEV' },
+  { label: 'UAT', value: 'UAT' },
+  { label: 'PROD', value: 'PROD' },
 ];
-const APP_TYPE_VALUE_ALIASES: Record<string, string> = {
-  business: 'BUSINESS',
-  nghiep_vu: 'BUSINESS',
-  'nghiệp_vụ': 'BUSINESS',
-  system: 'SYSTEM',
-  he_thong: 'SYSTEM',
-  'hệ_thống': 'SYSTEM',
+const ENV_VALUE_ALIASES: Record<string, string> = {
+  dev: 'DEV', development: 'DEV', test: 'DEV',
+  uat: 'UAT', staging: 'UAT',
+  prod: 'PROD', production: 'PROD', live: 'PROD',
 };
 
-const APP_TARGETS: TargetField[] = [
-  { key: 'code', label: 'Mã ứng dụng (Code)', required: true, aliases: ['app_code', 'application_code', 'ma', 'ma_ung_dung'] },
-  { key: 'name', label: 'Tên ứng dụng (Name)', required: true, aliases: ['app_name', 'application_name', 'ten', 'ten_ung_dung'] },
-  { key: 'group_code', label: 'Mã nhóm (Group Code)', aliases: ['group', 'nhom', 'nhom_code'] },
-  { key: 'version', label: 'Phiên bản (Version)', aliases: ['ver', 'phien_ban'] },
-  { key: 'owner_team', label: 'Nhóm phụ trách (Owner Team)', aliases: ['team', 'owner', 'don_vi'] },
+const CONN_TYPE_OPTIONS = [
+  { label: 'HTTP', value: 'HTTP' },
+  { label: 'HTTPS', value: 'HTTPS' },
+  { label: 'TCP', value: 'TCP' },
+  { label: 'GRPC', value: 'GRPC' },
+  { label: 'AMQP', value: 'AMQP' },
+  { label: 'KAFKA', value: 'KAFKA' },
+  { label: 'DATABASE', value: 'DATABASE' },
+];
+const CONN_TYPE_ALIASES: Record<string, string> = {
+  http: 'HTTP', https: 'HTTPS', tcp: 'TCP',
+  grpc: 'GRPC',
+  amqp: 'AMQP', mq: 'AMQP', rabbitmq: 'AMQP',
+  kafka: 'KAFKA',
+  database: 'DATABASE', db: 'DATABASE', sql: 'DATABASE',
+};
+
+const CONN_TARGETS: TargetField[] = [
   {
-    key: 'application_type',
-    label: 'Loại ứng dụng (Type)',
-    aliases: ['type', 'loai', 'app_type'],
-    options: APP_TYPE_OPTIONS,
-    valueAliases: APP_TYPE_VALUE_ALIASES,
+    key: 'source_app',
+    label: 'Ứng dụng nguồn (source_app)',
+    required: true,
+    aliases: ['from_app', 'from', 'source', 'caller', 'source_application'],
   },
-  { key: 'description', label: 'Mô tả (Description)', aliases: ['desc', 'mo_ta'] },
+  {
+    key: 'target_app',
+    label: 'Ứng dụng đích (target_app)',
+    required: true,
+    aliases: ['to_app', 'to', 'target', 'destination', 'callee', 'target_application'],
+  },
+  {
+    key: 'environment',
+    label: 'Môi trường (environment)',
+    required: true,
+    aliases: ['env', 'moi_truong'],
+    options: ENV_OPTIONS,
+    valueAliases: ENV_VALUE_ALIASES,
+  },
+  {
+    key: 'connection_type',
+    label: 'Loại kết nối (connection_type)',
+    aliases: ['type', 'conn_type', 'protocol'],
+    options: CONN_TYPE_OPTIONS,
+    valueAliases: CONN_TYPE_ALIASES,
+  },
+  {
+    key: 'target_port',
+    label: 'Port đích (target_port)',
+    aliases: ['port', 'dst_port', 'target_port_number'],
+  },
+  {
+    key: 'description',
+    label: 'Mô tả (description)',
+    aliases: ['desc', 'notes', 'ghi_chu', 'mo_ta'],
+  },
 ];
 
-const APP_TARGET_BY_KEY: Record<string, TargetField> = APP_TARGETS.reduce(
+const CONN_TARGET_BY_KEY: Record<string, TargetField> = CONN_TARGETS.reduce(
   (acc, t) => ({ ...acc, [t.key]: t }),
   {} as Record<string, TargetField>,
 );
 
-export function AppUploadContent() {
+export function ConnectionUploadContent() {
   const { message } = App.useApp();
   const [step, setStep] = useState(0);
-  const [environment, setEnvironment] = useState<string | undefined>(undefined);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [csvColumns, setCsvColumns] = useState<string[]>([]);
   const [csvRows, setCsvRows] = useState<Record<string, any>[]>([]);
@@ -134,7 +172,6 @@ export function AppUploadContent() {
       ...prev,
       [rowNum]: { ...(prev[rowNum] ?? {}), [colKey]: value },
     }));
-    // Also reflect in preview.rows so user sees the update immediately
     setPreview((prev) => {
       if (!prev) return prev;
       return {
@@ -146,36 +183,19 @@ export function AppUploadContent() {
     });
   };
 
-  const handleRevalidate = async () => {
-    setLoading(true);
-    try {
-      const mappedRows = applyAllMappings(csvRows, mapping, valueMappings);
-      const editedMappedRows = mappedRows.map((row, idx) => {
-        const edits = editedRows[idx + 1];
-        return edits ? { ...row, ...edits } : row;
-      });
-      const csvString = Papa.unparse(editedMappedRows);
-      const blob = new Blob([csvString], { type: 'text/csv' });
-      const mappedFile = new File([blob], 'mapped.csv', { type: 'text/csv' });
-
-      const form = new FormData();
-      form.append('file', mappedFile);
-      const params = new URLSearchParams({ type: 'application' });
-      if (environment) params.set('environment', environment);
-
-      const { data } = await apiClient.post(`/import/preview?${params}`, form, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      setPreview(data.data ?? data);
-      setEditedRows({});
-      message.success('Đã kiểm tra lại');
-    } catch (err: unknown) {
-      const msg =
-        (err as any)?.response?.data?.error?.message || 'Kiểm tra lại thất bại.';
-      message.error(msg);
-    } finally {
-      setLoading(false);
-    }
+  const buildFormData = (withEdits = false) => {
+    const mappedRows = applyAllMappings(csvRows, mapping, valueMappings);
+    const finalRows = withEdits
+      ? mappedRows.map((row, idx) => {
+          const edits = editedRows[idx + 1];
+          return edits ? { ...row, ...edits } : row;
+        })
+      : mappedRows;
+    const csvString = Papa.unparse(finalRows);
+    const blob = new Blob([csvString], { type: 'text/csv' });
+    const form = new FormData();
+    form.append('file', new File([blob], 'mapped.csv', { type: 'text/csv' }));
+    return form;
   };
 
   const handleParseFile = () => {
@@ -204,7 +224,7 @@ export function AppUploadContent() {
   };
 
   const handleUploadPreview = async () => {
-    const missingRequired = APP_TARGETS.filter((t) => t.required).filter(
+    const missingRequired = CONN_TARGETS.filter((t) => t.required).filter(
       (t) => !Object.values(mapping).includes(t.key),
     );
     if (missingRequired.length) {
@@ -213,18 +233,8 @@ export function AppUploadContent() {
     }
     setLoading(true);
     try {
-      // Apply mapping client-side: rename CSV columns to canonical target keys
-      const mappedRows = applyAllMappings(csvRows, mapping, valueMappings);
-      const csvString = Papa.unparse(mappedRows);
-      const blob = new Blob([csvString], { type: 'text/csv' });
-      const mappedFile = new File([blob], 'mapped.csv', { type: 'text/csv' });
-
-      const form = new FormData();
-      form.append('file', mappedFile);
-      const params = new URLSearchParams({ type: 'application' });
-      if (environment) params.set('environment', environment);
-
-      const { data } = await apiClient.post(`/import/preview?${params}`, form, {
+      const form = buildFormData();
+      const { data } = await apiClient.post('/import/preview?type=connection', form, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       setPreview(data.data ?? data);
@@ -234,6 +244,23 @@ export function AppUploadContent() {
         (err as any)?.response?.data?.error?.message ||
         'Xem trước thất bại. Vui lòng kiểm tra định dạng file.';
       message.error(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRevalidate = async () => {
+    setLoading(true);
+    try {
+      const form = buildFormData(true);
+      const { data } = await apiClient.post('/import/preview?type=connection', form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      setPreview(data.data ?? data);
+      setEditedRows({});
+      message.success('Đã kiểm tra lại');
+    } catch (err: unknown) {
+      message.error((err as any)?.response?.data?.error?.message || 'Kiểm tra lại thất bại.');
     } finally {
       setLoading(false);
     }
@@ -249,8 +276,7 @@ export function AppUploadContent() {
       setResult(data.data ?? data);
       setStep(3);
     } catch (err: unknown) {
-      const msg = (err as any)?.response?.data?.error?.message || 'Import thất bại.';
-      message.error(msg);
+      message.error((err as any)?.response?.data?.error?.message || 'Import thất bại.');
     } finally {
       setLoading(false);
     }
@@ -287,13 +313,11 @@ export function AppUploadContent() {
       render: (_: unknown, r: ImportRow) => {
         const value = r.data[col];
         const isEdited = editedRows[r.row]?.[col] !== undefined;
-        const target = APP_TARGET_BY_KEY[col];
+        const target = CONN_TARGET_BY_KEY[col];
         const displayStr = value != null ? String(value) : '';
 
-        // Enum field → Select dropdown
         if (target?.options) {
-          const normalized =
-            target.valueAliases?.[displayStr.toLowerCase()] ?? displayStr;
+          const normalized = target.valueAliases?.[displayStr.toLowerCase()] ?? displayStr;
           const validValues = target.options.map((o) => o.value);
           const currentValue = validValues.includes(normalized) ? normalized : undefined;
 
@@ -325,9 +349,7 @@ export function AppUploadContent() {
               }}
               onBlur={(e) => {
                 const newValue = e.target.value;
-                if (newValue !== displayStr) {
-                  handleCellEdit(r.row, col, newValue);
-                }
+                if (newValue !== displayStr) handleCellEdit(r.row, col, newValue);
               }}
               onPressEnter={(e) => (e.target as HTMLInputElement).blur()}
             />
@@ -377,31 +399,22 @@ export function AppUploadContent() {
 
         {step === 0 && (
           <Space direction="vertical" style={{ width: '100%' }} size={16}>
-            <Space wrap>
-              <div>
-                <Text strong style={{ marginRight: 8 }}>
-                  Môi trường (tùy chọn):
-                </Text>
-                <Select
-                  allowClear
-                  value={environment}
-                  onChange={setEnvironment}
-                  style={{ width: 160 }}
-                  placeholder="Tất cả"
-                  options={[
-                    { value: 'DEV', label: 'DEV' },
-                    { value: 'UAT', label: 'UAT' },
-                    { value: 'PROD', label: 'PROD' },
-                  ]}
-                />
-              </div>
-            </Space>
-
             <Alert
               type="info"
               showIcon
-              message="Cột bắt buộc cho Ứng dụng"
-              description="Bắt buộc: code, name. Tùy chọn: group_code, version, owner_team, description."
+              message="Import kết nối App-to-App"
+              description={
+                <span>
+                  Bắt buộc: <b>source_app</b> (mã ứng dụng nguồn), <b>target_app</b> (mã ứng dụng đích), <b>environment</b> (DEV/UAT/PROD).
+                  <br />
+                  Tùy chọn: <b>connection_type</b> (HTTP/HTTPS/TCP/GRPC/AMQP/KAFKA/DATABASE, mặc định HTTP),{' '}
+                  <b>target_port</b> (port số nguyên trên app đích — để liên kết topology),{' '}
+                  <b>description</b>.
+                  <br />
+                  <b>Lưu ý:</b> Kết nối đã tồn tại (cùng source + target + env + type) sẽ được cập nhật thay vì tạo mới.
+                  Nếu <b>target_port</b> không tìm thấy trong database, kết nối vẫn được tạo (không fail row).
+                </span>
+              }
             />
 
             <Dragger
@@ -439,12 +452,12 @@ export function AppUploadContent() {
             <Alert
               type="info"
               showIcon
-              message="Ánh xạ cột CSV tới trường ứng dụng"
-              description="Cột có dấu * là bắt buộc. Cột không được ánh xạ sẽ bị bỏ qua khi import."
+              message="Ánh xạ cột CSV tới trường kết nối"
+              description="Cột có dấu * là bắt buộc. Hệ thống tự động nhận dạng tên cột phổ biến (from_app, to_app, env, type...)."
             />
             <ColumnMapper
               csvColumns={csvColumns}
-              targets={APP_TARGETS}
+              targets={CONN_TARGETS}
               value={mapping}
               onChange={setMapping}
               previewRows={csvRows}
@@ -454,7 +467,7 @@ export function AppUploadContent() {
               <h4 style={{ marginTop: 8, marginBottom: 8 }}>Ánh xạ giá trị (Value Mapping)</h4>
               <ValueMapper
                 mapping={mapping}
-                targets={APP_TARGETS}
+                targets={CONN_TARGETS}
                 csvRows={csvRows}
                 value={valueMappings}
                 onChange={setValueMappings}
@@ -463,11 +476,7 @@ export function AppUploadContent() {
 
             <Space style={{ justifyContent: 'flex-end', width: '100%' }}>
               <Button onClick={() => setStep(0)}>Quay lại</Button>
-              <Button
-                type="primary"
-                loading={loading}
-                onClick={handleUploadPreview}
-              >
+              <Button type="primary" loading={loading} onClick={handleUploadPreview}>
                 Tiếp theo: Xem trước
               </Button>
             </Space>
@@ -481,11 +490,7 @@ export function AppUploadContent() {
                 <Statistic title="Tổng số dòng" value={preview.total} />
               </Col>
               <Col span={8}>
-                <Statistic
-                  title="Hợp lệ"
-                  value={preview.valid}
-                  valueStyle={{ color: '#52c41a' }}
-                />
+                <Statistic title="Hợp lệ" value={preview.valid} valueStyle={{ color: '#52c41a' }} />
               </Col>
               <Col span={8}>
                 <Statistic
@@ -502,6 +507,11 @@ export function AppUploadContent() {
                 message={`${preview.invalid} dòng có lỗi. Nhấn ô để chỉnh sửa, sau đó bấm "Kiểm tra lại".`}
               />
             )}
+            <Alert
+              type="info"
+              showIcon
+              message="Kết nối đã tồn tại (source + target + env + type) sẽ được cập nhật thay vì tạo mới. target_port_id sẽ được resolve lúc execute."
+            />
 
             <Space style={{ width: '100%', justifyContent: 'space-between' }}>
               <Space>
@@ -543,7 +553,7 @@ export function AppUploadContent() {
                 onClick={handleExecute}
                 disabled={!preview || preview.valid === 0 || hasEdits}
               >
-                Nhập {preview.valid} dòng hợp lệ
+                Nhập {preview.valid} kết nối hợp lệ
               </Button>
             </Space>
           </Space>
@@ -556,10 +566,10 @@ export function AppUploadContent() {
             <div>
               <Result
                 status={summary.succeeded > 0 ? 'success' : 'warning'}
-                title={allSuccess ? 'Import hoàn tất!' : `Import hoàn tất — ${summary.failed} dòng thất bại`}
+                title={allSuccess ? 'Import hoàn tất!' : `Import hoàn tất — ${summary.failed} kết nối thất bại`}
                 subTitle={
                   allSuccess
-                    ? 'Tất cả ứng dụng đã được nhập thành công.'
+                    ? 'Tất cả kết nối đã được tạo/cập nhật thành công.'
                     : `${summary.failed} dòng không được import — Xem chi tiết lỗi bên dưới.`
                 }
                 extra={<Button type="primary" onClick={handleReset}>Nhập thêm</Button>}
@@ -581,16 +591,6 @@ export function AppUploadContent() {
                   </Card>
                 </Col>
               </Row>
-              <Row gutter={16} style={{ marginBottom: 16 }}>
-                <Col span={24}>
-                  <Card size="small" title="Ứng dụng">
-                    <Space>
-                      <span><Tag color="green">Thành công</Tag>{summary.succeeded}</span>
-                      <span><Tag color="red">Thất bại</Tag>{summary.failed}</span>
-                    </Space>
-                  </Card>
-                </Col>
-              </Row>
               {errors.length > 0 && (
                 <>
                   <Divider orientation="left" orientationMargin={0} style={{ fontSize: 13, color: '#ff4d4f' }}>
@@ -600,20 +600,12 @@ export function AppUploadContent() {
                     size="small"
                     dataSource={errors}
                     rowKey="row"
-                    pagination={{ pageSize: 5, showSizeChanger: false, showTotal: (t) => `${t} lỗi` }}
                     columns={[
-                      { title: 'Dòng', dataIndex: 'row', width: 60 },
-                      { title: 'Tên ứng dụng', dataIndex: 'name', width: 200, ellipsis: true },
-                      {
-                        title: 'Lý do',
-                        dataIndex: 'reason',
-                        render: (r: string) => (
-                          <Tooltip title={r}>
-                            <span style={{ color: '#ff4d4f', fontSize: 12 }}>{r}</span>
-                          </Tooltip>
-                        ),
-                      },
+                      { title: '#', dataIndex: 'row', width: 60 },
+                      { title: 'Source App', dataIndex: 'name', width: 160 },
+                      { title: 'Lý do', dataIndex: 'reason', render: (v: string) => <Text type="danger">{v}</Text> },
                     ]}
+                    pagination={false}
                   />
                 </>
               )}
@@ -624,11 +616,11 @@ export function AppUploadContent() {
   );
 }
 
-export default function AppUploadPage() {
+export default function ConnectionUploadPage() {
   return (
     <div className="p-6">
-      <PageHeader title="Upload Ứng dụng" helpKey="application" />
-      <AppUploadContent />
+      <PageHeader title="Upload Connection" helpKey="connection" />
+      <ConnectionUploadContent />
     </div>
   );
 }

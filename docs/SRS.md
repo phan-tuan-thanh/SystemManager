@@ -790,6 +790,28 @@ Hệ thống hỗ trợ phân quyền truy cập theo từng InfraSystem:
   - AC5: Cho phép tra cứu lịch sử thay đổi (Change Log) của một deployment cụ thể để phục vụ quản lý sự thay đổi.
   **Added:** 2026-04-24
 
+### 4.8.4. Multi-Port per Deployment — Import nhiều port/protocol cho một deployment
+**Mô tả:** Một ứng dụng triển khai trên server có thể lắng nghe nhiều cổng (port) đồng thời (ví dụ: REST trên HTTP/8080 và gRPC trên 9092). Import CSV hỗ trợ khai báo nhiều cặp port-protocol trong một dòng bằng cú pháp `PORT-PROTOCOL:service_name` cách nhau bởi dấu cách.
+**Actor:** ADMIN | OPERATOR
+**Acceptance Criteria:**
+- AC1: Cột `ports` trong CSV nhận giá trị dạng `8080-HTTP:rest-api 9092-gRPC:grpc-api` — mỗi token là một cặp port-protocol, tùy chọn tên dịch vụ sau dấu `:`.
+- AC2: Mỗi token tạo ra một Port record độc lập liên kết với cùng deployment.
+- AC3: Port conflict detection áp dụng cho từng port trong danh sách — conflict bất kỳ → rollback toàn bộ deployment.
+- AC4: Backward compatible: CSV vẫn dùng cột `port`/`protocol`/`service_name` riêng lẻ (Sprint 17 format) vẫn được xử lý đúng như một port duy nhất.
+**Added:** 2026-04-25
+
+### 4.8.5. Import Kết nối App-to-App (Connection)
+**Mô tả:** Bổ sung trang `/connection-upload` cho phép import hàng loạt kết nối giữa các ứng dụng (AppConnection) từ CSV. Đây là cách nhanh nhất để xây dựng dữ liệu topology kết nối cho hệ thống đã có sẵn.
+**Actor:** ADMIN | OPERATOR
+**Acceptance Criteria:**
+- AC1: CSV có các cột: `source_app`, `target_app`, `environment`, `connection_type`, `target_port` (tùy chọn), `description` (tùy chọn).
+- AC2: Upsert theo `(source_app_id, target_app_id, environment, connection_type)` — re-import không tạo duplicate.
+- AC3: Nếu `target_port` được cung cấp, hệ thống tra cứu Port record của `target_app` trong `environment` tương ứng và liên kết `target_port_id` để topology render đúng endpoint.
+- AC4: Nếu Port không tìm thấy — connection vẫn được tạo với `target_port_id = null`, không fail row.
+- AC5: UI 4 bước giống deployment-upload: upload → column map → preview → result.
+- AC6: `connection_type` hỗ trợ alias: `grpc` → `GRPC`, `mq` → `AMQP`, `db` → `DATABASE`.
+**Added:** 2026-04-25
+
 ---
 
 # 🔗 5. Yêu cầu phi chức năng

@@ -1,15 +1,15 @@
 {
   "_meta": {
     "purpose": "AI Agent handoff file — tracks exact build state so any agent can continue without re-reading the entire codebase",
-    "updated_at": "2026-04-24T11:30:00+07:00",
-    "updated_by": "Claude Sonnet 4.6",
+    "updated_at": "2026-04-25T14:45:00+07:00",
+    "updated_by": "Claude Haiku 4.5",
     "schema_version": "2",
     "agile_planning": {
       "task_list": "TASKS.md",
       "reports_folder": "docs/reports/",
-      "current_sprint": "Sprint 16 — App Group Restructure & Catalog Unification (S16-01 to S16-13 implemented)",
+      "current_sprint": "Sprint 18 ✅ DONE — Multi-Port, Connection Import & UI Consolidation (S18-01 to S18-12 implemented)",
       "sprint_report_template": "docs/reports/sprint-template.md",
-      "completed_sprint_reports": ["docs/reports/sprint-00-bootstrap.md", "docs/reports/sprint-01.md", "docs/reports/sprint-02.md", "docs/reports/sprint-03.md", "docs/reports/sprint-04.md", "docs/reports/sprint-05.md", "docs/reports/sprint-06.md", "docs/reports/sprint-07.md", "docs/reports/sprint-08.md", "docs/reports/sprint-09.md", "docs/reports/sprint-10.md", "docs/reports/sprint-11.md", "docs/reports/sprint-12.md", "docs/reports/sprint-13.md", "docs/reports/sprint-14.md", "docs/reports/sprint-15.md"]
+      "completed_sprint_reports": ["docs/reports/sprint-00-bootstrap.md", "docs/reports/sprint-01.md", "docs/reports/sprint-02.md", "docs/reports/sprint-03.md", "docs/reports/sprint-04.md", "docs/reports/sprint-05.md", "docs/reports/sprint-06.md", "docs/reports/sprint-07.md", "docs/reports/sprint-08.md", "docs/reports/sprint-09.md", "docs/reports/sprint-10.md", "docs/reports/sprint-11.md", "docs/reports/sprint-12.md", "docs/reports/sprint-13.md", "docs/reports/sprint-14.md", "docs/reports/sprint-15.md", "docs/reports/sprint-16.md", "docs/reports/sprint-17.md", "docs/reports/sprint-18.md"]
     }
   },
 
@@ -484,7 +484,12 @@
       },
       "changeset/ChangeSetListPage":   { "status": "COMPLETE", "route": "/changesets", "notes": "DataTable + filter (status/env) + Create modal. Navigate to detail on click." },
       "changeset/ChangeSetDetailPage": { "status": "COMPLETE", "route": "/changesets/:id", "notes": "Descriptions metadata + ChangeItemDiff table (old/new side-by-side) + Preview/Apply/Discard actions." },
-      "changeset/ChangeSetPreviewPage":{ "status": "COMPLETE", "route": "/changesets/:id/preview", "notes": "Virtual topology cards color-coded (NEW=green, MODIFIED=yellow, DELETED=red). Conflict warning panel. Apply button disabled if fatal conflicts." }
+      "changeset/ChangeSetPreviewPage":{ "status": "COMPLETE", "route": "/changesets/:id/preview", "notes": "Virtual topology cards color-coded (NEW=green, MODIFIED=yellow, DELETED=red). Conflict warning panel. Apply button disabled if fatal conflicts." },
+      "app-import/AppImportPage": {
+        "status": "COMPLETE",
+        "route": "/app-import",
+        "notes": "Unified tabbed import page (S18-11). Consolidates 3 separate upload flows into 1 page with tabs: App / Deployment / Connection. State managed via URL param ?tab=. Backward compat: /app-upload → /app-import?tab=app, /deployment-upload → /app-import?tab=deployment, /connection-upload → /app-import?tab=connection."
+      }
     },
 
     "shared_components": {
@@ -498,8 +503,8 @@
   },
 
   "progress": {
-    "phase": "Sprint 16 — App Group Restructure & Centralized Deployments",
-    "overall_pct": 42,
+    "phase": "Sprint 18 ✅ DONE — Multi-Port, Connection Import & UI Consolidation",
+    "overall_pct": 44,
     "breakdown": {
       "infrastructure":   { "pct": 100, "note": "Docker, DB, migrations, monorepo, Dockerfiles, ESLint, Prettier" },
       "backend_common":   { "pct": 100, "note": "Guards, decorators, interceptors, filters — all registered globally in main.ts" },
@@ -527,7 +532,9 @@
       "frontend_search":  { "pct": 100, "note": "Sprint 12: Global search Omnibar in Header with TanStack Query autocomplete." },
       "frontend_darkmode":{ "pct": 100, "note": "Sprint 12: Dark mode toggle in Header, Zustand persisted, Ant Design darkAlgorithm." },
       "frontend_topology_interactive": { "pct": 100, "note": "Sprint 14 complete: Floating filters, node visual distinction, compact auto-arrange for disconnected nodes, vis-network default." },
-      "backend_server_enrichment": { "pct": 100, "note": "Sprint 15: Added 'os' field and detailed hardware specs import logic. Refactored Upload UI and Detail view. Complete." }
+      "backend_server_enrichment": { "pct": 100, "note": "Sprint 15: Added 'os' field and detailed hardware specs import logic. Refactored Upload UI and Detail view. Complete." },
+      "frontend_import_consolidation": { "pct": 100, "note": "Sprint 18: Consolidated 3 upload pages (app/deployment/connection) into 1 unified /app-import page with tabbed interface. Sidebar: 3 menu items → 1 'Import CSV' item. Backward compat via redirects." },
+      "frontend_topology_layout_fix": { "pct": 100, "note": "Sprint 18: Fixed topology page layout. Moved Segmented controls from title prop (block <h4>) to extra prop (flex layout)." }
     }
   },
 

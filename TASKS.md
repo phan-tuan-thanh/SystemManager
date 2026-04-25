@@ -1,6 +1,6 @@
 # SystemManager — Agile Task List & Sprint Plan
 
-> **Trạng thái hiện tại:** Sprint 14 ✅ DONE — UX Polish & Floating Filters hoàn thành
+> **Trạng thái hiện tại:** Sprint 18 ✅ DONE — Multi-Port, Connection Import & UI Consolidation
 
 ---
 
@@ -479,6 +479,55 @@
 | S16-11 | `[FE]` SystemSoftware Page: Redirect sang /applications?tab=infra | 1 | ✅ | 4.8.3 |
 | S16-12 | `[BE]` Sidebar: Link Phần mềm hạ tầng | 1 | ✅ | 4.8.3 |
 | S16-13 | `[BE]` Import: Auto-create group với đúng GroupType | 1 | ✅ | 4.8.3 |
+
+---
+
+## Sprint 18 — Multi-Port per Deployment & Connection Import ✅ DONE
+
+**Mục tiêu:** (1) 1 deployment có thể khai báo nhiều cặp port-protocol. (2) Import kết nối app-to-app từ CSV. (3) Tối ưu hóa UI import — gộp 3 trang thành 1 trang tabbed.
+**Thời gian:** 2026-04-25
+**Branch:** `feat/sprint-18-multi-port-connection-import`
+**Plan:** [docs/plans/sprint-18-multi-port-connection-import.md](docs/plans/sprint-18-multi-port-connection-import.md)
+
+| # | Task | Points | Status | SRS Ref |
+|---|------|--------|--------|---------|
+| S18-01 | `[BE]` Thêm `parsePortsString()`, cập nhật `DEPLOYMENT_COLUMNS` và `validateRows` cho multi-port | 2 | ✅ | 4.8.4 |
+| S18-02 | `[BE]` Refactor `importDeployment()` — tạo nhiều Port record per deployment, backward compat | 2 | ✅ | 4.8.4 |
+| S18-03 | `[BE]` Thêm `CONNECTION_COLUMNS`, `importConnection()` — upsert AppConnection | 3 | ✅ | 4.8.5 |
+| S18-04 | `[BE]` Cập nhật `ImportPreviewDto` + controller — nhận `type=connection` | 1 | ✅ | 4.8.5 |
+| S18-05 | `[FE]` Cập nhật `deployment-upload/index.tsx` — thay port/protocol/service_name bằng `ports` | 1 | ✅ | 4.8.4 |
+| S18-06 | `[FE]` Tạo `pages/connection-upload/index.tsx` — 4-step wizard | 3 | ✅ | 4.8.5 |
+| S18-07 | `[FE]` Thêm route `/connection-upload` + Sidebar menu | 1 | ✅ | 4.8.5 |
+| S18-08 | `[DATA]` Cập nhật `deployments.csv` sang format `ports` multi-port | 1 | ✅ | — |
+| S18-09 | `[DATA]` Tạo `connections.csv` demo — ~30 kết nối PROD/UAT/DEV | 2 | ✅ | — |
+| S18-10 | `[FE]` Refactor `app-upload`, `deployment-upload`, `connection-upload` — extract Content components | 2 | ✅ | — |
+| S18-11 | `[FE]` Tạo `/app-import/index.tsx` — unified tabbed import page cho 3 loại (app/deployment/connection) | 3 | ✅ | — |
+| S18-12 | `[FE]` Fix topology layout — di chuyển Segmented controls từ title → extra prop | 1 | ✅ | — |
+
+**Sprint 18 Total: 22 points** ✅ DONE
+
+---
+
+## Sprint 17 — Deployment Upload UI ✅ DONE
+
+**Mục tiêu:** Bổ sung trang UI import deployment từ CSV, hoàn chỉnh bộ 3 upload flow (Server → Application → Deployment). Fix upsert duplicate trong importDeployment.  
+**Thời gian:** 2026-04-25  
+**Branch:** `feat/sprint-17-deployment-upload`  
+**Plan:** [docs/plans/sprint-17-deployment-upload.md](docs/plans/sprint-17-deployment-upload.md)
+
+| # | Task | Points | Status | SRS Ref |
+|---|------|--------|--------|---------|
+| S17-01 | `[BE]` Thêm `DEPLOYMENT_HEADER_ALIASES` vào validateRows | 1 | ✅ | 4.7.4 |
+| S17-02 | `[BE]` Refactor `importDeployment`: upsert theo (app+server+env) | 1 | ✅ | 4.7.4 |
+| S17-03 | `[FE]` Tạo `pages/deployment-upload/index.tsx` | 3 | ✅ | 4.7.4 |
+| S17-04 | `[FE]` Thêm route `/deployment-upload` vào `App.tsx` | 1 | ✅ | 4.7.4 |
+| S17-05 | `[FE]` Thêm menu item "Upload Deployment" vào Sidebar | 1 | ✅ | 4.7.4 |
+| S17-06 | `[BE]` Import port/protocol/service_name — tạo Port record trong transaction | 2 | ✅ | 4.4.3 |
+| S17-07 | `[BE]` Port conflict detection trong importDeployment (rollback nếu conflict) | 2 | ✅ | 4.4.3 |
+| S17-08 | `[FE]` Column mapper: thêm port/protocol/service_name target fields | 1 | ✅ | 4.4.3 |
+| S17-09 | Demo: cập nhật `deployments.csv` với port/protocol/service_name (verified no conflict) | 1 | ✅ | — |
+
+**Sprint 17 Total: 13 points**
 
 ---
 

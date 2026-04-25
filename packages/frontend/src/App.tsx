@@ -24,7 +24,7 @@ import ConnectionListPage from './pages/connection/index';
 import TopologyPage from './pages/topology/index';
 import InfraSystemListPage from './pages/infra-system/index';
 import InfraUploadPage from './pages/infra-upload/index';
-import AppUploadPage from './pages/app-upload/index';
+import AppImportPage from './pages/app-import/index';
 import ChangeSetListPage from './pages/changeset/index';
 import ChangeSetDetailPage from './pages/changeset/[id]';
 import ChangeSetPreviewPage from './pages/changeset/preview';
@@ -91,7 +91,11 @@ export default function App() {
 
                 {/* Application routes */}
                 <Route path="/applications" element={<ApplicationListPage />} />
-                <Route path="/app-upload" element={<AppUploadPage />} />
+                <Route path="/app-import" element={<AppImportPage />} />
+                {/* Legacy upload routes — redirect to unified import page */}
+                <Route path="/app-upload" element={<Navigate to="/app-import?tab=app" replace />} />
+                <Route path="/deployment-upload" element={<Navigate to="/app-import?tab=deployment" replace />} />
+                <Route path="/connection-upload" element={<Navigate to="/app-import?tab=connection" replace />} />
                 <Route path="/applications/:id" element={<ApplicationDetailPage />} />
                 <Route path="/system-software" element={<Navigate to="/applications?tab=infra" replace />} />
 

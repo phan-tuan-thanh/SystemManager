@@ -4,6 +4,63 @@ A chronological record of project milestones, updates, and sprint summaries.
 
 ---
 
+## 2026-04-25 — Sprint 18: Upload UI Consolidation & Topology Layout Fix ✅
+
+- ✅ S18-10: Refactored 3 upload pages — extracted Content components (AppUploadContent, DeploymentUploadContent, ConnectionUploadContent)
+- ✅ S18-11: Created `/app-import` unified page — Ant Design Tabs with URL-based state management (`?tab=app|deployment|connection`)
+- ✅ S18-12: Fixed topology layout — moved Segmented controls from title → extra prop (prevents <h4 block> from breaking flex)
+- Updated Sidebar: 3 upload menu items → 1 unified "Import CSV" item
+- Updated App.tsx: added `/app-import` route, redirects for backward compat (`/app-upload` → `/app-import?tab=app`, etc.)
+- Branch: `feat/sprint-18-multi-port-connection-import` ready for merge
+- Docs: IMPLEMENTATION_DETAILS updated with consolidation details
+
+## 2026-04-25 — Sprint 18: Multi-Port Deployment & Connection Import ✅
+
+- ✅ S18-01: `parsePortsString()` — parse format `PORT-PROTOCOL:service_name` space-separated
+- ✅ S18-02: `importDeployment()` — tạo nhiều Port records per deployment, backward compat
+- ✅ S18-03: `importConnection()` — upsert AppConnection, resolve `target_port_id`
+- ✅ S18-04: `ImportPreviewDto` + controller hỗ trợ `type=connection`
+- ✅ S18-05: `deployment-upload` UI — thay 3 cột bằng 1 cột `ports`
+- ✅ S18-06: `/connection-upload` — trang 4-step wizard import kết nối app-to-app
+- ✅ S18-07: Route + Sidebar menu cho `/connection-upload`
+- ✅ S18-08: `deployments.csv` — 56 records, CORE_CBS & CORE_TRAN có 2 ports (HTTP + gRPC 9092/9093)
+- ✅ S18-09: `connections.csv` — 30 kết nối PROD/UAT/DEV (GRPC, HTTPS, HTTP)
+- Branch: `feat/sprint-18-multi-port-connection-import` pushed
+
+## 2026-04-25 — Sprint 18: Bắt đầu implement Multi-Port & Connection Import
+
+- Yêu cầu ghi nhận vào SRS.md sections 4.8.4, 4.8.5
+- Sprint plan tạo mới: `docs/plans/sprint-18-multi-port-connection-import.md`
+- Tasks mới: S18-01 đến S18-09 (16 points)
+- Nội dung: cột `ports` multi-port, trang `/connection-upload`, file demo `connections.csv`
+
+## 2026-04-25 — Sprint 17: Bổ sung Port/Protocol vào Deployment Import ✅
+
+- ✅ S17-06: `importDeployment` — tạo Port record trong transaction cùng với deployment
+- ✅ S17-07: Port conflict detection: `(server_id, port_number, protocol)` unique, rollback toàn bộ nếu conflict
+- ✅ S17-08: FE column mapper thêm port/protocol/service_name target fields
+- ✅ S17-09: `deployments.csv` cập nhật 9 cột, 56 records, tất cả port verified không conflict
+- Gap: deploy app lên server phải khai báo port/protocol → đã xử lý đầy đủ
+
+## 2026-04-25 — Sprint 17: Deployment Upload UI ✅ Hoàn thành
+
+- ✅ S17-01: `DEPLOYMENT_HEADER_ALIASES` — normalize header CSV variants
+- ✅ S17-02: `importDeployment` — upsert theo (app+server+env), tránh duplicate
+- ✅ S17-03: Trang `/deployment-upload` — 4 bước đầy đủ, inline edit, error table
+- ✅ S17-04: Route `/deployment-upload` thêm vào `App.tsx`
+- ✅ S17-05: Menu "Upload Deployment" trong Sidebar nhóm Ứng dụng
+- Branch: `feat/sprint-17-deployment-upload` pushed
+- Sprint plan: `docs/plans/sprint-17-deployment-upload.md`
+
+## 2026-04-25 — Sprint 17: Bắt đầu implement Deployment Upload UI
+
+- Yêu cầu ghi nhận vào SRS.md section 4.7.4
+- Sprint plan tạo mới: `docs/plans/sprint-17-deployment-upload.md`
+- Tasks mới: S17-01 đến S17-05 (7 points)
+- Nội dung: trang `/deployment-upload`, fix upsert duplicate, header aliases
+
+---
+
 ## 2026-04-24: Sprint 16 — App Group Restructure & Catalog Unification ✅ Implemented
 
 - ✅ S16-01: Schema — thêm `GroupType` enum + `group_type` vào `ApplicationGroup`
