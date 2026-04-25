@@ -4,6 +4,16 @@ A chronological record of project milestones, updates, and sprint summaries.
 
 ---
 
+## 2026-04-25 — Sprint 18: Upload UI Consolidation & Topology Layout Fix ✅
+
+- ✅ S18-10: Refactored 3 upload pages — extracted Content components (AppUploadContent, DeploymentUploadContent, ConnectionUploadContent)
+- ✅ S18-11: Created `/app-import` unified page — Ant Design Tabs with URL-based state management (`?tab=app|deployment|connection`)
+- ✅ S18-12: Fixed topology layout — moved Segmented controls from title → extra prop (prevents <h4 block> from breaking flex)
+- Updated Sidebar: 3 upload menu items → 1 unified "Import CSV" item
+- Updated App.tsx: added `/app-import` route, redirects for backward compat (`/app-upload` → `/app-import?tab=app`, etc.)
+- Branch: `feat/sprint-18-multi-port-connection-import` ready for merge
+- Docs: IMPLEMENTATION_DETAILS updated with consolidation details
+
 ## 2026-04-25 — Sprint 18: Multi-Port Deployment & Connection Import ✅
 
 - ✅ S18-01: `parsePortsString()` — parse format `PORT-PROTOCOL:service_name` space-separated

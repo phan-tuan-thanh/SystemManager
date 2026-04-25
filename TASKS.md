@@ -1,6 +1,6 @@
 # SystemManager — Agile Task List & Sprint Plan
 
-> **Trạng thái hiện tại:** Sprint 18 🔄 IN PROGRESS — Multi-Port & Connection Import
+> **Trạng thái hiện tại:** Sprint 18 ✅ DONE — Multi-Port, Connection Import & UI Consolidation
 
 ---
 
@@ -482,9 +482,9 @@
 
 ---
 
-## Sprint 18 — Multi-Port per Deployment & Connection Import 🔄 IN PROGRESS
+## Sprint 18 — Multi-Port per Deployment & Connection Import ✅ DONE
 
-**Mục tiêu:** (1) 1 deployment có thể khai báo nhiều cặp port-protocol. (2) Import kết nối app-to-app từ CSV.
+**Mục tiêu:** (1) 1 deployment có thể khai báo nhiều cặp port-protocol. (2) Import kết nối app-to-app từ CSV. (3) Tối ưu hóa UI import — gộp 3 trang thành 1 trang tabbed.
 **Thời gian:** 2026-04-25
 **Branch:** `feat/sprint-18-multi-port-connection-import`
 **Plan:** [docs/plans/sprint-18-multi-port-connection-import.md](docs/plans/sprint-18-multi-port-connection-import.md)
@@ -500,8 +500,11 @@
 | S18-07 | `[FE]` Thêm route `/connection-upload` + Sidebar menu | 1 | ✅ | 4.8.5 |
 | S18-08 | `[DATA]` Cập nhật `deployments.csv` sang format `ports` multi-port | 1 | ✅ | — |
 | S18-09 | `[DATA]` Tạo `connections.csv` demo — ~30 kết nối PROD/UAT/DEV | 2 | ✅ | — |
+| S18-10 | `[FE]` Refactor `app-upload`, `deployment-upload`, `connection-upload` — extract Content components | 2 | ✅ | — |
+| S18-11 | `[FE]` Tạo `/app-import/index.tsx` — unified tabbed import page cho 3 loại (app/deployment/connection) | 3 | ✅ | — |
+| S18-12 | `[FE]` Fix topology layout — di chuyển Segmented controls từ title → extra prop | 1 | ✅ | — |
 
-**Sprint 18 Total: 16 points**
+**Sprint 18 Total: 22 points** ✅ DONE
 
 ---
 

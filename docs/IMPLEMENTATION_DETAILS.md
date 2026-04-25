@@ -4,9 +4,35 @@ This document consolidates all past implementation plans and detailed technical 
 
 ---
 
-## Sprint 18 — Multi-Port per Deployment & Connection Import (2026-04-25)
+## Sprint 18 — Upload UI Consolidation & Layout Fixes (2026-04-25)
 
-**Status:** 🔄 In Progress
+**Status:** ✅ Completed
+**Context:** 3 separate upload pages (`/app-upload`, `/deployment-upload`, `/connection-upload`) gây rối UI. Sidebar có 3 menu items riêng khiến navigation phức tạp. Topology page layout bị vỡ: Segmented controls trong title prop bị wrap.
+**Decision:**
+- Refactor 3 upload pages: extract Content components (app-upload, deployment-upload, connection-upload) từ page wrappers.
+- Tạo unified `/app-import` page với Tabs component, quản lý state qua URL param `?tab=app|deployment|connection`.
+- Consolidate Sidebar: 3 upload menu items → 1 unified "Import CSV" item.
+- Fix topology: di chuyển Segmented controls từ `title` prop (renders <h4 block>) → `extra` prop (uses flex layout).
+- Backward compat: old URLs (`/app-upload`, etc.) redirect sang `/app-import?tab=X`.
+**Files impacted:**
+- `packages/frontend/src/pages/app-upload/index.tsx` — refactor (export Content + default wrapper)
+- `packages/frontend/src/pages/deployment-upload/index.tsx` — refactor (export Content + default wrapper)
+- `packages/frontend/src/pages/connection-upload/index.tsx` — refactor (export Content + default wrapper)
+- `packages/frontend/src/pages/app-import/index.tsx` — new unified page (new)
+- `packages/frontend/src/App.tsx` — add `/app-import` route, redirect legacy upload paths (update)
+- `packages/frontend/src/components/layout/Sidebar.tsx` — consolidate to 1 menu item, update openKeys (update)
+- `packages/frontend/src/pages/topology/index.tsx` — fix layout by moving controls to extra prop (update)
+**Trade-offs:**
+- Refactoring separates content from wrapper — allows reuse without duplication, maintains backward compat via redirects.
+- Topology fix prevents block-level title element from breaking flex layout of inline controls.
+**Outcome:** ✅ UI consolidated, navigation simplified. 3 upload pages merged into 1 tabbed interface. Sidebar now shows single "Import CSV" menu. Topology layout fixed.
+**Completed:** 2026-04-25
+
+---
+
+## Sprint 18a — Multi-Port per Deployment & Connection Import (2026-04-25)
+
+**Status:** ✅ Completed
 **Context:** Sprint 17 hỗ trợ import 1 port/protocol duy nhất mỗi deployment. Thực tế nhiều service (Core Banking, Transaction Engine) expose cả REST lẫn gRPC. Kết nối app-to-app hiện chưa có batch import — phải nhập thủ công.
 **Decision:**
 - Thêm cột `ports` với format `PORT-PROTOCOL:service_name`, space-separated, thay 3 cột `port`/`protocol`/`service_name`.

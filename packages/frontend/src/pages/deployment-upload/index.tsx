@@ -147,7 +147,7 @@ const DEPLOY_TARGET_BY_KEY: Record<string, TargetField> = DEPLOY_TARGETS.reduce(
   {} as Record<string, TargetField>,
 );
 
-export default function DeploymentUploadPage() {
+export function DeploymentUploadContent() {
   const { message } = App.useApp();
   const [step, setStep] = useState(0);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
@@ -393,10 +393,7 @@ export default function DeploymentUploadPage() {
   const hasEdits = Object.keys(editedRows).length > 0;
 
   return (
-    <div className="p-6">
-      <PageHeader title="Upload Deployment" helpKey="deployment" />
-
-      <Card>
+    <Card>
         <Steps
           current={step}
           style={{ marginBottom: 24 }}
@@ -634,6 +631,14 @@ export default function DeploymentUploadPage() {
           );
         })()}
       </Card>
+  );
+}
+
+export default function DeploymentUploadPage() {
+  return (
+    <div className="p-6">
+      <PageHeader title="Upload Deployment" helpKey="deployment" />
+      <DeploymentUploadContent />
     </div>
   );
 }

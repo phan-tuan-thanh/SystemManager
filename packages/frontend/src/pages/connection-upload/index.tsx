@@ -140,7 +140,7 @@ const CONN_TARGET_BY_KEY: Record<string, TargetField> = CONN_TARGETS.reduce(
   {} as Record<string, TargetField>,
 );
 
-export default function ConnectionUploadPage() {
+export function ConnectionUploadContent() {
   const { message } = App.useApp();
   const [step, setStep] = useState(0);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
@@ -385,10 +385,7 @@ export default function ConnectionUploadPage() {
   const hasEdits = Object.keys(editedRows).length > 0;
 
   return (
-    <div className="p-6">
-      <PageHeader title="Upload Connection" helpKey="connection" />
-
-      <Card>
+    <Card>
         <Steps
           current={step}
           style={{ marginBottom: 24 }}
@@ -616,6 +613,14 @@ export default function ConnectionUploadPage() {
           );
         })()}
       </Card>
+  );
+}
+
+export default function ConnectionUploadPage() {
+  return (
+    <div className="p-6">
+      <PageHeader title="Upload Connection" helpKey="connection" />
+      <ConnectionUploadContent />
     </div>
   );
 }

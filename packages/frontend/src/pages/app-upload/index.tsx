@@ -101,7 +101,7 @@ const APP_TARGET_BY_KEY: Record<string, TargetField> = APP_TARGETS.reduce(
   {} as Record<string, TargetField>,
 );
 
-export default function AppUploadPage() {
+export function AppUploadContent() {
   const { message } = App.useApp();
   const [step, setStep] = useState(0);
   const [environment, setEnvironment] = useState<string | undefined>(undefined);
@@ -363,10 +363,7 @@ export default function AppUploadPage() {
   const hasEdits = Object.keys(editedRows).length > 0;
 
   return (
-    <div className="p-6">
-      <PageHeader title="Upload Ứng dụng" helpKey="application" />
-
-      <Card>
+    <Card>
         <Steps
           current={step}
           style={{ marginBottom: 24 }}
@@ -624,6 +621,14 @@ export default function AppUploadPage() {
           );
         })()}
       </Card>
+  );
+}
+
+export default function AppUploadPage() {
+  return (
+    <div className="p-6">
+      <PageHeader title="Upload Ứng dụng" helpKey="application" />
+      <AppUploadContent />
     </div>
   );
 }
