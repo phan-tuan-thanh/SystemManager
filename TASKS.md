@@ -491,15 +491,15 @@
 
 | # | Task | Points | Status | SRS Ref |
 |---|------|--------|--------|---------|
-| S18-01 | `[BE]` Thêm `parsePortsString()`, cập nhật `DEPLOYMENT_COLUMNS` và `validateRows` cho multi-port | 2 | ⬜ | 4.8.4 |
-| S18-02 | `[BE]` Refactor `importDeployment()` — tạo nhiều Port record per deployment, backward compat | 2 | ⬜ | 4.8.4 |
-| S18-03 | `[BE]` Thêm `CONNECTION_COLUMNS`, `importConnection()` — upsert AppConnection | 3 | ⬜ | 4.8.5 |
-| S18-04 | `[BE]` Cập nhật `ImportPreviewDto` + controller — nhận `type=connection` | 1 | ⬜ | 4.8.5 |
-| S18-05 | `[FE]` Cập nhật `deployment-upload/index.tsx` — thay port/protocol/service_name bằng `ports` | 1 | ⬜ | 4.8.4 |
-| S18-06 | `[FE]` Tạo `pages/connection-upload/index.tsx` — 4-step wizard | 3 | ⬜ | 4.8.5 |
-| S18-07 | `[FE]` Thêm route `/connection-upload` + Sidebar menu | 1 | ⬜ | 4.8.5 |
-| S18-08 | `[DATA]` Cập nhật `deployments.csv` sang format `ports` multi-port | 1 | ⬜ | — |
-| S18-09 | `[DATA]` Tạo `connections.csv` demo — ~30 kết nối PROD/UAT/DEV | 2 | ⬜ | — |
+| S18-01 | `[BE]` Thêm `parsePortsString()`, cập nhật `DEPLOYMENT_COLUMNS` và `validateRows` cho multi-port | 2 | ✅ | 4.8.4 |
+| S18-02 | `[BE]` Refactor `importDeployment()` — tạo nhiều Port record per deployment, backward compat | 2 | ✅ | 4.8.4 |
+| S18-03 | `[BE]` Thêm `CONNECTION_COLUMNS`, `importConnection()` — upsert AppConnection | 3 | ✅ | 4.8.5 |
+| S18-04 | `[BE]` Cập nhật `ImportPreviewDto` + controller — nhận `type=connection` | 1 | ✅ | 4.8.5 |
+| S18-05 | `[FE]` Cập nhật `deployment-upload/index.tsx` — thay port/protocol/service_name bằng `ports` | 1 | ✅ | 4.8.4 |
+| S18-06 | `[FE]` Tạo `pages/connection-upload/index.tsx` — 4-step wizard | 3 | ✅ | 4.8.5 |
+| S18-07 | `[FE]` Thêm route `/connection-upload` + Sidebar menu | 1 | ✅ | 4.8.5 |
+| S18-08 | `[DATA]` Cập nhật `deployments.csv` sang format `ports` multi-port | 1 | ✅ | — |
+| S18-09 | `[DATA]` Tạo `connections.csv` demo — ~30 kết nối PROD/UAT/DEV | 2 | ✅ | — |
 
 **Sprint 18 Total: 16 points**
 

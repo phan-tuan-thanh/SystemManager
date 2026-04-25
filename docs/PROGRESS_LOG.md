@@ -4,6 +4,19 @@ A chronological record of project milestones, updates, and sprint summaries.
 
 ---
 
+## 2026-04-25 — Sprint 18: Multi-Port Deployment & Connection Import ✅
+
+- ✅ S18-01: `parsePortsString()` — parse format `PORT-PROTOCOL:service_name` space-separated
+- ✅ S18-02: `importDeployment()` — tạo nhiều Port records per deployment, backward compat
+- ✅ S18-03: `importConnection()` — upsert AppConnection, resolve `target_port_id`
+- ✅ S18-04: `ImportPreviewDto` + controller hỗ trợ `type=connection`
+- ✅ S18-05: `deployment-upload` UI — thay 3 cột bằng 1 cột `ports`
+- ✅ S18-06: `/connection-upload` — trang 4-step wizard import kết nối app-to-app
+- ✅ S18-07: Route + Sidebar menu cho `/connection-upload`
+- ✅ S18-08: `deployments.csv` — 56 records, CORE_CBS & CORE_TRAN có 2 ports (HTTP + gRPC 9092/9093)
+- ✅ S18-09: `connections.csv` — 30 kết nối PROD/UAT/DEV (GRPC, HTTPS, HTTP)
+- Branch: `feat/sprint-18-multi-port-connection-import` pushed
+
 ## 2026-04-25 — Sprint 18: Bắt đầu implement Multi-Port & Connection Import
 
 - Yêu cầu ghi nhận vào SRS.md sections 4.8.4, 4.8.5
