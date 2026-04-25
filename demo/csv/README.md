@@ -76,7 +76,7 @@ Import theo đúng thứ tự dưới đây vì `deployments.csv` phụ thuộc 
 
 ---
 
-### `deployments.csv` — 55 deployment records
+### `deployments.csv` — 56 deployment records
 
 | Cột | Bắt buộc | Giá trị hợp lệ |
 |-----|----------|---------------|
@@ -86,8 +86,20 @@ Import theo đúng thứ tự dưới đây vì `deployments.csv` phụ thuộc 
 | `version` | ✅ | Phiên bản được deploy |
 | `status` | — | `RUNNING` / `STOPPED` / `DEPRECATED` |
 | `deployer` | — | Người/team thực hiện deploy |
+| `port` | — | Port lắng nghe của ứng dụng trên server (1–65535) |
+| `protocol` | — | `HTTP` / `HTTPS` / `TCP` / `UDP` / `gRPC` / `MQ` |
+| `service_name` | — | Tên định danh dịch vụ (dùng cho topology) |
+
+> **Port conflict detection**: Cùng `server_code` + cùng `port` + cùng `protocol` → import thất bại. Mỗi app trên cùng server phải dùng port khác nhau.
 
 **Phân bổ:**
-- PROD: 29 records (DC x22, DR x7)
+- PROD: 29 records (DC x24, DR x5)
 - UAT: 13 records
-- DEV: 13 records
+- DEV: 14 records
+
+**Phân bổ port theo server (đã verify không conflict):**
+- `SRV-PROD-APP-001`: 8080/8081/8084/3000/8090/8095/9090
+- `SRV-PROD-APP-002`: 8082/8083/8085/8086/8094/8096/9091
+- `SRV-PROD-APP-003`: 8088/8092/8093
+- `SRV-PROD-GW-001`: 443(HTTPS)/80(HTTP)
+- `SRV-*-DB-*`: 5432(TCP) — mỗi server DB riêng biệt

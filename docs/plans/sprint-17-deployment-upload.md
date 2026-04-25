@@ -70,10 +70,16 @@ const DEPLOYMENT_HEADER_ALIASES = {
 | `version` | Phiên bản | ✅ | Chuỗi tự do |
 | `status` | Trạng thái | — | RUNNING / STOPPED / DEPRECATED |
 | `deployer` | Người triển khai | — | Chuỗi tự do |
+| `port` | Port lắng nghe | — | Integer 1–65535 |
+| `protocol` | Giao thức | — | HTTP / HTTPS / TCP / UDP / gRPC / MQ |
+| `service_name` | Tên dịch vụ | — | Chuỗi tự do (dùng trong topology) |
+
+> **Port conflict detection**: Nếu `port` được cung cấp, backend kiểm tra `(server_id, port_number, protocol)` unique. Conflict → row thất bại với lỗi rõ ràng. Deploy + Port tạo trong một transaction — rollback toàn bộ nếu conflict.
 
 **Value aliases cho enum fields:**
 - `environment`: `dev→DEV`, `prod→PROD`, `production→PROD`, `uat→UAT`, `staging→UAT`
 - `status`: `running→RUNNING`, `stopped→STOPPED`, `deprecated→DEPRECATED`, `inactive→STOPPED`
+- `protocol`: `http→HTTP`, `https→HTTPS`, `tcp→TCP`, `udp→UDP`, `grpc→gRPC`, `amqp→MQ`
 
 **UI flow (4 steps — giống app-upload):**
 1. **Tải file** — drag & drop CSV/Excel
@@ -92,13 +98,16 @@ const DEPLOYMENT_HEADER_ALIASES = {
 
 ## Definition of Done
 
-- [ ] S17-01: Header aliases hoạt động, validateRows map đúng cột
-- [ ] S17-02: Re-import cùng file không tạo duplicate deployment
-- [ ] S17-03: Page UI hiển thị đúng 4 bước, preview table có inline edit
-- [ ] S17-04: Route `/deployment-upload` accessible sau login
-- [ ] S17-05: Sidebar hiển thị "Upload Deployment" dưới nhóm "Ứng dụng"
-- [ ] TypeScript không có lỗi mới
-- [ ] Import demo `deployments.csv` thành công: 56 records created
+- [x] S17-01: Header aliases hoạt động, validateRows map đúng cột ✅
+- [x] S17-02: Re-import cùng file không tạo duplicate deployment ✅
+- [x] S17-03: Page UI hiển thị đúng 4 bước, preview table có inline edit ✅
+- [x] S17-04: Route `/deployment-upload` accessible sau login ✅
+- [x] S17-05: Sidebar hiển thị "Upload Deployment" dưới nhóm "Ứng dụng" ✅
+- [x] S17-06: Port/protocol được import, Port record tạo đúng linked to deployment ✅
+- [x] S17-07: Port conflict detection: cùng server + cùng port + cùng protocol → fail rõ ràng ✅
+- [x] S17-08: `deployments.csv` demo có đầy đủ port/protocol/service_name không conflict ✅
+- [x] TypeScript không có lỗi mới ✅
+- [x] Import demo `deployments.csv` thành công: 56 records + 56 Port records created
 
 ---
 

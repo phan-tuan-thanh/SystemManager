@@ -64,7 +64,7 @@ const APP_TYPE_ALIASES: Record<string, 'BUSINESS' | 'SYSTEM'> = {
   he_thong: 'SYSTEM',
   'hệ_thống': 'SYSTEM',
 };
-const DEPLOYMENT_COLUMNS = ['application_code', 'server_code', 'environment', 'version', 'status', 'deployer'];
+const DEPLOYMENT_COLUMNS = ['application_code', 'server_code', 'environment', 'version', 'status', 'deployer', 'port', 'protocol', 'service_name'];
 
 const DEPLOYMENT_HEADER_ALIASES: Record<string, string> = {
   'app_code': 'application_code',
@@ -76,6 +76,12 @@ const DEPLOYMENT_HEADER_ALIASES: Record<string, string> = {
   'ver': 'version',
   'deployed_by': 'deployer',
   'team': 'deployer',
+  'port_number': 'port',
+  'port_no': 'port',
+  'prot': 'protocol',
+  'service': 'service_name',
+  'svc_name': 'service_name',
+  'ten_dich_vu': 'service_name',
 };
 
 // Header aliases: map common spreadsheet header variants to canonical keys
@@ -424,20 +430,48 @@ export class ImportService {
     const status = String(d['status'] || 'RUNNING') as any;
     const deployer = d['deployer'] ? String(d['deployer']) : null;
 
-    const existing = await this.prisma.appDeployment.findFirst({
-      where: { application_id: app.id, server_id: server.id, environment, deleted_at: null },
-    });
+    // Port fields (optional)
+    const portRaw = d['port'];
+    const portNumber = portRaw !== undefined && portRaw !== '' ? Number(portRaw) : null;
+    const protocol = portNumber ? String(d['protocol'] || 'HTTP').toUpperCase() : null;
+    const serviceName = d['service_name'] ? String(d['service_name']) : null;
 
-    if (existing) {
-      await this.prisma.appDeployment.update({
-        where: { id: existing.id },
-        data: { version, status, deployer },
+    await this.prisma.$transaction(async (tx) => {
+      // Upsert deployment
+      const existing = await tx.appDeployment.findFirst({
+        where: { application_id: app.id, server_id: server.id, environment, deleted_at: null },
       });
-    } else {
-      await this.prisma.appDeployment.create({
-        data: { application_id: app.id, server_id: server.id, environment, version, status, deployer },
-      });
-    }
+
+      const deployment = existing
+        ? await tx.appDeployment.update({ where: { id: existing.id }, data: { version, status, deployer } })
+        : await tx.appDeployment.create({ data: { application_id: app.id, server_id: server.id, environment, version, status, deployer } });
+
+      // Upsert port if provided
+      if (portNumber && protocol) {
+        // Port conflict check: same port+protocol on same server (other deployments)
+        const conflict = await tx.port.findFirst({
+          where: {
+            port_number: portNumber,
+            protocol: { equals: protocol, mode: 'insensitive' },
+            deleted_at: null,
+            deployment: { server_id: server.id, deleted_at: null, NOT: { id: deployment.id } },
+          },
+        });
+        if (conflict) {
+          throw new Error(`Port conflict: ${portNumber}/${protocol} already in use on server '${serverCode}'`);
+        }
+
+        // Upsert: create port if not already recorded for this deployment
+        const existingPort = await tx.port.findFirst({
+          where: { deployment_id: deployment.id, port_number: portNumber, protocol: { equals: protocol, mode: 'insensitive' }, deleted_at: null },
+        });
+        if (!existingPort) {
+          await tx.port.create({
+            data: { application_id: app.id, deployment_id: deployment.id, port_number: portNumber, protocol, service_name: serviceName },
+          });
+        }
+      }
+    });
   }
 
   private validateRows(
@@ -474,6 +508,16 @@ export class ImportService {
 
       for (const col of requiredCols) {
         if (!normalised[col]) errors.push(`Missing required field: ${col}`);
+      }
+
+      // Validate port if provided
+      if (type === 'deployment' && normalised['port'] !== undefined && normalised['port'] !== '') {
+        const portNum = Number(normalised['port']);
+        if (!Number.isInteger(portNum) || portNum < 1 || portNum > 65535) {
+          errors.push(`Invalid port: must be integer 1–65535`);
+        } else {
+          normalised['port'] = portNum;
+        }
       }
 
       // IP/code uniqueness is checked at execute time

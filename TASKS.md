@@ -496,8 +496,12 @@
 | S17-03 | `[FE]` Tạo `pages/deployment-upload/index.tsx` | 3 | ✅ | 4.7.4 |
 | S17-04 | `[FE]` Thêm route `/deployment-upload` vào `App.tsx` | 1 | ✅ | 4.7.4 |
 | S17-05 | `[FE]` Thêm menu item "Upload Deployment" vào Sidebar | 1 | ✅ | 4.7.4 |
+| S17-06 | `[BE]` Import port/protocol/service_name — tạo Port record trong transaction | 2 | ✅ | 4.4.3 |
+| S17-07 | `[BE]` Port conflict detection trong importDeployment (rollback nếu conflict) | 2 | ✅ | 4.4.3 |
+| S17-08 | `[FE]` Column mapper: thêm port/protocol/service_name target fields | 1 | ✅ | 4.4.3 |
+| S17-09 | Demo: cập nhật `deployments.csv` với port/protocol/service_name (verified no conflict) | 1 | ✅ | — |
 
-**Sprint 17 Total: 7 points**
+**Sprint 17 Total: 13 points**
 
 ---
 

@@ -135,6 +135,30 @@ const DEPLOY_TARGETS: TargetField[] = [
     label: 'Người triển khai (deployer)',
     aliases: ['deployed_by', 'team', 'don_vi'],
   },
+  {
+    key: 'port',
+    label: 'Port (port)',
+    aliases: ['port_number', 'port_no', 'cong'],
+  },
+  {
+    key: 'protocol',
+    label: 'Giao thức (protocol)',
+    aliases: ['prot', 'giao_thuc'],
+    options: [
+      { label: 'HTTP', value: 'HTTP' },
+      { label: 'HTTPS', value: 'HTTPS' },
+      { label: 'TCP', value: 'TCP' },
+      { label: 'UDP', value: 'UDP' },
+      { label: 'gRPC', value: 'gRPC' },
+      { label: 'MQ', value: 'MQ' },
+    ],
+    valueAliases: { http: 'HTTP', https: 'HTTPS', tcp: 'TCP', udp: 'UDP', grpc: 'gRPC', mq: 'MQ', amqp: 'MQ' },
+  },
+  {
+    key: 'service_name',
+    label: 'Tên dịch vụ (service_name)',
+    aliases: ['service', 'svc_name', 'ten_dich_vu'],
+  },
 ];
 
 const DEPLOY_TARGET_BY_KEY: Record<string, TargetField> = DEPLOY_TARGETS.reduce(
@@ -413,9 +437,9 @@ export default function DeploymentUploadPage() {
                 <span>
                   Bắt buộc: <b>application_code</b>, <b>server_code</b>, <b>environment</b> (DEV/UAT/PROD), <b>version</b>.
                   <br />
-                  Tùy chọn: <b>status</b> (RUNNING/STOPPED/DEPRECATED), <b>deployer</b>.
+                  Tùy chọn: <b>status</b> (RUNNING/STOPPED/DEPRECATED), <b>deployer</b>, <b>port</b> (1–65535), <b>protocol</b> (HTTP/HTTPS/TCP/UDP/gRPC/MQ), <b>service_name</b>.
                   <br />
-                  Lưu ý: Phải import <b>servers.csv</b> và <b>applications.csv</b> trước.
+                  <b>Lưu ý:</b> Phải import <b>servers.csv</b> và <b>applications.csv</b> trước. Port được kiểm tra conflict (cùng server + cùng port + cùng protocol).
                 </span>
               }
             />

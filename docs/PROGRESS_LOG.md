@@ -4,6 +4,14 @@ A chronological record of project milestones, updates, and sprint summaries.
 
 ---
 
+## 2026-04-25 — Sprint 17: Bổ sung Port/Protocol vào Deployment Import ✅
+
+- ✅ S17-06: `importDeployment` — tạo Port record trong transaction cùng với deployment
+- ✅ S17-07: Port conflict detection: `(server_id, port_number, protocol)` unique, rollback toàn bộ nếu conflict
+- ✅ S17-08: FE column mapper thêm port/protocol/service_name target fields
+- ✅ S17-09: `deployments.csv` cập nhật 9 cột, 56 records, tất cả port verified không conflict
+- Gap: deploy app lên server phải khai báo port/protocol → đã xử lý đầy đủ
+
 ## 2026-04-25 — Sprint 17: Deployment Upload UI ✅ Hoàn thành
 
 - ✅ S17-01: `DEPLOYMENT_HEADER_ALIASES` — normalize header CSV variants
