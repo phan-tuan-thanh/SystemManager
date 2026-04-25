@@ -1,0 +1,26 @@
+code,name,group_code,version,owner_team,application_type,description
+CORE_CBS,Core Banking System,CORE_BANKING,3.5.2,Team Core Banking,BUSINESS,Hệ thống ngân hàng lõi - quản lý tài khoản và giao dịch cốt lõi
+CORE_ACCT,Account Management Service,CORE_BANKING,2.8.1,Team Core Banking,BUSINESS,Quản lý tài khoản khách hàng - mở/đóng tài khoản và KYC
+CORE_TRAN,Transaction Processing Engine,CORE_BANKING,2.8.1,Team Core Banking,BUSINESS,Xử lý giao dịch real-time - chuyển khoản nội bộ và liên ngân hàng
+CORE_LOAN,Loan Management System,CORE_BANKING,1.9.4,Team Tín dụng,BUSINESS,Quản lý vòng đời khoản vay - thẩm định/giải ngân/thu nợ
+CORE_REPORT,Reporting & BI Service,CORE_BANKING,1.4.0,Team Core Banking,BUSINESS,Báo cáo nghiệp vụ và thống kê - kết nối data warehouse
+IB_PORTAL,Internet Banking Portal,INTERNET_BANKING,5.2.0,Team Digital,BUSINESS,Ứng dụng web Internet Banking cho khách hàng cá nhân và doanh nghiệp
+IB_API,Internet Banking API Gateway,INTERNET_BANKING,4.1.3,Team Digital,BUSINESS,REST API backend cho Internet Banking - tích hợp với Core Banking
+IB_AUTH,Authentication & Authorization Service,INTERNET_BANKING,3.0.1,Team Digital,BUSINESS,Xác thực đa yếu tố - OTP/TOTP/Biometric cho Internet Banking
+IB_NOTIFY,Notification Service,INTERNET_BANKING,2.3.0,Team Digital,BUSINESS,Gửi email và SMS thông báo giao dịch và xác thực
+MB_APP,Mobile Banking Backend,MOBILE_BANKING,6.4.1,Team Mobile,BUSINESS,Backend cho ứng dụng Mobile Banking iOS/Android
+MB_BIOMETRIC,Biometric Authentication Service,MOBILE_BANKING,1.8.0,Team Mobile,BUSINESS,Xác thực khuôn mặt và vân tay cho Mobile Banking
+MB_PUSH,Push Notification Service,MOBILE_BANKING,2.1.0,Team Mobile,BUSINESS,Firebase/APNs push notification cho ứng dụng di động
+PAY_GATEWAY,Payment Gateway,PAYMENT,3.2.0,Team Thanh toán,BUSINESS,Cổng thanh toán - kết nối NAPAS/Visa/Mastercard
+PAY_SWITCH,Payment Switch Service,PAYMENT,2.9.0,Team Thanh toán,BUSINESS,Định tuyến giao dịch thanh toán - chọn kênh tối ưu
+PAY_SETTLEMENT,Settlement & Reconciliation,PAYMENT,2.1.0,Team Thanh toán,BUSINESS,Quyết toán và đối soát cuối ngày với đối tác thanh toán
+PAY_QR,QR Payment Service,PAYMENT,1.5.0,Team Thanh toán,BUSINESS,Thanh toán QR Code - VietQR và QR đa năng
+ADMIN_PORTAL,Admin Management Portal,ADMIN_TOOLS,3.1.0,Team Vận hành,BUSINESS,Cổng quản trị nội bộ - quản lý người dùng và cấu hình hệ thống
+AUDIT_SVC,Audit & Compliance Service,ADMIN_TOOLS,1.6.0,Team Vận hành,BUSINESS,Ghi nhật ký kiểm toán và báo cáo tuân thủ quy định pháp lý
+REDIS_SESSION,Redis Session Store,INFRA_MIDDLEWARE,7.0.11,,SYSTEM,Redis dùng cho session cache và hot data - Sentinel mode HA
+RABBITMQ_BROKER,RabbitMQ Message Broker,INFRA_MIDDLEWARE,3.12.4,,SYSTEM,Message broker cho async communication giữa các service
+NGINX_PROXY,Nginx Reverse Proxy,INFRA_MIDDLEWARE,1.24.0,,SYSTEM,Nginx reverse proxy và API gateway - SSL termination
+HAPROXY_LB,HAProxy Load Balancer,INFRA_MIDDLEWARE,2.8.3,,SYSTEM,Load balancer phân tải cho App Server cluster
+POSTGRES_CORE,PostgreSQL Database - Core,INFRA_DATABASE,15.4,,SYSTEM,PostgreSQL primary database cho Core Banking
+POSTGRES_MB,PostgreSQL Database - Mobile,INFRA_DATABASE,15.4,,SYSTEM,PostgreSQL database riêng cho Mobile Banking
+ELASTICSEARCH,Elasticsearch Search Engine,INFRA_MIDDLEWARE,8.11.0,,SYSTEM,Full-text search và log aggregation

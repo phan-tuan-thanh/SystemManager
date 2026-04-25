@@ -18,6 +18,7 @@ import {
   Switch,
   Input,
   Tooltip,
+  Divider,
 } from 'antd';
 import {
   InboxOutlined,
@@ -56,9 +57,14 @@ interface PreviewResult {
 }
 
 interface ExecuteResult {
-  imported: number;
-  skipped: number;
-  errors: string[];
+  summary: { total: number; succeeded: number; failed: number };
+  breakdown: {
+    systems: { created: number; updated: number };
+    servers: { created: number; updated: number };
+    os_apps: { created: number; reused: number };
+    hardware: { created: number; updated: number };
+  };
+  errors: Array<{ row: number; name: string; ip: string; reason: string }>;
 }
 
 const APP_TYPE_OPTIONS = [
@@ -546,42 +552,77 @@ export default function AppUploadPage() {
           </Space>
         )}
 
-        {step === 3 && result && (
-          <Result
-            status={result.imported > 0 ? 'success' : 'warning'}
-            title={`Hoàn tất: đã nhập ${result.imported}, bỏ qua ${result.skipped}`}
-            subTitle={
-              result.errors.length > 0
-                ? `Phát sinh ${result.errors.length} lỗi trong quá trình nhập dữ liệu.`
-                : 'Tất cả các dòng hợp lệ đã được nhập thành công.'
-            }
-            extra={
-              <Space>
-                <Button type="primary" onClick={handleReset}>
-                  Nhập thêm
-                </Button>
-                {result.errors.length > 0 && (
-                  <Alert
-                    type="error"
-                    message="Danh sách lỗi"
-                    description={
-                      <ul style={{ paddingLeft: 16, margin: 0 }}>
-                        {result.errors.slice(0, 10).map((e, i) => (
-                          <li key={i} style={{ fontSize: 12 }}>
-                            {e}
-                          </li>
-                        ))}
-                        {result.errors.length > 10 && (
-                          <li>...và {result.errors.length - 10} lỗi khác</li>
-                        )}
-                      </ul>
-                    }
+        {step === 3 && result && (() => {
+          const { summary, errors } = result;
+          const allSuccess = summary.failed === 0;
+          return (
+            <div>
+              <Result
+                status={summary.succeeded > 0 ? 'success' : 'warning'}
+                title={allSuccess ? 'Import hoàn tất!' : `Import hoàn tất — ${summary.failed} dòng thất bại`}
+                subTitle={
+                  allSuccess
+                    ? 'Tất cả ứng dụng đã được nhập thành công.'
+                    : `${summary.failed} dòng không được import — Xem chi tiết lỗi bên dưới.`
+                }
+                extra={<Button type="primary" onClick={handleReset}>Nhập thêm</Button>}
+              />
+              <Row gutter={16} style={{ marginBottom: 16 }}>
+                <Col span={8}>
+                  <Card size="small" style={{ textAlign: 'center' }}>
+                    <Statistic title="Tổng dòng xử lý" value={summary.total} />
+                  </Card>
+                </Col>
+                <Col span={8}>
+                  <Card size="small" style={{ textAlign: 'center', border: '1px solid #b7eb8f', background: '#f6ffed' }}>
+                    <Statistic title="Thành công" value={summary.succeeded} valueStyle={{ color: '#52c41a' }} />
+                  </Card>
+                </Col>
+                <Col span={8}>
+                  <Card size="small" style={{ textAlign: 'center', ...(summary.failed > 0 ? { border: '1px solid #ffccc7', background: '#fff2f0' } : {}) }}>
+                    <Statistic title="Thất bại" value={summary.failed} valueStyle={{ color: summary.failed > 0 ? '#ff4d4f' : '#8c8c8c' }} />
+                  </Card>
+                </Col>
+              </Row>
+              <Row gutter={16} style={{ marginBottom: 16 }}>
+                <Col span={24}>
+                  <Card size="small" title="Ứng dụng">
+                    <Space>
+                      <span><Tag color="green">Thành công</Tag>{summary.succeeded}</span>
+                      <span><Tag color="red">Thất bại</Tag>{summary.failed}</span>
+                    </Space>
+                  </Card>
+                </Col>
+              </Row>
+              {errors.length > 0 && (
+                <>
+                  <Divider orientation="left" orientationMargin={0} style={{ fontSize: 13, color: '#ff4d4f' }}>
+                    Dòng thất bại ({errors.length})
+                  </Divider>
+                  <Table
+                    size="small"
+                    dataSource={errors}
+                    rowKey="row"
+                    pagination={{ pageSize: 5, showSizeChanger: false, showTotal: (t) => `${t} lỗi` }}
+                    columns={[
+                      { title: 'Dòng', dataIndex: 'row', width: 60 },
+                      { title: 'Tên ứng dụng', dataIndex: 'name', width: 200, ellipsis: true },
+                      {
+                        title: 'Lý do',
+                        dataIndex: 'reason',
+                        render: (r: string) => (
+                          <Tooltip title={r}>
+                            <span style={{ color: '#ff4d4f', fontSize: 12 }}>{r}</span>
+                          </Tooltip>
+                        ),
+                      },
+                    ]}
                   />
-                )}
-              </Space>
-            }
-          />
-        )}
+                </>
+              )}
+            </div>
+          );
+        })()}
       </Card>
     </div>
   );

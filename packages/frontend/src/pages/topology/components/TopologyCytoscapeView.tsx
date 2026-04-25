@@ -43,6 +43,7 @@ interface Props {
 
 function buildLayoutOptions(
   layout: 'dagre' | 'cose' | 'breadthfirst' | 'grid',
+  animated = true,
 ): any {
   switch (layout) {
     case 'dagre':
@@ -54,14 +55,14 @@ function buildLayoutOptions(
         edgeSep: 10,
         fit: true,
         padding: 30,
-        animate: true,
+        animate: animated,
         animationDuration: 400,
-        spacingFactor: 0.8, // Compact
+        spacingFactor: 0.8,
       };
     case 'cose':
       return {
         name: 'cose',
-        animate: true,
+        animate: animated,
         animationDuration: 400,
         idealEdgeLength: 80,
         nodeOverlap: 20,
@@ -79,11 +80,11 @@ function buildLayoutOptions(
         padding: 30,
         spacingFactor: 1.3,
         fit: true,
-        animate: true,
+        animate: animated,
         animationDuration: 400,
       };
     case 'grid':
-      return { name: 'grid', padding: 30, fit: true, animate: true, animationDuration: 400 };
+      return { name: 'grid', padding: 30, fit: true, animate: animated, animationDuration: 400 };
   }
 }
 
@@ -96,15 +97,29 @@ const TopologyCytoscapeView = forwardRef<TopologyCytoscapeHandle, Props>(functio
   const layoutRef = useRef(layout);
   layoutRef.current = layout;
 
+  // Callback refs: updating these never triggers useEffect re-runs.
+  // This prevents parent inline-function props from destroying/recreating cy on every render.
+  const onNodeClickRef = useRef(onNodeClick);
+  onNodeClickRef.current = onNodeClick;
+  const onEdgeClickRef = useRef(onEdgeClick);
+  onEdgeClickRef.current = onEdgeClick;
+
+  // Holds the currently-running animated layout runner so we can stop it before destroy.
+  const layoutRunnerRef = useRef<any>(null);
+
   useImperativeHandle(ref, () => ({
     autoArrange: () => {
       const cy = cyRef.current;
       if (!cy) return;
-      cy.layout(buildLayoutOptions(layoutRef.current)).run();
-      // Layout emits `layoutstop` when done — fit with padding so viewport centers on content
+      const runner = cy.layout(buildLayoutOptions(layoutRef.current, true));
+      layoutRunnerRef.current = runner;
+      runner.run();
       cy.one('layoutstop', () => {
-        cy.fit(undefined, 40);
-        cy.center();
+        // Guard: only act if this is still the live instance
+        if (cyRef.current === cy) {
+          cy.fit(undefined, 40);
+          cy.center();
+        }
       });
     },
     fit: () => {
@@ -170,6 +185,9 @@ const TopologyCytoscapeView = forwardRef<TopologyCytoscapeHandle, Props>(functio
   useEffect(() => {
     if (!containerRef.current) return;
 
+    // Use synchronous (non-animated) layout for initialization.
+    // Animated layouts run a requestAnimationFrame loop that keeps firing after cy.destroy(),
+    // accessing the nulled-out _private object and throwing "Cannot read properties of null".
     const cy = cytoscape({
       container: containerRef.current,
       elements,
@@ -200,7 +218,6 @@ const TopologyCytoscapeView = forwardRef<TopologyCytoscapeHandle, Props>(functio
             'background-color': '#fff',
             'background-opacity': 1,
             shape: 'round-rectangle',
-            'corner-radius': 20,
             label: 'data(label)',
             'font-size': 10,
             color: '#1a1a1a',
@@ -247,30 +264,35 @@ const TopologyCytoscapeView = forwardRef<TopologyCytoscapeHandle, Props>(functio
           },
         },
       ],
-      layout: buildLayoutOptions(layout),
+      layout: buildLayoutOptions(layout, false), // synchronous — no RAF loop
     });
 
     cyRef.current = cy;
-    // After first layout finishes, center and fit
-    cy.one('layoutstop', () => {
-      cy.fit(undefined, 40);
-      cy.center();
-    });
+
+    // Fit after synchronous layout completes
+    cy.fit(undefined, 40);
+    cy.center();
 
     cy.on('tap', 'node', (evt) => {
       const raw = evt.target.data('_raw');
-      if (raw && onNodeClick) onNodeClick(raw);
+      if (raw && onNodeClickRef.current) onNodeClickRef.current(raw);
     });
     cy.on('tap', 'edge', (evt) => {
       const raw = evt.target.data('_raw');
-      if (raw && onEdgeClick) onEdgeClick(raw);
+      if (raw && onEdgeClickRef.current) onEdgeClickRef.current(raw);
     });
 
     return () => {
+      // Stop any animated layout runner before destroying to prevent its RAF callbacks
+      // from firing after _private is nulled out by cy.destroy().
+      if (layoutRunnerRef.current) {
+        try { layoutRunnerRef.current.stop(); } catch (_) {}
+        layoutRunnerRef.current = null;
+      }
       cy.destroy();
       cyRef.current = null;
     };
-  }, [elements, layout, onNodeClick, onEdgeClick]);
+  }, [elements, layout]); // onNodeClick/onEdgeClick intentionally omitted — accessed via refs
 
   return (
     <div
