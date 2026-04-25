@@ -371,11 +371,6 @@ export class ImportService {
       });
     }
 
-    const existing = await this.prisma.application.findUnique({ where: { code } });
-    if (existing && !existing.deleted_at) {
-      throw new Error(`Application code '${code}' already exists`);
-    }
-
     const appTypeRaw = d['application_type'] ? String(d['application_type']).toLowerCase().replace(/\s+/g, '_') : '';
     const application_type =
       appTypeRaw === 'business' || appTypeRaw === 'system'
