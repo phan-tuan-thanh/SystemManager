@@ -73,41 +73,40 @@ const ENV_OPTIONS = [
   { label: 'PROD', value: 'PROD' },
 ];
 const ENV_VALUE_ALIASES: Record<string, string> = {
-  dev: 'DEV',
-  development: 'DEV',
-  test: 'DEV',
-  uat: 'UAT',
-  staging: 'UAT',
-  prod: 'PROD',
-  production: 'PROD',
-  live: 'PROD',
+  dev: 'DEV', development: 'DEV', test: 'DEV',
+  uat: 'UAT', staging: 'UAT',
+  prod: 'PROD', production: 'PROD', live: 'PROD',
 };
 
-const STATUS_OPTIONS = [
-  { label: 'RUNNING', value: 'RUNNING' },
-  { label: 'STOPPED', value: 'STOPPED' },
-  { label: 'DEPRECATED', value: 'DEPRECATED' },
+const CONN_TYPE_OPTIONS = [
+  { label: 'HTTP', value: 'HTTP' },
+  { label: 'HTTPS', value: 'HTTPS' },
+  { label: 'TCP', value: 'TCP' },
+  { label: 'GRPC', value: 'GRPC' },
+  { label: 'AMQP', value: 'AMQP' },
+  { label: 'KAFKA', value: 'KAFKA' },
+  { label: 'DATABASE', value: 'DATABASE' },
 ];
-const STATUS_VALUE_ALIASES: Record<string, string> = {
-  running: 'RUNNING',
-  active: 'RUNNING',
-  stopped: 'STOPPED',
-  inactive: 'STOPPED',
-  deprecated: 'DEPRECATED',
+const CONN_TYPE_ALIASES: Record<string, string> = {
+  http: 'HTTP', https: 'HTTPS', tcp: 'TCP',
+  grpc: 'GRPC',
+  amqp: 'AMQP', mq: 'AMQP', rabbitmq: 'AMQP',
+  kafka: 'KAFKA',
+  database: 'DATABASE', db: 'DATABASE', sql: 'DATABASE',
 };
 
-const DEPLOY_TARGETS: TargetField[] = [
+const CONN_TARGETS: TargetField[] = [
   {
-    key: 'application_code',
-    label: 'Mã ứng dụng (application_code)',
+    key: 'source_app',
+    label: 'Ứng dụng nguồn (source_app)',
     required: true,
-    aliases: ['app_code', 'application', 'ma_ung_dung'],
+    aliases: ['from_app', 'from', 'source', 'caller', 'source_application'],
   },
   {
-    key: 'server_code',
-    label: 'Mã server (server_code)',
+    key: 'target_app',
+    label: 'Ứng dụng đích (target_app)',
     required: true,
-    aliases: ['server', 'host', 'host_code', 'ma_server'],
+    aliases: ['to_app', 'to', 'target', 'destination', 'callee', 'target_application'],
   },
   {
     key: 'environment',
@@ -118,36 +117,30 @@ const DEPLOY_TARGETS: TargetField[] = [
     valueAliases: ENV_VALUE_ALIASES,
   },
   {
-    key: 'version',
-    label: 'Phiên bản (version)',
-    required: true,
-    aliases: ['ver', 'phien_ban'],
+    key: 'connection_type',
+    label: 'Loại kết nối (connection_type)',
+    aliases: ['type', 'conn_type', 'protocol'],
+    options: CONN_TYPE_OPTIONS,
+    valueAliases: CONN_TYPE_ALIASES,
   },
   {
-    key: 'status',
-    label: 'Trạng thái (status)',
-    aliases: ['trang_thai'],
-    options: STATUS_OPTIONS,
-    valueAliases: STATUS_VALUE_ALIASES,
+    key: 'target_port',
+    label: 'Port đích (target_port)',
+    aliases: ['port', 'dst_port', 'target_port_number'],
   },
   {
-    key: 'deployer',
-    label: 'Người triển khai (deployer)',
-    aliases: ['deployed_by', 'team', 'don_vi'],
-  },
-  {
-    key: 'ports',
-    label: 'Danh sách port (ports)',
-    aliases: ['port', 'port_list', 'cong'],
+    key: 'description',
+    label: 'Mô tả (description)',
+    aliases: ['desc', 'notes', 'ghi_chu', 'mo_ta'],
   },
 ];
 
-const DEPLOY_TARGET_BY_KEY: Record<string, TargetField> = DEPLOY_TARGETS.reduce(
+const CONN_TARGET_BY_KEY: Record<string, TargetField> = CONN_TARGETS.reduce(
   (acc, t) => ({ ...acc, [t.key]: t }),
   {} as Record<string, TargetField>,
 );
 
-export default function DeploymentUploadPage() {
+export default function ConnectionUploadPage() {
   const { message } = App.useApp();
   const [step, setStep] = useState(0);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
@@ -231,7 +224,7 @@ export default function DeploymentUploadPage() {
   };
 
   const handleUploadPreview = async () => {
-    const missingRequired = DEPLOY_TARGETS.filter((t) => t.required).filter(
+    const missingRequired = CONN_TARGETS.filter((t) => t.required).filter(
       (t) => !Object.values(mapping).includes(t.key),
     );
     if (missingRequired.length) {
@@ -241,7 +234,7 @@ export default function DeploymentUploadPage() {
     setLoading(true);
     try {
       const form = buildFormData();
-      const { data } = await apiClient.post('/import/preview?type=deployment', form, {
+      const { data } = await apiClient.post('/import/preview?type=connection', form, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       setPreview(data.data ?? data);
@@ -260,7 +253,7 @@ export default function DeploymentUploadPage() {
     setLoading(true);
     try {
       const form = buildFormData(true);
-      const { data } = await apiClient.post('/import/preview?type=deployment', form, {
+      const { data } = await apiClient.post('/import/preview?type=connection', form, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       setPreview(data.data ?? data);
@@ -320,12 +313,11 @@ export default function DeploymentUploadPage() {
       render: (_: unknown, r: ImportRow) => {
         const value = r.data[col];
         const isEdited = editedRows[r.row]?.[col] !== undefined;
-        const target = DEPLOY_TARGET_BY_KEY[col];
+        const target = CONN_TARGET_BY_KEY[col];
         const displayStr = value != null ? String(value) : '';
 
         if (target?.options) {
-          const normalized =
-            target.valueAliases?.[displayStr.toLowerCase()] ?? displayStr;
+          const normalized = target.valueAliases?.[displayStr.toLowerCase()] ?? displayStr;
           const validValues = target.options.map((o) => o.value);
           const currentValue = validValues.includes(normalized) ? normalized : undefined;
 
@@ -394,7 +386,7 @@ export default function DeploymentUploadPage() {
 
   return (
     <div className="p-6">
-      <PageHeader title="Upload Deployment" helpKey="deployment" />
+      <PageHeader title="Upload Connection" helpKey="connection" />
 
       <Card>
         <Steps
@@ -413,19 +405,17 @@ export default function DeploymentUploadPage() {
             <Alert
               type="info"
               showIcon
-              message="Cột bắt buộc cho Deployment"
+              message="Import kết nối App-to-App"
               description={
                 <span>
-                  Bắt buộc: <b>application_code</b>, <b>server_code</b>, <b>environment</b> (DEV/UAT/PROD), <b>version</b>.
+                  Bắt buộc: <b>source_app</b> (mã ứng dụng nguồn), <b>target_app</b> (mã ứng dụng đích), <b>environment</b> (DEV/UAT/PROD).
                   <br />
-                  Tùy chọn: <b>status</b> (RUNNING/STOPPED/DEPRECATED), <b>deployer</b>.
+                  Tùy chọn: <b>connection_type</b> (HTTP/HTTPS/TCP/GRPC/AMQP/KAFKA/DATABASE, mặc định HTTP),{' '}
+                  <b>target_port</b> (port số nguyên trên app đích — để liên kết topology),{' '}
+                  <b>description</b>.
                   <br />
-                  Cột <b>ports</b> — khai báo 1 hoặc nhiều port, cách nhau bởi dấu cách:{' '}
-                  <code>8080-HTTP:rest-api 9092-gRPC:grpc-api</code>
-                  <br />
-                  Định dạng mỗi port: <code>PORT-PROTOCOL</code> hoặc <code>PORT-PROTOCOL:service_name</code>.
-                  <br />
-                  <b>Lưu ý:</b> Phải import <b>servers.csv</b> và <b>applications.csv</b> trước. Mỗi port được kiểm tra conflict (cùng server + port + protocol). Deployment tồn tại (cùng app + server + env) sẽ được cập nhật.
+                  <b>Lưu ý:</b> Kết nối đã tồn tại (cùng source + target + env + type) sẽ được cập nhật thay vì tạo mới.
+                  Nếu <b>target_port</b> không tìm thấy trong database, kết nối vẫn được tạo (không fail row).
                 </span>
               }
             />
@@ -465,12 +455,12 @@ export default function DeploymentUploadPage() {
             <Alert
               type="info"
               showIcon
-              message="Ánh xạ cột CSV tới trường deployment"
-              description="Cột có dấu * là bắt buộc. Cột không được ánh xạ sẽ bị bỏ qua khi import."
+              message="Ánh xạ cột CSV tới trường kết nối"
+              description="Cột có dấu * là bắt buộc. Hệ thống tự động nhận dạng tên cột phổ biến (from_app, to_app, env, type...)."
             />
             <ColumnMapper
               csvColumns={csvColumns}
-              targets={DEPLOY_TARGETS}
+              targets={CONN_TARGETS}
               value={mapping}
               onChange={setMapping}
               previewRows={csvRows}
@@ -480,7 +470,7 @@ export default function DeploymentUploadPage() {
               <h4 style={{ marginTop: 8, marginBottom: 8 }}>Ánh xạ giá trị (Value Mapping)</h4>
               <ValueMapper
                 mapping={mapping}
-                targets={DEPLOY_TARGETS}
+                targets={CONN_TARGETS}
                 csvRows={csvRows}
                 value={valueMappings}
                 onChange={setValueMappings}
@@ -523,7 +513,7 @@ export default function DeploymentUploadPage() {
             <Alert
               type="info"
               showIcon
-              message="Deployment đã tồn tại (cùng app + server + env) sẽ được cập nhật version & status thay vì tạo mới."
+              message="Kết nối đã tồn tại (source + target + env + type) sẽ được cập nhật thay vì tạo mới. target_port_id sẽ được resolve lúc execute."
             />
 
             <Space style={{ width: '100%', justifyContent: 'space-between' }}>
@@ -566,7 +556,7 @@ export default function DeploymentUploadPage() {
                 onClick={handleExecute}
                 disabled={!preview || preview.valid === 0 || hasEdits}
               >
-                Nhập {preview.valid} dòng hợp lệ
+                Nhập {preview.valid} kết nối hợp lệ
               </Button>
             </Space>
           </Space>
@@ -579,10 +569,10 @@ export default function DeploymentUploadPage() {
             <div>
               <Result
                 status={summary.succeeded > 0 ? 'success' : 'warning'}
-                title={allSuccess ? 'Import hoàn tất!' : `Import hoàn tất — ${summary.failed} dòng thất bại`}
+                title={allSuccess ? 'Import hoàn tất!' : `Import hoàn tất — ${summary.failed} kết nối thất bại`}
                 subTitle={
                   allSuccess
-                    ? 'Tất cả deployment đã được nhập/cập nhật thành công.'
+                    ? 'Tất cả kết nối đã được tạo/cập nhật thành công.'
                     : `${summary.failed} dòng không được import — Xem chi tiết lỗi bên dưới.`
                 }
                 extra={<Button type="primary" onClick={handleReset}>Nhập thêm</Button>}
@@ -613,20 +603,12 @@ export default function DeploymentUploadPage() {
                     size="small"
                     dataSource={errors}
                     rowKey="row"
-                    pagination={{ pageSize: 5, showSizeChanger: false, showTotal: (t) => `${t} lỗi` }}
                     columns={[
-                      { title: 'Dòng', dataIndex: 'row', width: 60 },
-                      { title: 'Ứng dụng', dataIndex: 'name', width: 200, ellipsis: true },
-                      {
-                        title: 'Lý do',
-                        dataIndex: 'reason',
-                        render: (r: string) => (
-                          <Tooltip title={r}>
-                            <span style={{ color: '#ff4d4f', fontSize: 12 }}>{r}</span>
-                          </Tooltip>
-                        ),
-                      },
+                      { title: '#', dataIndex: 'row', width: 60 },
+                      { title: 'Source App', dataIndex: 'name', width: 160 },
+                      { title: 'Lý do', dataIndex: 'reason', render: (v: string) => <Text type="danger">{v}</Text> },
                     ]}
+                    pagination={false}
                   />
                 </>
               )}

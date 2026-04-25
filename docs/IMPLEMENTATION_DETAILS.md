@@ -4,6 +4,32 @@ This document consolidates all past implementation plans and detailed technical 
 
 ---
 
+## Sprint 18 — Multi-Port per Deployment & Connection Import (2026-04-25)
+
+**Status:** 🔄 In Progress
+**Context:** Sprint 17 hỗ trợ import 1 port/protocol duy nhất mỗi deployment. Thực tế nhiều service (Core Banking, Transaction Engine) expose cả REST lẫn gRPC. Kết nối app-to-app hiện chưa có batch import — phải nhập thủ công.
+**Decision:**
+- Thêm cột `ports` với format `PORT-PROTOCOL:service_name`, space-separated, thay 3 cột `port`/`protocol`/`service_name`.
+- Backward compat: giữ nguyên xử lý single-port (old format) trong cùng validator.
+- Thêm `type=connection` vào import pipeline: `importConnection()` upsert AppConnection, resolve `target_port_id` qua Port lookup theo `(app, port_number, environment)`.
+- Tạo trang `/connection-upload` theo pattern 4-step wizard đã chuẩn hoá.
+**Files impacted:**
+- `packages/backend/src/modules/import/import.service.ts` — `parsePortsString()`, `importDeployment()`, `importConnection()` (update)
+- `packages/backend/src/modules/import/dto/import-upload.dto.ts` — thêm `connection` vào `@IsIn` (update)
+- `packages/backend/src/modules/import/import.controller.ts` — cập nhật Swagger enum (update)
+- `packages/frontend/src/pages/deployment-upload/index.tsx` — cập nhật `ports` field (update)
+- `packages/frontend/src/pages/connection-upload/index.tsx` — trang mới (new)
+- `packages/frontend/src/App.tsx` — thêm route `/connection-upload` (update)
+- `packages/frontend/src/components/layout/Sidebar.tsx` — thêm menu item (update)
+- `demo/csv/deployments.csv` — format sang `ports` multi-port, thêm gRPC cho CORE_CBS/CORE_TRAN (update)
+- `demo/csv/connections.csv` — ~30 kết nối PROD/UAT/DEV (new)
+**Trade-offs:**
+- `_parsed_ports` là field nội bộ (underscore prefix) trong ImportRow.data — không expose ra API response nhưng đủ để transfer data giữa validateRows và importDeployment trong cùng session.
+- Port lookup cho connections không fail nếu port không tồn tại (AC4) — cho phép import connection trước khi deployment đã được import.
+**Sprint plan ref:** `docs/plans/sprint-18-multi-port-connection-import.md`
+
+---
+
 ## Sprint 17 — Deployment Upload UI (2026-04-25)
 
 **Status:** ✅ Completed

@@ -4,6 +4,13 @@ A chronological record of project milestones, updates, and sprint summaries.
 
 ---
 
+## 2026-04-25 — Sprint 18: Bắt đầu implement Multi-Port & Connection Import
+
+- Yêu cầu ghi nhận vào SRS.md sections 4.8.4, 4.8.5
+- Sprint plan tạo mới: `docs/plans/sprint-18-multi-port-connection-import.md`
+- Tasks mới: S18-01 đến S18-09 (16 points)
+- Nội dung: cột `ports` multi-port, trang `/connection-upload`, file demo `connections.csv`
+
 ## 2026-04-25 — Sprint 17: Bổ sung Port/Protocol vào Deployment Import ✅
 
 - ✅ S17-06: `importDeployment` — tạo Port record trong transaction cùng với deployment

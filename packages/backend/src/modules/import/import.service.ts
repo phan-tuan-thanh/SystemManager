@@ -64,7 +64,9 @@ const APP_TYPE_ALIASES: Record<string, 'BUSINESS' | 'SYSTEM'> = {
   he_thong: 'SYSTEM',
   'hệ_thống': 'SYSTEM',
 };
-const DEPLOYMENT_COLUMNS = ['application_code', 'server_code', 'environment', 'version', 'status', 'deployer', 'port', 'protocol', 'service_name'];
+// Multi-port column `ports` replaces single-port `port`/`protocol`/`service_name`.
+// Old single-port columns are kept for backward compatibility.
+const DEPLOYMENT_COLUMNS = ['application_code', 'server_code', 'environment', 'version', 'status', 'deployer', 'ports', 'port', 'protocol', 'service_name'];
 
 const DEPLOYMENT_HEADER_ALIASES: Record<string, string> = {
   'app_code': 'application_code',
@@ -82,6 +84,47 @@ const DEPLOYMENT_HEADER_ALIASES: Record<string, string> = {
   'service': 'service_name',
   'svc_name': 'service_name',
   'ten_dich_vu': 'service_name',
+};
+
+const CONNECTION_COLUMNS = ['source_app', 'target_app', 'environment', 'connection_type', 'target_port', 'description'];
+
+const CONNECTION_HEADER_ALIASES: Record<string, string> = {
+  'from_app': 'source_app',
+  'from': 'source_app',
+  'source': 'source_app',
+  'source_application': 'source_app',
+  'caller': 'source_app',
+  'to_app': 'target_app',
+  'to': 'target_app',
+  'target': 'target_app',
+  'target_application': 'target_app',
+  'destination': 'target_app',
+  'callee': 'target_app',
+  'env': 'environment',
+  'type': 'connection_type',
+  'conn_type': 'connection_type',
+  'protocol': 'connection_type',
+  'port': 'target_port',
+  'dst_port': 'target_port',
+  'target_port_number': 'target_port',
+  'desc': 'description',
+  'notes': 'description',
+  'ghi_chu': 'description',
+  'mo_ta': 'description',
+};
+
+const CONN_TYPE_ALIASES: Record<string, string> = {
+  http: 'HTTP',
+  https: 'HTTPS',
+  tcp: 'TCP',
+  grpc: 'GRPC',
+  amqp: 'AMQP',
+  mq: 'AMQP',
+  rabbitmq: 'AMQP',
+  kafka: 'KAFKA',
+  database: 'DATABASE',
+  db: 'DATABASE',
+  sql: 'DATABASE',
 };
 
 // Header aliases: map common spreadsheet header variants to canonical keys
@@ -127,6 +170,22 @@ const SITE_ALIASES: Record<string, 'DC' | 'DR' | 'TEST'> = {
   '': 'TEST',
 };
 
+function parsePortsString(raw: string): Array<{ port: number; protocol: string; serviceName: string | null }> {
+  if (!raw || !raw.trim()) return [];
+  return raw.trim().split(/\s+/).map((token) => {
+    const dashIdx = token.indexOf('-');
+    if (dashIdx === -1) {
+      return { port: parseInt(token, 10), protocol: 'HTTP', serviceName: null };
+    }
+    const portStr = token.slice(0, dashIdx);
+    const rest = token.slice(dashIdx + 1);
+    const colonIdx = rest.indexOf(':');
+    const protocol = colonIdx === -1 ? rest : rest.slice(0, colonIdx);
+    const serviceName = colonIdx === -1 ? null : rest.slice(colonIdx + 1) || null;
+    return { port: parseInt(portStr, 10), protocol: protocol.toUpperCase(), serviceName };
+  });
+}
+
 function normaliseIp(ip: string): string {
   return ip.trim();
 }
@@ -149,7 +208,7 @@ export class ImportService {
     buffer: Buffer,
     mimetype: string,
     originalname: string,
-    type: 'server' | 'application' | 'deployment',
+    type: 'server' | 'application' | 'deployment' | 'connection',
     environment?: string,
   ): Promise<ImportPreviewResult> {
     const rows = await this.parseFile(buffer, mimetype, originalname);
@@ -205,12 +264,17 @@ export class ImportService {
         } else if (result.type === 'deployment') {
           await this.importDeployment(row);
           breakdown.servers.created++;
+        } else if (result.type === 'connection') {
+          await this.importConnection(row);
+          breakdown.servers.created++;
         }
       } catch (err) {
         const d = row.data;
         errors.push({
           row: row.row,
-          name: d['name'] ? String(d['name']) : `Row ${row.row}`,
+          name: d['name'] ?? d['source_app'] ?? d['application_code']
+            ? String(d['name'] ?? d['source_app'] ?? d['application_code'])
+            : `Row ${row.row}`,
           ip: d['ip'] ? String(d['ip']) : '—',
           reason: (err as Error).message,
         });
@@ -430,11 +494,20 @@ export class ImportService {
     const status = String(d['status'] || 'RUNNING') as any;
     const deployer = d['deployer'] ? String(d['deployer']) : null;
 
-    // Port fields (optional)
-    const portRaw = d['port'];
-    const portNumber = portRaw !== undefined && portRaw !== '' ? Number(portRaw) : null;
-    const protocol = portNumber ? String(d['protocol'] || 'HTTP').toUpperCase() : null;
-    const serviceName = d['service_name'] ? String(d['service_name']) : null;
+    // Collect ports: multi-port from `_parsed_ports` (set by validateRows), or single port backward compat
+    const portEntries: Array<{ port: number; protocol: string; serviceName: string | null }> =
+      Array.isArray(d['_parsed_ports']) ? (d['_parsed_ports'] as any) : [];
+
+    if (portEntries.length === 0 && d['port'] !== undefined && d['port'] !== '') {
+      const portNum = Number(d['port']);
+      if (!isNaN(portNum) && portNum > 0) {
+        portEntries.push({
+          port: portNum,
+          protocol: String(d['protocol'] || 'HTTP').toUpperCase(),
+          serviceName: d['service_name'] ? String(d['service_name']) : null,
+        });
+      }
+    }
 
     await this.prisma.$transaction(async (tx) => {
       // Upsert deployment
@@ -446,8 +519,8 @@ export class ImportService {
         ? await tx.appDeployment.update({ where: { id: existing.id }, data: { version, status, deployer } })
         : await tx.appDeployment.create({ data: { application_id: app.id, server_id: server.id, environment, version, status, deployer } });
 
-      // Upsert port if provided
-      if (portNumber && protocol) {
+      // Create Port records for each port entry
+      for (const { port: portNumber, protocol, serviceName } of portEntries) {
         // Port conflict check: same port+protocol on same server (other deployments)
         const conflict = await tx.port.findFirst({
           where: {
@@ -474,16 +547,86 @@ export class ImportService {
     });
   }
 
+  private async importConnection(row: ImportRow) {
+    const d = row.data;
+    const sourceCode = String(d['source_app']);
+    const targetCode = String(d['target_app']);
+
+    const envRaw = String(d['environment'] || 'PROD').toLowerCase();
+    const environment = (ENV_ALIASES[envRaw] ?? String(d['environment'] || 'PROD').toUpperCase()) as any;
+
+    const rawType = String(d['connection_type'] || 'HTTP').toLowerCase();
+    const connectionType = (CONN_TYPE_ALIASES[rawType] ?? String(d['connection_type'] || 'HTTP').toUpperCase()) as any;
+
+    const targetPortNum = d['target_port'] !== undefined && d['target_port'] !== '' ? Number(d['target_port']) : null;
+    const description = d['description'] ? String(d['description']) : null;
+
+    const sourceApp = await this.prisma.application.findUnique({ where: { code: sourceCode, deleted_at: null } });
+    if (!sourceApp) throw new Error(`Source application '${sourceCode}' not found`);
+
+    const targetApp = await this.prisma.application.findUnique({ where: { code: targetCode, deleted_at: null } });
+    if (!targetApp) throw new Error(`Target application '${targetCode}' not found`);
+
+    // Resolve target port record (optional — no fail if not found)
+    let targetPortId: string | null = null;
+    if (targetPortNum) {
+      const portRecord = await this.prisma.port.findFirst({
+        where: {
+          application_id: targetApp.id,
+          port_number: targetPortNum,
+          deleted_at: null,
+          deployment: { environment, deleted_at: null },
+        },
+      });
+      targetPortId = portRecord?.id ?? null;
+    }
+
+    // Upsert by (source_app_id, target_app_id, environment, connection_type)
+    const existing = await this.prisma.appConnection.findFirst({
+      where: {
+        source_app_id: sourceApp.id,
+        target_app_id: targetApp.id,
+        environment,
+        connection_type: connectionType,
+        deleted_at: null,
+      },
+    });
+
+    if (existing) {
+      await this.prisma.appConnection.update({
+        where: { id: existing.id },
+        data: { description, target_port_id: targetPortId },
+      });
+    } else {
+      await this.prisma.appConnection.create({
+        data: {
+          source_app_id: sourceApp.id,
+          target_app_id: targetApp.id,
+          environment,
+          connection_type: connectionType,
+          description,
+          target_port_id: targetPortId,
+        },
+      });
+    }
+  }
+
   private validateRows(
     rawRows: Record<string, string>[],
-    type: 'server' | 'application' | 'deployment',
+    type: 'server' | 'application' | 'deployment' | 'connection',
     environment?: string,
   ): Omit<ImportPreviewResult, 'session_id'> {
-    const columns = type === 'server' ? SERVER_COLUMNS : type === 'application' ? APPLICATION_COLUMNS : DEPLOYMENT_COLUMNS;
+    const columns = type === 'server' ? SERVER_COLUMNS
+      : type === 'application' ? APPLICATION_COLUMNS
+      : type === 'connection' ? CONNECTION_COLUMNS
+      : DEPLOYMENT_COLUMNS;
+
     const requiredCols = type === 'server'
       ? ['ip', 'name']
       : type === 'application'
       ? ['code', 'name']
+      : type === 'connection'
+      ? ['source_app', 'target_app', 'environment']
       : ['application_code', 'server_code', 'environment', 'version'];
 
     const rows: ImportRow[] = rawRows.map((raw, idx) => {
@@ -497,12 +640,13 @@ export class ImportService {
           type === 'server' ? (SERVER_HEADER_ALIASES[key] ?? key)
           : type === 'application' ? (APP_HEADER_ALIASES[key] ?? key)
           : type === 'deployment' ? (DEPLOYMENT_HEADER_ALIASES[key] ?? key)
+          : type === 'connection' ? (CONNECTION_HEADER_ALIASES[key] ?? key)
           : key;
         normalised[canonical] = typeof v === 'string' ? v.trim() : v;
       }
 
       // Override environment from query param if provided
-      if (environment && type !== 'deployment') {
+      if (environment && type !== 'deployment' && type !== 'connection') {
         normalised['environment'] = environment;
       }
 
@@ -510,13 +654,46 @@ export class ImportService {
         if (!normalised[col]) errors.push(`Missing required field: ${col}`);
       }
 
-      // Validate port if provided
-      if (type === 'deployment' && normalised['port'] !== undefined && normalised['port'] !== '') {
-        const portNum = Number(normalised['port']);
-        if (!Number.isInteger(portNum) || portNum < 1 || portNum > 65535) {
-          errors.push(`Invalid port: must be integer 1–65535`);
-        } else {
-          normalised['port'] = portNum;
+      // Deployment: validate ports (multi-port `ports` column or single `port` backward compat)
+      if (type === 'deployment') {
+        const portsStr = normalised['ports'];
+        if (portsStr !== undefined && String(portsStr).trim() !== '') {
+          const parsed = parsePortsString(String(portsStr));
+          for (const p of parsed) {
+            if (!Number.isInteger(p.port) || p.port < 1 || p.port > 65535) {
+              errors.push(`Invalid port ${p.port} in 'ports': must be integer 1–65535`);
+            }
+          }
+          if (errors.length === 0) {
+            (normalised as any)['_parsed_ports'] = parsed;
+          }
+        } else if (normalised['port'] !== undefined && normalised['port'] !== '') {
+          const portNum = Number(normalised['port']);
+          if (!Number.isInteger(portNum) || portNum < 1 || portNum > 65535) {
+            errors.push(`Invalid port: must be integer 1–65535`);
+          } else {
+            normalised['port'] = portNum;
+          }
+        }
+      }
+
+      // Connection: validate and normalize
+      if (type === 'connection') {
+        if (normalised['environment']) {
+          const envRaw = String(normalised['environment']).toLowerCase();
+          normalised['environment'] = ENV_ALIASES[envRaw] ?? String(normalised['environment']).toUpperCase();
+        }
+        if (normalised['connection_type']) {
+          const raw = String(normalised['connection_type']).toLowerCase();
+          normalised['connection_type'] = CONN_TYPE_ALIASES[raw] ?? String(normalised['connection_type']).toUpperCase();
+        }
+        if (normalised['target_port'] !== undefined && normalised['target_port'] !== '') {
+          const portNum = Number(normalised['target_port']);
+          if (!Number.isInteger(portNum) || portNum < 1 || portNum > 65535) {
+            errors.push(`Invalid target_port: must be integer 1–65535`);
+          } else {
+            normalised['target_port'] = portNum;
+          }
         }
       }
 

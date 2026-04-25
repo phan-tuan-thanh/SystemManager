@@ -5,12 +5,13 @@ Kịch bản: hạ tầng ngân hàng gồm 4 hệ thống nghiệp vụ, 3 môi
 
 ## Thứ tự import
 
-Import theo đúng thứ tự dưới đây vì `deployments.csv` phụ thuộc vào cả server lẫn application đã tồn tại:
+Import theo đúng thứ tự dưới đây vì mỗi file phụ thuộc vào dữ liệu của file trước:
 
 ```
 1. servers.csv       → tạo InfraSystem + Server + NetworkConfig + Hardware
 2. applications.csv  → tạo ApplicationGroup + Application
-3. deployments.csv   → tạo AppDeployment (liên kết application ↔ server)
+3. deployments.csv   → tạo AppDeployment + Port records (liên kết application ↔ server)
+4. connections.csv   → tạo AppConnection (liên kết app-to-app, resolve target_port_id)
 ```
 
 ## Nội dung từng file
@@ -76,7 +77,7 @@ Import theo đúng thứ tự dưới đây vì `deployments.csv` phụ thuộc 
 
 ---
 
-### `deployments.csv` — 56 deployment records
+### `deployments.csv` — 56 deployment records *(Sprint 18: multi-port format)*
 
 | Cột | Bắt buộc | Giá trị hợp lệ |
 |-----|----------|---------------|
@@ -86,20 +87,45 @@ Import theo đúng thứ tự dưới đây vì `deployments.csv` phụ thuộc 
 | `version` | ✅ | Phiên bản được deploy |
 | `status` | — | `RUNNING` / `STOPPED` / `DEPRECATED` |
 | `deployer` | — | Người/team thực hiện deploy |
-| `port` | — | Port lắng nghe của ứng dụng trên server (1–65535) |
-| `protocol` | — | `HTTP` / `HTTPS` / `TCP` / `UDP` / `gRPC` / `MQ` |
-| `service_name` | — | Tên định danh dịch vụ (dùng cho topology) |
+| `ports` | — | Danh sách port, format: `PORT-PROTOCOL:service_name` cách nhau bởi dấu cách |
 
-> **Port conflict detection**: Cùng `server_code` + cùng `port` + cùng `protocol` → import thất bại. Mỗi app trên cùng server phải dùng port khác nhau.
+**Ví dụ `ports`:**
+- `8080-HTTP:rest-api` — 1 port
+- `8080-HTTP:rest-api 9092-gRPC:grpc-api` — 2 port (REST + gRPC)
+
+> **Port conflict detection**: Cùng `server_code` + cùng `port` + cùng `protocol` → import thất bại. Mỗi port trong danh sách đều được kiểm tra riêng.
 
 **Phân bổ:**
-- PROD: 29 records (DC x24, DR x5)
+- PROD: 29 records (DC x24, DR x5) — CORE_CBS và CORE_TRAN mỗi record có 2 port (HTTP + gRPC)
 - UAT: 13 records
 - DEV: 14 records
 
 **Phân bổ port theo server (đã verify không conflict):**
-- `SRV-PROD-APP-001`: 8080/8081/8084/3000/8090/8095/9090
-- `SRV-PROD-APP-002`: 8082/8083/8085/8086/8094/8096/9091
-- `SRV-PROD-APP-003`: 8088/8092/8093
-- `SRV-PROD-GW-001`: 443(HTTPS)/80(HTTP)
+- `SRV-PROD-APP-001`: 8080, **9092**(gRPC CORE_CBS), 8081, 8084, 3000, 8090, 8095, 9090
+- `SRV-PROD-APP-002`: 8082, **9093**(gRPC CORE_TRAN), 8083, 8085, 8086, 8094, 8096, 9091
+- `SRV-PROD-APP-003`: 8088, 8092, 8093
+- `SRV-PROD-GW-001`: 443(HTTPS), 80(HTTP)
 - `SRV-*-DB-*`: 5432(TCP) — mỗi server DB riêng biệt
+
+---
+
+### `connections.csv` — 30 kết nối app-to-app *(Sprint 18: mới)*
+
+| Cột | Bắt buộc | Giá trị hợp lệ |
+|-----|----------|---------------|
+| `source_app` | ✅ | Mã ứng dụng nguồn (caller) |
+| `target_app` | ✅ | Mã ứng dụng đích (callee) |
+| `environment` | ✅ | `DEV` / `UAT` / `PROD` |
+| `connection_type` | — | `HTTP` / `HTTPS` / `TCP` / `GRPC` / `AMQP` / `KAFKA` / `DATABASE` (mặc định HTTP) |
+| `target_port` | — | Port số nguyên trên app đích — để liên kết Port record cho topology |
+| `description` | — | Mô tả kết nối |
+
+**Phân bổ:**
+- PROD: 16 kết nối (luồng đầy đủ: IB_PORTAL → IB_API → CORE_CBS → CORE_TRAN, MB, PAY, ADMIN)
+- UAT: 9 kết nối (subset của PROD)
+- DEV: 5 kết nối (luồng cốt lõi)
+
+**Kết nối đáng chú ý:**
+- `IB_API → CORE_TRAN (GRPC, port 9093)` — gRPC, liên kết Port record gRPC của CORE_TRAN
+- `CORE_CBS → CORE_TRAN (GRPC, port 9093)` — Core Banking gọi Transaction Engine
+- `PAY_SWITCH → PAY_GATEWAY (HTTPS, port 443)` — qua cổng thanh toán HTTPS
