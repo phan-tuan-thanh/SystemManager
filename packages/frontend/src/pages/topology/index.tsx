@@ -8,7 +8,6 @@ import ReactFlow, {
   BackgroundVariant,
   useNodesState,
   useEdgesState,
-  addEdge,
   MarkerType,
   NodeTypes,
   EdgeTypes,
@@ -41,8 +40,6 @@ import {
   ReloadOutlined,
   HistoryOutlined,
   SaveOutlined,
-  FilterOutlined,
-  PartitionOutlined,
   ThunderboltOutlined,
   FullscreenOutlined,
   FullscreenExitOutlined,
@@ -479,13 +476,17 @@ function TopologyPageInner() {
     }
     return 'visnetwork';
   });
-  useEffect(() => {
-    try {
-      localStorage.setItem('topology.renderEngine', renderEngine);
-    } catch {
-      /* ignore */
-    }
-  }, [renderEngine]);
+  const handleViewModeChange = useCallback((v: '2D' | '3D') => {
+    setViewMode(v);
+    if (v === '3D') setFilters((f) => f.connectionMode ? { ...f, connectionMode: false } : f);
+  }, []);
+
+  const handleRenderEngineChange = useCallback((v: 'reactflow' | 'visnetwork' | 'mermaid') => {
+    setRenderEngine(v);
+    try { localStorage.setItem('topology.renderEngine', v); } catch { /* ignore */ }
+    if (v !== 'reactflow') setFilters((f) => f.connectionMode ? { ...f, connectionMode: false } : f);
+  }, []);
+
   const [filters, setFilters] = useState<{
     environment?: string;
     nodeType: 'all' | 'server' | 'app';
@@ -495,9 +496,9 @@ function TopologyPageInner() {
     edgeStyle: 'bezier' | 'step';
   }>({ nodeType: 'all', showMiniMap: true, layout: 'force', connectionMode: false, edgeStyle: 'bezier' });
 
-  const [showFilters, setShowFilters] = useState(true);
   const [selectedNode, setSelectedNode] = useState<any>(null);
   const [selectedConnection, setSelectedConnection] = useState<ConnectionEdge | null>(null);
+  const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null);
   const [showSnapshots, setShowSnapshots] = useState(false);
   const [saveModalOpen, setSaveModalOpen] = useState(false);
   const [snapshotLabel, setSnapshotLabel] = useState('');
@@ -643,6 +644,79 @@ function TopologyPageInner() {
   // Keep a ref to current nodes so handleNodesChange can read them without stale closure
   const nodesRef = useRef(nodes);
   useEffect(() => { nodesRef.current = nodes; }, [nodes]);
+  const edgesRef = useRef(edges);
+  useEffect(() => { edgesRef.current = edges; }, [edges]);
+
+  // ─── Focus highlight ────────────────────────────────────────────
+  // When a node is focused, dim everything not connected to it.
+  const displayNodes = useMemo(() => {
+    if (!focusedNodeId) return nodes;
+
+    const highlighted = new Set<string>([focusedNodeId]);
+    // Include children of the focused container (server → its apps)
+    nodes.forEach((n) => { if (n.parentNode === focusedNodeId) highlighted.add(n.id); });
+    // Include edge endpoints connected to highlighted nodes
+    edges.forEach((e) => {
+      if (highlighted.has(e.source) || highlighted.has(e.target)) {
+        highlighted.add(e.source);
+        highlighted.add(e.target);
+      }
+    });
+    // Include parent containers of highlighted apps
+    nodes.forEach((n) => { if (n.parentNode && highlighted.has(n.id)) highlighted.add(n.parentNode); });
+    // Include all children of highlighted containers
+    nodes.forEach((n) => { if (n.parentNode && highlighted.has(n.parentNode)) highlighted.add(n.id); });
+
+    return nodes.map((n) => ({
+      ...n,
+      style: { ...n.style, opacity: highlighted.has(n.id) ? 1 : 0.12, transition: 'opacity 0.2s ease' },
+    }));
+  }, [nodes, edges, focusedNodeId]);
+
+  const displayEdges = useMemo(() => {
+    if (!focusedNodeId) return edges;
+
+    const childIds = new Set(
+      nodes.filter((n) => n.parentNode === focusedNodeId).map((n) => n.id),
+    );
+    childIds.add(focusedNodeId);
+
+    return edges.map((e) => {
+      const isHighlighted = childIds.has(e.source) || childIds.has(e.target);
+      return {
+        ...e,
+        style: { ...e.style, opacity: isHighlighted ? 1 : 0.08, strokeWidth: isHighlighted ? 3 : (e.style?.strokeWidth ?? 2) },
+        zIndex: isHighlighted ? 10 : 0,
+      };
+    });
+  }, [edges, nodes, focusedNodeId]);
+
+  // Fit view to the focused node and its direct connections
+  useEffect(() => {
+    if (!focusedNodeId || renderEngine !== 'reactflow') return;
+    const currentNodes = nodesRef.current;
+    const currentEdges = edgesRef.current;
+
+    const highlighted = new Set<string>([focusedNodeId]);
+    currentNodes.forEach((n) => { if (n.parentNode === focusedNodeId) highlighted.add(n.id); });
+    currentEdges.forEach((e) => {
+      if (highlighted.has(e.source) || highlighted.has(e.target)) {
+        highlighted.add(e.source);
+        highlighted.add(e.target);
+      }
+    });
+    currentNodes.forEach((n) => { if (n.parentNode && highlighted.has(n.id)) highlighted.add(n.parentNode); });
+
+    requestAnimationFrame(() => {
+      reactFlowRef.current?.fitView({
+        nodes: [...highlighted].map((id) => ({ id })),
+        duration: 500,
+        padding: 0.3,
+        minZoom: 0.2,
+        maxZoom: 1.5,
+      });
+    });
+  }, [focusedNodeId, renderEngine]);
 
   // Drag stop handler:
   //   • Child app inside a server → reorder as a vertical list (drop-between behaviour)
@@ -830,10 +904,10 @@ function TopologyPageInner() {
   };
 
   const onEdgeClick = useCallback((_: any, edge: Edge) => {
-    // Always open connection detail pane (delete is available inside the pane)
     const conn = edge.data?._connection as ConnectionEdge | undefined;
     if (conn) {
       setSelectedNode(null);
+      setFocusedNodeId(null);
       setSelectedConnection(conn);
     }
   }, []);
@@ -851,6 +925,7 @@ function TopologyPageInner() {
 
   const onNodeClick = useCallback((_: any, node: Node) => {
     setSelectedConnection(null);
+    setFocusedNodeId(node.id);
     if (node.data._server) {
       const server = node.data._server as ServerNode;
       setSelectedNode({ type: 'server', id: server.id, name: server.name, code: server.code, hostname: server.hostname, purpose: server.purpose, status: server.status, environment: server.environment, infra_type: server.infra_type, site: server.site, description: server.description, deployments: server.deployments, networkConfigs: server.networkConfigs });
@@ -955,7 +1030,8 @@ function TopologyPageInner() {
   const serverCount = data?.topology?.servers?.length ?? 0;
   const connectionCount = data?.topology?.connections?.length ?? 0;
 
-  const CANVAS_H = 'calc(100vh - 64px - 48px - 48px - 72px)';
+  // global header(64) + content margins(48) + content padding(48) + PageHeader(72) + filter bar(48)
+  const CANVAS_H = 'calc(100vh - 64px - 48px - 48px - 72px - 48px)';
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -969,46 +1045,10 @@ function TopologyPageInner() {
         }
         extra={
           <Space>
-            <Segmented
-              value={viewMode}
-              onChange={(v: string | number) => setViewMode(v as '2D' | '3D')}
-              options={[
-                { label: '2D', value: '2D' },
-                { label: '3D', value: '3D' },
-              ]}
-              size="small"
-            />
-            {viewMode === '2D' && (
-              <Segmented
-                value={renderEngine}
-                onChange={(v: string | number) =>
-                  setRenderEngine(v as 'reactflow' | 'visnetwork' | 'mermaid')
-                }
-                options={[
-                  { label: 'React Flow', value: 'reactflow' },
-                  { label: 'vis-network', value: 'visnetwork' },
-                  { label: 'Mermaid', value: 'mermaid' },
-                ]}
-                size="small"
-              />
-            )}
-            {/* Realtime event badge */}
             {realtimeEvents.length > 0 && (
-              <Tag icon={<ThunderboltOutlined />} color="blue" style={{ maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <Tag icon={<ThunderboltOutlined />} color="blue" style={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {realtimeEvents[0]}
               </Tag>
-            )}
-            {viewMode === '2D' && (
-              <>
-                <Button icon={<FilterOutlined />} onClick={() => setShowFilters((v) => !v)}>
-                  {showFilters ? 'Ẩn bộ lọc' : 'Bộ lọc'}
-                </Button>
-                {renderEngine !== 'mermaid' && (
-                  <Button icon={<PartitionOutlined />} onClick={handleAutoArrange} title="Sắp xếp tự động các nút">
-                    Tự động sắp xếp
-                  </Button>
-                )}
-              </>
             )}
             <Button icon={<ReloadOutlined />} onClick={() => refetch()} loading={loading}>
               Làm mới
@@ -1021,34 +1061,44 @@ function TopologyPageInner() {
                 Bản chụp
               </Button>
             </Badge>
-            {viewMode === '2D' && renderEngine !== 'mermaid' && (
-              <Dropdown
-                menu={{
-                  items: [
-                    { key: 'png', label: 'Xuất ảnh PNG', icon: <DownloadOutlined />, onClick: exportAsPNG },
-                    { key: 'svg', label: 'Xuất ảnh SVG', icon: <DownloadOutlined />, onClick: exportAsSVG },
-                    { key: 'json', label: 'Xuất file JSON', icon: <DownloadOutlined />, onClick: exportAsJSON },
-                    { key: 'mermaid', label: 'Xuất file Mermaid', icon: <DownloadOutlined />, onClick: exportAsMermaid },
-                  ],
-                }}
-              >
-                <Button icon={<DownloadOutlined />}>Xuất file</Button>
-              </Dropdown>
-            )}
-            {viewMode === '2D' && (
-              <Button
-                icon={isFullscreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
-                onClick={toggleFullscreen}
-                title={isFullscreen ? 'Thoát toàn màn hình (Esc)' : 'Toàn màn hình'}
-              />
-            )}
+            <Dropdown
+              menu={{
+                items: [
+                  ...(viewMode === '2D' && renderEngine === 'reactflow'
+                    ? [
+                        { key: 'png', label: 'Xuất ảnh PNG', icon: <DownloadOutlined />, onClick: exportAsPNG },
+                        { key: 'svg', label: 'Xuất ảnh SVG', icon: <DownloadOutlined />, onClick: exportAsSVG },
+                      ]
+                    : []),
+                  { key: 'json', label: 'Xuất file JSON', icon: <DownloadOutlined />, onClick: exportAsJSON },
+                  { key: 'mermaid', label: 'Xuất file Mermaid', icon: <DownloadOutlined />, onClick: exportAsMermaid },
+                ],
+              }}
+            >
+              <Button icon={<DownloadOutlined />}>Xuất file</Button>
+            </Dropdown>
+            <Button
+              icon={isFullscreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
+              onClick={toggleFullscreen}
+              title={isFullscreen ? 'Thoát toàn màn hình (Esc)' : 'Toàn màn hình'}
+            />
           </Space>
         }
       />
 
       {error && (
-        <Alert type="error" message="Không thể tải sơ đồ" description={error.message} style={{ margin: '0 24px 16px' }} showIcon />
+        <Alert type="error" message="Không thể tải sơ đồ" description={error.message} style={{ margin: '0 24px 8px' }} showIcon />
       )}
+
+      <TopologyFilterPanel
+        filters={filters}
+        onChange={setFilters}
+        viewMode={viewMode}
+        onViewModeChange={handleViewModeChange}
+        renderEngine={renderEngine}
+        onRenderEngineChange={handleRenderEngineChange}
+        onAutoArrange={handleAutoArrange}
+      />
 
       <div
         ref={containerRef}
@@ -1061,20 +1111,18 @@ function TopologyPageInner() {
           </div>
         )}
 
-        {showFilters && <TopologyFilterPanel filters={filters} onChange={setFilters} />}
-
         {/* ── 2D VIEW — React Flow (full editor) ── */}
         {viewMode === '2D' && renderEngine === 'reactflow' && (
           <>
             <ReactFlow
-              nodes={nodes}
-              edges={edges}
+              nodes={displayNodes}
+              edges={displayEdges}
               onNodesChange={handleNodesChange}
               onEdgesChange={onEdgesChange}
               onConnect={onConnect}
               onNodeClick={onNodeClick}
               onEdgeClick={onEdgeClick}
-              onPaneClick={() => { setSelectedNode(null); setSelectedConnection(null); }}
+              onPaneClick={() => { setSelectedNode(null); setSelectedConnection(null); setFocusedNodeId(null); }}
               onNodeDragStop={handleNodeDragStop}
               nodeTypes={nodeTypes}
               edgeTypes={edgeTypes}
