@@ -69,7 +69,35 @@ filters.edgeStyle
 
 ---
 
+---
+
+## 3. [FE] Topology Node Visibility Filter *(added 2026-04-29)*
+
+**Yêu cầu từ:** cho phép user filter/ẩn hiện hệ thống, servers và ứng dụng muốn hiển thị trong topology.
+**Story points:** 3
+
+### Thành phần Frontend
+- **Trang/Component:** `TopologyFilterPanel` + `index.tsx`
+- **Cơ chế:**
+  - Mở rộng `FilterState` với 3 field mới: `visibleGroupNames: string[]`, `visibleServerIds: string[]`, `visibleAppIds: string[]`
+  - `TopologyFilterPanel` nhận thêm props `groupOptions`, `serverOptions`, `appOptions` từ parent
+  - Thêm 3 multi-select `Select` trong Data Filters section
+  - `index.tsx` — compute options từ `data.topology.servers`; mở rộng `filteredData` useMemo để áp dụng visibility filters sau environment filter
+- **Files thay đổi:**
+  - `packages/frontend/src/pages/topology/components/TopologyFilterPanel.tsx` — mở rộng FilterState + 3 multi-select (update)
+  - `packages/frontend/src/pages/topology/index.tsx` — options compute + filteredData extension (update)
+
+### Tasks
+| # | Type | Mô tả | Points |
+|---|------|-------|--------|
+| S19-03 | `[FE]` | Mở rộng FilterState + thêm 3 multi-select vào TopologyFilterPanel | 2 |
+| S19-04 | `[FE]` | Compute options + mở rộng filteredData trong index.tsx | 1 |
+
+---
+
 ## 4. Checklist
 
 - [x] S19-01: FilterState + Select UI — `TopologyFilterPanel.tsx` thêm `edgeStyle` field + Select "Edges" ✅
 - [x] S19-02: ProtocolEdge dual-mode — `index.tsx` import `getSmoothStepPath`, if/else branch, `buildGraph`/`computeLayout` param, `filters` default ✅
+- [x] S19-03: TopologyFilterPanel — mở rộng FilterState + 3 multi-select (visibleGroupNames, visibleServerIds, visibleAppIds) ✅
+- [x] S19-04: index.tsx — compute options + mở rộng filteredData useMemo áp dụng visibility filters ✅

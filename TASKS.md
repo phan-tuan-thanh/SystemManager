@@ -493,8 +493,10 @@
 |---|------|--------|--------|---------|
 | S19-01 | `[FE]` Thêm `edgeStyle` vào `FilterState` + Select "Edges" trong `TopologyFilterPanel` | 1 | ✅ | 4.5.5 |
 | S19-02 | `[FE]` Import `getSmoothStepPath`, cập nhật `ProtocolEdge` dual-mode + parallel spread | 2 | ✅ | 4.5.5 |
+| S19-03 | `[FE]` Mở rộng FilterState + 3 multi-select visibility filter trong `TopologyFilterPanel` | 2 | ✅ | 4.5.6 |
+| S19-04 | `[FE]` Compute options + mở rộng `filteredData` useMemo áp dụng visibility filters | 1 | ✅ | 4.5.6 |
 
-**Sprint 19 Total: 3 points**
+**Sprint 19 Total: 6 points**
 
 ---
 

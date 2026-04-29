@@ -10,6 +10,14 @@ interface FilterState {
   layout: 'force' | 'hierarchical';
   connectionMode: boolean;
   edgeStyle: 'bezier' | 'step';
+  visibleGroupNames: string[];
+  visibleServerIds: string[];
+  visibleAppIds: string[];
+}
+
+interface SelectOption {
+  label: string;
+  value: string;
 }
 
 interface Props {
@@ -20,6 +28,9 @@ interface Props {
   renderEngine: 'reactflow' | 'visnetwork' | 'mermaid';
   onRenderEngineChange: (v: 'reactflow' | 'visnetwork' | 'mermaid') => void;
   onAutoArrange?: () => void;
+  groupOptions?: SelectOption[];
+  serverOptions?: SelectOption[];
+  appOptions?: SelectOption[];
 }
 
 export default function TopologyFilterPanel({
@@ -27,6 +38,9 @@ export default function TopologyFilterPanel({
   viewMode, onViewModeChange,
   renderEngine, onRenderEngineChange,
   onAutoArrange,
+  groupOptions = [],
+  serverOptions = [],
+  appOptions = [],
 }: Props) {
   const is2D = viewMode === '2D';
   const isInteractive = is2D && (renderEngine === 'reactflow' || renderEngine === 'visnetwork');
@@ -171,6 +185,61 @@ export default function TopologyFilterPanel({
               size="small"
               checked={filters.showMiniMap}
               onChange={(v) => onChange({ ...filters, showMiniMap: v })}
+            />
+          </div>
+        )}
+
+        {/* ── Visibility filters ── */}
+        {groupOptions.length > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Text style={{ fontSize: 12, color: '#8c8c8c' }}>Hệ thống</Text>
+            <Select
+              mode="multiple"
+              allowClear
+              size="small"
+              placeholder="Tất cả"
+              style={{ minWidth: 120, maxWidth: 200 }}
+              value={filters.visibleGroupNames}
+              onChange={(v) => onChange({ ...filters, visibleGroupNames: v })}
+              options={groupOptions}
+              maxTagCount="responsive"
+              getPopupContainer={(trigger) => trigger.parentElement!}
+            />
+          </div>
+        )}
+
+        {serverOptions.length > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Text style={{ fontSize: 12, color: '#8c8c8c' }}>Servers</Text>
+            <Select
+              mode="multiple"
+              allowClear
+              size="small"
+              placeholder="Tất cả"
+              style={{ minWidth: 120, maxWidth: 200 }}
+              value={filters.visibleServerIds}
+              onChange={(v) => onChange({ ...filters, visibleServerIds: v })}
+              options={serverOptions}
+              maxTagCount="responsive"
+              getPopupContainer={(trigger) => trigger.parentElement!}
+            />
+          </div>
+        )}
+
+        {appOptions.length > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Text style={{ fontSize: 12, color: '#8c8c8c' }}>Ứng dụng</Text>
+            <Select
+              mode="multiple"
+              allowClear
+              size="small"
+              placeholder="Tất cả"
+              style={{ minWidth: 120, maxWidth: 200 }}
+              value={filters.visibleAppIds}
+              onChange={(v) => onChange({ ...filters, visibleAppIds: v })}
+              options={appOptions}
+              maxTagCount="responsive"
+              getPopupContainer={(trigger) => trigger.parentElement!}
             />
           </div>
         )}

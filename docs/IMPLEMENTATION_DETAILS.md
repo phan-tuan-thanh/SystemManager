@@ -4,6 +4,27 @@ This document consolidates all past implementation plans and detailed technical 
 
 ---
 
+## Topology Node Visibility Filter (2026-04-29)
+
+**Status:** ✅ Completed
+**Context:** Người dùng cần ẩn/hiện hệ thống (nhóm ứng dụng), server và ứng dụng cụ thể trên sơ đồ topology mà không cần rời trang. Đặc biệt hữu ích khi sơ đồ có nhiều node gây rối.
+**Decision:**
+- Mở rộng `FilterState` với 3 field mới: `visibleGroupNames: string[]`, `visibleServerIds: string[]`, `visibleAppIds: string[]`. Empty array = show all (no filter applied).
+- `TopologyFilterPanel` nhận thêm 3 props options (computed từ topology data). Render 3 `Select mode="multiple"` trong Data Filters section.
+- `index.tsx` mở rộng `filteredData` useMemo: sau environment filter, apply visibility filters (server → app group → app). Server không có app nào sau filter sẽ bị drop. Connections filter để chỉ giữ những cặp có cả source lẫn target còn visible.
+- Không cần backend change — pure frontend derived state.
+**Files impacted:**
+- `packages/frontend/src/pages/topology/components/TopologyFilterPanel.tsx` — FilterState + 3 multi-select (update)
+- `packages/frontend/src/pages/topology/index.tsx` — options + filteredData extension (update)
+**Trade-offs:**
+- Filter xảy ra client-side trên toàn bộ dataset đã load — với topology lớn (>500 node) có thể có latency nhỏ trong useMemo. Acceptable vì SRS yêu cầu ≤200 node performance.
+- Options dropdown lấy từ dữ liệu hiện tại (theo environment filter hiện tại) — nếu environment filter thay đổi, options tự động cập nhật.
+**Sprint plan ref:** `docs/plans/sprint-19-topology-orthogonal-edges.md`
+**Outcome:** ✅ 3 multi-select dropdowns (Hệ thống/Servers/Ứng dụng) trong filter bar. filteredData useMemo áp dụng visibility filters. Edges tự động ẩn khi một trong hai đầu không còn visible. 0 TS error mới.
+**Completed:** 2026-04-29
+
+---
+
 ## Sprint 19 — Topology Orthogonal Edges (2026-04-29)
 
 **Status:** ✅ Completed

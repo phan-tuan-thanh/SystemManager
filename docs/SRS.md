@@ -719,6 +719,18 @@ DRAFT → PREVIEWING → APPLIED
 - AC5: Không có TypeScript error mới sau khi thêm tính năng.
 **Added:** 2026-04-29
 
+### 4.5.6 Topology — Node Visibility Filter (Ẩn/hiện hệ thống, server, ứng dụng)
+**Mô tả:** Cho phép người dùng lọc và ẩn/hiện các hệ thống (nhóm ứng dụng), server cụ thể và ứng dụng cụ thể trực tiếp trên màn hình Topology mà không cần rời trang. Bộ lọc áp dụng cho cả ReactFlow, vis-network và Mermaid.
+**Actor:** ADMIN | OPERATOR | VIEWER
+**Acceptance Criteria:**
+- AC1: Filter panel có 3 multi-select dropdown: "Hệ thống" (nhóm ứng dụng), "Servers", "Ứng dụng".
+- AC2: Khi không chọn gì (empty), mặc định hiển thị tất cả (no filter).
+- AC3: Khi chọn một hoặc nhiều giá trị, chỉ hiển thị các node/edge liên quan đến lựa chọn đó.
+- AC4: Kết nối (edges) tự động ẩn nếu một trong hai đầu không còn hiển thị.
+- AC5: Các server không còn app nào hiển thị sẽ bị ẩn khỏi sơ đồ.
+- AC6: Options trong dropdown được lấy động từ dữ liệu topology hiện tại (không hardcode).
+**Added:** 2026-04-29
+
 ---
 
 ## 4.6. Audit Log & Lịch sử thay đổi *(first-class module)*

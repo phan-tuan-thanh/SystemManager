@@ -4,6 +4,13 @@ A chronological record of project milestones, updates, and sprint summaries.
 
 ---
 
+## 2026-04-29 — Sprint 19: Topology Node Visibility Filter ✅ Hoàn thành
+
+- ✅ S19-03: Mở rộng FilterState (`visibleGroupNames`, `visibleServerIds`, `visibleAppIds`) + 3 multi-select trong TopologyFilterPanel
+- ✅ S19-04: Compute options từ topology data + mở rộng filteredData useMemo trong index.tsx
+- Branch: `feat/sprint-19-topology-orthogonal-edges` (giữ nguyên sprint branch)
+- Sprint plan: `docs/plans/sprint-19-topology-orthogonal-edges.md` cập nhật
+
 ## 2026-04-29 — Sprint 19: Topology Orthogonal Edges ✅ Hoàn thành
 
 - ✅ S19-01: Thêm `edgeStyle: 'bezier' | 'step'` vào FilterState + Select "Edges" trong TopologyFilterPanel

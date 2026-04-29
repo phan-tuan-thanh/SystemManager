@@ -494,7 +494,10 @@ function TopologyPageInner() {
     layout: 'force' | 'hierarchical';
     connectionMode: boolean;
     edgeStyle: 'bezier' | 'step';
-  }>({ nodeType: 'all', showMiniMap: true, layout: 'force', connectionMode: false, edgeStyle: 'bezier' });
+    visibleGroupNames: string[];
+    visibleServerIds: string[];
+    visibleAppIds: string[];
+  }>({ nodeType: 'all', showMiniMap: true, layout: 'force', connectionMode: false, edgeStyle: 'bezier', visibleGroupNames: [], visibleServerIds: [], visibleAppIds: [] });
 
   const [selectedNode, setSelectedNode] = useState<any>(null);
   const [selectedConnection, setSelectedConnection] = useState<ConnectionEdge | null>(null);
@@ -555,6 +558,40 @@ function TopologyPageInner() {
     },
   });
 
+  // ─── Computed options for visibility filter dropdowns ────────────
+  // Options are scoped to the current environment filter so dropdowns only
+  // show items that exist in the selected environment.
+  const { groupOptions, serverOptions, appOptions } = useMemo(() => {
+    let servers = data?.topology?.servers ?? [];
+
+    if (filters.environment) {
+      servers = servers
+        .filter((s) => s.environment === filters.environment)
+        .map((s) => ({
+          ...s,
+          deployments: s.deployments.filter((d) => d.environment === filters.environment),
+        }));
+    }
+
+    const groupSet = new Set<string>();
+    const appMap = new Map<string, string>();
+
+    servers.forEach((s) => {
+      s.deployments.forEach((d) => {
+        if (d.application.groupName) groupSet.add(d.application.groupName);
+        appMap.set(d.application.id, d.application.name);
+      });
+    });
+
+    return {
+      groupOptions: [...groupSet].sort().map((g) => ({ label: g, value: g })),
+      serverOptions: servers.map((s) => ({ label: s.name, value: s.id })),
+      appOptions: [...appMap.entries()]
+        .sort((a, b) => a[1].localeCompare(b[1]))
+        .map(([id, name]) => ({ label: name, value: id })),
+    };
+  }, [data?.topology?.servers, filters.environment]);
+
   const filteredData = useMemo(() => {
     if (!data?.topology) return { servers: [], connections: [] };
 
@@ -569,25 +606,51 @@ function TopologyPageInner() {
           ...s,
           deployments: s.deployments.filter((d) => d.environment === filters.environment),
         }));
-      
-      // Connections only if both sides exist in filtered set
-      const validAppIds = new Set();
+
+      const validAppIds = new Set<string>();
       servers.forEach(s => s.deployments.forEach(d => validAppIds.add(d.application.id)));
-      
       connections = connections.filter(c => validAppIds.has(c.sourceAppId) && validAppIds.has(c.targetAppId));
     }
 
-    // 2. Filter by node type (for Vis/Cytoscape mostly, as ReactFlow handles it in buildGraph)
+    // 2. Visibility filters (server / app-group / app)
+    const hasServerFilter = filters.visibleServerIds.length > 0;
+    const hasGroupFilter = filters.visibleGroupNames.length > 0;
+    const hasAppFilter = filters.visibleAppIds.length > 0;
+
+    if (hasServerFilter) {
+      servers = servers.filter((s) => filters.visibleServerIds.includes(s.id));
+    }
+
+    if (hasGroupFilter || hasAppFilter) {
+      servers = servers.map((s) => {
+        let deps = s.deployments;
+        if (hasGroupFilter) {
+          deps = deps.filter((d) => filters.visibleGroupNames.includes(d.application.groupName ?? ''));
+        }
+        if (hasAppFilter) {
+          deps = deps.filter((d) => filters.visibleAppIds.includes(d.application.id));
+        }
+        return { ...s, deployments: deps };
+      });
+      // Drop servers that have no remaining apps when app-level filters are active
+      servers = servers.filter((s) => s.deployments.length > 0);
+    }
+
+    // Rebuild valid app ID set and drop orphaned connections
+    if (hasServerFilter || hasGroupFilter || hasAppFilter) {
+      const visibleAppIds = new Set<string>();
+      servers.forEach(s => s.deployments.forEach(d => visibleAppIds.add(d.application.id)));
+      connections = connections.filter(c => visibleAppIds.has(c.sourceAppId) && visibleAppIds.has(c.targetAppId));
+    }
+
+    // 3. Filter by node type (for Vis/Cytoscape mostly, as ReactFlow handles it in buildGraph)
     if (filters.nodeType === 'server') {
       servers = servers.map(s => ({ ...s, deployments: [] }));
       connections = [];
-    } else if (filters.nodeType === 'app') {
-      // Keep only apps? Actually usually "app only" view still shows apps, but maybe hide servers if the engine supports it.
-      // For now, ReactFlow buildGraph handles this specifically.
     }
 
     return { servers, connections };
-  }, [data, filters.environment, filters.nodeType]);
+  }, [data, filters.environment, filters.nodeType, filters.visibleServerIds, filters.visibleGroupNames, filters.visibleAppIds]);
 
   // ─── 2D layout ───────────────────────────────────────────────
   const { nodes: computedNodes, edges: computedEdges } = useMemo(() => {
@@ -1098,6 +1161,9 @@ function TopologyPageInner() {
         renderEngine={renderEngine}
         onRenderEngineChange={handleRenderEngineChange}
         onAutoArrange={handleAutoArrange}
+        groupOptions={groupOptions}
+        serverOptions={serverOptions}
+        appOptions={appOptions}
       />
 
       <div
