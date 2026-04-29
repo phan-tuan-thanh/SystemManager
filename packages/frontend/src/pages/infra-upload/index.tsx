@@ -27,11 +27,13 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
   InfoCircleOutlined,
+  ThunderboltOutlined,
 } from '@ant-design/icons';
 import Papa from 'papaparse';
 import PageHeader from '../../components/common/PageHeader';
 import apiClient from '../../api/client';
 import ColumnMapper, {
+  autoDetect,
   applyAllMappings,
   type ColumnMapping,
   type TargetField,
@@ -140,7 +142,7 @@ interface GenericPreviewResult {
 }
 
 export default function ServerUploadPage() {
-  const { message } = App.useApp();
+  const { message, modal } = App.useApp();
 
   const [previewData, setPreviewData] = useState<any[]>([]);
   const [totalRows, setTotalRows] = useState<number>(0);
@@ -260,6 +262,85 @@ export default function ServerUploadPage() {
     } catch (err: unknown) {
       const msg = (err as any)?.response?.data?.error?.message || 'Kiểm tra lại thất bại.';
       message.error(msg);
+    } finally {
+      setServerLoading(false);
+    }
+  };
+
+  const handleQuickImport = async () => {
+    if (!fileToUpload || !allRows.length || !csvColumns.length) {
+      message.error('Vui lòng chọn file trước.');
+      return;
+    }
+
+    const autoMapping = autoDetect(csvColumns, SERVER_TARGETS);
+    const mappedTargets = new Set(Object.values(autoMapping).filter(Boolean));
+    const missing = SERVER_TARGETS.filter((t) => t.required && !mappedTargets.has(t.key));
+
+    if (missing.length > 0) {
+      message.warning(`Không nhận diện được cột: ${missing.map((t) => t.label).join(', ')}. Vui lòng ánh xạ thủ công.`);
+      return;
+    }
+
+    setServerLoading(true);
+    try {
+      const mappedRows = applyAllMappings(allRows, autoMapping, {});
+      const blob = new Blob([Papa.unparse(mappedRows)], { type: 'text/csv' });
+      const form = new FormData();
+      form.append('file', new File([blob], 'mapped.csv', { type: 'text/csv' }));
+
+      const { data } = await apiClient.post('/import/preview?type=server', form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      const previewResult: GenericPreviewResult = data.data ?? data;
+      const newOsCount = previewResult.os_resolution?.filter((o) => o.is_new).length ?? 0;
+
+      modal.confirm({
+        title: 'Xác nhận Import nhanh',
+        icon: <ThunderboltOutlined style={{ color: '#faad14' }} />,
+        content: (
+          <div>
+            <p>Nhận diện tự động <b>{previewResult.total}</b> server:</p>
+            <ul style={{ marginBottom: 0 }}>
+              <li style={{ color: '#52c41a' }}>✓ {previewResult.valid} server hợp lệ</li>
+              {previewResult.invalid > 0 && (
+                <li style={{ color: '#ff4d4f' }}>✗ {previewResult.invalid} dòng lỗi (sẽ bị bỏ qua)</li>
+              )}
+              {newOsCount > 0 && (
+                <li style={{ color: '#fa8c16' }}>⚠ {newOsCount} OS mới sẽ được tự động tạo trong danh mục</li>
+              )}
+            </ul>
+          </div>
+        ),
+        okText: `Import ${previewResult.valid} server`,
+        okButtonProps: { disabled: previewResult.valid === 0 },
+        cancelText: 'Xem chi tiết',
+        onOk: async () => {
+          const { data: execData } = await apiClient.post('/import/execute', {
+            session_id: previewResult.session_id,
+            os_resolution: {},
+          });
+          setServerResult(execData.data ?? execData);
+          setFileToUpload(null);
+          setPreviewData([]);
+          setTotalRows(0);
+          setCsvColumns([]);
+          setAllRows([]);
+          setMapping({});
+          setValueMappings({});
+          setServerEditedRows({});
+          setServerShowOnlyErrors(false);
+          setPreviewPageSize(20);
+          setOsMappings({});
+        },
+        onCancel: () => {
+          setServerPreview(previewResult);
+          setMapping(autoMapping);
+          fetchOsCatalog();
+        },
+      });
+    } catch (err: unknown) {
+      message.error((err as any)?.response?.data?.error?.message || 'Import nhanh thất bại.');
     } finally {
       setServerLoading(false);
     }
@@ -655,15 +736,26 @@ export default function ServerUploadPage() {
               Tiến hành Nhập {serverPreview.valid} Server
             </Button>
           ) : (
-            <Button
-              type="primary"
-              onClick={handleServerPreview}
-              disabled={!fileToUpload}
-              loading={serverLoading}
-              size="large"
-            >
-              Kiểm tra &amp; Xem trước ({totalRows} dòng)
-            </Button>
+            <>
+              <Button
+                icon={<ThunderboltOutlined />}
+                onClick={handleQuickImport}
+                disabled={!fileToUpload}
+                loading={serverLoading}
+                size="large"
+              >
+                Import nhanh
+              </Button>
+              <Button
+                type="primary"
+                onClick={handleServerPreview}
+                disabled={!fileToUpload}
+                loading={serverLoading}
+                size="large"
+              >
+                Kiểm tra &amp; Xem trước ({totalRows} dòng)
+              </Button>
+            </>
           )}
         </Space>
       </Card>

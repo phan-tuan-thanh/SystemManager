@@ -27,7 +27,7 @@ interface Props {
 const normaliseKey = (s: string): string =>
   s.trim().toLowerCase().replace(/[\s()]+/g, '_').replace(/__+/g, '_').replace(/_+$/g, '');
 
-function autoDetect(csvColumns: string[], targets: TargetField[]): ColumnMapping {
+export function autoDetect(csvColumns: string[], targets: TargetField[]): ColumnMapping {
   const result: ColumnMapping = {};
   const usedTargets = new Set<string>();
   for (const col of csvColumns) {

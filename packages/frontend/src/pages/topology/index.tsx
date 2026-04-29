@@ -55,8 +55,8 @@ import ConnectionDetailPanel from './components/ConnectionDetailPanel';
 import TopologyFilterPanel from './components/TopologyFilterPanel';
 import SnapshotBrowser from './components/SnapshotBrowser';
 import Topology3DView from './components/Topology3DView';
-import TopologyCytoscapeView, { type TopologyCytoscapeHandle } from './components/TopologyCytoscapeView';
 import TopologyVisNetworkView, { type TopologyVisNetworkHandle } from './components/TopologyVisNetworkView';
+import TopologyMermaidView from './components/TopologyMermaidView';
 import { CreateConnectionModal } from './components/CreateConnectionModal';
 import { useTopologyQuery, ServerNode, ConnectionEdge } from './hooks/useTopology';
 import { useCreateSnapshot } from './hooks/useTopology';
@@ -470,10 +470,10 @@ function computeLayout(
 
 function TopologyPageInner() {
   const [viewMode, setViewMode] = useState<'2D' | '3D'>('2D');
-  const [renderEngine, setRenderEngine] = useState<'reactflow' | 'cytoscape' | 'visnetwork'>(() => {
+  const [renderEngine, setRenderEngine] = useState<'reactflow' | 'visnetwork' | 'mermaid'>(() => {
     try {
       const saved = localStorage.getItem('topology.renderEngine');
-      if (saved === 'cytoscape' || saved === 'visnetwork' || saved === 'reactflow') return saved;
+      if (saved === 'visnetwork' || saved === 'reactflow' || saved === 'mermaid') return saved;
     } catch {
       /* ignore */
     }
@@ -507,7 +507,6 @@ function TopologyPageInner() {
   const [connectionDraft, setConnectionDraft] = useState<any>(null);
 
   const reactFlowRef = useRef<ReactFlowInstance | null>(null);
-  const cytoscapeViewRef = useRef<TopologyCytoscapeHandle>(null);
   const visNetworkViewRef = useRef<TopologyVisNetworkHandle>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -749,10 +748,6 @@ function TopologyPageInner() {
   }, [onNodesChange]);
 
   const handleAutoArrange = useCallback(() => {
-    if (renderEngine === 'cytoscape') {
-      cytoscapeViewRef.current?.autoArrange();
-      return;
-    }
     if (renderEngine === 'visnetwork') {
       visNetworkViewRef.current?.autoArrange();
       return;
@@ -987,12 +982,12 @@ function TopologyPageInner() {
               <Segmented
                 value={renderEngine}
                 onChange={(v: string | number) =>
-                  setRenderEngine(v as 'reactflow' | 'cytoscape' | 'visnetwork')
+                  setRenderEngine(v as 'reactflow' | 'visnetwork' | 'mermaid')
                 }
                 options={[
                   { label: 'React Flow', value: 'reactflow' },
-                  { label: 'Cytoscape', value: 'cytoscape' },
                   { label: 'vis-network', value: 'visnetwork' },
+                  { label: 'Mermaid', value: 'mermaid' },
                 ]}
                 size="small"
               />
@@ -1008,9 +1003,11 @@ function TopologyPageInner() {
                 <Button icon={<FilterOutlined />} onClick={() => setShowFilters((v) => !v)}>
                   {showFilters ? 'Ẩn bộ lọc' : 'Bộ lọc'}
                 </Button>
-                <Button icon={<PartitionOutlined />} onClick={handleAutoArrange} title="Sắp xếp tự động các nút">
-                  Tự động sắp xếp
-                </Button>
+                {renderEngine !== 'mermaid' && (
+                  <Button icon={<PartitionOutlined />} onClick={handleAutoArrange} title="Sắp xếp tự động các nút">
+                    Tự động sắp xếp
+                  </Button>
+                )}
               </>
             )}
             <Button icon={<ReloadOutlined />} onClick={() => refetch()} loading={loading}>
@@ -1024,26 +1021,26 @@ function TopologyPageInner() {
                 Bản chụp
               </Button>
             </Badge>
+            {viewMode === '2D' && renderEngine !== 'mermaid' && (
+              <Dropdown
+                menu={{
+                  items: [
+                    { key: 'png', label: 'Xuất ảnh PNG', icon: <DownloadOutlined />, onClick: exportAsPNG },
+                    { key: 'svg', label: 'Xuất ảnh SVG', icon: <DownloadOutlined />, onClick: exportAsSVG },
+                    { key: 'json', label: 'Xuất file JSON', icon: <DownloadOutlined />, onClick: exportAsJSON },
+                    { key: 'mermaid', label: 'Xuất file Mermaid', icon: <DownloadOutlined />, onClick: exportAsMermaid },
+                  ],
+                }}
+              >
+                <Button icon={<DownloadOutlined />}>Xuất file</Button>
+              </Dropdown>
+            )}
             {viewMode === '2D' && (
-              <>
-                <Dropdown
-                  menu={{
-                    items: [
-                      { key: 'png', label: 'Xuất ảnh PNG', icon: <DownloadOutlined />, onClick: exportAsPNG },
-                      { key: 'svg', label: 'Xuất ảnh SVG', icon: <DownloadOutlined />, onClick: exportAsSVG },
-                      { key: 'json', label: 'Xuất file JSON', icon: <DownloadOutlined />, onClick: exportAsJSON },
-                      { key: 'mermaid', label: 'Xuất file Mermaid', icon: <DownloadOutlined />, onClick: exportAsMermaid },
-                    ],
-                  }}
-                >
-                  <Button icon={<DownloadOutlined />}>Xuất file</Button>
-                </Dropdown>
-                <Button
-                  icon={isFullscreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
-                  onClick={toggleFullscreen}
-                  title={isFullscreen ? 'Thoát toàn màn hình (Esc)' : 'Toàn màn hình'}
-                />
-              </>
+              <Button
+                icon={isFullscreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
+                onClick={toggleFullscreen}
+                title={isFullscreen ? 'Thoát toàn màn hình (Esc)' : 'Toàn màn hình'}
+              />
             )}
           </Space>
         }
@@ -1112,51 +1109,6 @@ function TopologyPageInner() {
           </>
         )}
 
-        {/* ── 2D VIEW — Cytoscape.js ── */}
-        {viewMode === '2D' && renderEngine === 'cytoscape' && data?.topology && (
-          <>
-            <TopologyCytoscapeView
-              ref={cytoscapeViewRef}
-              servers={filteredData.servers}
-              connections={filteredData.connections}
-              layout={filters.layout === 'hierarchical' ? 'dagre' : 'cose'}
-              onNodeClick={(payload) => {
-                setSelectedConnection(null);
-                if (payload.type === 'server') {
-                  const s = data.topology.servers.find((x) => x.id === payload.id);
-                  if (s) setSelectedNode({ type: 'server', ...s });
-                } else {
-                  const dep = data.topology.servers
-                    .flatMap((s) => s.deployments.map((d) => ({ d, s })))
-                    .find(({ d }) => d.application.id === payload.id);
-                  if (dep) {
-                    setSelectedNode({
-                      type: 'app',
-                      id: dep.d.application.id,
-                      name: dep.d.application.name,
-                      code: dep.d.application.code,
-                      deploymentStatus: dep.d.status,
-                      environment: dep.d.environment,
-                      serverName: dep.s.name,
-                    });
-                  }
-                }
-              }}
-              onEdgeClick={(conn) => {
-                setSelectedNode(null);
-                setSelectedConnection(conn);
-              }}
-            />
-            <NodeDetailPanel node={selectedNode} onClose={() => setSelectedNode(null)} />
-            <ConnectionDetailPanel
-              connection={selectedConnection}
-              onClose={() => setSelectedConnection(null)}
-              onDelete={handleDeleteConnection}
-              deleting={deleteConnection.isPending}
-            />
-          </>
-        )}
-
         {/* ── 2D VIEW — vis-network ── */}
         {viewMode === '2D' && renderEngine === 'visnetwork' && data?.topology && (
           <>
@@ -1200,6 +1152,17 @@ function TopologyPageInner() {
               deleting={deleteConnection.isPending}
             />
           </>
+        )}
+
+        {/* ── 2D VIEW — Mermaid ── */}
+        {viewMode === '2D' && renderEngine === 'mermaid' && (
+          <div style={{ position: 'absolute', inset: 0, overflow: 'auto', background: '#f0f2f5', padding: 16 }}>
+            <TopologyMermaidView
+              servers={filteredData.servers}
+              connections={filteredData.connections}
+              environment={filters.environment}
+            />
+          </div>
         )}
 
         {/* ── 3D VIEW ── */}
