@@ -4,6 +4,28 @@ This document consolidates all past implementation plans and detailed technical 
 
 ---
 
+## Sprint 19 — Topology Orthogonal Edges (2026-04-29)
+
+**Status:** ✅ Completed
+**Context:** Topology 2D dùng Bezier curves cho tất cả cạnh. Khi có nhiều kết nối, cạnh chồng lấp và khó đọc. Cần chế độ orthogonal (thẳng góc) dùng `getSmoothStepPath` của ReactFlow.
+**Decision:**
+- Thêm `edgeStyle: 'bezier' | 'step'` vào `FilterState`. Mặc định `bezier` để không phá vỡ UX cũ.
+- `ProtocolEdge` branch theo `data.edgeStyle`: `getBezierPath` (bezier) hoặc `getSmoothStepPath({borderRadius:8})` (step).
+- Parallel edges trong step mode: spread bằng `offset` param thay vì `curvature`.
+- `buildGraph()` nhận thêm param `edgeStyle` và ghi vào `edge.data.edgeStyle` để `ProtocolEdge` đọc.
+- Không cần thay đổi backend, GraphQL, hay schema.
+**Files impacted:**
+- `packages/frontend/src/pages/topology/components/TopologyFilterPanel.tsx` — thêm `edgeStyle` vào FilterState + Select "Edges" (update)
+- `packages/frontend/src/pages/topology/index.tsx` — import `getSmoothStepPath`, dual-mode `ProtocolEdge`, cập nhật `buildGraph`/`computeLayout`, default filter (update)
+**Trade-offs:**
+- `getSmoothStepPath` offset param shift trục trung tâm của đoạn step giữa — không thể kiểm soát chính xác như Bezier curvature. Với nhiều parallel edges (>5), có thể vẫn giao nhau ở góc đường nếu khoảng cách node quá gần.
+- `borderRadius: 8` cho bo tròn nhẹ — nếu muốn góc vuông tuyệt đối đặt `borderRadius: 0`.
+**Outcome:** ✅ Filter panel có Select "Edges" (Cong/Thẳng góc). `ProtocolEdge` dual-mode dùng `getSmoothStepPath` khi step, `getBezierPath` khi bezier. Parallel edges spread đúng trong cả 2 chế độ. 0 TS error mới.
+**Completed:** 2026-04-29
+**Sprint plan ref:** `docs/plans/sprint-19-topology-orthogonal-edges.md`
+
+---
+
 ## Sprint 18 — Upload UI Consolidation & Layout Fixes (2026-04-25)
 
 **Status:** ✅ Completed

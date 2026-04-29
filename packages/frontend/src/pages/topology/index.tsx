@@ -14,6 +14,7 @@ import ReactFlow, {
   EdgeTypes,
   EdgeLabelRenderer,
   getBezierPath,
+  getSmoothStepPath,
   EdgeProps,
   ReactFlowInstance,
   NodeChange,
@@ -83,27 +84,42 @@ function ProtocolEdge({
   const pIdx = data?.parallelIndex ?? 0;
   const pCount = data?.parallelCount ?? 1;
   const protocolColor = protocolColors[data?.protocol] ?? '#8c8c8c';
+  const edgeStyle: 'bezier' | 'step' = data?.edgeStyle ?? 'bezier';
 
-  // Curvature: spread parallel edges from nearly-straight to deeply-curved
-  const curvature = pCount <= 1
-    ? 0.25
-    : 0.08 + (pIdx / Math.max(1, pCount - 1)) * 0.72;
-
-  const [edgePath, labelX, labelY] = getBezierPath({
-    sourceX, sourceY, sourcePosition,
-    targetX, targetY, targetPosition,
-    curvature,
-  });
-
-  // Perpendicular unit vector — used to spread labels sideways off the edge midpoint
+  // Perpendicular unit vector — used to spread bezier labels sideways off the midpoint
   const dx = targetX - sourceX;
   const dy = targetY - sourceY;
   const len = Math.sqrt(dx * dx + dy * dy) || 1;
   const perpX = -dy / len;
   const perpY = dx / len;
 
-  // Spread amount for this edge relative to the group center (step = 22 px)
-  const spread = pCount <= 1 ? 0 : (pIdx - (pCount - 1) / 2) * 22;
+  let edgePath: string;
+  let labelX: number;
+  let labelY: number;
+  let spread: number;
+
+  if (edgeStyle === 'step') {
+    // Orthogonal mode: spread parallel edges via offset (24 px per edge from center)
+    const offsetStep = pCount <= 1 ? 0 : (pIdx - (pCount - 1) / 2) * 24;
+    [edgePath, labelX, labelY] = getSmoothStepPath({
+      sourceX, sourceY, sourcePosition,
+      targetX, targetY, targetPosition,
+      borderRadius: 8,
+      offset: offsetStep !== 0 ? offsetStep : undefined,
+    });
+    spread = 0; // offset handles the separation, no perpendicular spread needed
+  } else {
+    // Bezier mode: curvature-based spread for parallel edges
+    const curvature = pCount <= 1
+      ? 0.25
+      : 0.08 + (pIdx / Math.max(1, pCount - 1)) * 0.72;
+    [edgePath, labelX, labelY] = getBezierPath({
+      sourceX, sourceY, sourcePosition,
+      targetX, targetY, targetPosition,
+      curvature,
+    });
+    spread = pCount <= 1 ? 0 : (pIdx - (pCount - 1) / 2) * 22;
+  }
 
   const [isDragging, setIsDragging] = useState(false);
   const dragStart = useRef({ x: 0, y: 0 });
@@ -207,6 +223,7 @@ function buildGraph(
   servers: ServerNode[],
   connections: ConnectionEdge[],
   nodeType: 'all' | 'server' | 'app',
+  edgeStyle: 'bezier' | 'step' = 'bezier',
 ): { nodes: Node[]; edges: Edge[] } {
   const nodes: Node[] = [];
   const edges: Edge[] = [];
@@ -306,6 +323,7 @@ function buildGraph(
           protocol: conn.connectionType,
           description: conn.description,
           targetPort: conn.targetPort,
+          edgeStyle,
           _connection: conn,
         },
         style: { stroke: color, strokeWidth: 2 },
@@ -329,6 +347,7 @@ function buildGraph(
             data: {
               protocol: conn.connectionType,
               targetPort: conn.targetPort,
+              edgeStyle,
               _connection: conn,
             },
             style: { stroke: color, strokeWidth: 2 },
@@ -439,8 +458,9 @@ function computeLayout(
   connections: ConnectionEdge[],
   nodeType: 'all' | 'server' | 'app',
   layout: 'force' | 'hierarchical',
+  edgeStyle: 'bezier' | 'step' = 'bezier',
 ): { nodes: Node[]; edges: Edge[] } {
-  const { nodes, edges } = buildGraph(servers, connections, nodeType);
+  const { nodes, edges } = buildGraph(servers, connections, nodeType, edgeStyle);
   const direction = layout === 'hierarchical' ? 'TB' : 'LR';
   const layoutNodes = applyDagreLayout(nodes, edges, direction);
   return { nodes: layoutNodes, edges };
@@ -472,7 +492,8 @@ function TopologyPageInner() {
     showMiniMap: boolean;
     layout: 'force' | 'hierarchical';
     connectionMode: boolean;
-  }>({ nodeType: 'all', showMiniMap: true, layout: 'force', connectionMode: false });
+    edgeStyle: 'bezier' | 'step';
+  }>({ nodeType: 'all', showMiniMap: true, layout: 'force', connectionMode: false, edgeStyle: 'bezier' });
 
   const [showFilters, setShowFilters] = useState(true);
   const [selectedNode, setSelectedNode] = useState<any>(null);
@@ -572,7 +593,7 @@ function TopologyPageInner() {
   const { nodes: computedNodes, edges: computedEdges } = useMemo(() => {
     if (!data?.topology) return { nodes: [], edges: [] };
     // Use filtered data for React Flow too
-    const result = computeLayout(filteredData.servers, filteredData.connections, filters.nodeType, filters.layout);
+    const result = computeLayout(filteredData.servers, filteredData.connections, filters.nodeType, filters.layout, filters.edgeStyle);
     // Attach stable onLabelMove callback to each edge for draggable labels
     const edgesWithCallback = result.edges.map((e) => ({
       ...e,
@@ -582,7 +603,7 @@ function TopologyPageInner() {
       },
     }));
     return { nodes: result.nodes, edges: edgesWithCallback };
-  }, [filteredData, filters.nodeType, filters.layout, stableUpdateEdgeLabel]);
+  }, [filteredData, filters.nodeType, filters.layout, filters.edgeStyle, stableUpdateEdgeLabel]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(computedNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(computedEdges);

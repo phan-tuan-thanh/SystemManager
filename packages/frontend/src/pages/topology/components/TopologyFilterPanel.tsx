@@ -7,7 +7,8 @@ interface FilterState {
   nodeType: 'all' | 'server' | 'app';
   showMiniMap: boolean;
   layout: 'force' | 'hierarchical';
-  connectionMode: boolean;  // NEW
+  connectionMode: boolean;
+  edgeStyle: 'bezier' | 'step';
 }
 
 interface Props {
@@ -104,6 +105,23 @@ export default function TopologyFilterPanel({ filters, onChange }: Props) {
             size="small"
             checked={filters.showMiniMap}
             onChange={(v) => onChange({ ...filters, showMiniMap: v })}
+          />
+        </div>
+
+        <Divider type="vertical" />
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Text style={{ fontSize: 12, color: '#666' }}>Edges</Text>
+          <Select
+            size="small"
+            style={{ width: 120 }}
+            value={filters.edgeStyle}
+            onChange={(v) => onChange({ ...filters, edgeStyle: v })}
+            getPopupContainer={(trigger) => trigger.parentElement!}
+            options={[
+              { label: 'Cong', value: 'bezier' },
+              { label: 'Thẳng góc', value: 'step' },
+            ]}
           />
         </div>
 
