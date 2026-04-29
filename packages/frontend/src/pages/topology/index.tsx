@@ -585,7 +585,11 @@ function TopologyPageInner() {
 
     return {
       groupOptions: [...groupSet].sort().map((g) => ({ label: g, value: g })),
-      serverOptions: servers.map((s) => ({ label: s.name, value: s.id })),
+      serverOptions: servers.map((s) => {
+        const net = s.networkConfigs[0];
+        const ip = net?.private_ip || net?.public_ip || net?.domain || '';
+        return { label: s.name, value: s.id, description: ip };
+      }),
       appOptions: [...appMap.entries()]
         .sort((a, b) => a[1].localeCompare(b[1]))
         .map(([id, name]) => ({ label: name, value: id })),
