@@ -234,11 +234,49 @@ const TopologyVisNetworkView = forwardRef<TopologyVisNetworkHandle, Props>(funct
     return { nodes, edges, rawLookup };
   }, [servers, connections]);
 
+  // Store callbacks in refs so the network never rebuilds when click handlers change
+  const onNodeClickRef = useRef(onNodeClick);
+  const onEdgeClickRef = useRef(onEdgeClick);
+  useEffect(() => { onNodeClickRef.current = onNodeClick; }, [onNodeClick]);
+  useEffect(() => { onEdgeClickRef.current = onEdgeClick; }, [onEdgeClick]);
+
   useEffect(() => {
     if (!containerRef.current) return;
 
     const nodesDS = new DataSet(nodes);
     const edgesDS = new DataSet(edges);
+
+    // ── Highlight helpers ──────────────────────────────────────────
+    const highlightConnected = (clickedId: string, network: Network) => {
+      const connectedNodeIds = new Set<string>([
+        clickedId,
+        ...(network.getConnectedNodes(clickedId) as string[]),
+      ]);
+      const connectedEdgeIds = new Set<string>(
+        network.getConnectedEdges(clickedId) as string[],
+      );
+
+      nodes.forEach((n) => {
+        nodesDS.update({ id: n.id, opacity: connectedNodeIds.has(n.id as string) ? 1 : 0.12 });
+      });
+      edges.forEach((e) => {
+        const id = e.id as string;
+        const isContainment = id.startsWith('contain-');
+        const isConnected = connectedEdgeIds.has(id);
+        edgesDS.update({
+          id: e.id,
+          color: isConnected && !isContainment
+            ? e.color
+            : { color: 'rgba(0,0,0,0.06)', highlight: 'rgba(0,0,0,0.06)', hover: 'rgba(0,0,0,0.08)' },
+          width: isConnected && !isContainment ? 3 : e.width,
+        });
+      });
+    };
+
+    const restoreAll = () => {
+      nodes.forEach((n) => nodesDS.update({ id: n.id, opacity: 1 }));
+      edges.forEach((e) => edgesDS.update({ id: e.id, color: e.color, width: e.width }));
+    };
 
     const options: Options = {
       layout:
@@ -269,6 +307,7 @@ const TopologyVisNetworkView = forwardRef<TopologyVisNetworkHandle, Props>(funct
         dragNodes: true,
         dragView: true,
         zoomView: true,
+        selectConnectedEdges: false,
       },
       nodes: {
         shadow: { enabled: true, color: 'rgba(0,0,0,0.15)', x: 3, y: 3, size: 8 },
@@ -286,13 +325,27 @@ const TopologyVisNetworkView = forwardRef<TopologyVisNetworkHandle, Props>(funct
 
     network.on('click', (event: any) => {
       if (event.nodes.length) {
-        const id = event.nodes[0];
+        const id = event.nodes[0] as string;
         const raw = rawLookup[id];
-        if (raw && raw.type && onNodeClick) onNodeClick(raw);
+
+        // Focus: fit view to clicked node + its connected nodes
+        const connectedNodes = network.getConnectedNodes(id) as string[];
+        network.fit({
+          nodes: [id, ...connectedNodes],
+          animation: { duration: 500, easingFunction: 'easeInOutQuad' },
+        });
+
+        highlightConnected(id, network);
+
+        if (raw && raw.type && onNodeClickRef.current) onNodeClickRef.current(raw);
       } else if (event.edges.length) {
         const id = event.edges[0];
         const raw = rawLookup[id];
-        if (raw && !raw.type && onEdgeClick) onEdgeClick(raw);
+        restoreAll();
+        if (raw && !raw.type && onEdgeClickRef.current) onEdgeClickRef.current(raw);
+      } else {
+        // Background click — restore
+        restoreAll();
       }
     });
 
@@ -309,7 +362,7 @@ const TopologyVisNetworkView = forwardRef<TopologyVisNetworkHandle, Props>(funct
       network.destroy();
       networkRef.current = null;
     };
-  }, [nodes, edges, layout, onNodeClick, onEdgeClick, rawLookup]);
+  }, [nodes, edges, layout, rawLookup]);
 
   return (
     <div

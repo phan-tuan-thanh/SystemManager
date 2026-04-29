@@ -482,6 +482,24 @@
 
 ---
 
+## Sprint 19 — Topology Orthogonal Edges & UX Polish ✅ DONE
+
+**Mục tiêu:** Bổ sung chế độ kết nối thẳng góc (orthogonal edges) cho Topology 2D, cải thiện khả năng đọc hiểu sơ đồ khi có nhiều kết nối chồng lấp.
+**Thời gian:** 2026-04-29
+**Branch:** `feat/sprint-19-topology-orthogonal-edges`
+**Plan:** [docs/plans/sprint-19-topology-orthogonal-edges.md](docs/plans/sprint-19-topology-orthogonal-edges.md)
+
+| # | Task | Points | Status | SRS Ref |
+|---|------|--------|--------|---------|
+| S19-01 | `[FE]` Thêm `edgeStyle` vào `FilterState` + Select "Edges" trong `TopologyFilterPanel` | 1 | ✅ | 4.5.5 |
+| S19-02 | `[FE]` Import `getSmoothStepPath`, cập nhật `ProtocolEdge` dual-mode + parallel spread | 2 | ✅ | 4.5.5 |
+| S19-03 | `[FE]` Mở rộng FilterState + 3 multi-select visibility filter trong `TopologyFilterPanel` | 2 | ✅ | 4.5.6 |
+| S19-04 | `[FE]` Compute options + mở rộng `filteredData` useMemo áp dụng visibility filters | 1 | ✅ | 4.5.6 |
+
+**Sprint 19 Total: 6 points**
+
+---
+
 ## Sprint 18 — Multi-Port per Deployment & Connection Import ✅ DONE
 
 **Mục tiêu:** (1) 1 deployment có thể khai báo nhiều cặp port-protocol. (2) Import kết nối app-to-app từ CSV. (3) Tối ưu hóa UI import — gộp 3 trang thành 1 trang tabbed.

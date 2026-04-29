@@ -708,6 +708,29 @@ DRAFT → PREVIEWING → APPLIED
 - AC4: Nút toàn màn hình (fullscreen) hiển thị trong toolbar khi đang ở chế độ 2D; bấm vào sẽ mở rộng canvas chiếm toàn bộ màn hình, bấm lại hoặc nhấn Esc để thoát.
 **Added:** 2026-04-22
 
+### 4.5.5 Topology 2D — Orthogonal Edge Style & Auto-Routing
+**Mô tả:** Bổ sung chế độ hiển thị kết nối thẳng góc (orthogonal / step path) cho Topology 2D. Người dùng có thể chọn giữa "Cong" (Bezier) và "Thẳng góc" (Smooth-step) cho tất cả cạnh trên graph. Các cạnh song song (parallel edges) tự động spread theo offset để tránh chồng lên nhau.
+**Actor:** ADMIN | OPERATOR | VIEWER
+**Acceptance Criteria:**
+- AC1: Filter panel có Select "Edges" với 2 lựa chọn: "Cong" (Bezier, mặc định) và "Thẳng góc" (Orthogonal).
+- AC2: Khi chọn "Thẳng góc", tất cả cạnh render dưới dạng smooth-step path với góc vuông và bo tròn nhẹ (borderRadius=8).
+- AC3: Các cạnh song song (cùng cặp node) được spread bằng offset để không chồng lấp trong cả 2 chế độ.
+- AC4: Protocol label vẫn hiển thị đúng màu, drag được, và nằm đúng vị trí midpoint của cạnh trong cả 2 chế độ.
+- AC5: Không có TypeScript error mới sau khi thêm tính năng.
+**Added:** 2026-04-29
+
+### 4.5.6 Topology — Node Visibility Filter (Ẩn/hiện hệ thống, server, ứng dụng)
+**Mô tả:** Cho phép người dùng lọc và ẩn/hiện các hệ thống (nhóm ứng dụng), server cụ thể và ứng dụng cụ thể trực tiếp trên màn hình Topology mà không cần rời trang. Bộ lọc áp dụng cho cả ReactFlow, vis-network và Mermaid.
+**Actor:** ADMIN | OPERATOR | VIEWER
+**Acceptance Criteria:**
+- AC1: Filter panel có 3 multi-select dropdown: "Hệ thống" (nhóm ứng dụng), "Servers", "Ứng dụng".
+- AC2: Khi không chọn gì (empty), mặc định hiển thị tất cả (no filter).
+- AC3: Khi chọn một hoặc nhiều giá trị, chỉ hiển thị các node/edge liên quan đến lựa chọn đó.
+- AC4: Kết nối (edges) tự động ẩn nếu một trong hai đầu không còn hiển thị.
+- AC5: Các server không còn app nào hiển thị sẽ bị ẩn khỏi sơ đồ.
+- AC6: Options trong dropdown được lấy động từ dữ liệu topology hiện tại (không hardcode).
+**Added:** 2026-04-29
+
 ---
 
 ## 4.6. Audit Log & Lịch sử thay đổi *(first-class module)*

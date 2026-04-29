@@ -8,12 +8,12 @@ import ReactFlow, {
   BackgroundVariant,
   useNodesState,
   useEdgesState,
-  addEdge,
   MarkerType,
   NodeTypes,
   EdgeTypes,
   EdgeLabelRenderer,
   getBezierPath,
+  getSmoothStepPath,
   EdgeProps,
   ReactFlowInstance,
   NodeChange,
@@ -40,8 +40,6 @@ import {
   ReloadOutlined,
   HistoryOutlined,
   SaveOutlined,
-  FilterOutlined,
-  PartitionOutlined,
   ThunderboltOutlined,
   FullscreenOutlined,
   FullscreenExitOutlined,
@@ -54,8 +52,8 @@ import ConnectionDetailPanel from './components/ConnectionDetailPanel';
 import TopologyFilterPanel from './components/TopologyFilterPanel';
 import SnapshotBrowser from './components/SnapshotBrowser';
 import Topology3DView from './components/Topology3DView';
-import TopologyCytoscapeView, { type TopologyCytoscapeHandle } from './components/TopologyCytoscapeView';
 import TopologyVisNetworkView, { type TopologyVisNetworkHandle } from './components/TopologyVisNetworkView';
+import TopologyMermaidView from './components/TopologyMermaidView';
 import { CreateConnectionModal } from './components/CreateConnectionModal';
 import { useTopologyQuery, ServerNode, ConnectionEdge } from './hooks/useTopology';
 import { useCreateSnapshot } from './hooks/useTopology';
@@ -83,27 +81,42 @@ function ProtocolEdge({
   const pIdx = data?.parallelIndex ?? 0;
   const pCount = data?.parallelCount ?? 1;
   const protocolColor = protocolColors[data?.protocol] ?? '#8c8c8c';
+  const edgeStyle: 'bezier' | 'step' = data?.edgeStyle ?? 'bezier';
 
-  // Curvature: spread parallel edges from nearly-straight to deeply-curved
-  const curvature = pCount <= 1
-    ? 0.25
-    : 0.08 + (pIdx / Math.max(1, pCount - 1)) * 0.72;
-
-  const [edgePath, labelX, labelY] = getBezierPath({
-    sourceX, sourceY, sourcePosition,
-    targetX, targetY, targetPosition,
-    curvature,
-  });
-
-  // Perpendicular unit vector — used to spread labels sideways off the edge midpoint
+  // Perpendicular unit vector — used to spread bezier labels sideways off the midpoint
   const dx = targetX - sourceX;
   const dy = targetY - sourceY;
   const len = Math.sqrt(dx * dx + dy * dy) || 1;
   const perpX = -dy / len;
   const perpY = dx / len;
 
-  // Spread amount for this edge relative to the group center (step = 22 px)
-  const spread = pCount <= 1 ? 0 : (pIdx - (pCount - 1) / 2) * 22;
+  let edgePath: string;
+  let labelX: number;
+  let labelY: number;
+  let spread: number;
+
+  if (edgeStyle === 'step') {
+    // Orthogonal mode: spread parallel edges via offset (24 px per edge from center)
+    const offsetStep = pCount <= 1 ? 0 : (pIdx - (pCount - 1) / 2) * 24;
+    [edgePath, labelX, labelY] = getSmoothStepPath({
+      sourceX, sourceY, sourcePosition,
+      targetX, targetY, targetPosition,
+      borderRadius: 8,
+      offset: offsetStep !== 0 ? offsetStep : undefined,
+    });
+    spread = 0; // offset handles the separation, no perpendicular spread needed
+  } else {
+    // Bezier mode: curvature-based spread for parallel edges
+    const curvature = pCount <= 1
+      ? 0.25
+      : 0.08 + (pIdx / Math.max(1, pCount - 1)) * 0.72;
+    [edgePath, labelX, labelY] = getBezierPath({
+      sourceX, sourceY, sourcePosition,
+      targetX, targetY, targetPosition,
+      curvature,
+    });
+    spread = pCount <= 1 ? 0 : (pIdx - (pCount - 1) / 2) * 22;
+  }
 
   const [isDragging, setIsDragging] = useState(false);
   const dragStart = useRef({ x: 0, y: 0 });
@@ -207,6 +220,7 @@ function buildGraph(
   servers: ServerNode[],
   connections: ConnectionEdge[],
   nodeType: 'all' | 'server' | 'app',
+  edgeStyle: 'bezier' | 'step' = 'bezier',
 ): { nodes: Node[]; edges: Edge[] } {
   const nodes: Node[] = [];
   const edges: Edge[] = [];
@@ -306,6 +320,7 @@ function buildGraph(
           protocol: conn.connectionType,
           description: conn.description,
           targetPort: conn.targetPort,
+          edgeStyle,
           _connection: conn,
         },
         style: { stroke: color, strokeWidth: 2 },
@@ -329,6 +344,7 @@ function buildGraph(
             data: {
               protocol: conn.connectionType,
               targetPort: conn.targetPort,
+              edgeStyle,
               _connection: conn,
             },
             style: { stroke: color, strokeWidth: 2 },
@@ -439,8 +455,9 @@ function computeLayout(
   connections: ConnectionEdge[],
   nodeType: 'all' | 'server' | 'app',
   layout: 'force' | 'hierarchical',
+  edgeStyle: 'bezier' | 'step' = 'bezier',
 ): { nodes: Node[]; edges: Edge[] } {
-  const { nodes, edges } = buildGraph(servers, connections, nodeType);
+  const { nodes, edges } = buildGraph(servers, connections, nodeType, edgeStyle);
   const direction = layout === 'hierarchical' ? 'TB' : 'LR';
   const layoutNodes = applyDagreLayout(nodes, edges, direction);
   return { nodes: layoutNodes, edges };
@@ -450,33 +467,41 @@ function computeLayout(
 
 function TopologyPageInner() {
   const [viewMode, setViewMode] = useState<'2D' | '3D'>('2D');
-  const [renderEngine, setRenderEngine] = useState<'reactflow' | 'cytoscape' | 'visnetwork'>(() => {
+  const [renderEngine, setRenderEngine] = useState<'reactflow' | 'visnetwork' | 'mermaid'>(() => {
     try {
       const saved = localStorage.getItem('topology.renderEngine');
-      if (saved === 'cytoscape' || saved === 'visnetwork' || saved === 'reactflow') return saved;
+      if (saved === 'visnetwork' || saved === 'reactflow' || saved === 'mermaid') return saved;
     } catch {
       /* ignore */
     }
     return 'visnetwork';
   });
-  useEffect(() => {
-    try {
-      localStorage.setItem('topology.renderEngine', renderEngine);
-    } catch {
-      /* ignore */
-    }
-  }, [renderEngine]);
+  const handleViewModeChange = useCallback((v: '2D' | '3D') => {
+    setViewMode(v);
+    if (v === '3D') setFilters((f) => f.connectionMode ? { ...f, connectionMode: false } : f);
+  }, []);
+
+  const handleRenderEngineChange = useCallback((v: 'reactflow' | 'visnetwork' | 'mermaid') => {
+    setRenderEngine(v);
+    try { localStorage.setItem('topology.renderEngine', v); } catch { /* ignore */ }
+    if (v !== 'reactflow') setFilters((f) => f.connectionMode ? { ...f, connectionMode: false } : f);
+  }, []);
+
   const [filters, setFilters] = useState<{
     environment?: string;
     nodeType: 'all' | 'server' | 'app';
     showMiniMap: boolean;
     layout: 'force' | 'hierarchical';
     connectionMode: boolean;
-  }>({ nodeType: 'all', showMiniMap: true, layout: 'force', connectionMode: false });
+    edgeStyle: 'bezier' | 'step';
+    visibleGroupNames: string[];
+    visibleServerIds: string[];
+    visibleAppIds: string[];
+  }>({ nodeType: 'all', showMiniMap: true, layout: 'force', connectionMode: false, edgeStyle: 'bezier', visibleGroupNames: [], visibleServerIds: [], visibleAppIds: [] });
 
-  const [showFilters, setShowFilters] = useState(true);
   const [selectedNode, setSelectedNode] = useState<any>(null);
   const [selectedConnection, setSelectedConnection] = useState<ConnectionEdge | null>(null);
+  const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null);
   const [showSnapshots, setShowSnapshots] = useState(false);
   const [saveModalOpen, setSaveModalOpen] = useState(false);
   const [snapshotLabel, setSnapshotLabel] = useState('');
@@ -486,7 +511,6 @@ function TopologyPageInner() {
   const [connectionDraft, setConnectionDraft] = useState<any>(null);
 
   const reactFlowRef = useRef<ReactFlowInstance | null>(null);
-  const cytoscapeViewRef = useRef<TopologyCytoscapeHandle>(null);
   const visNetworkViewRef = useRef<TopologyVisNetworkHandle>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -534,6 +558,44 @@ function TopologyPageInner() {
     },
   });
 
+  // ─── Computed options for visibility filter dropdowns ────────────
+  // Options are scoped to the current environment filter so dropdowns only
+  // show items that exist in the selected environment.
+  const { groupOptions, serverOptions, appOptions } = useMemo(() => {
+    let servers = data?.topology?.servers ?? [];
+
+    if (filters.environment) {
+      servers = servers
+        .filter((s) => s.environment === filters.environment)
+        .map((s) => ({
+          ...s,
+          deployments: s.deployments.filter((d) => d.environment === filters.environment),
+        }));
+    }
+
+    const groupSet = new Set<string>();
+    const appMap = new Map<string, string>();
+
+    servers.forEach((s) => {
+      s.deployments.forEach((d) => {
+        if (d.application.groupName) groupSet.add(d.application.groupName);
+        appMap.set(d.application.id, d.application.name);
+      });
+    });
+
+    return {
+      groupOptions: [...groupSet].sort().map((g) => ({ label: g, value: g })),
+      serverOptions: servers.map((s) => {
+        const net = s.networkConfigs[0];
+        const ip = net?.private_ip || net?.public_ip || net?.domain || '';
+        return { label: s.name, value: s.id, description: ip };
+      }),
+      appOptions: [...appMap.entries()]
+        .sort((a, b) => a[1].localeCompare(b[1]))
+        .map(([id, name]) => ({ label: name, value: id })),
+    };
+  }, [data?.topology?.servers, filters.environment]);
+
   const filteredData = useMemo(() => {
     if (!data?.topology) return { servers: [], connections: [] };
 
@@ -548,31 +610,57 @@ function TopologyPageInner() {
           ...s,
           deployments: s.deployments.filter((d) => d.environment === filters.environment),
         }));
-      
-      // Connections only if both sides exist in filtered set
-      const validAppIds = new Set();
+
+      const validAppIds = new Set<string>();
       servers.forEach(s => s.deployments.forEach(d => validAppIds.add(d.application.id)));
-      
       connections = connections.filter(c => validAppIds.has(c.sourceAppId) && validAppIds.has(c.targetAppId));
     }
 
-    // 2. Filter by node type (for Vis/Cytoscape mostly, as ReactFlow handles it in buildGraph)
+    // 2. Visibility filters (server / app-group / app)
+    const hasServerFilter = filters.visibleServerIds.length > 0;
+    const hasGroupFilter = filters.visibleGroupNames.length > 0;
+    const hasAppFilter = filters.visibleAppIds.length > 0;
+
+    if (hasServerFilter) {
+      servers = servers.filter((s) => filters.visibleServerIds.includes(s.id));
+    }
+
+    if (hasGroupFilter || hasAppFilter) {
+      servers = servers.map((s) => {
+        let deps = s.deployments;
+        if (hasGroupFilter) {
+          deps = deps.filter((d) => filters.visibleGroupNames.includes(d.application.groupName ?? ''));
+        }
+        if (hasAppFilter) {
+          deps = deps.filter((d) => filters.visibleAppIds.includes(d.application.id));
+        }
+        return { ...s, deployments: deps };
+      });
+      // Drop servers that have no remaining apps when app-level filters are active
+      servers = servers.filter((s) => s.deployments.length > 0);
+    }
+
+    // Rebuild valid app ID set and drop orphaned connections
+    if (hasServerFilter || hasGroupFilter || hasAppFilter) {
+      const visibleAppIds = new Set<string>();
+      servers.forEach(s => s.deployments.forEach(d => visibleAppIds.add(d.application.id)));
+      connections = connections.filter(c => visibleAppIds.has(c.sourceAppId) && visibleAppIds.has(c.targetAppId));
+    }
+
+    // 3. Filter by node type (for Vis/Cytoscape mostly, as ReactFlow handles it in buildGraph)
     if (filters.nodeType === 'server') {
       servers = servers.map(s => ({ ...s, deployments: [] }));
       connections = [];
-    } else if (filters.nodeType === 'app') {
-      // Keep only apps? Actually usually "app only" view still shows apps, but maybe hide servers if the engine supports it.
-      // For now, ReactFlow buildGraph handles this specifically.
     }
 
     return { servers, connections };
-  }, [data, filters.environment, filters.nodeType]);
+  }, [data, filters.environment, filters.nodeType, filters.visibleServerIds, filters.visibleGroupNames, filters.visibleAppIds]);
 
   // ─── 2D layout ───────────────────────────────────────────────
   const { nodes: computedNodes, edges: computedEdges } = useMemo(() => {
     if (!data?.topology) return { nodes: [], edges: [] };
     // Use filtered data for React Flow too
-    const result = computeLayout(filteredData.servers, filteredData.connections, filters.nodeType, filters.layout);
+    const result = computeLayout(filteredData.servers, filteredData.connections, filters.nodeType, filters.layout, filters.edgeStyle);
     // Attach stable onLabelMove callback to each edge for draggable labels
     const edgesWithCallback = result.edges.map((e) => ({
       ...e,
@@ -582,7 +670,7 @@ function TopologyPageInner() {
       },
     }));
     return { nodes: result.nodes, edges: edgesWithCallback };
-  }, [filteredData, filters.nodeType, filters.layout, stableUpdateEdgeLabel]);
+  }, [filteredData, filters.nodeType, filters.layout, filters.edgeStyle, stableUpdateEdgeLabel]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(computedNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(computedEdges);
@@ -623,6 +711,79 @@ function TopologyPageInner() {
   // Keep a ref to current nodes so handleNodesChange can read them without stale closure
   const nodesRef = useRef(nodes);
   useEffect(() => { nodesRef.current = nodes; }, [nodes]);
+  const edgesRef = useRef(edges);
+  useEffect(() => { edgesRef.current = edges; }, [edges]);
+
+  // ─── Focus highlight ────────────────────────────────────────────
+  // When a node is focused, dim everything not connected to it.
+  const displayNodes = useMemo(() => {
+    if (!focusedNodeId) return nodes;
+
+    const highlighted = new Set<string>([focusedNodeId]);
+    // Include children of the focused container (server → its apps)
+    nodes.forEach((n) => { if (n.parentNode === focusedNodeId) highlighted.add(n.id); });
+    // Include edge endpoints connected to highlighted nodes
+    edges.forEach((e) => {
+      if (highlighted.has(e.source) || highlighted.has(e.target)) {
+        highlighted.add(e.source);
+        highlighted.add(e.target);
+      }
+    });
+    // Include parent containers of highlighted apps
+    nodes.forEach((n) => { if (n.parentNode && highlighted.has(n.id)) highlighted.add(n.parentNode); });
+    // Include all children of highlighted containers
+    nodes.forEach((n) => { if (n.parentNode && highlighted.has(n.parentNode)) highlighted.add(n.id); });
+
+    return nodes.map((n) => ({
+      ...n,
+      style: { ...n.style, opacity: highlighted.has(n.id) ? 1 : 0.12, transition: 'opacity 0.2s ease' },
+    }));
+  }, [nodes, edges, focusedNodeId]);
+
+  const displayEdges = useMemo(() => {
+    if (!focusedNodeId) return edges;
+
+    const childIds = new Set(
+      nodes.filter((n) => n.parentNode === focusedNodeId).map((n) => n.id),
+    );
+    childIds.add(focusedNodeId);
+
+    return edges.map((e) => {
+      const isHighlighted = childIds.has(e.source) || childIds.has(e.target);
+      return {
+        ...e,
+        style: { ...e.style, opacity: isHighlighted ? 1 : 0.08, strokeWidth: isHighlighted ? 3 : (e.style?.strokeWidth ?? 2) },
+        zIndex: isHighlighted ? 10 : 0,
+      };
+    });
+  }, [edges, nodes, focusedNodeId]);
+
+  // Fit view to the focused node and its direct connections
+  useEffect(() => {
+    if (!focusedNodeId || renderEngine !== 'reactflow') return;
+    const currentNodes = nodesRef.current;
+    const currentEdges = edgesRef.current;
+
+    const highlighted = new Set<string>([focusedNodeId]);
+    currentNodes.forEach((n) => { if (n.parentNode === focusedNodeId) highlighted.add(n.id); });
+    currentEdges.forEach((e) => {
+      if (highlighted.has(e.source) || highlighted.has(e.target)) {
+        highlighted.add(e.source);
+        highlighted.add(e.target);
+      }
+    });
+    currentNodes.forEach((n) => { if (n.parentNode && highlighted.has(n.id)) highlighted.add(n.parentNode); });
+
+    requestAnimationFrame(() => {
+      reactFlowRef.current?.fitView({
+        nodes: [...highlighted].map((id) => ({ id })),
+        duration: 500,
+        padding: 0.3,
+        minZoom: 0.2,
+        maxZoom: 1.5,
+      });
+    });
+  }, [focusedNodeId, renderEngine]);
 
   // Drag stop handler:
   //   • Child app inside a server → reorder as a vertical list (drop-between behaviour)
@@ -728,10 +889,6 @@ function TopologyPageInner() {
   }, [onNodesChange]);
 
   const handleAutoArrange = useCallback(() => {
-    if (renderEngine === 'cytoscape') {
-      cytoscapeViewRef.current?.autoArrange();
-      return;
-    }
     if (renderEngine === 'visnetwork') {
       visNetworkViewRef.current?.autoArrange();
       return;
@@ -814,10 +971,10 @@ function TopologyPageInner() {
   };
 
   const onEdgeClick = useCallback((_: any, edge: Edge) => {
-    // Always open connection detail pane (delete is available inside the pane)
     const conn = edge.data?._connection as ConnectionEdge | undefined;
     if (conn) {
       setSelectedNode(null);
+      setFocusedNodeId(null);
       setSelectedConnection(conn);
     }
   }, []);
@@ -835,6 +992,7 @@ function TopologyPageInner() {
 
   const onNodeClick = useCallback((_: any, node: Node) => {
     setSelectedConnection(null);
+    setFocusedNodeId(node.id);
     if (node.data._server) {
       const server = node.data._server as ServerNode;
       setSelectedNode({ type: 'server', id: server.id, name: server.name, code: server.code, hostname: server.hostname, purpose: server.purpose, status: server.status, environment: server.environment, infra_type: server.infra_type, site: server.site, description: server.description, deployments: server.deployments, networkConfigs: server.networkConfigs });
@@ -939,7 +1097,8 @@ function TopologyPageInner() {
   const serverCount = data?.topology?.servers?.length ?? 0;
   const connectionCount = data?.topology?.connections?.length ?? 0;
 
-  const CANVAS_H = 'calc(100vh - 64px - 48px - 48px - 72px)';
+  // global header(64) + content margins(48) + content padding(48) + PageHeader(72) + filter bar(48)
+  const CANVAS_H = 'calc(100vh - 64px - 48px - 48px - 72px - 48px)';
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -953,44 +1112,10 @@ function TopologyPageInner() {
         }
         extra={
           <Space>
-            <Segmented
-              value={viewMode}
-              onChange={(v: string | number) => setViewMode(v as '2D' | '3D')}
-              options={[
-                { label: '2D', value: '2D' },
-                { label: '3D', value: '3D' },
-              ]}
-              size="small"
-            />
-            {viewMode === '2D' && (
-              <Segmented
-                value={renderEngine}
-                onChange={(v: string | number) =>
-                  setRenderEngine(v as 'reactflow' | 'cytoscape' | 'visnetwork')
-                }
-                options={[
-                  { label: 'React Flow', value: 'reactflow' },
-                  { label: 'Cytoscape', value: 'cytoscape' },
-                  { label: 'vis-network', value: 'visnetwork' },
-                ]}
-                size="small"
-              />
-            )}
-            {/* Realtime event badge */}
             {realtimeEvents.length > 0 && (
-              <Tag icon={<ThunderboltOutlined />} color="blue" style={{ maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <Tag icon={<ThunderboltOutlined />} color="blue" style={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {realtimeEvents[0]}
               </Tag>
-            )}
-            {viewMode === '2D' && (
-              <>
-                <Button icon={<FilterOutlined />} onClick={() => setShowFilters((v) => !v)}>
-                  {showFilters ? 'Ẩn bộ lọc' : 'Bộ lọc'}
-                </Button>
-                <Button icon={<PartitionOutlined />} onClick={handleAutoArrange} title="Sắp xếp tự động các nút">
-                  Tự động sắp xếp
-                </Button>
-              </>
             )}
             <Button icon={<ReloadOutlined />} onClick={() => refetch()} loading={loading}>
               Làm mới
@@ -1003,34 +1128,47 @@ function TopologyPageInner() {
                 Bản chụp
               </Button>
             </Badge>
-            {viewMode === '2D' && (
-              <>
-                <Dropdown
-                  menu={{
-                    items: [
-                      { key: 'png', label: 'Xuất ảnh PNG', icon: <DownloadOutlined />, onClick: exportAsPNG },
-                      { key: 'svg', label: 'Xuất ảnh SVG', icon: <DownloadOutlined />, onClick: exportAsSVG },
-                      { key: 'json', label: 'Xuất file JSON', icon: <DownloadOutlined />, onClick: exportAsJSON },
-                      { key: 'mermaid', label: 'Xuất file Mermaid', icon: <DownloadOutlined />, onClick: exportAsMermaid },
-                    ],
-                  }}
-                >
-                  <Button icon={<DownloadOutlined />}>Xuất file</Button>
-                </Dropdown>
-                <Button
-                  icon={isFullscreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
-                  onClick={toggleFullscreen}
-                  title={isFullscreen ? 'Thoát toàn màn hình (Esc)' : 'Toàn màn hình'}
-                />
-              </>
-            )}
+            <Dropdown
+              menu={{
+                items: [
+                  ...(viewMode === '2D' && renderEngine === 'reactflow'
+                    ? [
+                        { key: 'png', label: 'Xuất ảnh PNG', icon: <DownloadOutlined />, onClick: exportAsPNG },
+                        { key: 'svg', label: 'Xuất ảnh SVG', icon: <DownloadOutlined />, onClick: exportAsSVG },
+                      ]
+                    : []),
+                  { key: 'json', label: 'Xuất file JSON', icon: <DownloadOutlined />, onClick: exportAsJSON },
+                  { key: 'mermaid', label: 'Xuất file Mermaid', icon: <DownloadOutlined />, onClick: exportAsMermaid },
+                ],
+              }}
+            >
+              <Button icon={<DownloadOutlined />}>Xuất file</Button>
+            </Dropdown>
+            <Button
+              icon={isFullscreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
+              onClick={toggleFullscreen}
+              title={isFullscreen ? 'Thoát toàn màn hình (Esc)' : 'Toàn màn hình'}
+            />
           </Space>
         }
       />
 
       {error && (
-        <Alert type="error" message="Không thể tải sơ đồ" description={error.message} style={{ margin: '0 24px 16px' }} showIcon />
+        <Alert type="error" message="Không thể tải sơ đồ" description={error.message} style={{ margin: '0 24px 8px' }} showIcon />
       )}
+
+      <TopologyFilterPanel
+        filters={filters}
+        onChange={setFilters}
+        viewMode={viewMode}
+        onViewModeChange={handleViewModeChange}
+        renderEngine={renderEngine}
+        onRenderEngineChange={handleRenderEngineChange}
+        onAutoArrange={handleAutoArrange}
+        groupOptions={groupOptions}
+        serverOptions={serverOptions}
+        appOptions={appOptions}
+      />
 
       <div
         ref={containerRef}
@@ -1043,20 +1181,18 @@ function TopologyPageInner() {
           </div>
         )}
 
-        {showFilters && <TopologyFilterPanel filters={filters} onChange={setFilters} />}
-
         {/* ── 2D VIEW — React Flow (full editor) ── */}
         {viewMode === '2D' && renderEngine === 'reactflow' && (
           <>
             <ReactFlow
-              nodes={nodes}
-              edges={edges}
+              nodes={displayNodes}
+              edges={displayEdges}
               onNodesChange={handleNodesChange}
               onEdgesChange={onEdgesChange}
               onConnect={onConnect}
               onNodeClick={onNodeClick}
               onEdgeClick={onEdgeClick}
-              onPaneClick={() => { setSelectedNode(null); setSelectedConnection(null); }}
+              onPaneClick={() => { setSelectedNode(null); setSelectedConnection(null); setFocusedNodeId(null); }}
               onNodeDragStop={handleNodeDragStop}
               nodeTypes={nodeTypes}
               edgeTypes={edgeTypes}
@@ -1081,51 +1217,6 @@ function TopologyPageInner() {
               )}
               <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="#e0e0e0" />
             </ReactFlow>
-            <NodeDetailPanel node={selectedNode} onClose={() => setSelectedNode(null)} />
-            <ConnectionDetailPanel
-              connection={selectedConnection}
-              onClose={() => setSelectedConnection(null)}
-              onDelete={handleDeleteConnection}
-              deleting={deleteConnection.isPending}
-            />
-          </>
-        )}
-
-        {/* ── 2D VIEW — Cytoscape.js ── */}
-        {viewMode === '2D' && renderEngine === 'cytoscape' && data?.topology && (
-          <>
-            <TopologyCytoscapeView
-              ref={cytoscapeViewRef}
-              servers={filteredData.servers}
-              connections={filteredData.connections}
-              layout={filters.layout === 'hierarchical' ? 'dagre' : 'cose'}
-              onNodeClick={(payload) => {
-                setSelectedConnection(null);
-                if (payload.type === 'server') {
-                  const s = data.topology.servers.find((x) => x.id === payload.id);
-                  if (s) setSelectedNode({ type: 'server', ...s });
-                } else {
-                  const dep = data.topology.servers
-                    .flatMap((s) => s.deployments.map((d) => ({ d, s })))
-                    .find(({ d }) => d.application.id === payload.id);
-                  if (dep) {
-                    setSelectedNode({
-                      type: 'app',
-                      id: dep.d.application.id,
-                      name: dep.d.application.name,
-                      code: dep.d.application.code,
-                      deploymentStatus: dep.d.status,
-                      environment: dep.d.environment,
-                      serverName: dep.s.name,
-                    });
-                  }
-                }
-              }}
-              onEdgeClick={(conn) => {
-                setSelectedNode(null);
-                setSelectedConnection(conn);
-              }}
-            />
             <NodeDetailPanel node={selectedNode} onClose={() => setSelectedNode(null)} />
             <ConnectionDetailPanel
               connection={selectedConnection}
@@ -1179,6 +1270,17 @@ function TopologyPageInner() {
               deleting={deleteConnection.isPending}
             />
           </>
+        )}
+
+        {/* ── 2D VIEW — Mermaid ── */}
+        {viewMode === '2D' && renderEngine === 'mermaid' && (
+          <div style={{ position: 'absolute', inset: 0, overflow: 'auto', background: '#f0f2f5', padding: 16 }}>
+            <TopologyMermaidView
+              servers={filteredData.servers}
+              connections={filteredData.connections}
+              environment={filters.environment}
+            />
+          </div>
         )}
 
         {/* ── 3D VIEW ── */}

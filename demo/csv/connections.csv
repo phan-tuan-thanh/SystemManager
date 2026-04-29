@@ -1,31 +1,68 @@
 source_app,target_app,environment,connection_type,target_port,description
-IB_PORTAL,IB_API,PROD,HTTP,8085,Internet Banking Portal gọi IB API lấy dữ liệu nghiệp vụ
-IB_PORTAL,IB_AUTH,PROD,HTTP,8090,Portal xác thực người dùng qua Auth Service
-IB_API,CORE_CBS,PROD,HTTP,8080,IB API gọi Core Banking REST để truy vấn tài khoản
-IB_API,CORE_TRAN,PROD,GRPC,9093,IB API gọi Transaction Engine qua gRPC để thực hiện giao dịch
+HAPROXY_LB,NGINX_PROXY,PROD,HTTP,80,Load Balancer phân phối HTTP traffic vào API Gateway
+HAPROXY_LB,PAY_GATEWAY,PROD,HTTPS,443,Load Balancer định tuyến HTTPS trực tiếp đến Payment Gateway
+NGINX_PROXY,IB_PORTAL,PROD,HTTP,3000,API Gateway proxy đến Internet Banking Portal
+NGINX_PROXY,ADMIN_PORTAL,PROD,HTTP,9090,API Gateway proxy đến Admin Portal
+IB_PORTAL,IB_API,PROD,HTTP,8085,IB Portal gọi IB API để lấy dữ liệu nghiệp vụ
+IB_PORTAL,IB_AUTH,PROD,HTTP,8090,IB Portal xác thực phiên người dùng qua Auth Service
+IB_API,CORE_CBS,PROD,HTTP,8080,IB API truy vấn tài khoản và khách hàng từ Core Banking
+IB_API,CORE_TRAN,PROD,GRPC,9093,IB API thực hiện giao dịch qua gRPC Transaction Engine
+IB_API,IB_NOTIFY,PROD,HTTP,8086,IB API kích hoạt gửi thông báo sau giao dịch thành công
 IB_AUTH,CORE_CBS,PROD,HTTP,8080,Auth Service kiểm tra tài khoản tồn tại trong Core Banking
-MB_APP,IB_API,PROD,HTTP,8085,Mobile Banking gọi IB API
-MB_APP,IB_AUTH,PROD,HTTP,8090,Mobile Banking xác thực qua Auth Service
-MB_APP,MB_BIOMETRIC,PROD,HTTP,8092,Mobile App gọi Biometric để xác thực sinh trắc học
+IB_AUTH,REDIS_SESSION,PROD,TCP,6379,Auth Service lưu và tra cứu session token qua Redis
+MB_APP,IB_API,PROD,HTTP,8085,Mobile Banking gọi IB API lấy dữ liệu tài khoản
+MB_APP,IB_AUTH,PROD,HTTP,8090,Mobile Banking xác thực người dùng qua Auth Service
+MB_APP,MB_BIOMETRIC,PROD,HTTP,8092,Mobile App yêu cầu xác thực sinh trắc học
 MB_APP,MB_PUSH,PROD,HTTP,8093,Mobile App gửi thông báo đẩy qua Push Service
-PAY_GATEWAY,CORE_CBS,PROD,HTTP,8080,Payment Gateway kiểm tra số dư tài khoản qua Core Banking
-PAY_SWITCH,PAY_GATEWAY,PROD,HTTPS,443,Payment Switch định tuyến giao dịch qua Payment Gateway
+MB_APP,POSTGRES_MB,PROD,DATABASE,5432,Mobile Banking lưu dữ liệu thiết bị và preference
+PAY_SWITCH,PAY_GATEWAY,PROD,HTTPS,443,Payment Switch định tuyến giao dịch liên ngân hàng
 PAY_QR,PAY_SWITCH,PROD,HTTP,8094,QR Payment định tuyến qua Payment Switch
-PAY_SETTLEMENT,CORE_ACCT,PROD,HTTP,8081,Settlement cập nhật số dư tài khoản sau quyết toán
-CORE_CBS,CORE_TRAN,PROD,GRPC,9093,Core Banking gọi Transaction Engine xử lý giao dịch lõi
-ADMIN_PORTAL,CORE_CBS,PROD,HTTP,8080,Admin Portal quản trị Core Banking
-AUDIT_SVC,CORE_CBS,PROD,HTTP,8080,Audit Service theo dõi hoạt động Core Banking
-IB_PORTAL,IB_API,UAT,HTTP,8085,Portal gọi IB API (UAT)
-IB_PORTAL,IB_AUTH,UAT,HTTP,8090,Portal xác thực qua Auth (UAT)
-IB_API,CORE_CBS,UAT,HTTP,8080,IB API gọi Core Banking (UAT)
+PAY_GATEWAY,CORE_CBS,PROD,HTTP,8080,Payment Gateway kiểm tra số dư tài khoản nguồn
+PAY_GATEWAY,CORE_ACCT,PROD,HTTP,8081,Payment Gateway tra cứu thông tin tài khoản chi tiết
+PAY_SETTLEMENT,CORE_ACCT,PROD,HTTP,8081,Settlement Service cập nhật số dư sau quyết toán
+PAY_SETTLEMENT,RABBITMQ_BROKER,PROD,AMQP,5672,Settlement publish sự kiện hoàn tất quyết toán
+CORE_CBS,CORE_TRAN,PROD,GRPC,9093,Core Banking gọi Transaction Engine xử lý nghiệp vụ giao dịch
+CORE_CBS,CORE_ACCT,PROD,HTTP,8081,Core Banking đồng bộ trạng thái và số dư tài khoản
+CORE_CBS,POSTGRES_CORE,PROD,DATABASE,5432,Core Banking kết nối cơ sở dữ liệu nghiệp vụ chính
+CORE_CBS,REDIS_SESSION,PROD,TCP,6379,Core Banking cache tra cứu khách hàng và tỷ giá
+CORE_TRAN,POSTGRES_CORE,PROD,DATABASE,5432,Transaction Engine ghi nhận log giao dịch vào DB
+CORE_TRAN,RABBITMQ_BROKER,PROD,AMQP,5672,Transaction Engine publish sự kiện giao dịch để audit
+CORE_LOAN,CORE_CBS,PROD,HTTP,8080,Loan Management truy vấn thông tin khách hàng từ Core Banking
+CORE_LOAN,CORE_ACCT,PROD,HTTP,8081,Loan Management kiểm tra tài khoản cho vay
+CORE_ACCT,POSTGRES_CORE,PROD,DATABASE,5432,Account Management lưu dữ liệu tài khoản vào DB
+CORE_REPORT,CORE_CBS,PROD,HTTP,8080,Reporting Service lấy dữ liệu báo cáo từ Core Banking
+CORE_REPORT,POSTGRES_CORE,PROD,DATABASE,5432,Reporting Service truy vấn trực tiếp DB cho báo cáo phức tạp
+ADMIN_PORTAL,CORE_CBS,PROD,HTTP,8080,Admin Portal quản trị nghiệp vụ Core Banking
+AUDIT_SVC,CORE_CBS,PROD,HTTP,8080,Audit Service theo dõi thao tác trên Core Banking
+AUDIT_SVC,RABBITMQ_BROKER,PROD,AMQP,5672,Audit Service subscribe sự kiện từ Message Queue để ghi log
+NGINX_PROXY,IB_PORTAL,UAT,HTTP,3000,API Gateway proxy đến IB Portal (UAT)
+IB_PORTAL,IB_API,UAT,HTTP,8085,IB Portal gọi IB API (UAT)
+IB_PORTAL,IB_AUTH,UAT,HTTP,8090,IB Portal xác thực qua Auth Service (UAT)
+IB_API,CORE_CBS,UAT,HTTP,8080,IB API truy vấn Core Banking (UAT)
 IB_API,CORE_TRAN,UAT,GRPC,9093,IB API gọi Transaction Engine gRPC (UAT)
 IB_AUTH,CORE_CBS,UAT,HTTP,8080,Auth kiểm tra tài khoản Core Banking (UAT)
+IB_AUTH,REDIS_SESSION,UAT,TCP,6379,Auth lưu session Redis (UAT)
 MB_APP,IB_API,UAT,HTTP,8085,Mobile Banking gọi IB API (UAT)
+MB_APP,IB_AUTH,UAT,HTTP,8090,Mobile Banking xác thực Auth (UAT)
+PAY_QR,PAY_GATEWAY,UAT,HTTPS,443,QR Payment qua Payment Gateway (UAT)
 PAY_GATEWAY,CORE_CBS,UAT,HTTP,8080,Payment Gateway kiểm tra Core Banking (UAT)
-PAY_QR,PAY_GATEWAY,UAT,HTTPS,443,QR Payment qua Gateway (UAT)
 CORE_CBS,CORE_TRAN,UAT,GRPC,9093,Core Banking gọi Transaction Engine (UAT)
-IB_PORTAL,IB_API,DEV,HTTP,8085,Portal gọi IB API (DEV)
-IB_API,CORE_CBS,DEV,HTTP,8080,IB API gọi Core Banking (DEV)
+CORE_CBS,CORE_ACCT,UAT,HTTP,8081,Core Banking đồng bộ tài khoản (UAT)
+CORE_CBS,POSTGRES_CORE,UAT,DATABASE,5432,Core Banking kết nối DB (UAT)
+CORE_LOAN,CORE_CBS,UAT,HTTP,8080,Loan Management truy vấn Core Banking (UAT)
+CORE_ACCT,POSTGRES_CORE,UAT,DATABASE,5432,Account Management lưu DB (UAT)
+IB_PORTAL,IB_API,DEV,HTTP,8085,IB Portal gọi IB API (DEV)
+IB_API,CORE_CBS,DEV,HTTP,8080,IB API truy vấn Core Banking (DEV)
 IB_API,CORE_TRAN,DEV,GRPC,9093,IB API gọi Transaction Engine gRPC (DEV)
 MB_APP,IB_API,DEV,HTTP,8085,Mobile Banking gọi IB API (DEV)
+MB_APP,MB_PUSH,DEV,HTTP,8093,Mobile App gửi push notification (DEV)
+PAY_QR,PAY_GATEWAY,DEV,HTTPS,443,QR Payment qua Payment Gateway (DEV)
+PAY_GATEWAY,CORE_CBS,DEV,HTTP,8080,Payment Gateway kiểm tra Core Banking (DEV)
 CORE_CBS,CORE_TRAN,DEV,GRPC,9093,Core Banking gọi Transaction Engine (DEV)
+CORE_CBS,CORE_ACCT,DEV,HTTP,8081,Core Banking đồng bộ Account Management (DEV)
+CORE_CBS,POSTGRES_CORE,DEV,DATABASE,5432,Core Banking kết nối DB (DEV)
+CORE_CBS,REDIS_SESSION,DEV,TCP,6379,Core Banking cache Redis (DEV)
+CORE_CBS,ELASTICSEARCH,DEV,HTTP,9200,Core Banking index dữ liệu tìm kiếm khách hàng (DEV)
+CORE_TRAN,RABBITMQ_BROKER,DEV,AMQP,5672,Transaction Engine publish sự kiện (DEV)
+CORE_ACCT,POSTGRES_CORE,DEV,DATABASE,5432,Account Management lưu DB (DEV)
+ADMIN_PORTAL,CORE_CBS,DEV,HTTP,8080,Admin Portal quản trị Core Banking (DEV)

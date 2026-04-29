@@ -24,6 +24,7 @@
     "dagre": "^0.8.5",
     "graphql": "^16.10.0",
     "graphql-ws": "^5.16.0",
+    "mermaid": "^11.14.0",
     "papaparse": "^5.4.1",
     "react": "^18.3.1",
     "react-cytoscapejs": "^2.0.0",

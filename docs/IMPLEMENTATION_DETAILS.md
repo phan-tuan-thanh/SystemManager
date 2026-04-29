@@ -4,6 +4,49 @@ This document consolidates all past implementation plans and detailed technical 
 
 ---
 
+## Topology Node Visibility Filter (2026-04-29)
+
+**Status:** ✅ Completed
+**Context:** Người dùng cần ẩn/hiện hệ thống (nhóm ứng dụng), server và ứng dụng cụ thể trên sơ đồ topology mà không cần rời trang. Đặc biệt hữu ích khi sơ đồ có nhiều node gây rối.
+**Decision:**
+- Mở rộng `FilterState` với 3 field mới: `visibleGroupNames: string[]`, `visibleServerIds: string[]`, `visibleAppIds: string[]`. Empty array = show all (no filter applied).
+- `TopologyFilterPanel` nhận thêm 3 props options (computed từ topology data). Render 3 `Select mode="multiple"` trong Data Filters section.
+- `index.tsx` mở rộng `filteredData` useMemo: sau environment filter, apply visibility filters (server → app group → app). Server không có app nào sau filter sẽ bị drop. Connections filter để chỉ giữ những cặp có cả source lẫn target còn visible.
+- Không cần backend change — pure frontend derived state.
+**Files impacted:**
+- `packages/frontend/src/pages/topology/components/TopologyFilterPanel.tsx` — FilterState + 3 multi-select (update)
+- `packages/frontend/src/pages/topology/index.tsx` — options + filteredData extension (update)
+**Trade-offs:**
+- Filter xảy ra client-side trên toàn bộ dataset đã load — với topology lớn (>500 node) có thể có latency nhỏ trong useMemo. Acceptable vì SRS yêu cầu ≤200 node performance.
+- Options dropdown lấy từ dữ liệu hiện tại (theo environment filter hiện tại) — nếu environment filter thay đổi, options tự động cập nhật.
+**Sprint plan ref:** `docs/plans/sprint-19-topology-orthogonal-edges.md`
+**Outcome:** ✅ 3 multi-select dropdowns (Hệ thống/Servers/Ứng dụng) trong filter bar. filteredData useMemo áp dụng visibility filters. Edges tự động ẩn khi một trong hai đầu không còn visible. 0 TS error mới.
+**Completed:** 2026-04-29
+
+---
+
+## Sprint 19 — Topology Orthogonal Edges (2026-04-29)
+
+**Status:** ✅ Completed
+**Context:** Topology 2D dùng Bezier curves cho tất cả cạnh. Khi có nhiều kết nối, cạnh chồng lấp và khó đọc. Cần chế độ orthogonal (thẳng góc) dùng `getSmoothStepPath` của ReactFlow.
+**Decision:**
+- Thêm `edgeStyle: 'bezier' | 'step'` vào `FilterState`. Mặc định `bezier` để không phá vỡ UX cũ.
+- `ProtocolEdge` branch theo `data.edgeStyle`: `getBezierPath` (bezier) hoặc `getSmoothStepPath({borderRadius:8})` (step).
+- Parallel edges trong step mode: spread bằng `offset` param thay vì `curvature`.
+- `buildGraph()` nhận thêm param `edgeStyle` và ghi vào `edge.data.edgeStyle` để `ProtocolEdge` đọc.
+- Không cần thay đổi backend, GraphQL, hay schema.
+**Files impacted:**
+- `packages/frontend/src/pages/topology/components/TopologyFilterPanel.tsx` — thêm `edgeStyle` vào FilterState + Select "Edges" (update)
+- `packages/frontend/src/pages/topology/index.tsx` — import `getSmoothStepPath`, dual-mode `ProtocolEdge`, cập nhật `buildGraph`/`computeLayout`, default filter (update)
+**Trade-offs:**
+- `getSmoothStepPath` offset param shift trục trung tâm của đoạn step giữa — không thể kiểm soát chính xác như Bezier curvature. Với nhiều parallel edges (>5), có thể vẫn giao nhau ở góc đường nếu khoảng cách node quá gần.
+- `borderRadius: 8` cho bo tròn nhẹ — nếu muốn góc vuông tuyệt đối đặt `borderRadius: 0`.
+**Outcome:** ✅ Filter panel có Select "Edges" (Cong/Thẳng góc). `ProtocolEdge` dual-mode dùng `getSmoothStepPath` khi step, `getBezierPath` khi bezier. Parallel edges spread đúng trong cả 2 chế độ. 0 TS error mới.
+**Completed:** 2026-04-29
+**Sprint plan ref:** `docs/plans/sprint-19-topology-orthogonal-edges.md`
+
+---
+
 ## Sprint 18 — Upload UI Consolidation & Layout Fixes (2026-04-25)
 
 **Status:** ✅ Completed

@@ -24,12 +24,14 @@ import {
   InboxOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
+  ThunderboltOutlined,
 } from '@ant-design/icons';
 import type { UploadFile } from 'antd';
 import Papa from 'papaparse';
 import apiClient from '../../api/client';
 import PageHeader from '../../components/common/PageHeader';
 import ColumnMapper, {
+  autoDetect,
   applyAllMappings,
   type ColumnMapping,
   type TargetField,
@@ -102,7 +104,7 @@ const APP_TARGET_BY_KEY: Record<string, TargetField> = APP_TARGETS.reduce(
 );
 
 export function AppUploadContent() {
-  const { message } = App.useApp();
+  const { message, modal } = App.useApp();
   const [step, setStep] = useState(0);
   const [environment, setEnvironment] = useState<string | undefined>(undefined);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
@@ -198,6 +200,87 @@ export function AppUploadContent() {
         setCsvRows(rows);
         setMapping({});
         setStep(1);
+      },
+      error: (err) => message.error(`Không thể đọc file: ${err.message}`),
+    });
+  };
+
+  const handleQuickImport = () => {
+    const file = fileList[0]?.originFileObj as File | undefined;
+    if (!file) { message.error('Vui lòng chọn file.'); return; }
+
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: async (results) => {
+        const rows = results.data as Record<string, any>[];
+        const cols = (results.meta.fields ?? []).filter(Boolean) as string[];
+        if (!cols.length) { message.error('Không đọc được tiêu đề cột.'); return; }
+
+        const autoMapping = autoDetect(cols, APP_TARGETS);
+        const mappedTargets = new Set(Object.values(autoMapping).filter(Boolean));
+        const missing = APP_TARGETS.filter((t) => t.required && !mappedTargets.has(t.key));
+
+        if (missing.length > 0) {
+          message.warning(`Không nhận diện được cột: ${missing.map((t) => t.label).join(', ')}. Chuyển sang wizard.`);
+          setCsvColumns(cols);
+          setCsvRows(rows);
+          setMapping(autoMapping);
+          setStep(1);
+          return;
+        }
+
+        setLoading(true);
+        try {
+          const mappedRows = applyAllMappings(rows, autoMapping, {});
+          const blob = new Blob([Papa.unparse(mappedRows)], { type: 'text/csv' });
+          const form = new FormData();
+          form.append('file', new File([blob], 'mapped.csv', { type: 'text/csv' }));
+          const params = new URLSearchParams({ type: 'application' });
+          if (environment) params.set('environment', environment);
+
+          const { data } = await apiClient.post(`/import/preview?${params}`, form, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+          });
+          const previewResult: PreviewResult = data.data ?? data;
+
+          modal.confirm({
+            title: 'Xác nhận Import nhanh',
+            icon: <ThunderboltOutlined style={{ color: '#faad14' }} />,
+            content: (
+              <div>
+                <p>Nhận diện tự động <b>{previewResult.total}</b> dòng:</p>
+                <ul style={{ marginBottom: 0 }}>
+                  <li style={{ color: '#52c41a' }}>✓ {previewResult.valid} dòng hợp lệ</li>
+                  {previewResult.invalid > 0 && (
+                    <li style={{ color: '#ff4d4f' }}>✗ {previewResult.invalid} dòng lỗi (sẽ bị bỏ qua)</li>
+                  )}
+                </ul>
+              </div>
+            ),
+            okText: `Import ${previewResult.valid} dòng`,
+            okButtonProps: { disabled: previewResult.valid === 0 },
+            cancelText: 'Xem chi tiết (wizard)',
+            onOk: async () => {
+              const { data: execData } = await apiClient.post('/import/execute', {
+                session_id: previewResult.session_id,
+              });
+              setResult(execData.data ?? execData);
+              setStep(3);
+            },
+            onCancel: () => {
+              setCsvColumns(cols);
+              setCsvRows(rows);
+              setMapping(autoMapping);
+              setPreview(previewResult);
+              setStep(2);
+            },
+          });
+        } catch (err: unknown) {
+          message.error((err as any)?.response?.data?.error?.message || 'Import nhanh thất bại.');
+        } finally {
+          setLoading(false);
+        }
       },
       error: (err) => message.error(`Không thể đọc file: ${err.message}`),
     });
@@ -423,6 +506,14 @@ export function AppUploadContent() {
             </Dragger>
 
             <Space style={{ justifyContent: 'flex-end', width: '100%' }}>
+              <Button
+                icon={<ThunderboltOutlined />}
+                onClick={handleQuickImport}
+                disabled={!fileList.length}
+                loading={loading}
+              >
+                Import nhanh
+              </Button>
               <Button
                 type="primary"
                 onClick={handleParseFile}
