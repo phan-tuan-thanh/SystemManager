@@ -4,6 +4,25 @@ This document consolidates all past implementation plans and detailed technical 
 
 ---
 
+## Sprint 22 Topology UX Enhancements (2026-04-30)
+
+**Status:** ✅ Completed
+**Context:** 3 cải tiến UX tiếp nối Sprint 21: (1) auto-arrange khi đổi filter, (2) cascade filter group→server→app, (3) connection health check panel.
+**Decision:**
+- S22-01: `useEffect` watch `filters.layoutAlgorithm` và `filters.layoutDirection`; dùng ref ổn định để tránh stale closure; chỉ trigger khi `renderEngine === 'reactflow'` và `nodes.length > 0`; skip lần mount đầu.
+- S22-02: FilterPanel nhận thêm prop `topologyServers: ServerNode[]`; tính `cascadedServerOptions` (lọc bởi `localGroupNames`) và `cascadedAppOptions` (lọc bởi `localServerIds`) trong useMemo bên trong modal.
+- S22-03: `ConnectionHealthDrawer` component mới; `analyzeTopologyHealth(servers, connections)` pure function trả về `Issue[]`; 5 loại vấn đề; click issue → `setFocusedNodeId` để highlight trên graph.
+**Files impacted:**
+- `packages/frontend/src/pages/topology/index.tsx` — S22-01 useEffect, S22-03 health button + state (update)
+- `packages/frontend/src/pages/topology/components/TopologyFilterPanel.tsx` — S22-02 cascade + new prop (update)
+- `packages/frontend/src/pages/topology/components/ConnectionHealthDrawer.tsx` — S22-03 (new)
+**Trade-offs:** Health check là pure FE → không lưu lịch sử, chỉ reflect trạng thái hiện tại. Cascade filter chỉ áp dụng trong modal (local state), không change options khi đã applied.
+**Outcome:** S22-01: useEffect + stable ref pattern tự trigger handleAutoArrange khi layoutAlgorithm/layoutDirection thay đổi. S22-02: serverGroupsMap + serverAppsMap passed từ parent, cascade trong modal FilterPanel. S22-03: ConnectionHealthDrawer với analyzeTopologyHealth() pure function, 5 loại issue, Badge count trên button "Kiểm tra kết nối", click issue → focus node + switch sang ReactFlow.
+**Completed:** 2026-04-30
+**Sprint plan ref:** `docs/plans/sprint-22-topology-ux.md`
+
+---
+
 ## Sprint 21 Topology Smart Auto-Layout (2026-04-30)
 
 **Status:** ✅ Completed

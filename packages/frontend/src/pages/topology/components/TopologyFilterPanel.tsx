@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Select, Switch, Button, Segmented, Typography, Space, Modal, Input, Checkbox, Badge, Divider, Tag } from 'antd';
 import { PartitionOutlined, LinkOutlined, FilterOutlined, SearchOutlined } from '@ant-design/icons';
 
@@ -35,6 +35,9 @@ interface Props {
   groupOptions?: SelectOption[];
   serverOptions?: SelectOption[];
   appOptions?: SelectOption[];
+  // Cascade filter maps: serverId → groupNames[], serverId → appIds[]
+  serverGroupsMap?: Record<string, string[]>;
+  serverAppsMap?: Record<string, string[]>;
 }
 
 // ─── Filter section inside modal ──────────────────────────────────
@@ -155,12 +158,33 @@ export default function TopologyFilterPanel({
   groupOptions = [],
   serverOptions = [],
   appOptions = [],
+  serverGroupsMap = {},
+  serverAppsMap = {},
 }: Props) {
   const [modalOpen, setModalOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [localGroupNames, setLocalGroupNames] = useState<string[]>([]);
   const [localServerIds, setLocalServerIds] = useState<string[]>([]);
   const [localAppIds, setLocalAppIds] = useState<string[]>([]);
+
+  // Cascade: server options filtered by selected groups
+  const cascadedServerOptions = useMemo(() => {
+    if (localGroupNames.length === 0) return serverOptions;
+    return serverOptions.filter((opt) => {
+      const groups = serverGroupsMap[opt.value] ?? [];
+      return groups.some((g) => localGroupNames.includes(g));
+    });
+  }, [localGroupNames, serverOptions, serverGroupsMap]);
+
+  // Cascade: app options filtered by selected servers
+  const cascadedAppOptions = useMemo(() => {
+    if (localServerIds.length === 0) return appOptions;
+    const appIdsOnServers = new Set<string>();
+    localServerIds.forEach((sid) => {
+      (serverAppsMap[sid] ?? []).forEach((aid) => appIdsOnServers.add(aid));
+    });
+    return appOptions.filter((opt) => appIdsOnServers.has(opt.value));
+  }, [localServerIds, appOptions, serverAppsMap]);
 
   const is2D = viewMode === '2D';
   const isInteractive = is2D && (renderEngine === 'reactflow' || renderEngine === 'visnetwork');
@@ -473,11 +497,13 @@ export default function TopologyFilterPanel({
             </>
           )}
 
-          {serverOptions.length > 0 && (
+          {cascadedServerOptions.length > 0 && (
             <>
               <FilterSection
-                title="Servers"
-                options={serverOptions}
+                title={localGroupNames.length > 0
+                  ? `Servers (trong ${localGroupNames.length} hệ thống đã chọn)`
+                  : 'Servers'}
+                options={cascadedServerOptions}
                 selected={localServerIds}
                 onSelect={setLocalServerIds}
                 search={search}
@@ -487,10 +513,12 @@ export default function TopologyFilterPanel({
             </>
           )}
 
-          {appOptions.length > 0 && (
+          {cascadedAppOptions.length > 0 && (
             <FilterSection
-              title="Ứng dụng"
-              options={appOptions}
+              title={localServerIds.length > 0
+                ? `Ứng dụng (trên ${localServerIds.length} server đã chọn)`
+                : 'Ứng dụng'}
+              options={cascadedAppOptions}
               selected={localAppIds}
               onSelect={setLocalAppIds}
               search={search}

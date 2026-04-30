@@ -743,6 +743,37 @@ DRAFT → PREVIEWING → APPLIED
 - AC6: Dagre vẫn là default (synchronous) khi load lần đầu và khi đổi filter.
 **Added:** 2026-04-30
 
+### 4.5.8 Topology 2D — Auto-Arrange on Algorithm/Direction Change
+**Mô tả:** Khi người dùng thay đổi dropdown "Thuật toán" hoặc "Hướng" trong React Flow, hệ thống tự động chạy lại layout mà không cần bấm nút "Sắp xếp".
+**Actor:** ADMIN | OPERATOR | VIEWER
+**Acceptance Criteria:**
+- AC1: Thay đổi thuật toán (Dagre/ELK/*) → tự động sắp xếp lại ngay lập tức.
+- AC2: Thay đổi hướng (TB/BT/LR/RL) → tự động sắp xếp lại ngay lập tức.
+- AC3: Auto-arrange chỉ kích hoạt khi đang dùng React Flow engine, không ảnh hưởng vis-network.
+- AC4: Sau khi tự sắp xếp, fit view để hiển thị toàn bộ graph.
+**Added:** 2026-04-30
+
+### 4.5.9 Topology 2D — Cascade Node Filter (Group → Server → App)
+**Mô tả:** Bộ lọc node hoạt động theo cascade: chọn hệ thống (AppGroup) → chỉ hiện servers chứa app thuộc hệ thống đó; chọn server → chỉ hiện apps deploy trên server đó.
+**Actor:** ADMIN | OPERATOR | VIEWER
+**Acceptance Criteria:**
+- AC1: Trong modal "Lọc node", khi chọn một hoặc nhiều Hệ thống, danh sách Servers chỉ hiện những server có app thuộc hệ thống đó.
+- AC2: Khi chọn một hoặc nhiều Server, danh sách Ứng dụng chỉ hiện app deploy trên servers đó.
+- AC3: Khi xóa filter Hệ thống → Server/App options trở về đầy đủ (reset cascade).
+- AC4: Kết hợp được: chọn group + server → app options là intersection.
+**Added:** 2026-04-30
+
+### 4.5.10 Topology 2D — Connection Health Check
+**Mô tả:** Panel phân tích chất lượng kết nối, phát hiện các vấn đề trong topology: circular dependency, single point of failure, orphaned apps, cross-environment connections, dead connections (đến app không hoạt động).
+**Actor:** ADMIN | OPERATOR | VIEWER
+**Acceptance Criteria:**
+- AC1: Nút "Kiểm tra kết nối" trong PageHeader, hiển thị badge số lượng issue.
+- AC2: Click mở Drawer hiển thị danh sách issue phân loại theo severity (ERROR/WARNING/INFO).
+- AC3: Phát hiện: circular dependency (A→B→…→A), SPoF (node kết nối > 5 chiều), orphaned app, cross-env connection, dead link (app INACTIVE/STOPPED).
+- AC4: Click vào issue → highlight node liên quan trên graph.
+- AC5: Tính toán pure FE từ dữ liệu topology hiện tại, không cần API mới.
+**Added:** 2026-04-30
+
 ---
 
 ## 4.6. Audit Log & Lịch sử thay đổi *(first-class module)*

@@ -4,6 +4,26 @@ A chronological record of project milestones, updates, and sprint summaries.
 
 ---
 
+## 2026-04-30 — Sprint 22: Topology UX Enhancements ✅ Hoàn thành
+
+- ✅ S22-01: Auto-arrange khi thay đổi layoutAlgorithm/layoutDirection (stable ref + useEffect)
+- ✅ S22-02: Cascade filter group→server→app trong FilterPanel modal (serverGroupsMap + serverAppsMap)
+- ✅ S22-03: ConnectionHealthDrawer — analyzeTopologyHealth() 5 issue types, Badge count, focus node
+- Branch: `feat/sprint-22-topology-ux` pushed
+- Sprint plan: `docs/plans/sprint-22-topology-ux.md` cập nhật
+
+---
+
+## 2026-04-30 — Sprint 22: Bắt đầu implement Topology UX Enhancements
+
+- Yêu cầu ghi nhận vào SRS.md sections 4.5.8, 4.5.9, 4.5.10
+- Sprint plan tạo mới: `docs/plans/sprint-22-topology-ux.md`
+- Kế hoạch kỹ thuật: `docs/IMPLEMENTATION_DETAILS.md` (entry Sprint 22)
+- Tasks mới: S22-01 đến S22-03 (10 points)
+- Nội dung: auto-arrange on filter change, cascade filter, connection health drawer
+
+---
+
 ## 2026-04-30 — Sprint 21: Topology Smart Auto-Layout ✅ Hoàn thành
 
 - ✅ S21-01: FilterState thêm `layoutAlgorithm` / `layoutDirection`; FilterPanel: Segmented Dagre|ELK + ↓TB|→LR

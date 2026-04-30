@@ -45,6 +45,7 @@ import {
   ThunderboltOutlined,
   FullscreenOutlined,
   FullscreenExitOutlined,
+  MedicineBoxOutlined,
 } from '@ant-design/icons';
 
 import ServerFlowNode from './components/ServerFlowNode';
@@ -57,6 +58,7 @@ import Topology3DView from './components/Topology3DView';
 import TopologyVisNetworkView, { type TopologyVisNetworkHandle } from './components/TopologyVisNetworkView';
 import TopologyMermaidView from './components/TopologyMermaidView';
 import { CreateConnectionModal } from './components/CreateConnectionModal';
+import ConnectionHealthDrawer, { analyzeTopologyHealth } from './components/ConnectionHealthDrawer';
 import { useTopologyQuery, ServerNode, ConnectionEdge } from './hooks/useTopology';
 import { useCreateSnapshot } from './hooks/useTopology';
 import { useTopologySubscription } from './hooks/useTopologySubscription';
@@ -583,6 +585,7 @@ function TopologyPageInner() {
   
   const [createConnModalVisible, setCreateConnModalVisible] = useState(false);
   const [connectionDraft, setConnectionDraft] = useState<any>(null);
+  const [healthDrawerOpen, setHealthDrawerOpen] = useState(false);
 
   const reactFlowRef = useRef<ReactFlowInstance | null>(null);
   const visNetworkViewRef = useRef<TopologyVisNetworkHandle>(null);
@@ -669,6 +672,25 @@ function TopologyPageInner() {
         .map(([id, name]) => ({ label: name, value: id })),
     };
   }, [data?.topology?.servers, filters.environment]);
+
+  // Cascade maps for FilterPanel: serverId → groupNames[], serverId → appIds[]
+  const { serverGroupsMap, serverAppsMap } = useMemo(() => {
+    const groups: Record<string, string[]> = {};
+    const apps: Record<string, string[]> = {};
+    (data?.topology?.servers ?? []).forEach((s) => {
+      groups[s.id] = s.deployments
+        .map((d) => d.application.groupName)
+        .filter((g): g is string => Boolean(g));
+      apps[s.id] = s.deployments.map((d) => d.application.id);
+    });
+    return { serverGroupsMap: groups, serverAppsMap: apps };
+  }, [data?.topology?.servers]);
+
+  const healthIssueCount = useMemo(() => {
+    if (!data?.topology) return 0;
+    const issues = analyzeTopologyHealth(data.topology.servers, data.topology.connections);
+    return issues.filter((i) => i.severity === 'ERROR' || i.severity === 'WARNING').length;
+  }, [data?.topology]);
 
   const filteredData = useMemo(() => {
     if (!data?.topology) return { servers: [], connections: [] };
@@ -1009,6 +1031,19 @@ function TopologyPageInner() {
     });
   }, [renderEngine, nodes, edges, filters.layoutAlgorithm, filters.layoutDirection, setNodes]);
 
+  // Stable ref so the auto-arrange effect always calls the latest version without becoming a dependency
+  const handleAutoArrangeRef = useRef(handleAutoArrange);
+  useEffect(() => { handleAutoArrangeRef.current = handleAutoArrange; }, [handleAutoArrange]);
+
+  // Skip triggering on the initial mount
+  const isFirstRenderRef = useRef(true);
+  useEffect(() => {
+    if (isFirstRenderRef.current) { isFirstRenderRef.current = false; return; }
+    if (renderEngine !== 'reactflow' || nodes.length === 0) return;
+    handleAutoArrangeRef.current();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters.layoutAlgorithm, filters.layoutDirection]);
+
   const onConnect = useCallback(async (params: any) => {
     if (!filters.connectionMode) return;
     const sourceNode = nodes.find((n) => n.id === params.source);
@@ -1214,6 +1249,16 @@ function TopologyPageInner() {
                 {realtimeEvents[0]}
               </Tag>
             )}
+            <Badge count={healthIssueCount} size="small" offset={[-3, 3]}>
+              <Button
+                icon={<MedicineBoxOutlined />}
+                onClick={() => setHealthDrawerOpen(true)}
+                type={healthIssueCount > 0 ? 'default' : 'default'}
+                danger={healthIssueCount > 0}
+              >
+                Kiểm tra kết nối
+              </Button>
+            </Badge>
             <Button icon={<ReloadOutlined />} onClick={() => refetch()} loading={loading}>
               Làm mới
             </Button>
@@ -1265,6 +1310,8 @@ function TopologyPageInner() {
         groupOptions={groupOptions}
         serverOptions={serverOptions}
         appOptions={appOptions}
+        serverGroupsMap={serverGroupsMap}
+        serverAppsMap={serverAppsMap}
       />
 
       <div
@@ -1428,6 +1475,18 @@ function TopologyPageInner() {
 
       {/* Snapshot Browser Drawer */}
       <SnapshotBrowser open={showSnapshots} onClose={() => setShowSnapshots(false)} currentEnvironment={filters.environment} />
+
+      {/* Connection Health Drawer */}
+      <ConnectionHealthDrawer
+        open={healthDrawerOpen}
+        onClose={() => setHealthDrawerOpen(false)}
+        servers={data?.topology?.servers ?? []}
+        connections={data?.topology?.connections ?? []}
+        onFocusNode={(nodeId) => {
+          setFocusedNodeId(nodeId);
+          if (renderEngine !== 'reactflow') setRenderEngine('reactflow');
+        }}
+      />
     </div>
   );
 }
