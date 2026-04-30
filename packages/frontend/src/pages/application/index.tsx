@@ -22,6 +22,7 @@ function BusinessTab() {
   const [limit, setLimit] = useState(20);
   const [formOpen, setFormOpen] = useState(false);
   const [editApp, setEditApp] = useState<Application | null>(null);
+  const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
 
   const { data, isLoading } = useApplicationList({
     page, limit,
@@ -36,9 +37,21 @@ function BusinessTab() {
     try {
       await deleteApp.mutateAsync(id);
       message.success('Đã xoá ứng dụng');
+      setSelectedRowKeys((prev) => prev.filter((k) => k !== id));
     } catch {
       message.error('Không thể xoá ứng dụng');
     }
+  };
+
+  const handleBulkDelete = async () => {
+    const results = await Promise.allSettled(
+      selectedRowKeys.map((id) => deleteApp.mutateAsync(id)),
+    );
+    const failed = results.filter((r) => r.status === 'rejected').length;
+    const succeeded = results.length - failed;
+    if (succeeded > 0) message.success(`Đã xoá ${succeeded} ứng dụng`);
+    if (failed > 0) message.error(`${failed} ứng dụng không thể xoá`);
+    setSelectedRowKeys([]);
   };
 
   const columns: ColumnsType<Application> = [
@@ -102,26 +115,43 @@ function BusinessTab() {
 
   return (
     <>
-      <Space style={{ marginBottom: 16 }} wrap>
-        <Input
-          prefix={<SearchOutlined />}
-          placeholder="Tìm ứng dụng nghiệp vụ..."
-          value={search}
-          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          style={{ width: 260 }}
-          allowClear
-        />
-        <Select
-          placeholder="Lọc theo nhóm"
-          value={groupFilter}
-          onChange={(v) => { setGroupFilter(v); setPage(1); }}
-          allowClear
-          style={{ width: 200 }}
-          options={(groups?.items ?? []).map((g) => ({ value: g.id, label: g.name }))}
-        />
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditApp(null); setFormOpen(true); }}>
-          Thêm ứng dụng
-        </Button>
+      <Space style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between' }}>
+        <Space wrap>
+          <Input
+            prefix={<SearchOutlined />}
+            placeholder="Tìm ứng dụng nghiệp vụ..."
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+            style={{ width: 260 }}
+            allowClear
+          />
+          <Select
+            placeholder="Lọc theo nhóm"
+            value={groupFilter}
+            onChange={(v) => { setGroupFilter(v); setPage(1); }}
+            allowClear
+            style={{ width: 200 }}
+            options={(groups?.items ?? []).map((g) => ({ value: g.id, label: g.name }))}
+          />
+        </Space>
+        <Space>
+          {selectedRowKeys.length > 0 && (
+            <Popconfirm
+              title={`Xoá ${selectedRowKeys.length} ứng dụng đã chọn?`}
+              onConfirm={handleBulkDelete}
+              okText="Xoá"
+              cancelText="Huỷ"
+              okType="danger"
+            >
+              <Button danger icon={<DeleteOutlined />}>
+                Xoá {selectedRowKeys.length} mục
+              </Button>
+            </Popconfirm>
+          )}
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditApp(null); setFormOpen(true); }}>
+            Thêm ứng dụng
+          </Button>
+        </Space>
       </Space>
 
       <DataTable<Application>
@@ -133,6 +163,10 @@ function BusinessTab() {
         page={page}
         pageSize={limit}
         onPageChange={(p, ps) => { setPage(p); setLimit(ps); }}
+        rowSelection={{
+          selectedRowKeys,
+          onChange: (keys) => setSelectedRowKeys(keys as string[]),
+        }}
       />
 
       <ApplicationForm open={formOpen} app={editApp} onClose={() => setFormOpen(false)} initialType="BUSINESS" />
@@ -149,6 +183,7 @@ function InfraTab() {
   const [limit, setLimit] = useState(20);
   const [formOpen, setFormOpen] = useState(false);
   const [editApp, setEditApp] = useState<Application | null>(null);
+  const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
 
   const { data, isLoading } = useApplicationList({
     page, limit,
@@ -164,9 +199,21 @@ function InfraTab() {
     try {
       await deleteApp.mutateAsync(id);
       message.success('Đã xoá phần mềm hạ tầng');
+      setSelectedRowKeys((prev) => prev.filter((k) => k !== id));
     } catch {
       message.error('Không thể xoá phần mềm hạ tầng');
     }
+  };
+
+  const handleBulkDelete = async () => {
+    const results = await Promise.allSettled(
+      selectedRowKeys.map((id) => deleteApp.mutateAsync(id)),
+    );
+    const failed = results.filter((r) => r.status === 'rejected').length;
+    const succeeded = results.length - failed;
+    if (succeeded > 0) message.success(`Đã xoá ${succeeded} phần mềm hạ tầng`);
+    if (failed > 0) message.error(`${failed} mục không thể xoá`);
+    setSelectedRowKeys([]);
   };
 
   const columns: ColumnsType<Application> = [
@@ -237,41 +284,58 @@ function InfraTab() {
 
   return (
     <>
-      <Space style={{ marginBottom: 16 }} wrap>
-        <Input
-          prefix={<SearchOutlined />}
-          placeholder="Tìm phần mềm hạ tầng..."
-          value={search}
-          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          style={{ width: 260 }}
-          allowClear
-        />
-        <Select
-          placeholder="Lọc theo nhóm"
-          value={groupFilter}
-          onChange={(v) => { setGroupFilter(v); setPage(1); }}
-          allowClear
-          style={{ width: 200 }}
-          options={(groups?.items ?? []).map((g) => ({ value: g.id, label: g.name }))}
-        />
-        <Select
-          placeholder="Loại phần mềm"
-          value={swTypeFilter}
-          onChange={(v) => { setSwTypeFilter(v); setPage(1); }}
-          allowClear
-          style={{ width: 160 }}
-          options={[
-            { value: 'OS', label: 'OS' },
-            { value: 'DATABASE', label: 'Database' },
-            { value: 'MIDDLEWARE', label: 'Middleware' },
-            { value: 'RUNTIME', label: 'Runtime' },
-            { value: 'WEB_SERVER', label: 'Web Server' },
-            { value: 'OTHER', label: 'Khác' },
-          ]}
-        />
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditApp(null); setFormOpen(true); }}>
-          Thêm phần mềm
-        </Button>
+      <Space style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between' }}>
+        <Space wrap>
+          <Input
+            prefix={<SearchOutlined />}
+            placeholder="Tìm phần mềm hạ tầng..."
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+            style={{ width: 260 }}
+            allowClear
+          />
+          <Select
+            placeholder="Lọc theo nhóm"
+            value={groupFilter}
+            onChange={(v) => { setGroupFilter(v); setPage(1); }}
+            allowClear
+            style={{ width: 200 }}
+            options={(groups?.items ?? []).map((g) => ({ value: g.id, label: g.name }))}
+          />
+          <Select
+            placeholder="Loại phần mềm"
+            value={swTypeFilter}
+            onChange={(v) => { setSwTypeFilter(v); setPage(1); }}
+            allowClear
+            style={{ width: 160 }}
+            options={[
+              { value: 'OS', label: 'OS' },
+              { value: 'DATABASE', label: 'Database' },
+              { value: 'MIDDLEWARE', label: 'Middleware' },
+              { value: 'RUNTIME', label: 'Runtime' },
+              { value: 'WEB_SERVER', label: 'Web Server' },
+              { value: 'OTHER', label: 'Khác' },
+            ]}
+          />
+        </Space>
+        <Space>
+          {selectedRowKeys.length > 0 && (
+            <Popconfirm
+              title={`Xoá ${selectedRowKeys.length} phần mềm đã chọn?`}
+              onConfirm={handleBulkDelete}
+              okText="Xoá"
+              cancelText="Huỷ"
+              okType="danger"
+            >
+              <Button danger icon={<DeleteOutlined />}>
+                Xoá {selectedRowKeys.length} mục
+              </Button>
+            </Popconfirm>
+          )}
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditApp(null); setFormOpen(true); }}>
+            Thêm phần mềm
+          </Button>
+        </Space>
       </Space>
 
       <DataTable<Application>
@@ -283,6 +347,10 @@ function InfraTab() {
         page={page}
         pageSize={limit}
         onPageChange={(p, ps) => { setPage(p); setLimit(ps); }}
+        rowSelection={{
+          selectedRowKeys,
+          onChange: (keys) => setSelectedRowKeys(keys as string[]),
+        }}
       />
 
       <ApplicationForm open={formOpen} app={editApp} onClose={() => setFormOpen(false)} initialType="SYSTEM" />

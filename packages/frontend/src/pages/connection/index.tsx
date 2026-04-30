@@ -27,7 +27,8 @@ export default function ConnectionListPage() {
   const [envFilter, setEnvFilter] = useState<string | undefined>();
   const [typeFilter, setTypeFilter] = useState<string | undefined>();
   const [page, setPage] = useState(1);
-  const [limit] = useState(20);
+  const [limit, setLimit] = useState(20);
+  const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
 
   // Form state
   const [formOpen, setFormOpen] = useState(false);
@@ -73,9 +74,21 @@ export default function ConnectionListPage() {
     try {
       await deleteConn.mutateAsync(id);
       message.success('Đã xoá kết nối');
+      setSelectedRowKeys((prev) => prev.filter((k) => k !== id));
     } catch {
       message.error('Không thể xoá kết nối');
     }
+  };
+
+  const handleBulkDelete = async () => {
+    const results = await Promise.allSettled(
+      selectedRowKeys.map((id) => deleteConn.mutateAsync(id)),
+    );
+    const failed = results.filter((r) => r.status === 'rejected').length;
+    const succeeded = results.length - failed;
+    if (succeeded > 0) message.success(`Đã xoá ${succeeded} kết nối`);
+    if (failed > 0) message.error(`${failed} kết nối không thể xoá`);
+    setSelectedRowKeys([]);
   };
 
   const openDependency = (appId: string, appName: string) => {
@@ -173,13 +186,28 @@ export default function ConnectionListPage() {
         title="App Connections"
         subtitle="Quản lý kết nối giữa các ứng dụng"
         extra={
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => { setEditing(null); setFormOpen(true); }}
-          >
-            Thêm kết nối
-          </Button>
+          <Space>
+            {selectedRowKeys.length > 0 && (
+              <Popconfirm
+                title={`Xoá ${selectedRowKeys.length} kết nối đã chọn?`}
+                onConfirm={handleBulkDelete}
+                okText="Xoá"
+                cancelText="Huỷ"
+                okType="danger"
+              >
+                <Button danger icon={<DeleteOutlined />}>
+                  Xoá {selectedRowKeys.length} mục
+                </Button>
+              </Popconfirm>
+            )}
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => { setEditing(null); setFormOpen(true); }}
+            >
+              Thêm kết nối
+            </Button>
+          </Space>
         }
       />
 
@@ -210,15 +238,19 @@ export default function ConnectionListPage() {
         />
       </Space>
 
-      <DataTable
+      <DataTable<AppConnection>
         columns={columns}
         dataSource={data?.items ?? []}
         loading={isLoading}
         total={data?.total ?? 0}
         page={page}
-        limit={limit}
-        onPageChange={setPage}
+        pageSize={limit}
+        onPageChange={(p, ps) => { setPage(p); setLimit(ps); }}
         rowKey="id"
+        rowSelection={{
+          selectedRowKeys,
+          onChange: (keys) => setSelectedRowKeys(keys as string[]),
+        }}
       />
 
       <ConnectionForm
