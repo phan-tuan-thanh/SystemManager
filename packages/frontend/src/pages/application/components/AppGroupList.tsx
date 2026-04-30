@@ -12,7 +12,7 @@ export default function AppGroupList() {
   const [search, setSearch] = useState('');
   const [groupTypeFilter, setGroupTypeFilter] = useState<GroupType | undefined>();
   const [page, setPage] = useState(1);
-  const [limit] = useState(20);
+  const [limit, setLimit] = useState(20);
   const [modalOpen, setModalOpen] = useState(false);
   const [editGroup, setEditGroup] = useState<ApplicationGroup | null>(null);
   const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
@@ -161,16 +161,13 @@ export default function AppGroupList() {
         dataSource={data?.items ?? []}
         loading={isLoading}
         rowKey="id"
+        total={data?.total ?? 0}
+        page={page}
+        pageSize={limit}
+        onPageChange={(p, ps) => { setPage(p); setLimit(ps); }}
         rowSelection={{
-          type: 'checkbox',
           selectedRowKeys,
           onChange: (keys) => setSelectedRowKeys(keys as string[]),
-        }}
-        pagination={{
-          current: page,
-          pageSize: limit,
-          total: data?.total ?? 0,
-          onChange: setPage,
         }}
       />
 
