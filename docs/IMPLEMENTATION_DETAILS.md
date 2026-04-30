@@ -4,6 +4,25 @@ This document consolidates all past implementation plans and detailed technical 
 
 ---
 
+## Sprint 21 Topology Smart Auto-Layout (2026-04-30)
+
+**Status:** ✅ Completed
+**Context:** Topology 2D dùng dagre nhưng direction bị ẩn sau tên 'force'/'hierarchical' gây nhầm lẫn; không có lựa chọn thuật toán nào khác; collision khi drag chỉ push theo trục Y.
+**Decision:**
+- S21-01: Thêm `layoutDirection: 'TB' | 'LR'` vào FilterState — explicit direction control. `computeLayout` và `handleAutoArrange` dùng `filters.layoutDirection` trực tiếp thay vì suy ra từ `layout`. FilterPanel: Segmented "↓ TB | → LR" khi React Flow, ẩn khi vis-network. `layout: 'force'|'hierarchical'` giữ nguyên cho vis-network backward compat.
+- S21-02: Cài `elkjs` (0.9.x). Thêm `layoutAlgorithm: 'dagre' | 'elk'` vào FilterState. Dagre synchronous trong useMemo (default). ELK async, chỉ trigger khi bấm "Sắp xếp". `applyElkLayout(nodes, edges, direction)` → Promise<Node[]>. ELK options: algorithm=`org.eclipse.elk.layered`, spacing.nodeNode=80, spacing.edgeNode=40. FilterPanel: Segmented "Dagre | ELK" khi React Flow.
+- S21-03: Cải thiện `handleNodeDragStop` — sau khi phát hiện collision, thử 8 hướng (N/NE/E/SE/S/SW/W/NW) với step = max(nW,nH)+GAP. Tìm vị trí free gần nhất theo khoảng cách Euclidean từ điểm thả.
+**Files impacted:**
+- `packages/frontend/package.json` — thêm `elkjs` (update)
+- `packages/frontend/src/pages/topology/index.tsx` — FilterState + applyElkLayout + handleAutoArrange + handleNodeDragStop (update)
+- `packages/frontend/src/pages/topology/components/TopologyFilterPanel.tsx` — algorithm + direction controls (update)
+**Trade-offs:** ELK async chỉ trigger qua button chứ không auto-layout khi filter thay đổi (dagre vẫn handle case đó). ELK file bundled (~800KB) tăng bundle nhẹ nhưng không ảnh hưởng initial load vì lazy.
+**Outcome:** S21-01: FilterState có `layoutDirection`/`layoutAlgorithm`, FilterPanel có Dagre|ELK và ↓TB|→LR segmented. S21-02: `applyElkLayout` async function, handleAutoArrange hỗ trợ elk với fallback dagre. S21-03: 8-direction push tìm vị trí free gần nhất theo khoảng cách Euclidean. Pre-existing TS warnings trong topology/index.tsx cũng được fix (dagre @ts-expect-error, Segmented removed, isolated node grid, stableUpdateEdgeLabel typed).
+**Completed:** 2026-04-30
+**Sprint plan ref:** `docs/plans/sprint-21-topology-smart-layout.md`
+
+---
+
 ## Sprint 20 UI/UX Polish (2026-04-30)
 
 **Status:** ✅ Completed

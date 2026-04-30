@@ -4,6 +4,25 @@ A chronological record of project milestones, updates, and sprint summaries.
 
 ---
 
+## 2026-04-30 — Sprint 21: Topology Smart Auto-Layout ✅ Hoàn thành
+
+- ✅ S21-01: FilterState thêm `layoutAlgorithm` / `layoutDirection`; FilterPanel: Segmented Dagre|ELK + ↓TB|→LR
+- ✅ S21-02: `elkjs` installed; `applyElkLayout` async (ELK layered, fallback dagre); handleAutoArrange async
+- ✅ S21-03: 8-direction collision push trong handleNodeDragStop (N/NE/E/SE/S/SW/W/NW, nearest by Euclidean dist)
+- Bonus: fix pre-existing TS warnings trong topology/index.tsx
+- Branch: `feat/sprint-21-topology-smart-layout` pushed
+- Sprint plan: `docs/plans/sprint-21-topology-smart-layout.md` cập nhật
+
+## 2026-04-30 — Sprint 21: Bắt đầu implement Topology Smart Auto-Layout
+
+- Yêu cầu ghi nhận vào SRS.md section 4.5.7
+- Sprint plan tạo mới: `docs/plans/sprint-21-topology-smart-layout.md`
+- Kế hoạch kỹ thuật: `docs/IMPLEMENTATION_DETAILS.md` (entry Sprint 21)
+- Tasks mới: S21-01 đến S21-03 (9 points)
+- Nội dung: layoutDirection control, ELK engine, 8-direction collision push
+
+---
+
 ## 2026-04-30 — Sprint 20: UI/UX Polish ✅ Hoàn thành
 
 - ✅ S20-01: `infra-upload/index.tsx` — Dragger + Steps 4-bước wizard (đồng nhất với app-import)

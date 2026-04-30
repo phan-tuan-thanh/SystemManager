@@ -18,7 +18,10 @@ import ReactFlow, {
   ReactFlowInstance,
   NodeChange,
 } from 'reactflow';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-expect-error dagre has no bundled types
 import dagre from 'dagre';
+import ELK from 'elkjs/lib/elk.bundled.js';
 import 'reactflow/dist/style.css';
 
 import {
@@ -32,7 +35,6 @@ import {
   Modal,
   Badge,
   App,
-  Segmented,
   Tag,
 } from 'antd';
 import {
@@ -229,7 +231,6 @@ function buildGraph(
     if (nodeType !== 'app') {
       const apps = server.deployments;
 
-      const paddingX = 14;
       const paddingY = 48; // matches compact header height
       const isContainer = nodeType === 'all' && apps.length > 0;
 
@@ -377,7 +378,7 @@ function buildGraph(
   return { nodes, edges };
 }
 
-function applyDagreLayout(nodes: Node[], edges: Edge[], direction: 'TB' | 'LR'): Node[] {
+function applyDagreLayout(nodes: Node[], edges: Edge[], direction: 'TB' | 'BT' | 'LR' | 'RL'): Node[] {
   const g = new dagre.graphlib.Graph();
   g.setDefaultEdgeLabel(() => ({}));
   g.setGraph({ rankdir: direction, nodesep: 140, ranksep: 200, edgesep: 40, marginx: 60, marginy: 60 });
@@ -434,14 +435,13 @@ function applyDagreLayout(nodes: Node[], edges: Edge[], direction: 'TB' | 'LR'):
     isolatedNodes.forEach((node, idx) => {
       const col = idx % COLS;
       const row = Math.floor(idx / COLS);
-      const w = node.style?.width as number ?? (node.type === 'serverNode' ? SERVER_NODE_W : APP_NODE_W);
-      const h = node.style?.height as number ?? (node.type === 'serverNode' ? SERVER_NODE_H : APP_NODE_H);
-      
+      const nodeW = (node.style?.width as number) ?? (node.type === 'serverNode' ? SERVER_NODE_W : APP_NODE_W);
+      const nodeH = (node.style?.height as number) ?? (node.type === 'serverNode' ? SERVER_NODE_H : APP_NODE_H);
       const targetNode = laidOutNodes.find(n => n.id === node.id);
       if (targetNode) {
         targetNode.position = {
-          x: col * (SERVER_NODE_W + GRID_GAP),
-          y: START_Y + row * (SERVER_NODE_H + GRID_GAP)
+          x: col * (nodeW + GRID_GAP),
+          y: START_Y + row * (nodeH + GRID_GAP),
         };
       }
     });
@@ -450,15 +450,87 @@ function applyDagreLayout(nodes: Node[], edges: Edge[], direction: 'TB' | 'LR'):
   return laidOutNodes;
 }
 
+const _elkInstance = new ELK();
+
+const ELK_ALGO_MAP: Record<string, string> = {
+  'elk-layered': 'org.eclipse.elk.layered',
+  'elk-force':   'org.eclipse.elk.force',
+  'elk-tree':    'org.eclipse.elk.mrtree',
+  'elk-radial':  'org.eclipse.elk.radial',
+};
+
+const ELK_DIR_MAP: Record<string, string> = {
+  TB: 'DOWN',
+  BT: 'UP',
+  LR: 'RIGHT',
+  RL: 'LEFT',
+};
+
+async function applyElkLayout(
+  nodes: Node[],
+  edges: Edge[],
+  algorithm: 'elk-layered' | 'elk-force' | 'elk-tree' | 'elk-radial',
+  direction: 'TB' | 'BT' | 'LR' | 'RL',
+): Promise<Node[]> {
+  const topNodes = nodes.filter((n) => !n.parentNode);
+  const elkChildren = topNodes.map((n) => ({
+    id: n.id,
+    width: (n.style?.width as number) ?? (n.type === 'serverNode' ? SERVER_NODE_W : APP_NODE_W),
+    height: (n.style?.height as number) ?? (n.type === 'serverNode' ? SERVER_NODE_H : APP_NODE_H),
+  }));
+
+  // Deduplicate edges between top-level parent nodes
+  const seen = new Set<string>();
+  const elkEdges: { id: string; sources: string[]; targets: string[] }[] = [];
+  edges.forEach((e) => {
+    const src = nodes.find((n) => n.id === e.source)?.parentNode ?? e.source;
+    const tgt = nodes.find((n) => n.id === e.target)?.parentNode ?? e.target;
+    if (src === tgt) return;
+    const key = `${src}||${tgt}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    elkEdges.push({ id: `${src}-${tgt}`, sources: [src], targets: [tgt] });
+  });
+
+  const elkAlgo = ELK_ALGO_MAP[algorithm] ?? 'org.eclipse.elk.layered';
+  const elkDir  = ELK_DIR_MAP[direction]   ?? 'DOWN';
+
+  const graph = {
+    id: 'root',
+    layoutOptions: {
+      'algorithm': elkAlgo,
+      'elk.direction': elkDir,
+      'spacing.nodeNode': '80',
+      'spacing.edgeNode': '40',
+      'spacing.edgeEdge': '20',
+      'org.eclipse.elk.layered.spacing.nodeNodeBetweenLayers': '140',
+    },
+    children: elkChildren,
+    edges: elkEdges,
+  };
+
+  const result = await _elkInstance.layout(graph);
+
+  const posMap = new Map<string, { x: number; y: number }>();
+  result.children?.forEach((n) => {
+    if (n.x !== undefined && n.y !== undefined) posMap.set(n.id, { x: n.x, y: n.y });
+  });
+
+  return nodes.map((node) => {
+    if (node.parentNode) return node;
+    const pos = posMap.get(node.id);
+    return pos ? { ...node, position: pos } : node;
+  });
+}
+
 function computeLayout(
   servers: ServerNode[],
   connections: ConnectionEdge[],
   nodeType: 'all' | 'server' | 'app',
-  layout: 'force' | 'hierarchical',
+  direction: 'TB' | 'BT' | 'LR' | 'RL',
   edgeStyle: 'bezier' | 'step' = 'bezier',
 ): { nodes: Node[]; edges: Edge[] } {
   const { nodes, edges } = buildGraph(servers, connections, nodeType, edgeStyle);
-  const direction = layout === 'hierarchical' ? 'TB' : 'LR';
   const layoutNodes = applyDagreLayout(nodes, edges, direction);
   return { nodes: layoutNodes, edges };
 }
@@ -492,12 +564,14 @@ function TopologyPageInner() {
     nodeType: 'all' | 'server' | 'app';
     showMiniMap: boolean;
     layout: 'force' | 'hierarchical';
+    layoutAlgorithm: 'dagre' | 'elk-layered' | 'elk-force' | 'elk-tree' | 'elk-radial';
+    layoutDirection: 'TB' | 'BT' | 'LR' | 'RL';
     connectionMode: boolean;
     edgeStyle: 'bezier' | 'step';
     visibleGroupNames: string[];
     visibleServerIds: string[];
     visibleAppIds: string[];
-  }>({ nodeType: 'all', showMiniMap: true, layout: 'force', connectionMode: false, edgeStyle: 'bezier', visibleGroupNames: [], visibleServerIds: [], visibleAppIds: [] });
+  }>({ nodeType: 'all', showMiniMap: true, layout: 'force', layoutAlgorithm: 'dagre', layoutDirection: 'LR', connectionMode: false, edgeStyle: 'bezier', visibleGroupNames: [], visibleServerIds: [], visibleAppIds: [] });
 
   const [selectedNode, setSelectedNode] = useState<any>(null);
   const [selectedConnection, setSelectedConnection] = useState<ConnectionEdge | null>(null);
@@ -521,9 +595,9 @@ function TopologyPageInner() {
   const positionsModeRef = useRef<string>(filters.nodeType);
 
   // Stable ref to setEdges for use inside edge label drag callbacks
-  const setEdgesRef = useRef<any>(null);
+  const setEdgesRef = useRef<((updater: (edges: Edge[]) => Edge[]) => void) | null>(null);
   const stableUpdateEdgeLabel = useCallback((edgeId: string, dx: number, dy: number) => {
-    setEdgesRef.current?.((prev) => prev.map((e) => {
+    setEdgesRef.current?.((prev: Edge[]) => prev.map((e: Edge) => {
       if (e.id !== edgeId) return e;
       return {
         ...e,
@@ -660,7 +734,7 @@ function TopologyPageInner() {
   const { nodes: computedNodes, edges: computedEdges } = useMemo(() => {
     if (!data?.topology) return { nodes: [], edges: [] };
     // Use filtered data for React Flow too
-    const result = computeLayout(filteredData.servers, filteredData.connections, filters.nodeType, filters.layout, filters.edgeStyle);
+    const result = computeLayout(filteredData.servers, filteredData.connections, filters.nodeType, filters.layoutDirection, filters.edgeStyle);
     // Attach stable onLabelMove callback to each edge for draggable labels
     const edgesWithCallback = result.edges.map((e) => ({
       ...e,
@@ -670,7 +744,7 @@ function TopologyPageInner() {
       },
     }));
     return { nodes: result.nodes, edges: edgesWithCallback };
-  }, [filteredData, filters.nodeType, filters.layout, filters.edgeStyle, stableUpdateEdgeLabel]);
+  }, [filteredData, filters.nodeType, filters.layoutDirection, filters.edgeStyle, stableUpdateEdgeLabel]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(computedNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(computedEdges);
@@ -815,8 +889,7 @@ function TopologyPageInner() {
       return;
     }
 
-    // ── TOP-LEVEL NODE: collision push ────────────────────────────────
-    // Snapping was already done in handleNodesChange. Here we just ensure no overlap.
+    // ── TOP-LEVEL NODE: 8-direction collision push ───────────────────
     const GAP = 8;
     const { x, y } = node.position;
     const nW = node.width ?? 160;
@@ -830,20 +903,33 @@ function TopologyPageInner() {
              ty < other.position.y + oH - 2 && ty + nH > other.position.y + 2;
     });
 
-    if (collidesAt(x, y)) {
-      const step = nH + GAP;
-      let resolved = false;
-      for (let i = 1; i <= 20 && !resolved; i++) {
-        for (const dir of [1, -1]) {
-          const ty = y + i * step * dir;
-          if (!collidesAt(x, ty)) {
-            setNodes((nds) => nds.map((n) => n.id === node.id ? { ...n, position: { x, y: ty } } : n));
-            userPositionsRef.current[node.id] = { x, y: ty };
-            resolved = true;
-            break;
-          }
+    if (!collidesAt(x, y)) {
+      userPositionsRef.current[node.id] = { x, y };
+      return;
+    }
+
+    // Try 8 compass directions, expanding outward ring by ring
+    const step = Math.max(nW, nH) + GAP;
+    const DIRS = [
+      { dx: 0, dy: -1 }, { dx: 1, dy: -1 }, { dx: 1, dy: 0 }, { dx: 1, dy: 1 },
+      { dx: 0, dy: 1 }, { dx: -1, dy: 1 }, { dx: -1, dy: 0 }, { dx: -1, dy: -1 },
+    ];
+    let bestPos: { x: number; y: number } | null = null;
+    for (let ring = 1; ring <= 20 && !bestPos; ring++) {
+      let nearest: { pos: { x: number; y: number }; dist: number } | null = null;
+      for (const { dx, dy } of DIRS) {
+        const tx = x + dx * ring * step;
+        const ty = y + dy * ring * step;
+        if (!collidesAt(tx, ty)) {
+          const dist = Math.sqrt((tx - x) ** 2 + (ty - y) ** 2);
+          if (!nearest || dist < nearest.dist) nearest = { pos: { x: tx, y: ty }, dist };
         }
       }
+      if (nearest) bestPos = nearest.pos;
+    }
+    if (bestPos) {
+      setNodes((nds) => nds.map((n) => n.id === node.id ? { ...n, position: bestPos! } : n));
+      userPositionsRef.current[node.id] = bestPos;
     }
   }, [setNodes]);
 
@@ -888,17 +974,28 @@ function TopologyPageInner() {
     onNodesChange(alignedChanges);
   }, [onNodesChange]);
 
-  const handleAutoArrange = useCallback(() => {
+  const handleAutoArrange = useCallback(async () => {
     if (renderEngine === 'visnetwork') {
       visNetworkViewRef.current?.autoArrange();
       return;
     }
-    // React Flow: clear saved positions, re-run dagre, then fit with zoom clamps
     userPositionsRef.current = {};
-    const direction = filters.layout === 'hierarchical' ? ('TB' as const) : ('LR' as const);
-    const arranged = applyDagreLayout(nodes, edges, direction);
+    let arranged: Node[];
+    if (filters.layoutAlgorithm !== 'dagre') {
+      try {
+        arranged = await applyElkLayout(
+          nodes, edges,
+          filters.layoutAlgorithm as 'elk-layered' | 'elk-force' | 'elk-tree' | 'elk-radial',
+          filters.layoutDirection,
+        );
+      } catch {
+        // Fall back to dagre if ELK fails
+        arranged = applyDagreLayout(nodes, edges, filters.layoutDirection);
+      }
+    } else {
+      arranged = applyDagreLayout(nodes, edges, filters.layoutDirection);
+    }
     setNodes(arranged);
-    // Double rAF: first frame commits new positions, second frame triggers fitView after paint
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         reactFlowRef.current?.fitView({
@@ -910,7 +1007,7 @@ function TopologyPageInner() {
         });
       });
     });
-  }, [renderEngine, nodes, edges, filters.layout, setNodes]);
+  }, [renderEngine, nodes, edges, filters.layoutAlgorithm, filters.layoutDirection, setNodes]);
 
   const onConnect = useCallback(async (params: any) => {
     if (!filters.connectionMode) return;
