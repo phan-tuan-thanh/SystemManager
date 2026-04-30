@@ -1,6 +1,6 @@
 # SystemManager — Agile Task List & Sprint Plan
 
-> **Trạng thái hiện tại:** Sprint 18 ✅ DONE — Multi-Port, Connection Import & UI Consolidation
+> **Trạng thái hiện tại:** Sprint 22 ✅ DONE — Topology UX: Auto-Layout Trigger, Cascade Filter & Connection Health
 
 ---
 
@@ -501,7 +501,7 @@
 
 ---
 
-## Sprint 21 — Topology Smart Auto-Layout & Collision Avoidance 🔄 IN PROGRESS
+## Sprint 21 — Topology Smart Auto-Layout & Collision Avoidance ✅ DONE
 
 **Mục tiêu:** Nâng cấp layout Topology 2D: thêm thuật toán ELK, direction toggle TB/LR, cải thiện collision avoidance khi drag.
 **Thời gian:** 2026-04-30
@@ -515,6 +515,23 @@
 | S21-03 | `[FE]` Cải thiện collision avoidance trong handleNodeDragStop: 8-direction push | 2 | ✅ | 4.5.7 |
 
 **Sprint 21 Total: 9 points**
+
+---
+
+## Sprint 22 — Topology UX: Auto-Layout Trigger, Cascade Filter & Connection Health ✅ DONE
+
+**Mục tiêu:** 3 cải tiến UX cho Topology 2D: tự động sắp xếp khi đổi thuật toán, lọc node theo cascade (group→server→app), và panel đánh giá chất lượng kết nối.
+**Thời gian:** 2026-04-30
+**Branch:** `feat/sprint-22-topology-ux`
+**Plan:** [docs/plans/sprint-22-topology-ux.md](docs/plans/sprint-22-topology-ux.md)
+
+| # | Task | Points | Status | SRS Ref |
+|---|------|--------|--------|---------|
+| S22-01 | `[FE]` Auto-arrange khi thay đổi `layoutAlgorithm` / `layoutDirection` trong ReactFlow | 2 | ✅ | 4.5.8 |
+| S22-02 | `[FE]` Cascade filter: chọn group → lọc server options; chọn server → lọc app options | 3 | ✅ | 4.5.9 |
+| S22-03 | `[FE]` ConnectionHealthDrawer: phân tích circular deps, SPoF, orphaned, cross-env, dead links | 5 | ✅ | 4.5.10 |
+
+**Sprint 22 Total: 10 points**
 
 ---
 

@@ -1,22 +1,23 @@
 {
   "_meta": {
     "purpose": "AI Agent handoff file — tracks exact build state so any agent can continue without re-reading the entire codebase",
-    "updated_at": "2026-04-30T17:00:00+07:00",
+    "updated_at": "2026-04-30T23:59:00+07:00",
     "updated_by": "Claude Sonnet 4.6",
     "schema_version": "2",
     "agile_planning": {
       "task_list": "TASKS.md",
       "reports_folder": "docs/reports/",
-      "current_sprint": "Sprint 21 ✅ DONE — Topology Smart Auto-Layout (S21-01 to S21-03 implemented)",
+      "current_sprint": "Sprint 22 ✅ DONE — Topology UX: Auto-Layout Trigger, Cascade Filter & Connection Health",
+      "active_branch": "feat/sprint-22-topology-ux",
       "sprint_report_template": "docs/reports/sprint-template.md",
-      "completed_sprint_reports": ["docs/reports/sprint-00-bootstrap.md", "docs/reports/sprint-01.md", "docs/reports/sprint-02.md", "docs/reports/sprint-03.md", "docs/reports/sprint-04.md", "docs/reports/sprint-05.md", "docs/reports/sprint-06.md", "docs/reports/sprint-07.md", "docs/reports/sprint-08.md", "docs/reports/sprint-09.md", "docs/reports/sprint-10.md", "docs/reports/sprint-11.md", "docs/reports/sprint-12.md", "docs/reports/sprint-13.md", "docs/reports/sprint-14.md", "docs/reports/sprint-15.md", "docs/reports/sprint-16.md", "docs/reports/sprint-17.md", "docs/reports/sprint-18.md", "docs/reports/sprint-19.md", "docs/reports/sprint-20.md"]
+      "completed_sprint_reports": ["docs/reports/sprint-00-bootstrap.md", "docs/reports/sprint-01.md", "docs/reports/sprint-02.md", "docs/reports/sprint-03.md", "docs/reports/sprint-04.md", "docs/reports/sprint-05.md", "docs/reports/sprint-06.md", "docs/reports/sprint-07.md", "docs/reports/sprint-08.md", "docs/reports/sprint-09.md", "docs/reports/sprint-10.md", "docs/reports/sprint-11.md", "docs/reports/sprint-12.md", "docs/reports/sprint-13.md", "docs/reports/sprint-14.md", "docs/reports/sprint-19.md", "docs/reports/sprint-20.md", "docs/reports/sprint-21.md", "docs/reports/sprint-22.md"]
     }
   },
 
   "project": {
     "name": "SystemManager",
     "description": "Infrastructure & Deployment Management System",
-    "repo_root": "/Users/ptud/Documents/Labs/SystemManager",
+    "repo_root": "/Users/thanhphan/Documents/SystemManager",
     "srs": "docs/SRS.md",
     "tech_stack": {
       "backend": "NestJS + TypeScript + Prisma + PostgreSQL",
@@ -475,7 +476,7 @@
       "topology/TopologyPage": {
         "status": "COMPLETE",
         "route": "/topology",
-        "notes": "React Flow 2D canvas. Interactive features: drag/drop connection creation (onConnect) with port selection, direct edge deletion, draggable protocol labels. Networks layout with nested ServerBoxes. Custom ServerFlowNode (purpose/status/IP/deployment count) + AppFlowNode (group/version/status). Custom ProtocolEdge with color-coded labels. Controls + MiniMap + Background. Filter panel (env/nodeType/layout/minimap). NodeDetailPanel drawer on click. Export PNG/SVG/JSON/Mermaid. Save snapshot modal. SnapshotBrowser drawer (list + view + compare diff)."
+        "notes": "React Flow 2D canvas. Engines: ReactFlow / vis-network / Mermaid. Layout algorithms: Dagre + ELK (layered/force/tree/radial). Direction: TB/BT/LR/RL. Auto-arrange on algorithm/direction change. 8-direction collision avoidance on drag. Edge styles: bezier/step. Connection mode (draw edge to create). Draggable protocol labels. Node visibility filter (modal) with cascade: group→server→app. Connection health drawer: analyzeTopologyHealth() — circular dep, dead connection, cross-env, SPoF, orphaned app; focus node on click. Export PNG/SVG/JSON/Mermaid. Save snapshot + SnapshotBrowser. Fullscreen. Mermaid preview: auto-fit + CSS zoom (25–400%)."
       },
       "infra-system/InfraSystemPage": {
         "status": "COMPLETE",
@@ -503,8 +504,8 @@
   },
 
   "progress": {
-    "phase": "Sprint 18 ✅ DONE — Multi-Port, Connection Import & UI Consolidation",
-    "overall_pct": 44,
+    "phase": "Sprint 22 ✅ DONE — Topology UX: Auto-Layout Trigger, Cascade Filter & Connection Health",
+    "overall_pct": 52,
     "breakdown": {
       "infrastructure":   { "pct": 100, "note": "Docker, DB, migrations, monorepo, Dockerfiles, ESLint, Prettier" },
       "backend_common":   { "pct": 100, "note": "Guards, decorators, interceptors, filters — all registered globally in main.ts" },
@@ -534,7 +535,11 @@
       "frontend_topology_interactive": { "pct": 100, "note": "Sprint 14 complete: Floating filters, node visual distinction, compact auto-arrange for disconnected nodes, vis-network default." },
       "backend_server_enrichment": { "pct": 100, "note": "Sprint 15: Added 'os' field and detailed hardware specs import logic. Refactored Upload UI and Detail view. Complete." },
       "frontend_import_consolidation": { "pct": 100, "note": "Sprint 18: Consolidated 3 upload pages (app/deployment/connection) into 1 unified /app-import page with tabbed interface. Sidebar: 3 menu items → 1 'Import CSV' item. Backward compat via redirects." },
-      "frontend_topology_layout_fix": { "pct": 100, "note": "Sprint 18: Fixed topology page layout. Moved Segmented controls from title prop (block <h4>) to extra prop (flex layout)." }
+      "frontend_topology_layout_fix": { "pct": 100, "note": "Sprint 18: Fixed topology page layout. Moved Segmented controls from title prop (block <h4>) to extra prop (flex layout)." },
+      "frontend_topology_orthogonal_edges": { "pct": 100, "note": "Sprint 19: edgeStyle bezier/step, getSmoothStepPath dual-mode, parallel edge spread, node visibility filter (modal) với 3 multi-select." },
+      "frontend_ux_polish": { "pct": 100, "note": "Sprint 20: infra-upload Dragger+Steps wizard, guide docs import, AppGroupList bulk delete, HardwareTab KV editor, form layout 2-column." },
+      "frontend_topology_smart_layout": { "pct": 100, "note": "Sprint 21: ELK engine (layered/force/tree/radial), direction TB/BT/LR/RL, Algorithm+Direction Select dropdowns, 8-direction collision push." },
+      "frontend_topology_ux": { "pct": 100, "note": "Sprint 22: auto-arrange on filter change, cascade filter group→server→app, ConnectionHealthDrawer (5 issue types), Mermaid zoom+auto-fit." }
     }
   },
 
@@ -552,45 +557,61 @@
       "fix": "After any session, verify prisma.service.ts extends PrismaClient (not MockPrismaClient). Run docker compose up backend --build to confirm no ReferenceError at startup."
     },
     {
-      "id": "ISSUE-005",
+      "id": "ISSUE-006",
       "severity": "MEDIUM",
-      "description": "Frontend (Sprint 0) calls API and expects flat JSON. TransformInterceptor now wraps all responses in {data, message, meta}. Frontend api/client.ts must be updated to unwrap .data.",
-      "fix": "Sprint 2: update src/api/client.ts axios response interceptor to unwrap data.data, or update each hook individually."
+      "description": "Pre-existing TS errors in unrelated files (Topology3DView, CreateConnectionModal, changeset pages). Do not introduce new errors when editing these files.",
+      "fix": "Address separately per file when touching those modules."
+    },
+    {
+      "id": "ISSUE-007",
+      "severity": "LOW",
+      "description": "Docker pgdata volume password mismatch: if start.sh -b fails with 'Database authentication failed', the volume was init'd with a different password than 'postgres'.",
+      "fix": "Run: docker exec systemmanager-db-1 psql -U postgres -c \"ALTER USER postgres WITH PASSWORD 'postgres';\" — fixes without data loss."
     }
   ],
 
   "next_tasks": [
     {
       "priority": 1,
-      "task": "Production deployment — Docker Compose with nginx + SSL",
+      "task": "Merge feat/sprint-22-topology-ux → main",
+      "description": "PR #4 đã tạo. Review và merge.",
+      "pr": "https://github.com/phan-tuan-thanh/SystemManager/pull/4",
+      "sprint": "Sprint 22 close-out"
+    },
+    {
+      "priority": 2,
+      "task": "Fix pre-existing TS errors trong 3D topology files",
+      "description": "Topology3DView.tsx, ConnectionEdge3D.tsx có lỗi three.js/react-three-fiber type mismatch. CreateConnectionModal.tsx unused imports.",
+      "files": [
+        "packages/frontend/src/pages/topology/components/Topology3DView.tsx",
+        "packages/frontend/src/pages/topology/components/edges/ConnectionEdge3D.tsx",
+        "packages/frontend/src/pages/topology/components/CreateConnectionModal.tsx"
+      ],
+      "sprint": "Backlog / Sprint 23"
+    },
+    {
+      "priority": 3,
+      "task": "Dashboard — real data từ API",
+      "description": "DashboardPage hiện tại là 4 Statistic cards static (0). Cần call /servers, /applications, /deployments, /connections để hiện số thật.",
+      "files": ["packages/frontend/src/pages/dashboard/DashboardPage.tsx"],
+      "srs_ref": "4.1",
+      "sprint": "Sprint 23"
+    },
+    {
+      "priority": 4,
+      "task": "Production deployment — Docker Compose với nginx + SSL",
       "description": "Configure nginx reverse proxy, SSL certificates, environment separation for PROD.",
       "files": ["docker-compose.prod.yml", "nginx/nginx.conf"],
       "srs_ref": "DevOps",
       "sprint": "Backlog BL-09"
     },
     {
-      "priority": 2,
+      "priority": 5,
       "task": "CI/CD GitHub Actions — lint + test + build + deploy",
       "description": "Set up GitHub Actions pipeline: lint, unit tests, Docker build, deploy to staging.",
       "files": [".github/workflows/ci.yml"],
       "srs_ref": "DevOps",
       "sprint": "Backlog BL-08"
-    },
-    {
-      "priority": 3,
-      "task": "Configure Azure AD app registration for MS365 SSO",
-      "description": "Register application in Azure AD portal, add MS365_TENANT_ID, MS365_CLIENT_ID, MS365_CLIENT_SECRET to .env",
-      "files": [".env.example"],
-      "srs_ref": "4.0.1",
-      "sprint": "Post-sprint config"
-    },
-    {
-      "priority": 4,
-      "task": "Install exceljs package (for Excel import support)",
-      "description": "Rebuild Docker backend to install exceljs: docker compose build backend && docker compose up -d backend",
-      "files": ["packages/backend/package.json"],
-      "srs_ref": "4.0b",
-      "sprint": "Post-sprint build"
     }
   ],
 

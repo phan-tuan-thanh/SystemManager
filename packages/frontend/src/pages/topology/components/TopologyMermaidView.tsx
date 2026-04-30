@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Tabs, Button, Space, Spin, Empty, message } from 'antd';
-import { CopyOutlined, DownloadOutlined } from '@ant-design/icons';
+import { Tabs, Button, Space, Spin, Empty, Tooltip, message } from 'antd';
+import { CopyOutlined, DownloadOutlined, ZoomInOutlined, ZoomOutOutlined, CompressOutlined } from '@ant-design/icons';
 import mermaid from 'mermaid';
 import type { ServerNode, ConnectionEdge } from '../hooks/useTopology';
 
@@ -55,11 +55,28 @@ interface Props {
   environment?: string;
 }
 
+const ZOOM_MIN = 0.25;
+const ZOOM_MAX = 4;
+const ZOOM_STEP = 0.25;
+
+function clampZoom(z: number) {
+  return Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, z));
+}
+
 export default function TopologyMermaidView({ servers, connections, environment }: Props) {
   const [svg, setSvg] = useState('');
   const [rendering, setRendering] = useState(false);
   const [error, setError] = useState('');
   const currentRender = useRef(0);
+
+  const [zoom, setZoom] = useState(1);
+
+  const resetView = useCallback(() => setZoom(1), []);
+  const zoomIn  = useCallback(() => setZoom((z) => clampZoom(z + ZOOM_STEP)), []);
+  const zoomOut = useCallback(() => setZoom((z) => clampZoom(z - ZOOM_STEP)), []);
+
+  // Reset zoom whenever the diagram changes
+  useEffect(() => { setZoom(1); }, [svg]);
 
   const source = buildMermaidSource(servers, connections);
 
@@ -104,8 +121,22 @@ export default function TopologyMermaidView({ servers, connections, environment 
     URL.revokeObjectURL(a.href);
   }, [source, environment]);
 
+  const zoomLabel = `${Math.round(zoom * 100)}%`;
+
   const extraButtons = (
     <Space size={4}>
+      <Tooltip title="Thu nhỏ">
+        <Button size="small" icon={<ZoomOutOutlined />} onClick={zoomOut} disabled={!svg || zoom <= ZOOM_MIN} />
+      </Tooltip>
+      <span style={{ fontSize: 12, color: '#595959', minWidth: 38, textAlign: 'center', display: 'inline-block' }}>
+        {zoomLabel}
+      </span>
+      <Tooltip title="Phóng to">
+        <Button size="small" icon={<ZoomInOutlined />} onClick={zoomIn} disabled={!svg || zoom >= ZOOM_MAX} />
+      </Tooltip>
+      <Tooltip title="Về kích thước gốc (100%)">
+        <Button size="small" icon={<CompressOutlined />} onClick={resetView} disabled={!svg || zoom === 1} />
+      </Tooltip>
       <Button size="small" icon={<CopyOutlined />} onClick={handleCopy} disabled={!source}>
         Copy
       </Button>
@@ -134,11 +165,22 @@ export default function TopologyMermaidView({ servers, connections, environment 
     if (!svg) {
       return <Empty description="Không có dữ liệu kết nối để hiển thị" style={{ padding: 40 }} />;
     }
+
     return (
-      <div
-        style={{ overflow: 'auto', padding: 24, background: '#fff', borderRadius: 8, minHeight: 300 }}
-        dangerouslySetInnerHTML={{ __html: svg }}
-      />
+      // Outer: scroll container — shows full diagram by default, scrolls when zoomed in
+      <div style={{ overflow: 'auto', background: '#fff', borderRadius: 8 }}>
+        {/* CSS zoom property is layout-aware: parent scroll area grows with zoom level */}
+        <div
+          style={{
+            zoom: zoom,
+            padding: 24,
+            display: 'inline-block',
+            minWidth: '100%',
+            boxSizing: 'border-box',
+          }}
+          dangerouslySetInnerHTML={{ __html: svg }}
+        />
+      </div>
     );
   };
 
