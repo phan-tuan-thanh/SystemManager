@@ -9,6 +9,8 @@ interface FilterState {
   nodeType: 'all' | 'server' | 'app';
   showMiniMap: boolean;
   layout: 'force' | 'hierarchical';
+  layoutAlgorithm: 'dagre' | 'elk';
+  layoutDirection: 'TB' | 'LR';
   connectionMode: boolean;
   edgeStyle: 'bezier' | 'step';
   visibleGroupNames: string[];
@@ -238,8 +240,8 @@ export default function TopologyFilterPanel({
           />
         )}
 
-        {/* ── Layout (ReactFlow + vis) ── */}
-        {isInteractive && (
+        {/* ── Layout (vis-network only: physics vs hierarchical) ── */}
+        {isInteractive && !isReactFlow && (
           <Segmented
             size="small"
             value={filters.layout}
@@ -247,6 +249,32 @@ export default function TopologyFilterPanel({
             options={[
               { label: 'Auto', value: 'force' },
               { label: 'Phân cấp', value: 'hierarchical' },
+            ]}
+          />
+        )}
+
+        {/* ── Layout Algorithm (ReactFlow only) ── */}
+        {isReactFlow && (
+          <Segmented
+            size="small"
+            value={filters.layoutAlgorithm}
+            onChange={(v) => onChange({ ...filters, layoutAlgorithm: v as 'dagre' | 'elk' })}
+            options={[
+              { label: 'Dagre', value: 'dagre' },
+              { label: 'ELK', value: 'elk' },
+            ]}
+          />
+        )}
+
+        {/* ── Layout Direction (ReactFlow only) ── */}
+        {isReactFlow && (
+          <Segmented
+            size="small"
+            value={filters.layoutDirection}
+            onChange={(v) => onChange({ ...filters, layoutDirection: v as 'TB' | 'LR' })}
+            options={[
+              { label: '↓ TB', value: 'TB' },
+              { label: '→ LR', value: 'LR' },
             ]}
           />
         )}

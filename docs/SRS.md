@@ -731,6 +731,18 @@ DRAFT → PREVIEWING → APPLIED
 - AC6: Options trong dropdown được lấy động từ dữ liệu topology hiện tại (không hardcode).
 **Added:** 2026-04-29
 
+### 4.5.7 Topology 2D — Smart Auto-Layout & Collision Avoidance
+**Mô tả:** Nâng cấp hệ thống layout cho Topology 2D React Flow. Cho phép chọn thuật toán sắp xếp (Dagre / ELK), chọn hướng layout (Top→Bottom / Left→Right) độc lập, và cải thiện collision avoidance khi kéo thả node.
+**Actor:** ADMIN | OPERATOR | VIEWER
+**Acceptance Criteria:**
+- AC1: Filter bar có Segmented "Thuật toán: Dagre | ELK" (React Flow only).
+- AC2: Filter bar có Segmented "Hướng: ↓ TB | → LR" (React Flow only).
+- AC3: Bấm "Sắp xếp" áp dụng thuật toán và hướng đã chọn, fit view sau khi xong.
+- AC4: ELK layout tránh node chồng lên nhau tốt hơn dagre với graph phức tạp.
+- AC5: Khi kéo node vào vùng node khác, node tự động đẩy ra vị trí gần nhất theo 8 hướng.
+- AC6: Dagre vẫn là default (synchronous) khi load lần đầu và khi đổi filter.
+**Added:** 2026-04-30
+
 ---
 
 ## 4.6. Audit Log & Lịch sử thay đổi *(first-class module)*

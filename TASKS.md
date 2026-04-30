@@ -501,6 +501,23 @@
 
 ---
 
+## Sprint 21 — Topology Smart Auto-Layout & Collision Avoidance 🔄 IN PROGRESS
+
+**Mục tiêu:** Nâng cấp layout Topology 2D: thêm thuật toán ELK, direction toggle TB/LR, cải thiện collision avoidance khi drag.
+**Thời gian:** 2026-04-30
+**Branch:** `feat/sprint-21-topology-smart-layout`
+**Plan:** [docs/plans/sprint-21-topology-smart-layout.md](docs/plans/sprint-21-topology-smart-layout.md)
+
+| # | Task | Points | Status | SRS Ref |
+|---|------|--------|--------|---------|
+| S21-01 | `[FE]` FilterState: thêm `layoutDirection` + cập nhật computeLayout + FilterPanel direction UI | 2 | ✅ | 4.5.7 |
+| S21-02 | `[FE]` Install elkjs + implement `applyElkLayout` async + thêm Algorithm selector trong FilterPanel | 5 | ✅ | 4.5.7 |
+| S21-03 | `[FE]` Cải thiện collision avoidance trong handleNodeDragStop: 8-direction push | 2 | ✅ | 4.5.7 |
+
+**Sprint 21 Total: 9 points**
+
+---
+
 ## Sprint 19 — Topology Orthogonal Edges & UX Polish ✅ DONE
 
 **Mục tiêu:** Bổ sung chế độ kết nối thẳng góc (orthogonal edges) cho Topology 2D, cải thiện khả năng đọc hiểu sơ đồ khi có nhiều kết nối chồng lấp.
