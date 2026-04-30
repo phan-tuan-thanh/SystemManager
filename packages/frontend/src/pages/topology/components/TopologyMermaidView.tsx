@@ -55,9 +55,9 @@ interface Props {
   environment?: string;
 }
 
-const ZOOM_MIN = 0.1;
-const ZOOM_MAX = 8;
-const ZOOM_STEP = 0.15;
+const ZOOM_MIN = 0.25;
+const ZOOM_MAX = 4;
+const ZOOM_STEP = 0.25;
 
 function clampZoom(z: number) {
   return Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, z));
@@ -69,64 +69,14 @@ export default function TopologyMermaidView({ servers, connections, environment 
   const [error, setError] = useState('');
   const currentRender = useRef(0);
 
-  // ─── Zoom / pan state ────────────────────────────────────────────
   const [zoom, setZoom] = useState(1);
-  const [pan, setPan] = useState({ x: 0, y: 0 });
-  const dragging = useRef(false);
-  const dragStart = useRef({ mouseX: 0, mouseY: 0, panX: 0, panY: 0 });
-  const containerRef = useRef<HTMLDivElement>(null);
 
-  const resetView = useCallback(() => {
-    setZoom(1);
-    setPan({ x: 0, y: 0 });
-  }, []);
+  const resetView = useCallback(() => setZoom(1), []);
+  const zoomIn  = useCallback(() => setZoom((z) => clampZoom(z + ZOOM_STEP)), []);
+  const zoomOut = useCallback(() => setZoom((z) => clampZoom(z - ZOOM_STEP)), []);
 
-  const zoomIn = useCallback(() => {
-    setZoom((z) => clampZoom(z + ZOOM_STEP));
-  }, []);
-
-  const zoomOut = useCallback(() => {
-    setZoom((z) => clampZoom(z - ZOOM_STEP));
-  }, []);
-
-  const handleWheel = useCallback((e: React.WheelEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    const rect = containerRef.current!.getBoundingClientRect();
-    const cursorX = e.clientX - rect.left;
-    const cursorY = e.clientY - rect.top;
-    setZoom((prevZoom) => {
-      const factor = e.deltaY < 0 ? 1.1 : 0.9;
-      const newZoom = clampZoom(prevZoom * factor);
-      setPan((prevPan) => ({
-        x: cursorX - (cursorX - prevPan.x) * (newZoom / prevZoom),
-        y: cursorY - (cursorY - prevPan.y) * (newZoom / prevZoom),
-      }));
-      return newZoom;
-    });
-  }, []);
-
-  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.button !== 0) return;
-    dragging.current = true;
-    dragStart.current = { mouseX: e.clientX, mouseY: e.clientY, panX: pan.x, panY: pan.y };
-    e.currentTarget.style.cursor = 'grabbing';
-  }, [pan]);
-
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (!dragging.current) return;
-    setPan({
-      x: dragStart.current.panX + (e.clientX - dragStart.current.mouseX),
-      y: dragStart.current.panY + (e.clientY - dragStart.current.mouseY),
-    });
-  }, []);
-
-  const stopDrag = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    dragging.current = false;
-    e.currentTarget.style.cursor = 'grab';
-  }, []);
-
-  // Reset view whenever SVG changes (new data loaded)
-  useEffect(() => { resetView(); }, [svg, resetView]);
+  // Reset zoom whenever the diagram changes
+  useEffect(() => { setZoom(1); }, [svg]);
 
   const source = buildMermaidSource(servers, connections);
 
@@ -175,17 +125,17 @@ export default function TopologyMermaidView({ servers, connections, environment 
 
   const extraButtons = (
     <Space size={4}>
-      <Tooltip title="Zoom out (scroll ↓)">
-        <Button size="small" icon={<ZoomOutOutlined />} onClick={zoomOut} disabled={!svg} />
+      <Tooltip title="Thu nhỏ">
+        <Button size="small" icon={<ZoomOutOutlined />} onClick={zoomOut} disabled={!svg || zoom <= ZOOM_MIN} />
       </Tooltip>
       <span style={{ fontSize: 12, color: '#595959', minWidth: 38, textAlign: 'center', display: 'inline-block' }}>
         {zoomLabel}
       </span>
-      <Tooltip title="Zoom in (scroll ↑)">
-        <Button size="small" icon={<ZoomInOutlined />} onClick={zoomIn} disabled={!svg} />
+      <Tooltip title="Phóng to">
+        <Button size="small" icon={<ZoomInOutlined />} onClick={zoomIn} disabled={!svg || zoom >= ZOOM_MAX} />
       </Tooltip>
-      <Tooltip title="Fit / Reset">
-        <Button size="small" icon={<CompressOutlined />} onClick={resetView} disabled={!svg} />
+      <Tooltip title="Về kích thước gốc (100%)">
+        <Button size="small" icon={<CompressOutlined />} onClick={resetView} disabled={!svg || zoom === 1} />
       </Tooltip>
       <Button size="small" icon={<CopyOutlined />} onClick={handleCopy} disabled={!source}>
         Copy
@@ -215,31 +165,18 @@ export default function TopologyMermaidView({ servers, connections, environment 
     if (!svg) {
       return <Empty description="Không có dữ liệu kết nối để hiển thị" style={{ padding: 40 }} />;
     }
+
     return (
-      <div
-        ref={containerRef}
-        onWheel={handleWheel}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={stopDrag}
-        onMouseLeave={stopDrag}
-        style={{
-          overflow: 'hidden',
-          background: '#fff',
-          borderRadius: 8,
-          minHeight: 300,
-          cursor: 'grab',
-          userSelect: 'none',
-          position: 'relative',
-        }}
-      >
+      // Outer: scroll container — shows full diagram by default, scrolls when zoomed in
+      <div style={{ overflow: 'auto', background: '#fff', borderRadius: 8 }}>
+        {/* CSS zoom property is layout-aware: parent scroll area grows with zoom level */}
         <div
           style={{
-            transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
-            transformOrigin: '0 0',
+            zoom: zoom,
             padding: 24,
             display: 'inline-block',
-            willChange: 'transform',
+            minWidth: '100%',
+            boxSizing: 'border-box',
           }}
           dangerouslySetInnerHTML={{ __html: svg }}
         />
