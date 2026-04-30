@@ -221,6 +221,12 @@ export default function ServerUploadPage() {
     });
   };
 
+  const handleGoToMapping = () => {
+    const file = fileList[0]?.originFileObj as File | undefined;
+    if (!file) { message.error('Vui lòng chọn file.'); return; }
+    handleFileParsed(file);
+  };
+
   const handleQuickImport = () => {
     const file = fileList[0]?.originFileObj as File | undefined;
     if (!file) { message.error('Vui lòng chọn file.'); return; }
@@ -465,10 +471,7 @@ export default function ServerUploadPage() {
               accept=".csv"
               maxCount={1}
               fileList={fileList}
-              beforeUpload={(file) => {
-                handleFileParsed(file);
-                return false;
-              }}
+              beforeUpload={() => false}
               onChange={({ fileList: list }) => setFileList(list)}
               onRemove={() => {
                 setFileList([]);
@@ -495,6 +498,13 @@ export default function ServerUploadPage() {
                 loading={serverLoading}
               >
                 Import nhanh
+              </Button>
+              <Button
+                type="primary"
+                onClick={handleGoToMapping}
+                disabled={!fileList.length}
+              >
+                Tiếp theo: Ánh xạ cột
               </Button>
             </Space>
           </Space>
