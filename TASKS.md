@@ -1,6 +1,6 @@
 # SystemManager — Agile Task List & Sprint Plan
 
-> **Trạng thái hiện tại:** Sprint 18 ✅ DONE — Multi-Port, Connection Import & UI Consolidation
+> **Trạng thái hiện tại:** Sprint 22 ✅ DONE — Topology UX: Auto-Layout Trigger, Cascade Filter & Connection Health
 
 ---
 
