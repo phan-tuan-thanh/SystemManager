@@ -378,7 +378,7 @@ function buildGraph(
   return { nodes, edges };
 }
 
-function applyDagreLayout(nodes: Node[], edges: Edge[], direction: 'TB' | 'LR'): Node[] {
+function applyDagreLayout(nodes: Node[], edges: Edge[], direction: 'TB' | 'BT' | 'LR' | 'RL'): Node[] {
   const g = new dagre.graphlib.Graph();
   g.setDefaultEdgeLabel(() => ({}));
   g.setGraph({ rankdir: direction, nodesep: 140, ranksep: 200, edgesep: 40, marginx: 60, marginy: 60 });
@@ -452,7 +452,26 @@ function applyDagreLayout(nodes: Node[], edges: Edge[], direction: 'TB' | 'LR'):
 
 const _elkInstance = new ELK();
 
-async function applyElkLayout(nodes: Node[], edges: Edge[], direction: 'TB' | 'LR'): Promise<Node[]> {
+const ELK_ALGO_MAP: Record<string, string> = {
+  'elk-layered': 'org.eclipse.elk.layered',
+  'elk-force':   'org.eclipse.elk.force',
+  'elk-tree':    'org.eclipse.elk.mrtree',
+  'elk-radial':  'org.eclipse.elk.radial',
+};
+
+const ELK_DIR_MAP: Record<string, string> = {
+  TB: 'DOWN',
+  BT: 'UP',
+  LR: 'RIGHT',
+  RL: 'LEFT',
+};
+
+async function applyElkLayout(
+  nodes: Node[],
+  edges: Edge[],
+  algorithm: 'elk-layered' | 'elk-force' | 'elk-tree' | 'elk-radial',
+  direction: 'TB' | 'BT' | 'LR' | 'RL',
+): Promise<Node[]> {
   const topNodes = nodes.filter((n) => !n.parentNode);
   const elkChildren = topNodes.map((n) => ({
     id: n.id,
@@ -473,11 +492,14 @@ async function applyElkLayout(nodes: Node[], edges: Edge[], direction: 'TB' | 'L
     elkEdges.push({ id: `${src}-${tgt}`, sources: [src], targets: [tgt] });
   });
 
+  const elkAlgo = ELK_ALGO_MAP[algorithm] ?? 'org.eclipse.elk.layered';
+  const elkDir  = ELK_DIR_MAP[direction]   ?? 'DOWN';
+
   const graph = {
     id: 'root',
     layoutOptions: {
-      'algorithm': 'org.eclipse.elk.layered',
-      'elk.direction': direction === 'TB' ? 'DOWN' : 'RIGHT',
+      'algorithm': elkAlgo,
+      'elk.direction': elkDir,
       'spacing.nodeNode': '80',
       'spacing.edgeNode': '40',
       'spacing.edgeEdge': '20',
@@ -505,7 +527,7 @@ function computeLayout(
   servers: ServerNode[],
   connections: ConnectionEdge[],
   nodeType: 'all' | 'server' | 'app',
-  direction: 'TB' | 'LR',
+  direction: 'TB' | 'BT' | 'LR' | 'RL',
   edgeStyle: 'bezier' | 'step' = 'bezier',
 ): { nodes: Node[]; edges: Edge[] } {
   const { nodes, edges } = buildGraph(servers, connections, nodeType, edgeStyle);
@@ -542,8 +564,8 @@ function TopologyPageInner() {
     nodeType: 'all' | 'server' | 'app';
     showMiniMap: boolean;
     layout: 'force' | 'hierarchical';
-    layoutAlgorithm: 'dagre' | 'elk';
-    layoutDirection: 'TB' | 'LR';
+    layoutAlgorithm: 'dagre' | 'elk-layered' | 'elk-force' | 'elk-tree' | 'elk-radial';
+    layoutDirection: 'TB' | 'BT' | 'LR' | 'RL';
     connectionMode: boolean;
     edgeStyle: 'bezier' | 'step';
     visibleGroupNames: string[];
@@ -959,9 +981,13 @@ function TopologyPageInner() {
     }
     userPositionsRef.current = {};
     let arranged: Node[];
-    if (filters.layoutAlgorithm === 'elk') {
+    if (filters.layoutAlgorithm !== 'dagre') {
       try {
-        arranged = await applyElkLayout(nodes, edges, filters.layoutDirection);
+        arranged = await applyElkLayout(
+          nodes, edges,
+          filters.layoutAlgorithm as 'elk-layered' | 'elk-force' | 'elk-tree' | 'elk-radial',
+          filters.layoutDirection,
+        );
       } catch {
         // Fall back to dagre if ELK fails
         arranged = applyDagreLayout(nodes, edges, filters.layoutDirection);

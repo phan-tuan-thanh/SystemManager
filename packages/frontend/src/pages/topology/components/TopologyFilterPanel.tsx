@@ -9,8 +9,8 @@ interface FilterState {
   nodeType: 'all' | 'server' | 'app';
   showMiniMap: boolean;
   layout: 'force' | 'hierarchical';
-  layoutAlgorithm: 'dagre' | 'elk';
-  layoutDirection: 'TB' | 'LR';
+  layoutAlgorithm: 'dagre' | 'elk-layered' | 'elk-force' | 'elk-tree' | 'elk-radial';
+  layoutDirection: 'TB' | 'BT' | 'LR' | 'RL';
   connectionMode: boolean;
   edgeStyle: 'bezier' | 'step';
   visibleGroupNames: string[];
@@ -255,28 +255,43 @@ export default function TopologyFilterPanel({
 
         {/* ── Layout Algorithm (ReactFlow only) ── */}
         {isReactFlow && (
-          <Segmented
-            size="small"
-            value={filters.layoutAlgorithm}
-            onChange={(v) => onChange({ ...filters, layoutAlgorithm: v as 'dagre' | 'elk' })}
-            options={[
-              { label: 'Dagre', value: 'dagre' },
-              { label: 'ELK', value: 'elk' },
-            ]}
-          />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Text style={{ fontSize: 12, color: '#8c8c8c' }}>Thuật toán</Text>
+            <Select
+              size="small"
+              style={{ width: 130 }}
+              value={filters.layoutAlgorithm}
+              onChange={(v) => onChange({ ...filters, layoutAlgorithm: v })}
+              getPopupContainer={(trigger) => trigger.parentElement!}
+              options={[
+                { label: 'Dagre (DAG)', value: 'dagre' },
+                { label: 'ELK Layered', value: 'elk-layered' },
+                { label: 'ELK Force', value: 'elk-force' },
+                { label: 'ELK Tree', value: 'elk-tree' },
+                { label: 'ELK Radial', value: 'elk-radial' },
+              ]}
+            />
+          </div>
         )}
 
         {/* ── Layout Direction (ReactFlow only) ── */}
         {isReactFlow && (
-          <Segmented
-            size="small"
-            value={filters.layoutDirection}
-            onChange={(v) => onChange({ ...filters, layoutDirection: v as 'TB' | 'LR' })}
-            options={[
-              { label: '↓ TB', value: 'TB' },
-              { label: '→ LR', value: 'LR' },
-            ]}
-          />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Text style={{ fontSize: 12, color: '#8c8c8c' }}>Hướng</Text>
+            <Select
+              size="small"
+              style={{ width: 120 }}
+              value={filters.layoutDirection}
+              onChange={(v) => onChange({ ...filters, layoutDirection: v })}
+              getPopupContainer={(trigger) => trigger.parentElement!}
+              options={[
+                { label: '↓ Trên → Dưới', value: 'TB' },
+                { label: '↑ Dưới → Trên', value: 'BT' },
+                { label: '→ Trái → Phải', value: 'LR' },
+                { label: '← Phải → Trái', value: 'RL' },
+              ]}
+            />
+          </div>
         )}
 
         {/* ── Edge style (ReactFlow only) ── */}
