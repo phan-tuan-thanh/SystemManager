@@ -42,16 +42,6 @@
           }
         ]
       }
-    ],
-    "PostCommit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo '✅ Commit created. Remember: run tests before pushing.'"
-          }
-        ]
-      }
     ]
   },
   "permissions": {

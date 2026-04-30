@@ -39,3 +39,4 @@ pgdata/
 
 # Secrets (tokens, credentials — never commit)
 .secrets/
+.secrects/gh_tokens.txt
