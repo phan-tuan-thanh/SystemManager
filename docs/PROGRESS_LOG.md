@@ -4,6 +4,26 @@ A chronological record of project milestones, updates, and sprint summaries.
 
 ---
 
+## 2026-04-30 — Sprint 20: UI/UX Polish ✅ Hoàn thành
+
+- ✅ S20-01: `infra-upload/index.tsx` — Dragger + Steps 4-bước wizard (đồng nhất với app-import)
+- ✅ S20-02: GuidePage thêm menu "Import CSV"; `import.md` rewrite; `guide_infra.md` bổ sung bước import hàng loạt
+- ✅ S20-03: `AppGroupList.tsx` — rowSelection + bulk delete Popconfirm
+- ✅ S20-04: `HardwareTab.tsx` — Form.List key-value editor (thay JSON textarea), gợi ý preset key theo loại phần cứng
+- ✅ S20-05: `ServerForm`, `ApplicationForm`, `AppGroupModal` — Row/Col 2-column layout
+- Branch: `feat/sprint-20-ux-polish` pushed
+- Sprint plan: `docs/plans/sprint-20-ux-polish.md`
+
+## 2026-04-30 — Sprint 20: Bắt đầu implement UI/UX Polish
+
+- Yêu cầu ghi nhận vào SRS.md section 4.2.4, 4.1.3, 4.6.1
+- Sprint plan tạo mới: `docs/plans/sprint-20-ux-polish.md`
+- Kế hoạch kỹ thuật: `docs/IMPLEMENTATION_DETAILS.md` (entry Sprint 20)
+- Tasks mới: S20-01 đến S20-05 (13 points)
+- Nội dung: Dragger+Steps wizard, guide docs, AppGroup bulk delete, HardwareTab KV editor, form layout
+
+---
+
 ## 2026-04-29 — Sprint 19: Topology Node Visibility Filter ✅ Hoàn thành
 
 - ✅ S19-03: Mở rộng FilterState (`visibleGroupNames`, `visibleServerIds`, `visibleAppIds`) + 3 multi-select trong TopologyFilterPanel

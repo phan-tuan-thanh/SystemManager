@@ -10,10 +10,22 @@ Trước tiên, bạn cần tạo một "vỏ" bọc cho dự án.
 4. Chọn người phụ trách.
 
 ## Bước 2: Khai báo Server
-Tiếp theo, hãy thêm các máy chủ vật lý hoặc ảo hóa.
-1. Vào menu **Hạ tầng** > **Servers**.
-2. Bạn có thể thêm thủ công từng server hoặc dùng tính năng **Import hàng loạt** (khuyên dùng nếu có nhiều server).
-3. Đảm bảo nhập đúng **Hostname** và **IP** để hệ thống có thể giám sát sau này.
+
+Có 2 cách để thêm server:
+
+### 2a. Thêm thủ công (1–5 server)
+1. Vào menu **Hạ tầng** → **Servers**.
+2. Nhấn **Thêm Server**, điền các thông tin cần thiết.
+3. Đảm bảo nhập đúng **Hostname** và **IP** để hệ thống có thể theo dõi.
+
+### 2b. Import hàng loạt từ CSV (khuyên dùng cho 5+ server)
+1. Vào menu **Hạ tầng** → **Import Server từ CSV**.
+2. Kéo thả hoặc chọn file CSV — hệ thống tự động chuyển sang bước ánh xạ cột.
+3. Kiểm tra ánh xạ cột, nhấn **Tiếp theo: Xem trước** để xác nhận dữ liệu.
+4. Sửa các dòng lỗi (nếu có) trực tiếp trên bảng, nhấn **Kiểm tra lại**.
+5. Nhấn **Nhập X server hợp lệ** để hoàn thành.
+
+> **Định dạng file CSV server:** Cột bắt buộc là `ip` và `name`. Các cột tùy chọn: `hostname`, `os`, `cpu`, `ram`, `total_storage_gb`, `environment`, `site`, `system`, `purpose`. Xem thêm tại mục **Import CSV (hàng loạt)**.
 
 ## Bước 3: Khai báo Ứng dụng
 1. Vào menu **Ứng dụng** > **Ứng dụng**.

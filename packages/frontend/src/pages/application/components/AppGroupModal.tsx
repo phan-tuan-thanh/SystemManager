@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Modal, Form, Input, Select, Tooltip, App } from 'antd';
+import { Modal, Form, Input, Select, Tooltip, App, Row, Col } from 'antd';
 import { useCreateAppGroup, useUpdateAppGroup } from '../../../hooks/useAppGroups';
 import type { ApplicationGroup } from '../../../types/application';
 
@@ -46,15 +46,38 @@ export default function AppGroupModal({ open, group, onClose }: Props) {
       onCancel={() => { form.resetFields(); onClose(); }}
       confirmLoading={create.isPending || update.isPending}
       destroyOnClose
+      width={520}
     >
       <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
-        <Form.Item
-          label="Mã nhóm"
-          name="code"
-          rules={[{ required: true, message: 'Nhập mã nhóm' }, { max: 50 }]}
-        >
-          <Input placeholder="VD: BANKING" disabled={!!group} />
-        </Form.Item>
+        <Row gutter={16}>
+          <Col span={12}>
+            <Form.Item
+              label="Mã nhóm"
+              name="code"
+              rules={[{ required: true, message: 'Nhập mã nhóm' }, { max: 50 }]}
+            >
+              <Input placeholder="VD: BANKING" disabled={!!group} />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Tooltip title={group ? 'Loại nhóm không thể thay đổi sau khi tạo' : undefined}>
+              <Form.Item
+                label="Loại nhóm"
+                name="group_type"
+                rules={[{ required: true, message: 'Vui lòng chọn loại nhóm' }]}
+              >
+                <Select
+                  disabled={!!group}
+                  options={[
+                    { value: 'BUSINESS', label: 'Nghiệp vụ' },
+                    { value: 'INFRASTRUCTURE', label: 'Hạ tầng' },
+                  ]}
+                />
+              </Form.Item>
+            </Tooltip>
+          </Col>
+        </Row>
+
         <Form.Item
           label="Tên nhóm"
           name="name"
@@ -62,21 +85,7 @@ export default function AppGroupModal({ open, group, onClose }: Props) {
         >
           <Input placeholder="VD: Core Banking" />
         </Form.Item>
-        <Form.Item
-          label="Loại nhóm"
-          name="group_type"
-          rules={[{ required: true, message: 'Vui lòng chọn loại nhóm' }]}
-        >
-          <Tooltip title={group ? 'Loại nhóm không thể thay đổi sau khi tạo' : undefined}>
-            <Select
-              disabled={!!group}
-              options={[
-                { value: 'BUSINESS', label: 'Nghiệp vụ (Business)' },
-                { value: 'INFRASTRUCTURE', label: 'Hạ tầng (Infrastructure)' },
-              ]}
-            />
-          </Tooltip>
-        </Form.Item>
+
         <Form.Item label="Mô tả" name="description">
           <Input.TextArea rows={3} placeholder="Mô tả nhóm ứng dụng" />
         </Form.Item>
