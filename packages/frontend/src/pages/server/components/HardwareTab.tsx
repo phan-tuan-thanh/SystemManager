@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import {
-  Button, Space, App, Popconfirm, Tag, Modal, Form, Input, Select,
+  Button, Space, App, Popconfirm, Tag, Modal, Form, Input, Select, Row, Col,
 } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { PlusOutlined, EditOutlined, DeleteOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import DataTable from '../../../components/common/DataTable';
 import {
@@ -11,6 +11,34 @@ import {
 import type { HardwareComponent } from '../../../types/server';
 
 const HARDWARE_TYPES = ['CPU', 'RAM', 'HDD', 'SSD', 'NETWORK_CARD'] as const;
+
+// Common spec key suggestions per hardware type
+const SPEC_PRESETS: Record<string, string[]> = {
+  CPU: ['cores', 'threads', 'speed_ghz', 'architecture'],
+  RAM: ['gb', 'speed_mhz', 'type'],
+  HDD: ['size_gb', 'rpm', 'interface'],
+  SSD: ['size_gb', 'interface', 'read_mbps', 'write_mbps'],
+  NETWORK_CARD: ['speed_gbps', 'ports', 'interface'],
+};
+
+interface KvPair { key: string; value: string }
+
+function specsToKv(specs: unknown): KvPair[] {
+  if (!specs || typeof specs !== 'object') return [];
+  return Object.entries(specs as Record<string, unknown>).map(([key, value]) => ({
+    key,
+    value: String(value ?? ''),
+  }));
+}
+
+function kvToSpecs(pairs: KvPair[]): Record<string, string> {
+  const result: Record<string, string> = {};
+  for (const { key, value } of pairs) {
+    const k = key.trim();
+    if (k) result[k] = value;
+  }
+  return result;
+}
 
 interface HardwareFormProps {
   open: boolean;
@@ -25,13 +53,20 @@ function HardwareForm({ open, onClose, serverId, initial }: HardwareFormProps) {
   const create = useCreateHardware();
   const update = useUpdateHardware();
 
+  const selectedType: string | undefined = Form.useWatch('type', form);
+  const presetKeys = selectedType ? (SPEC_PRESETS[selectedType] ?? []) : [];
+
   const onFinish = async (values: Record<string, unknown>) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { specs_kv, ...rest } = values as { specs_kv?: KvPair[] } & Record<string, unknown>;
+    const specs = kvToSpecs(specs_kv ?? []);
+    const payload = { ...rest, specs: Object.keys(specs).length ? specs : undefined };
     try {
       if (initial) {
-        await update.mutateAsync({ id: initial.id, ...values });
+        await update.mutateAsync({ id: initial.id, ...payload });
         message.success('Cập nhật thành công');
       } else {
-        await create.mutateAsync({ server_id: serverId, ...values } as Parameters<typeof create.mutateAsync>[0]);
+        await create.mutateAsync({ server_id: serverId, ...payload } as Parameters<typeof create.mutateAsync>[0]);
         message.success('Thêm phần cứng thành công');
       }
       form.resetFields();
@@ -42,6 +77,10 @@ function HardwareForm({ open, onClose, serverId, initial }: HardwareFormProps) {
     }
   };
 
+  const initialValues = initial
+    ? { ...initial, specs_kv: specsToKv(initial.specs) }
+    : {};
+
   return (
     <Modal
       title={initial ? 'Cập nhật phần cứng' : 'Thêm phần cứng'}
@@ -49,48 +88,102 @@ function HardwareForm({ open, onClose, serverId, initial }: HardwareFormProps) {
       onCancel={() => { form.resetFields(); onClose(); }}
       footer={null}
       destroyOnHidden
-      width={480}
+      width={520}
     >
       <Form
         form={form}
         layout="vertical"
-        initialValues={initial ?? {}}
+        initialValues={initialValues}
         onFinish={onFinish}
         style={{ marginTop: 16 }}
       >
-        <Form.Item name="type" label="Loại" rules={[{ required: !initial }]}>
-          <Select disabled={!!initial}>
-            {HARDWARE_TYPES.map((t) => <Select.Option key={t} value={t}>{t}</Select.Option>)}
-          </Select>
+        <Row gutter={12}>
+          <Col span={12}>
+            <Form.Item name="type" label="Loại" rules={[{ required: !initial }]}>
+              <Select disabled={!!initial}>
+                {HARDWARE_TYPES.map((t) => <Select.Option key={t} value={t}>{t}</Select.Option>)}
+              </Select>
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item name="manufacturer" label="Hãng sản xuất">
+              <Input placeholder="Dell, HP, Intel..." />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={12}>
+          <Col span={12}>
+            <Form.Item name="model" label="Model">
+              <Input placeholder="PowerEdge R740" />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item name="serial" label="Serial number">
+              <Input />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Form.Item label="Thông số kỹ thuật">
+          {presetKeys.length > 0 && (
+            <div style={{ marginBottom: 8 }}>
+              <span style={{ fontSize: 12, color: '#8c8c8c', marginRight: 6 }}>Gợi ý:</span>
+              {presetKeys.map((k) => (
+                <Tag
+                  key={k}
+                  style={{ cursor: 'pointer', marginBottom: 4 }}
+                  onClick={() => {
+                    const current: KvPair[] = form.getFieldValue('specs_kv') ?? [];
+                    const exists = current.some((p) => p.key === k);
+                    if (!exists) {
+                      form.setFieldValue('specs_kv', [...current, { key: k, value: '' }]);
+                    }
+                  }}
+                >
+                  + {k}
+                </Tag>
+              ))}
+            </div>
+          )}
+
+          <Form.List name="specs_kv">
+            {(fields, { add, remove }) => (
+              <Space direction="vertical" style={{ width: '100%' }} size={4}>
+                {fields.map(({ key, name }) => (
+                  <Row key={key} gutter={8} align="middle">
+                    <Col flex="1">
+                      <Form.Item name={[name, 'key']} noStyle>
+                        <Input placeholder="Tên thông số (ví dụ: cores)" size="small" />
+                      </Form.Item>
+                    </Col>
+                    <Col flex="1">
+                      <Form.Item name={[name, 'value']} noStyle>
+                        <Input placeholder="Giá trị (ví dụ: 8)" size="small" />
+                      </Form.Item>
+                    </Col>
+                    <Col flex="none">
+                      <MinusCircleOutlined
+                        style={{ color: '#ff4d4f', cursor: 'pointer', fontSize: 16 }}
+                        onClick={() => remove(name)}
+                      />
+                    </Col>
+                  </Row>
+                ))}
+                <Button
+                  type="dashed"
+                  onClick={() => add({ key: '', value: '' })}
+                  icon={<PlusOutlined />}
+                  size="small"
+                  block
+                >
+                  Thêm thông số
+                </Button>
+              </Space>
+            )}
+          </Form.List>
         </Form.Item>
-        <Form.Item name="manufacturer" label="Hãng sản xuất">
-          <Input placeholder="Dell, HP, Intel..." />
-        </Form.Item>
-        <Form.Item name="model" label="Model">
-          <Input placeholder="PowerEdge R740" />
-        </Form.Item>
-        <Form.Item name="serial" label="Serial number">
-          <Input />
-        </Form.Item>
-        <Form.Item label="Thông số kỹ thuật (JSON)">
-          <Form.Item name="specs" noStyle>
-            <Input.TextArea 
-              rows={4} 
-              placeholder='{"cores": 8, "threads": 16}' 
-              autoSize={{ minRows: 2, maxRows: 6 }}
-              onBlur={(e) => {
-                try {
-                  if (e.target.value) JSON.parse(e.target.value);
-                } catch {
-                  message.error('Định dạng JSON không hợp lệ');
-                }
-              }}
-            />
-          </Form.Item>
-          <div style={{ fontSize: '11px', color: '#8c8c8c', marginTop: '4px' }}>
-            Ví dụ: {"{"}"cores": 6, "gb": 16, "size_gb": 150{"}"}
-          </div>
-        </Form.Item>
+
         <Form.Item>
           <Space>
             <Button type="primary" htmlType="submit" loading={create.isPending || update.isPending}>
@@ -148,6 +241,8 @@ export default function HardwareTab({ serverId }: HardwareTabProps) {
         if (specs.gb) parts.push(`${specs.gb} GB`);
         if (specs.size_gb) parts.push(`${specs.size_gb} GB`);
         if (specs.speed) parts.push(String(specs.speed));
+        if (specs.speed_ghz) parts.push(`${specs.speed_ghz} GHz`);
+        if (specs.speed_mhz) parts.push(`${specs.speed_mhz} MHz`);
         return parts.length ? parts.join(' / ') : JSON.stringify(specs);
       },
     },

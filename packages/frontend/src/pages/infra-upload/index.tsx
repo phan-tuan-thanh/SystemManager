@@ -2,11 +2,10 @@ import { useState } from 'react';
 import {
   Button,
   Table,
+  Steps,
   Space,
-  Upload,
   Alert,
   Select,
-  Form,
   App,
   Modal,
   Card,
@@ -21,12 +20,14 @@ import {
   Descriptions,
   Divider,
   Badge,
+  Result,
 } from 'antd';
+import type { UploadFile } from 'antd';
+import { Upload } from 'antd';
 import {
-  UploadOutlined,
+  InboxOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
-  InfoCircleOutlined,
   ThunderboltOutlined,
 } from '@ant-design/icons';
 import Papa from 'papaparse';
@@ -40,6 +41,7 @@ import ColumnMapper, {
 } from '../../components/common/ColumnMapper';
 import ValueMapper, { type ValueMappings } from '../../components/common/ValueMapper';
 
+const { Dragger } = Upload;
 const { Text } = Typography;
 
 const ENV_OPTIONS = [
@@ -114,7 +116,6 @@ const SERVER_TARGETS: TargetField[] = [
   { key: 'infra_type', label: 'Loại hạ tầng', aliases: ['infra', 'loai_ha_tang'], options: INFRA_TYPE_OPTIONS },
 ];
 
-// Build a lookup for quick target-by-key access in the cell renderer
 const SERVER_TARGET_BY_KEY: Record<string, TargetField> = SERVER_TARGETS.reduce(
   (acc, t) => ({ ...acc, [t.key]: t }),
   {} as Record<string, TargetField>,
@@ -141,82 +142,207 @@ interface GenericPreviewResult {
   }>;
 }
 
+interface ImportResult {
+  summary: { total: number; succeeded: number; failed: number };
+  breakdown: {
+    systems: { created: number; updated: number };
+    servers: { created: number; updated: number };
+    os_apps: { created: number; reused: number };
+    hardware: { created: number; updated: number };
+  };
+  errors: Array<{ row: number; name: string; ip: string; reason: string }>;
+}
+
 export default function ServerUploadPage() {
   const { message, modal } = App.useApp();
 
-  const [previewData, setPreviewData] = useState<any[]>([]);
-  const [totalRows, setTotalRows] = useState<number>(0);
-  const [fileToUpload, setFileToUpload] = useState<File | null>(null);
-  const [csvColumns, setCsvColumns] = useState<string[]>([]);
+  const [step, setStep] = useState(0);
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [allRows, setAllRows] = useState<any[]>([]);
+  const [csvColumns, setCsvColumns] = useState<string[]>([]);
+  const [previewData, setPreviewData] = useState<any[]>([]);
   const [mapping, setMapping] = useState<ColumnMapping>({});
   const [valueMappings, setValueMappings] = useState<ValueMappings>({});
   const [osMappings, setOsMappings] = useState<Record<string, string>>({});
   const [osCatalog, setOsCatalog] = useState<any[]>([]);
 
-  const fetchOsCatalog = async () => {
-    try {
-      const res = await apiClient.get('/applications', {
-        params: { application_type: 'SYSTEM', sw_type: 'OS', limit: 100 }
-      });
-      const items = res.data.data ?? res.data;
-      setOsCatalog(items);
-    } catch (err) {
-      console.error('Failed to fetch OS catalog', err);
-    }
-  };
-
-  // Server import state
   const [serverPreview, setServerPreview] = useState<GenericPreviewResult | null>(null);
-  const [serverResult, setServerResult] = useState<{
-    summary: { total: number; succeeded: number; failed: number };
-    breakdown: {
-      systems: { created: number; updated: number };
-      servers: { created: number; updated: number };
-      os_apps: { created: number; reused: number };
-      hardware: { created: number; updated: number };
-    };
-    errors: Array<{ row: number; name: string; ip: string; reason: string }>;
-  } | null>(null);
+  const [serverResult, setServerResult] = useState<ImportResult | null>(null);
   const [serverLoading, setServerLoading] = useState(false);
   const [serverEditedRows, setServerEditedRows] = useState<Record<number, Record<string, any>>>({});
   const [serverShowOnlyErrors, setServerShowOnlyErrors] = useState(false);
   const [previewPageSize, setPreviewPageSize] = useState(20);
 
-  const handleFileSelect = (file: File) => {
+  const fetchOsCatalog = async () => {
+    try {
+      const res = await apiClient.get('/applications', {
+        params: { application_type: 'SYSTEM', sw_type: 'OS', limit: 100 },
+      });
+      setOsCatalog(res.data.data ?? res.data);
+    } catch {
+      // non-critical
+    }
+  };
+
+  const handleReset = () => {
+    setStep(0);
+    setFileList([]);
+    setAllRows([]);
+    setCsvColumns([]);
+    setPreviewData([]);
+    setMapping({});
+    setValueMappings({});
+    setOsMappings({});
+    setServerPreview(null);
+    setServerResult(null);
+    setServerEditedRows({});
+    setServerShowOnlyErrors(false);
+    setPreviewPageSize(20);
+  };
+
+  const handleFileParsed = (file: File) => {
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
       complete: (results) => {
         const rows = results.data as any[];
         const cols = (results.meta.fields ?? []).filter(Boolean) as string[];
-        setTotalRows(rows.length);
+        if (!cols.length) {
+          message.error('Không đọc được tiêu đề cột từ file CSV.');
+          return;
+        }
         setAllRows(rows);
         setCsvColumns(cols);
-        setMapping({});
         setPreviewData(rows.slice(0, 10));
-        setFileToUpload(file);
+        setMapping({});
+        setStep(1);
       },
-      error: (err) => {
-        message.error(`Không thể đọc file CSV: ${err.message}`);
-      },
+      error: (err) => message.error(`Không thể đọc file: ${err.message}`),
     });
-    return false;
   };
 
-  const handleReset = () => {
-    setFileToUpload(null);
-    setPreviewData([]);
-    setTotalRows(0);
-    setCsvColumns([]);
-    setAllRows([]);
-    setMapping({});
-    setValueMappings({});
-    setServerPreview(null);
-    setServerResult(null);
-    setServerEditedRows({});
-    setServerShowOnlyErrors(false);
-    setPreviewPageSize(20);
+  const handleGoToMapping = () => {
+    const file = fileList[0]?.originFileObj as File | undefined;
+    if (!file) { message.error('Vui lòng chọn file.'); return; }
+    handleFileParsed(file);
+  };
+
+  const handleQuickImport = () => {
+    const file = fileList[0]?.originFileObj as File | undefined;
+    if (!file) { message.error('Vui lòng chọn file.'); return; }
+
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: async (results) => {
+        const rows = results.data as any[];
+        const cols = (results.meta.fields ?? []).filter(Boolean) as string[];
+        if (!cols.length) { message.error('Không đọc được tiêu đề cột.'); return; }
+
+        const autoMapping = autoDetect(cols, SERVER_TARGETS);
+        const mappedTargets = new Set(Object.values(autoMapping).filter(Boolean));
+        const missing = SERVER_TARGETS.filter((t) => t.required && !mappedTargets.has(t.key));
+
+        if (missing.length > 0) {
+          message.warning(`Không nhận diện được cột: ${missing.map((t) => t.label).join(', ')}. Chuyển sang wizard.`);
+          setAllRows(rows);
+          setCsvColumns(cols);
+          setPreviewData(rows.slice(0, 10));
+          setMapping(autoMapping);
+          setStep(1);
+          return;
+        }
+
+        setServerLoading(true);
+        try {
+          const mappedRows = applyAllMappings(rows, autoMapping, {});
+          const blob = new Blob([Papa.unparse(mappedRows)], { type: 'text/csv' });
+          const form = new FormData();
+          form.append('file', new File([blob], 'mapped.csv', { type: 'text/csv' }));
+
+          const { data } = await apiClient.post('/import/preview?type=server', form, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+          });
+          const previewResult: GenericPreviewResult = data.data ?? data;
+          const newOsCount = previewResult.os_resolution?.filter((o) => o.is_new).length ?? 0;
+
+          modal.confirm({
+            title: 'Xác nhận Import nhanh',
+            icon: <ThunderboltOutlined style={{ color: '#faad14' }} />,
+            content: (
+              <div>
+                <p>Nhận diện tự động <b>{previewResult.total}</b> server:</p>
+                <ul style={{ marginBottom: 0 }}>
+                  <li style={{ color: '#52c41a' }}>✓ {previewResult.valid} server hợp lệ</li>
+                  {previewResult.invalid > 0 && (
+                    <li style={{ color: '#ff4d4f' }}>✗ {previewResult.invalid} dòng lỗi (sẽ bị bỏ qua)</li>
+                  )}
+                  {newOsCount > 0 && (
+                    <li style={{ color: '#fa8c16' }}>⚠ {newOsCount} OS mới sẽ được tự động tạo</li>
+                  )}
+                </ul>
+              </div>
+            ),
+            okText: `Import ${previewResult.valid} server`,
+            okButtonProps: { disabled: previewResult.valid === 0 },
+            cancelText: 'Xem chi tiết',
+            onOk: async () => {
+              const { data: execData } = await apiClient.post('/import/execute', {
+                session_id: previewResult.session_id,
+                os_resolution: {},
+              });
+              setServerResult(execData.data ?? execData);
+              setStep(3);
+            },
+            onCancel: () => {
+              setAllRows(rows);
+              setCsvColumns(cols);
+              setPreviewData(rows.slice(0, 10));
+              setMapping(autoMapping);
+              setServerPreview(previewResult);
+              fetchOsCatalog();
+              setStep(2);
+            },
+          });
+        } catch (err: unknown) {
+          message.error((err as any)?.response?.data?.error?.message || 'Import nhanh thất bại.');
+        } finally {
+          setServerLoading(false);
+        }
+      },
+      error: (err) => message.error(`Không thể đọc file: ${err.message}`),
+    });
+  };
+
+  const handleServerPreview = async () => {
+    const missingRequired = SERVER_TARGETS.filter((t) => t.required).filter(
+      (t) => !Object.values(mapping).includes(t.key),
+    );
+    if (missingRequired.length) {
+      message.error(`Thiếu ánh xạ cho: ${missingRequired.map((t) => t.label).join(', ')}`);
+      return;
+    }
+    setServerLoading(true);
+    try {
+      const mappedRows = applyAllMappings(allRows, mapping, valueMappings);
+      const csvString = Papa.unparse(mappedRows);
+      const blob = new Blob([csvString], { type: 'text/csv' });
+      const mappedFile = new File([blob], 'mapped.csv', { type: 'text/csv' });
+
+      const form = new FormData();
+      form.append('file', mappedFile);
+
+      const { data } = await apiClient.post('/import/preview?type=server', form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      setServerPreview(data.data ?? data);
+      await fetchOsCatalog();
+      setStep(2);
+    } catch (err: unknown) {
+      message.error((err as any)?.response?.data?.error?.message || 'Xem trước thất bại.');
+    } finally {
+      setServerLoading(false);
+    }
   };
 
   const handleServerCellEdit = (rowNum: number, colKey: string, value: any) => {
@@ -244,15 +370,13 @@ export default function ServerUploadPage() {
         const edits = serverEditedRows[idx + 1];
         return edits ? { ...row, ...edits } : row;
       });
-      const csvString = Papa.unparse(editedMappedRows);
-      const blob = new Blob([csvString], { type: 'text/csv' });
+      const blob = new Blob([Papa.unparse(editedMappedRows)], { type: 'text/csv' });
       const mappedFile = new File([blob], 'mapped.csv', { type: 'text/csv' });
 
       const form = new FormData();
       form.append('file', mappedFile);
-      const params = new URLSearchParams({ type: 'server' });
 
-      const { data } = await apiClient.post(`/import/preview?${params}`, form, {
+      const { data } = await apiClient.post('/import/preview?type=server', form, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       setServerPreview(data.data ?? data);
@@ -260,131 +384,11 @@ export default function ServerUploadPage() {
       setServerEditedRows({});
       message.success('Đã kiểm tra lại dữ liệu');
     } catch (err: unknown) {
-      const msg = (err as any)?.response?.data?.error?.message || 'Kiểm tra lại thất bại.';
-      message.error(msg);
+      message.error((err as any)?.response?.data?.error?.message || 'Kiểm tra lại thất bại.');
     } finally {
       setServerLoading(false);
     }
   };
-
-  const handleQuickImport = async () => {
-    if (!fileToUpload || !allRows.length || !csvColumns.length) {
-      message.error('Vui lòng chọn file trước.');
-      return;
-    }
-
-    const autoMapping = autoDetect(csvColumns, SERVER_TARGETS);
-    const mappedTargets = new Set(Object.values(autoMapping).filter(Boolean));
-    const missing = SERVER_TARGETS.filter((t) => t.required && !mappedTargets.has(t.key));
-
-    if (missing.length > 0) {
-      message.warning(`Không nhận diện được cột: ${missing.map((t) => t.label).join(', ')}. Vui lòng ánh xạ thủ công.`);
-      return;
-    }
-
-    setServerLoading(true);
-    try {
-      const mappedRows = applyAllMappings(allRows, autoMapping, {});
-      const blob = new Blob([Papa.unparse(mappedRows)], { type: 'text/csv' });
-      const form = new FormData();
-      form.append('file', new File([blob], 'mapped.csv', { type: 'text/csv' }));
-
-      const { data } = await apiClient.post('/import/preview?type=server', form, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      const previewResult: GenericPreviewResult = data.data ?? data;
-      const newOsCount = previewResult.os_resolution?.filter((o) => o.is_new).length ?? 0;
-
-      modal.confirm({
-        title: 'Xác nhận Import nhanh',
-        icon: <ThunderboltOutlined style={{ color: '#faad14' }} />,
-        content: (
-          <div>
-            <p>Nhận diện tự động <b>{previewResult.total}</b> server:</p>
-            <ul style={{ marginBottom: 0 }}>
-              <li style={{ color: '#52c41a' }}>✓ {previewResult.valid} server hợp lệ</li>
-              {previewResult.invalid > 0 && (
-                <li style={{ color: '#ff4d4f' }}>✗ {previewResult.invalid} dòng lỗi (sẽ bị bỏ qua)</li>
-              )}
-              {newOsCount > 0 && (
-                <li style={{ color: '#fa8c16' }}>⚠ {newOsCount} OS mới sẽ được tự động tạo trong danh mục</li>
-              )}
-            </ul>
-          </div>
-        ),
-        okText: `Import ${previewResult.valid} server`,
-        okButtonProps: { disabled: previewResult.valid === 0 },
-        cancelText: 'Xem chi tiết',
-        onOk: async () => {
-          const { data: execData } = await apiClient.post('/import/execute', {
-            session_id: previewResult.session_id,
-            os_resolution: {},
-          });
-          setServerResult(execData.data ?? execData);
-          setFileToUpload(null);
-          setPreviewData([]);
-          setTotalRows(0);
-          setCsvColumns([]);
-          setAllRows([]);
-          setMapping({});
-          setValueMappings({});
-          setServerEditedRows({});
-          setServerShowOnlyErrors(false);
-          setPreviewPageSize(20);
-          setOsMappings({});
-        },
-        onCancel: () => {
-          setServerPreview(previewResult);
-          setMapping(autoMapping);
-          fetchOsCatalog();
-        },
-      });
-    } catch (err: unknown) {
-      message.error((err as any)?.response?.data?.error?.message || 'Import nhanh thất bại.');
-    } finally {
-      setServerLoading(false);
-    }
-  };
-
-  const handleServerPreview = async () => {
-    if (!allRows.length) {
-      message.error('Vui lòng chọn file trước khi xem trước.');
-      return;
-    }
-    const missingRequired = SERVER_TARGETS.filter((t) => t.required).filter(
-      (t) => !Object.values(mapping).includes(t.key),
-    );
-    if (missingRequired.length) {
-      message.error(`Thiếu ánh xạ cho: ${missingRequired.map((t) => t.label).join(', ')}`);
-      return;
-    }
-    setServerLoading(true);
-    try {
-      const mappedRows = applyAllMappings(allRows, mapping, valueMappings);
-      const csvString = Papa.unparse(mappedRows);
-      const blob = new Blob([csvString], { type: 'text/csv' });
-      const mappedFile = new File([blob], 'mapped.csv', { type: 'text/csv' });
-
-      const form = new FormData();
-      form.append('file', mappedFile);
-      const params = new URLSearchParams({ type: 'server' });
-
-      const { data } = await apiClient.post(`/import/preview?${params}`, form, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      setServerPreview(data.data ?? data);
-      await fetchOsCatalog();
-    } catch (err: unknown) {
-      const msg = (err as any)?.response?.data?.error?.message || 'Xem trước thất bại.';
-      message.error(msg);
-    } finally {
-      setServerLoading(false);
-    }
-  };
-
-  // Inject error-row highlight style once
-  const errorRowStyle = `.preview-row-error td { background: #fff2f0 !important; }
-.preview-row-error:hover td { background: #ffe7e0 !important; }`;
 
   const handleServerExecute = async () => {
     if (!serverPreview?.session_id) return;
@@ -394,21 +398,9 @@ export default function ServerUploadPage() {
         session_id: serverPreview.session_id,
         os_resolution: osMappings,
       });
-      const result = data.data ?? data;
-      setServerResult(result);
+      setServerResult(data.data ?? data);
       setServerPreview(null);
-      // Reset upload form state (keep serverResult so modal stays open)
-      setFileToUpload(null);
-      setPreviewData([]);
-      setTotalRows(0);
-      setCsvColumns([]);
-      setAllRows([]);
-      setMapping({});
-      setValueMappings({});
-      setServerEditedRows({});
-      setServerShowOnlyErrors(false);
-      setPreviewPageSize(20);
-      setOsMappings({});
+      setStep(3);
     } catch (err: unknown) {
       const status = (err as any)?.response?.status;
       const msg = (err as any)?.response?.data?.error?.message || 'Import thất bại.';
@@ -423,50 +415,110 @@ export default function ServerUploadPage() {
     }
   };
 
+  const mergedCols = (() => {
+    if (!serverPreview) return [] as string[];
+    const seen = new Set<string>(serverPreview.columns);
+    serverPreview.rows.forEach((r) => Object.keys(r.data).forEach((k) => seen.add(k)));
+    return Array.from(seen);
+  })();
+
+  const filteredRows = serverPreview
+    ? serverShowOnlyErrors
+      ? serverPreview.rows.filter((r) => !r.valid)
+      : serverPreview.rows
+    : [];
+
+  const hasServerEdits = Object.keys(serverEditedRows).length > 0;
+  const hasErrors = (serverPreview?.invalid ?? 0) > 0;
+
   return (
     <div className="p-6">
-      <style>{errorRowStyle}</style>
+      <style>{`.preview-row-error td { background: #fff2f0 !important; } .preview-row-error:hover td { background: #ffe7e0 !important; }`}</style>
       <PageHeader
-        title="Upload Server Chi tiết"
+        title="Import Server từ CSV"
+        subtitle="Khai báo hàng loạt server, hệ thống hạ tầng và phần cứng"
         helpKey="server-import"
       />
 
       <Card>
-        <Alert
-          type="info"
-          showIcon
-          icon={<InfoCircleOutlined />}
-          message="Hướng dẫn Import Server"
-          description={
-            <ul style={{ paddingLeft: 16, margin: 0 }}>
-              <li>Bắt buộc: <b>IP</b> và <b>Tên Server</b>.</li>
-              <li>Thông số kỹ thuật: Tự động tách <b>CPU (Cores)</b>, <b>RAM (GB)</b>, <b>Total Storage (GB)</b>.</li>
-              <li>Hệ điều hành: Nhập vào cột <b>OS</b> (ví dụ: Windows Server 2019, RHEL 8.4).</li>
-              <li>Dữ liệu sẽ được <b>Upsert</b> dựa trên mã Server (Code) hoặc IP Address.</li>
-            </ul>
-          }
-          style={{ marginBottom: 16 }}
+        <Steps
+          current={step}
+          style={{ marginBottom: 24 }}
+          items={[
+            { title: 'Tải file lên' },
+            { title: 'Ánh xạ cột' },
+            { title: 'Xem trước & Kiểm tra' },
+            { title: 'Hoàn tất Import' },
+          ]}
         />
 
-        <Upload
-          beforeUpload={handleFileSelect}
-          accept=".csv"
-          showUploadList={true}
-          multiple={false}
-          maxCount={1}
-          onRemove={() => {
-            setFileToUpload(null);
-            setPreviewData([]);
-          }}
-        >
-          <Button icon={<UploadOutlined />} block size="large">
-            Chọn file CSV để import Server
-          </Button>
-        </Upload>
+        {/* Step 0 — Upload */}
+        {step === 0 && (
+          <Space direction="vertical" style={{ width: '100%' }} size={16}>
+            <Alert
+              type="info"
+              showIcon
+              message="Cột bắt buộc cho Server"
+              description={
+                <span>
+                  Bắt buộc: <b>IP</b> và <b>Tên Server</b>. Tùy chọn: hostname, hệ điều hành (OS), CPU cores, RAM (GB), storage (GB), environment, site, system, purpose.
+                  Dữ liệu được <b>Upsert</b> theo mã Server hoặc IP Address.
+                </span>
+              }
+            />
 
-        {csvColumns.length > 0 && (
-          <div style={{ marginTop: 24 }}>
-            <h4 style={{ marginBottom: 12 }}>Ánh xạ cột (Column Mapping)</h4>
+            <Dragger
+              accept=".csv"
+              maxCount={1}
+              fileList={fileList}
+              beforeUpload={() => false}
+              onChange={({ fileList: list }) => setFileList(list)}
+              onRemove={() => {
+                setFileList([]);
+                setAllRows([]);
+                setCsvColumns([]);
+              }}
+            >
+              <p className="ant-upload-drag-icon">
+                <InboxOutlined />
+              </p>
+              <p className="ant-upload-text">
+                Nhấn hoặc kéo thả file CSV vào đây
+              </p>
+              <p className="ant-upload-hint">
+                Dòng đầu tiên phải là tiêu đề cột. Dung lượng tối đa: 20MB.
+              </p>
+            </Dragger>
+
+            <Space style={{ justifyContent: 'flex-end', width: '100%' }}>
+              <Button
+                icon={<ThunderboltOutlined />}
+                onClick={handleQuickImport}
+                disabled={!fileList.length}
+                loading={serverLoading}
+              >
+                Import nhanh
+              </Button>
+              <Button
+                type="primary"
+                onClick={handleGoToMapping}
+                disabled={!fileList.length}
+              >
+                Tiếp theo: Ánh xạ cột
+              </Button>
+            </Space>
+          </Space>
+        )}
+
+        {/* Step 1 — Column Mapping */}
+        {step === 1 && csvColumns.length > 0 && (
+          <Space direction="vertical" style={{ width: '100%' }} size={16}>
+            <Alert
+              type="info"
+              showIcon
+              message="Ánh xạ cột CSV tới trường server"
+              description="Cột có dấu * là bắt buộc. Cột không được ánh xạ sẽ bị bỏ qua khi import."
+            />
             <ColumnMapper
               csvColumns={csvColumns}
               targets={SERVER_TARGETS}
@@ -474,314 +526,260 @@ export default function ServerUploadPage() {
               onChange={setMapping}
               previewRows={previewData}
             />
-          </div>
+
+            <div>
+              <h4 style={{ marginTop: 8, marginBottom: 8 }}>Ánh xạ giá trị (Value Mapping)</h4>
+              <ValueMapper
+                mapping={mapping}
+                targets={SERVER_TARGETS}
+                csvRows={allRows}
+                value={valueMappings}
+                onChange={setValueMappings}
+              />
+            </div>
+
+            <Space style={{ justifyContent: 'flex-end', width: '100%' }}>
+              <Button onClick={() => setStep(0)}>Quay lại</Button>
+              <Button type="primary" loading={serverLoading} onClick={handleServerPreview}>
+                Tiếp theo: Xem trước ({allRows.length} dòng)
+              </Button>
+            </Space>
+          </Space>
         )}
 
-        {csvColumns.length > 0 && (
-          <div style={{ marginTop: 24 }}>
-            <h4 style={{ marginBottom: 12 }}>Ánh xạ giá trị (Value Mapping)</h4>
-            <ValueMapper
-              mapping={mapping}
-              targets={SERVER_TARGETS}
-              csvRows={allRows}
-              value={valueMappings}
-              onChange={setValueMappings}
-            />
-          </div>
-        )}
-
-        {serverPreview && (() => {
-          const hasErrors = serverPreview.invalid > 0;
-          const hasServerEdits = Object.keys(serverEditedRows).length > 0;
-          const mergedCols = (() => {
-            const seen = new Set<string>(serverPreview.columns);
-            serverPreview.rows.forEach((r) =>
-              Object.keys(r.data).forEach((k) => seen.add(k)),
-            );
-            return Array.from(seen);
-          })();
-          const filteredRows = serverShowOnlyErrors
-            ? serverPreview.rows.filter((r) => !r.valid)
-            : serverPreview.rows;
-
-          return (
-            <div style={{ marginTop: 24 }}>
-              {hasErrors && (
-                <Alert
-                  type="error"
-                  showIcon
-                  banner
-                  message={`Phát hiện ${serverPreview.invalid} dòng lỗi — Kiểm tra và sửa trực tiếp trên bảng hoặc loại bỏ trước khi import.`}
-                  style={{ marginBottom: 12, borderRadius: 6 }}
-                />
-              )}
-
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                <h4 style={{ margin: 0 }}>Bản xem trước &amp; Kiểm tra</h4>
-                <Space>
-                  <Switch
-                    checked={serverShowOnlyErrors}
-                    onChange={setServerShowOnlyErrors}
-                    checkedChildren={`Chỉ lỗi (${serverPreview.invalid})`}
-                    unCheckedChildren="Tất cả"
-                    style={hasErrors ? { backgroundColor: '#ff4d4f' } : undefined}
+        {/* Step 2 — Preview & Validate */}
+        {step === 2 && serverPreview && (
+          <Space direction="vertical" style={{ width: '100%' }} size={16}>
+            <Row gutter={16}>
+              <Col span={8}>
+                <Card size="small"><Statistic title="Tổng số dòng" value={serverPreview.total} /></Card>
+              </Col>
+              <Col span={8}>
+                <Card size="small"><Statistic title="Hợp lệ" value={serverPreview.valid} valueStyle={{ color: '#52c41a' }} /></Card>
+              </Col>
+              <Col span={8}>
+                <Card
+                  size="small"
+                  style={hasErrors ? { border: '1px solid #ff4d4f', background: '#fff2f0' } : undefined}
+                >
+                  <Statistic
+                    title="Lỗi"
+                    value={serverPreview.invalid}
+                    valueStyle={{ color: hasErrors ? '#ff4d4f' : '#8c8c8c' }}
+                    suffix={hasErrors ? <CloseCircleOutlined style={{ fontSize: 16 }} /> : undefined}
                   />
-                  <Button
-                    onClick={handleServerRevalidate}
-                    loading={serverLoading}
-                    disabled={!hasServerEdits}
-                    type="primary"
-                    ghost
-                  >
-                    Kiểm tra lại {hasServerEdits ? `(${Object.keys(serverEditedRows).length} dòng đã sửa)` : ''}
-                  </Button>
-                </Space>
-              </div>
+                </Card>
+              </Col>
+            </Row>
 
-              <Row gutter={16} style={{ marginBottom: 16 }}>
-                <Col span={8}>
-                  <Card size="small"><Statistic title="Tổng số dòng" value={serverPreview.total} /></Card>
-                </Col>
-                <Col span={8}>
-                  <Card size="small"><Statistic title="Hợp lệ" value={serverPreview.valid} valueStyle={{ color: '#52c41a' }} /></Card>
-                </Col>
-                <Col span={8}>
-                  <Card
-                    size="small"
-                    style={hasErrors ? { border: '1px solid #ff4d4f', background: '#fff2f0' } : undefined}
-                  >
-                    <Statistic
-                      title="Lỗi"
-                      value={serverPreview.invalid}
-                      valueStyle={{ color: hasErrors ? '#ff4d4f' : '#8c8c8c' }}
-                      suffix={hasErrors ? <CloseCircleOutlined style={{ fontSize: 16 }} /> : undefined}
-                    />
-                  </Card>
-                </Col>
-              </Row>
+            {hasErrors && (
+              <Alert
+                type="warning"
+                showIcon
+                message={`${serverPreview.invalid} dòng có lỗi. Nhấn ô để chỉnh sửa, sau đó bấm "Kiểm tra lại".`}
+              />
+            )}
 
-              <Table
-                size="small"
-                dataSource={filteredRows}
-                rowKey="row"
-                pagination={{
-                  pageSize: previewPageSize,
-                  showSizeChanger: true,
-                  pageSizeOptions: ['10', '20', '50', '100'],
-                  showTotal: (total, range) => `${range[0]}–${range[1]} / ${total} dòng`,
-                  onShowSizeChange: (_current, size) => setPreviewPageSize(size),
-                }}
-                scroll={{ x: 'max-content' }}
-                rowClassName={(r) => (r.valid ? '' : 'preview-row-error')}
-                columns={[
-                  {
-                    title: '#',
-                    dataIndex: 'row',
-                    width: 70,
-                    fixed: 'left' as const,
-                    filters: [
-                      { text: 'Hợp lệ', value: 'valid' },
-                      { text: 'Lỗi', value: 'invalid' },
-                    ],
-                    onFilter: (value, record: any) =>
-                      value === 'valid' ? record.valid : !record.valid,
-                    render: (v: number, r) => (
-                      <Tooltip title={r.valid ? 'Hợp lệ' : r.errors.join('; ')}>
-                        <span>
-                          {r.valid ? (
-                            <CheckCircleOutlined style={{ color: '#52c41a' }} />
-                          ) : (
-                            <CloseCircleOutlined style={{ color: '#ff4d4f' }} />
-                          )} {v}
-                        </span>
-                      </Tooltip>
-                    ),
-                  },
-                  ...mergedCols.map((col) => ({
-                    title: col.replace(/_/g, ' ').toUpperCase(),
-                    dataIndex: ['data', col],
-                    width: 160,
-                    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }: any) => (
-                      <div style={{ padding: 8 }}>
-                        <Input
-                          placeholder={`Lọc ${col}`}
-                          value={selectedKeys[0]}
-                          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-                          onPressEnter={() => confirm()}
-                          style={{ marginBottom: 8, display: 'block' }}
-                        />
-                        <Space>
-                          <Button type="primary" onClick={() => confirm()} size="small">Lọc</Button>
-                          <Button onClick={() => { clearFilters?.(); confirm(); }} size="small">Xóa</Button>
-                        </Space>
-                      </div>
-                    ),
-                    onFilter: (value: any, record: any) =>
-                      String(record.data[col] ?? '').toLowerCase().includes(String(value).toLowerCase()),
-                    render: (_: unknown, r: any) => {
-                      const value = r.data[col];
-                      const isEdited = serverEditedRows[r.row]?.[col] !== undefined;
-                      const target = SERVER_TARGET_BY_KEY[col];
-                      const displayStr = value != null ? String(value) : '';
+            <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+              <Space>
+                <Switch
+                  checked={serverShowOnlyErrors}
+                  onChange={setServerShowOnlyErrors}
+                  checkedChildren={`Chỉ lỗi (${serverPreview.invalid})`}
+                  unCheckedChildren="Tất cả"
+                  style={hasErrors ? { backgroundColor: '#ff4d4f' } : undefined}
+                />
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                  Hiển thị {filteredRows.length}/{serverPreview.rows.length} dòng
+                </Text>
+              </Space>
+              <Button
+                onClick={handleServerRevalidate}
+                loading={serverLoading}
+                disabled={!hasServerEdits}
+                type={hasServerEdits ? 'primary' : 'default'}
+                ghost={hasServerEdits}
+              >
+                Kiểm tra lại {hasServerEdits ? `(${Object.keys(serverEditedRows).length} dòng đã sửa)` : ''}
+              </Button>
+            </Space>
 
-                      if (target?.options) {
-                        const normalized = target.valueAliases?.[displayStr.toLowerCase()] ?? displayStr;
-                        const validValues = target.options.map((o: any) => o.value);
-                        const currentValue = validValues.includes(normalized) ? normalized : undefined;
+            <Table
+              size="small"
+              dataSource={filteredRows}
+              rowKey="row"
+              pagination={{
+                pageSize: previewPageSize,
+                showSizeChanger: true,
+                pageSizeOptions: ['10', '20', '50', '100'],
+                showTotal: (total, range) => `${range[0]}–${range[1]} / ${total} dòng`,
+                onShowSizeChange: (_current, size) => setPreviewPageSize(size),
+              }}
+              scroll={{ x: 'max-content' }}
+              rowClassName={(r) => (r.valid ? '' : 'preview-row-error')}
+              columns={[
+                {
+                  title: '#',
+                  dataIndex: 'row',
+                  width: 70,
+                  fixed: 'left' as const,
+                  render: (v: number, r: any) => (
+                    <Tooltip title={r.valid ? 'Hợp lệ' : r.errors.join('; ')}>
+                      <span>
+                        {r.valid ? (
+                          <CheckCircleOutlined style={{ color: '#52c41a' }} />
+                        ) : (
+                          <CloseCircleOutlined style={{ color: '#ff4d4f' }} />
+                        )}{' '}{v}
+                      </span>
+                    </Tooltip>
+                  ),
+                },
+                ...mergedCols.map((col) => ({
+                  title: col.replace(/_/g, ' ').toUpperCase(),
+                  dataIndex: ['data', col],
+                  width: 160,
+                  render: (_: unknown, r: any) => {
+                    const value = r.data[col];
+                    const isEdited = serverEditedRows[r.row]?.[col] !== undefined;
+                    const target = SERVER_TARGET_BY_KEY[col];
+                    const displayStr = value != null ? String(value) : '';
 
-                        return (
-                          <Select
-                            size="small"
-                            value={currentValue}
-                            placeholder={displayStr || '—'}
-                            style={{ width: '100%', background: isEdited ? '#fffbe6' : undefined }}
-                            options={target.options}
-                            onChange={(v) => handleServerCellEdit(r.row, col, v)}
-                          />
-                        );
-                      }
+                    if (target?.options) {
+                      const normalized = target.valueAliases?.[displayStr.toLowerCase()] ?? displayStr;
+                      const validValues = target.options.map((o: any) => o.value);
+                      const currentValue = validValues.includes(normalized) ? normalized : undefined;
 
                       return (
-                        <Input
+                        <Select
                           size="small"
-                          defaultValue={displayStr}
-                          style={{ background: isEdited ? '#fffbe6' : undefined }}
-                          onBlur={(e) => {
-                            const newValue = e.target.value;
-                            if (newValue !== displayStr) handleServerCellEdit(r.row, col, newValue);
-                          }}
+                          value={currentValue}
+                          placeholder={displayStr || '—'}
+                          style={{ width: '100%', background: isEdited ? '#fffbe6' : undefined }}
+                          options={target.options}
+                          onChange={(v) => handleServerCellEdit(r.row, col, v)}
                         />
                       );
-                    },
-                  })),
-                  {
-                    title: 'Thông báo lỗi',
-                    dataIndex: 'errors',
-                    width: 220,
-                    fixed: 'right' as const,
-                    render: (errors: string[]) =>
-                      errors.length ? (
-                        <Tooltip title={errors.join('\n')}>
-                          <div style={{
-                            color: '#ff4d4f',
-                            fontSize: 12,
-                            background: '#fff2f0',
-                            border: '1px solid #ffccc7',
-                            borderRadius: 4,
-                            padding: '2px 6px',
-                            cursor: 'help',
-                          }}>
-                            <CloseCircleOutlined style={{ marginRight: 4 }} />
-                            {errors[0]}{errors.length > 1 ? ` (+${errors.length - 1})` : ''}
-                          </div>
-                        </Tooltip>
-                      ) : (
-                        <Tag color="green" icon={<CheckCircleOutlined />}>Hợp lệ</Tag>
-                      ),
+                    }
+
+                    return (
+                      <Input
+                        size="small"
+                        defaultValue={displayStr}
+                        style={{ background: isEdited ? '#fffbe6' : undefined }}
+                        onBlur={(e) => {
+                          const newValue = e.target.value;
+                          if (newValue !== displayStr) handleServerCellEdit(r.row, col, newValue);
+                        }}
+                      />
+                    );
                   },
-                ]}
-              />
+                })),
+                {
+                  title: 'Thông báo lỗi',
+                  dataIndex: 'errors',
+                  width: 220,
+                  fixed: 'right' as const,
+                  render: (errors: string[]) =>
+                    errors.length ? (
+                      <Tooltip title={errors.join('\n')}>
+                        <div style={{
+                          color: '#ff4d4f',
+                          fontSize: 12,
+                          background: '#fff2f0',
+                          border: '1px solid #ffccc7',
+                          borderRadius: 4,
+                          padding: '2px 6px',
+                          cursor: 'help',
+                        }}>
+                          <CloseCircleOutlined style={{ marginRight: 4 }} />
+                          {errors[0]}{errors.length > 1 ? ` (+${errors.length - 1})` : ''}
+                        </div>
+                      </Tooltip>
+                    ) : (
+                      <Tag color="green" icon={<CheckCircleOutlined />}>Hợp lệ</Tag>
+                    ),
+                },
+              ]}
+            />
 
-              {serverPreview.os_resolution && serverPreview.os_resolution.length > 0 && (
-                <div style={{ marginTop: 24 }}>
-                  <Alert
-                    type="warning"
-                    showIcon
-                    message="Xác nhận Danh mục Hệ điều hành"
-                    description="Các Hệ điều hành mới sẽ được tự động tạo trong Danh mục (SYSTEM Application) nếu chưa tồn tại."
-                    style={{ marginBottom: 12 }}
-                  />
-                  <Table
-                    size="small"
-                    pagination={false}
-                    dataSource={serverPreview.os_resolution}
-                    rowKey="raw"
-                    columns={[
-                      { title: 'OS trong file', dataIndex: 'raw', key: 'raw' },
-                      { 
-                        title: 'Ánh xạ Danh mục', 
-                        key: 'action',
-                        render: (_, r) => (
-                          <Select
-                            placeholder="Chọn OS từ Danh mục hoặc Tạo mới"
-                            allowClear
-                            style={{ width: '100%' }}
-                            value={osMappings[r.raw]}
-                            onChange={(val) => setOsMappings(prev => ({ ...prev, [r.raw]: val }))}
-                            options={[
-                              { label: `+ Tạo mới OS: ${r.suggested_name}`, value: '' },
-                              ...osCatalog.map(os => ({ label: os.name, value: os.id }))
-                            ]}
-                          />
-                        )
-                      },
-                    ]}
-                  />
-                </div>
-              )}
-            </div>
-          );
-        })()}
+            {serverPreview.os_resolution && serverPreview.os_resolution.length > 0 && (
+              <div style={{ marginTop: 8 }}>
+                <Alert
+                  type="warning"
+                  showIcon
+                  message="Xác nhận Danh mục Hệ điều hành"
+                  description="Các Hệ điều hành mới sẽ được tự động tạo trong Danh mục (SYSTEM Application) nếu chưa tồn tại."
+                  style={{ marginBottom: 12 }}
+                />
+                <Table
+                  size="small"
+                  pagination={false}
+                  dataSource={serverPreview.os_resolution}
+                  rowKey="raw"
+                  columns={[
+                    { title: 'OS trong file', dataIndex: 'raw', key: 'raw' },
+                    {
+                      title: 'Ánh xạ Danh mục',
+                      key: 'action',
+                      render: (_, r: any) => (
+                        <Select
+                          placeholder="Chọn OS từ Danh mục hoặc Tạo mới"
+                          allowClear
+                          style={{ width: '100%' }}
+                          value={osMappings[r.raw]}
+                          onChange={(val) => setOsMappings((prev) => ({ ...prev, [r.raw]: val }))}
+                          options={[
+                            { label: `+ Tạo mới OS: ${r.suggested_name}`, value: '' },
+                            ...osCatalog.map((os: any) => ({ label: os.name, value: os.id })),
+                          ]}
+                        />
+                      ),
+                    },
+                  ]}
+                />
+              </div>
+            )}
 
-        <Space style={{ marginTop: 24, width: '100%', justifyContent: 'flex-end' }}>
-          <Button onClick={handleReset}>Hủy bỏ</Button>
-          {serverPreview ? (
-            <Button
-              type="primary"
-              onClick={handleServerExecute}
-              disabled={serverPreview.valid === 0 || Object.keys(serverEditedRows).length > 0}
-              loading={serverLoading}
-              size="large"
-            >
-              Tiến hành Nhập {serverPreview.valid} Server
-            </Button>
-          ) : (
-            <>
-              <Button
-                icon={<ThunderboltOutlined />}
-                onClick={handleQuickImport}
-                disabled={!fileToUpload}
-                loading={serverLoading}
-                size="large"
-              >
-                Import nhanh
-              </Button>
+            <Space style={{ justifyContent: 'flex-end', width: '100%' }}>
+              <Button onClick={() => setStep(1)}>Quay lại</Button>
               <Button
                 type="primary"
-                onClick={handleServerPreview}
-                disabled={!fileToUpload}
                 loading={serverLoading}
-                size="large"
+                onClick={handleServerExecute}
+                disabled={!serverPreview || serverPreview.valid === 0 || hasServerEdits}
               >
-                Kiểm tra &amp; Xem trước ({totalRows} dòng)
+                Nhập {serverPreview.valid} server hợp lệ
               </Button>
-            </>
-          )}
-        </Space>
-      </Card>
+            </Space>
+          </Space>
+        )}
 
-      <Modal
-        title="Kết quả Import Server"
-        open={!!serverResult}
-        onCancel={handleReset}
-        footer={<Button type="primary" onClick={handleReset}>Đóng &amp; Bắt đầu lại</Button>}
-        width={760}
-        styles={{ body: { maxHeight: '75vh', overflowY: 'auto' } }}
-      >
-        {serverResult && (() => {
+        {/* Step 3 — Done */}
+        {step === 3 && serverResult && (() => {
           const { summary, breakdown, errors } = serverResult;
           const allSuccess = summary.failed === 0;
           return (
             <div>
-              {/* Tổng quan */}
-              <Row gutter={16} style={{ marginBottom: 20 }}>
+              <Result
+                status={summary.succeeded > 0 ? 'success' : 'warning'}
+                title={allSuccess ? 'Import hoàn tất!' : `Import hoàn tất — ${summary.failed} dòng thất bại`}
+                subTitle={
+                  allSuccess
+                    ? 'Tất cả server đã được nhập thành công.'
+                    : `${summary.failed} dòng không được import — Xem chi tiết bên dưới.`
+                }
+                extra={<Button type="primary" onClick={handleReset}>Nhập thêm</Button>}
+              />
+
+              <Row gutter={16} style={{ marginBottom: 16 }}>
                 <Col span={8}>
                   <Card size="small" style={{ textAlign: 'center' }}>
                     <Statistic title="Tổng dòng xử lý" value={summary.total} />
                   </Card>
                 </Col>
                 <Col span={8}>
-                  <Card size="small" style={{ textAlign: 'center', border: '1px solid #b7eb8f' }}>
+                  <Card size="small" style={{ textAlign: 'center', border: '1px solid #b7eb8f', background: '#f6ffed' }}>
                     <Statistic title="Thành công" value={summary.succeeded} valueStyle={{ color: '#52c41a' }} />
                   </Card>
                 </Col>
@@ -792,12 +790,6 @@ export default function ServerUploadPage() {
                 </Col>
               </Row>
 
-              {allSuccess
-                ? <Alert type="success" showIcon message="Import hoàn tất — Tất cả dữ liệu đã được xử lý thành công." style={{ marginBottom: 16 }} />
-                : <Alert type="warning" showIcon message={`${summary.failed} dòng không được import — Xem chi tiết lỗi bên dưới.`} style={{ marginBottom: 16 }} />
-              }
-
-              {/* Breakdown */}
               <Divider orientation="left" orientationMargin={0} style={{ fontSize: 13, color: '#595959' }}>Chi tiết theo loại dữ liệu</Divider>
               <Descriptions bordered size="small" column={2} style={{ marginBottom: 16 }}>
                 <Descriptions.Item label={<><Badge color="#1677ff" /> Hệ thống (InfraSystem)</>} span={2}>
@@ -826,7 +818,6 @@ export default function ServerUploadPage() {
                 </Descriptions.Item>
               </Descriptions>
 
-              {/* Danh sách lỗi */}
               {errors.length > 0 && (
                 <>
                   <Divider orientation="left" orientationMargin={0} style={{ fontSize: 13, color: '#ff4d4f' }}>
@@ -857,7 +848,7 @@ export default function ServerUploadPage() {
             </div>
           );
         })()}
-      </Modal>
+      </Card>
     </div>
   );
 }

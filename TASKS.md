@@ -482,6 +482,25 @@
 
 ---
 
+## Sprint 20 — UI/UX Polish: Import Consistency, Bulk Actions & Form Modernization ✅ DONE
+
+**Mục tiêu:** Đồng nhất trải nghiệm import server với app-import (Dragger + Steps), bổ sung hướng dẫn còn thiếu, thêm bulk-delete cho nhóm ứng dụng, form nhập phần cứng dùng key-value UI, cải thiện layout form.
+**Thời gian:** 2026-04-30
+**Branch:** `feat/sprint-20-ux-polish`
+**Plan:** [docs/plans/sprint-20-ux-polish.md](docs/plans/sprint-20-ux-polish.md)
+
+| # | Task | Points | Status | SRS Ref |
+|---|------|--------|--------|---------|
+| S20-01 | `[FE]` Refactor `infra-upload/index.tsx`: Dragger + Steps 4-bước wizard (đồng nhất app-import) | 3 | ✅ | 4.2.4 |
+| S20-02 | `[FE/DOCS]` GuidePage: thêm menu "Import CSV"; cập nhật `import.md`, `guide_infra.md` | 2 | ✅ | — |
+| S20-03 | `[FE]` AppGroupList: thêm rowSelection + bulk delete (như infra-system) | 2 | ✅ | 4.6.1 |
+| S20-04 | `[FE]` HardwareTab: thay JSON textarea `specs` bằng Form.List key-value editor | 3 | ✅ | 4.1.3 |
+| S20-05 | `[FE]` ServerForm, ApplicationForm, AppGroupModal: Row/Col 2-column layout | 3 | ✅ | — |
+
+**Sprint 20 Total: 13 points**
+
+---
+
 ## Sprint 19 — Topology Orthogonal Edges & UX Polish ✅ DONE
 
 **Mục tiêu:** Bổ sung chế độ kết nối thẳng góc (orthogonal edges) cho Topology 2D, cải thiện khả năng đọc hiểu sơ đồ khi có nhiều kết nối chồng lấp.

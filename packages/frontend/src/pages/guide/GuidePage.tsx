@@ -45,6 +45,7 @@ export default function GuidePage() {
         { key: 'system-software', icon: <FileTextOutlined />, label: 'Phần mềm hệ thống' },
         { key: 'deployment', icon: <FileTextOutlined />, label: 'Triển khai (Deployment)' },
         { key: 'connection', icon: <FileTextOutlined />, label: 'Quản lý Kết nối' },
+        { key: 'import', icon: <FileTextOutlined />, label: 'Import CSV (hàng loạt)' },
         { key: 'topology', icon: <FileTextOutlined />, label: 'Sơ đồ Topology' },
         { key: 'changeset', icon: <FileTextOutlined />, label: 'ChangeSets' },
         { key: 'audit', icon: <FileTextOutlined />, label: 'Audit Log' },

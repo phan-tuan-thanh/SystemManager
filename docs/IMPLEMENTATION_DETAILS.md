@@ -4,6 +4,33 @@ This document consolidates all past implementation plans and detailed technical 
 
 ---
 
+## Sprint 20 UI/UX Polish (2026-04-30)
+
+**Status:** ✅ Completed
+**Context:** 5 cải tiến UX độc lập: (1) import server chưa dùng Dragger, (2) guide docs thiếu import, (3) AppGroupList thiếu bulk select, (4) HardwareTab dùng JSON textarea khó dùng, (5) form layout 100% width kém hiện đại.
+**Decision:**
+- S20-01: Refactor `infra-upload/index.tsx` thêm `<Steps>` 4 bước + `<Dragger>` thay `<Upload>` button. State machine: step 0→1→2→3, tự chuyển bước sau parse file.
+- S20-02: Thêm `import` key vào GuidePage menu sidebar. Rewrite `import.md` mô tả đúng flow wizard hiện tại. Bổ sung bước import hàng loạt trong `guide_infra.md`.
+- S20-03: AppGroupList dùng `Table` rowSelection kiểu `checkbox`, thêm `selectedRowKeys` state + bulk delete button (Popconfirm) giống `infra-system/index.tsx`.
+- S20-04: Thay `Input.TextArea` cho `specs` bằng `Form.List` — mỗi item là 1 hàng key + value. Serialize thành `Record<string,string>` khi submit, parse ngược khi edit.
+- S20-05: Dùng `<Row gutter={16}>` + `<Col span={12}>` để ghép fields ngắn: code+name, environment+site, status+purpose, version+owner_team, code+group_type.
+**Files impacted:**
+- `packages/frontend/src/pages/infra-upload/index.tsx` — update (S20-01)
+- `packages/frontend/src/pages/guide/GuidePage.tsx` — update (S20-02)
+- `packages/backend/content/help/vi/import.md` — update (S20-02)
+- `packages/backend/content/help/vi/guide_infra.md` — update (S20-02)
+- `packages/frontend/src/pages/application/components/AppGroupList.tsx` — update (S20-03)
+- `packages/frontend/src/pages/server/components/HardwareTab.tsx` — update (S20-04)
+- `packages/frontend/src/pages/server/components/ServerForm.tsx` — update (S20-05)
+- `packages/frontend/src/pages/application/components/ApplicationForm.tsx` — update (S20-05)
+- `packages/frontend/src/pages/application/components/AppGroupModal.tsx` — update (S20-05)
+**Trade-offs:** Key-value editor cho specs không validate kiểu dữ liệu (tất cả là string); đủ cho use case hiện tại, có thể mở rộng type hints sau.
+**Outcome:** Tất cả 5 task (S20-01 → S20-05) đã deliver: infra-upload dùng Dragger+Steps wizard; Guide sidebar có mục "Import CSV"; AppGroupList có bulk delete; HardwareTab dùng Form.List key-value editor; ServerForm/ApplicationForm/AppGroupModal dùng Row/Col 2-column layout.
+**Completed:** 2026-04-30
+**Sprint plan ref:** `docs/plans/sprint-20-ux-polish.md`
+
+---
+
 ## Topology Node Visibility Filter (2026-04-29)
 
 **Status:** ✅ Completed

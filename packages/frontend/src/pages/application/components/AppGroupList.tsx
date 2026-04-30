@@ -12,9 +12,10 @@ export default function AppGroupList() {
   const [search, setSearch] = useState('');
   const [groupTypeFilter, setGroupTypeFilter] = useState<GroupType | undefined>();
   const [page, setPage] = useState(1);
-  const [limit] = useState(20);
+  const [limit, setLimit] = useState(20);
   const [modalOpen, setModalOpen] = useState(false);
   const [editGroup, setEditGroup] = useState<ApplicationGroup | null>(null);
+  const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
 
   const { data, isLoading } = useAppGroupList({
     page, limit,
@@ -27,9 +28,21 @@ export default function AppGroupList() {
     try {
       await deleteGroup.mutateAsync(id);
       message.success('Đã xoá nhóm ứng dụng');
+      setSelectedRowKeys((prev) => prev.filter((k) => k !== id));
     } catch {
       message.error('Không thể xoá nhóm ứng dụng');
     }
+  };
+
+  const handleBulkDelete = async () => {
+    const results = await Promise.allSettled(
+      selectedRowKeys.map((id) => deleteGroup.mutateAsync(id)),
+    );
+    const failed = results.filter((r) => r.status === 'rejected').length;
+    const succeeded = results.length - failed;
+    if (succeeded > 0) message.success(`Đã xoá ${succeeded} nhóm ứng dụng`);
+    if (failed > 0) message.error(`${failed} nhóm không thể xoá (đang chứa ứng dụng)`);
+    setSelectedRowKeys([]);
   };
 
   const columns: ColumnsType<ApplicationGroup> = [
@@ -118,13 +131,29 @@ export default function AppGroupList() {
             ]}
           />
         </Space>
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={() => { setEditGroup(null); setModalOpen(true); }}
-        >
-          Tạo nhóm
-        </Button>
+        <Space>
+          {selectedRowKeys.length > 0 && (
+            <Popconfirm
+              title={`Xoá ${selectedRowKeys.length} nhóm đã chọn?`}
+              description="Hành động này không thể hoàn tác"
+              onConfirm={handleBulkDelete}
+              okText="Xoá"
+              cancelText="Huỷ"
+              okType="danger"
+            >
+              <Button danger icon={<DeleteOutlined />}>
+                Xoá {selectedRowKeys.length} nhóm
+              </Button>
+            </Popconfirm>
+          )}
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => { setEditGroup(null); setModalOpen(true); }}
+          >
+            Tạo nhóm
+          </Button>
+        </Space>
       </Space>
 
       <DataTable<ApplicationGroup>
@@ -132,11 +161,13 @@ export default function AppGroupList() {
         dataSource={data?.items ?? []}
         loading={isLoading}
         rowKey="id"
-        pagination={{
-          current: page,
-          pageSize: limit,
-          total: data?.total ?? 0,
-          onChange: setPage,
+        total={data?.total ?? 0}
+        page={page}
+        pageSize={limit}
+        onPageChange={(p, ps) => { setPage(p); setLimit(ps); }}
+        rowSelection={{
+          selectedRowKeys,
+          onChange: (keys) => setSelectedRowKeys(keys as string[]),
         }}
       />
 

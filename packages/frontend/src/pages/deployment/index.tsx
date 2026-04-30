@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Input, Select, Space, App, Popconfirm, Tag, Progress } from 'antd';
-import { PlusOutlined, SearchOutlined, EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Button, Input, Select, Space, App, Popconfirm, Tag } from 'antd';
+import { PlusOutlined, SearchOutlined, EyeOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import PageHeader from '../../components/common/PageHeader';
 import DataTable from '../../components/common/DataTable';
@@ -20,8 +20,9 @@ export default function DeploymentListPage() {
   const [envFilter, setEnvFilter] = useState<string | undefined>();
   const [statusFilter, setStatusFilter] = useState<string | undefined>();
   const [page, setPage] = useState(1);
-  const [limit] = useState(20);
+  const [limit, setLimit] = useState(20);
   const [formOpen, setFormOpen] = useState(false);
+  const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
 
   const { data, isLoading } = useDeploymentList({
     page, limit,
@@ -35,9 +36,21 @@ export default function DeploymentListPage() {
     try {
       await deleteDeployment.mutateAsync(id);
       message.success('Đã xoá deployment');
+      setSelectedRowKeys((prev) => prev.filter((k) => k !== id));
     } catch {
       message.error('Không thể xoá deployment');
     }
+  };
+
+  const handleBulkDelete = async () => {
+    const results = await Promise.allSettled(
+      selectedRowKeys.map((id) => deleteDeployment.mutateAsync(id)),
+    );
+    const failed = results.filter((r) => r.status === 'rejected').length;
+    const succeeded = results.length - failed;
+    if (succeeded > 0) message.success(`Đã xoá ${succeeded} deployment`);
+    if (failed > 0) message.error(`${failed} deployment không thể xoá`);
+    setSelectedRowKeys([]);
   };
 
   const columns: ColumnsType<AppDeployment> = [
@@ -113,9 +126,24 @@ export default function DeploymentListPage() {
         subtitle="Quản lý triển khai ứng dụng lên các server"
         helpKey="deployment"
         extra={
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => setFormOpen(true)}>
-            Tạo deployment
-          </Button>
+          <Space>
+            {selectedRowKeys.length > 0 && (
+              <Popconfirm
+                title={`Xoá ${selectedRowKeys.length} deployment đã chọn?`}
+                onConfirm={handleBulkDelete}
+                okText="Xoá"
+                cancelText="Huỷ"
+                okType="danger"
+              >
+                <Button danger icon={<DeleteOutlined />}>
+                  Xoá {selectedRowKeys.length} mục
+                </Button>
+              </Popconfirm>
+            )}
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => setFormOpen(true)}>
+              Tạo deployment
+            </Button>
+          </Space>
         }
       />
 
@@ -159,11 +187,13 @@ export default function DeploymentListPage() {
         dataSource={data?.items ?? []}
         loading={isLoading}
         rowKey="id"
-        pagination={{
-          current: page,
-          pageSize: limit,
-          total: data?.total ?? 0,
-          onChange: setPage,
+        total={data?.total ?? 0}
+        page={page}
+        pageSize={limit}
+        onPageChange={(p, ps) => { setPage(p); setLimit(ps); }}
+        rowSelection={{
+          selectedRowKeys,
+          onChange: (keys) => setSelectedRowKeys(keys as string[]),
         }}
       />
 
