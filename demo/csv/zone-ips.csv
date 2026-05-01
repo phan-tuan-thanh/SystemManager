@@ -1,0 +1,24 @@
+zone_code,environment,ip_address,label,description,is_range
+DMZ_PROD,PROD,192.168.10.31,SRV-PROD-GW-001,Nginx API Gateway PROD DC,false
+DMZ_PROD,PROD,192.168.10.41,SRV-PROD-LB-001,HAProxy Load Balancer PROD DC,false
+APP_PROD,PROD,192.168.10.11,SRV-PROD-APP-001,App Server PROD 01 — Core Banking & IB Portal,false
+APP_PROD,PROD,192.168.10.12,SRV-PROD-APP-002,App Server PROD 02 — Transaction & Loan,false
+APP_PROD,PROD,192.168.10.71,SRV-PROD-APP-003,App Server PROD 03 — Mobile Banking (maintenance),false
+DB_PROD,PROD,192.168.10.21,SRV-PROD-DB-001,Primary PostgreSQL — Core Banking,false
+DB_PROD,PROD,192.168.10.22,SRV-PROD-DB-002,Standby PostgreSQL — HA Replica,false
+DB_PROD,PROD,192.168.10.81,SRV-PROD-DB-003,PostgreSQL — Mobile Banking,false
+INFRA_PROD,PROD,192.168.10.51,SRV-PROD-CACHE-001,Redis Sentinel — Session & Hot Cache,false
+INFRA_PROD,PROD,192.168.10.61,SRV-PROD-MQ-001,RabbitMQ — Async Messaging,false
+DMZ_DR,PROD,192.168.20.31,SRV-DR-GW-001,Nginx API Gateway DR site,false
+APP_DR,PROD,192.168.20.11,SRV-DR-APP-001,App Server DR 01 — Core Banking standby,false
+DB_DR,PROD,192.168.20.21,SRV-DR-DB-001,PostgreSQL DR — Replica từ PROD DC,false
+APP_UAT,UAT,192.168.30.11,SRV-UAT-APP-001,App Server UAT — kiểm thử nghiệm thu,false
+DB_UAT,UAT,192.168.30.21,SRV-UAT-DB-001,Database Server UAT,false
+DMZ_UAT,UAT,192.168.30.31,SRV-UAT-GW-001,Nginx Gateway UAT,false
+APP_DEV,DEV,192.168.40.11,SRV-DEV-APP-001,App Server DEV 01 — Core Banking & IB,false
+APP_DEV,DEV,192.168.40.12,SRV-DEV-APP-002,App Server DEV 02 — Mobile & Payment,false
+DB_DEV,DEV,192.168.40.21,SRV-DEV-DB-001,Database Server DEV — dùng chung,false
+INFRA_DEV,DEV,192.168.40.51,SRV-DEV-CACHE-001,Redis DEV — standalone,false
+INTERNET,PROD,203.162.0.0/16,VN-ISP-Range,Dải IP ISP Việt Nam — người dùng cuối internet banking,true
+INTERNET,PROD,113.160.0.0/14,VN-Mobile-Range,Dải IP mạng di động Việt Nam — người dùng mobile banking,true
+INTERNET,PROD,14.160.0.0/11,VN-Broadband-Range,Dải IP broadband Việt Nam — kết nối hộ gia đình,true

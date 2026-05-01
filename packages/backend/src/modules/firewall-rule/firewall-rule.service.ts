@@ -114,7 +114,7 @@ export class FirewallRuleService {
 
   async importRules(rows: Record<string, string>[]) {
     const results = { created: 0, skipped: 0, errors: [] as string[] };
-    const REQUIRED = ['name', 'environment', 'destination_server_id'];
+    const REQUIRED = ['name', 'environment'];
 
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
@@ -125,11 +125,66 @@ export class FirewallRuleService {
       }
 
       try {
+        // Resolve server: accept UUID (destination_server_id) or friendly code (server_code)
+        let serverId: string | null = row.destination_server_id || null;
+        if (!serverId && row.server_code) {
+          const srv = await this.prisma.server.findFirst({
+            where: { code: row.server_code, deleted_at: null },
+            select: { id: true },
+          });
+          if (!srv) {
+            results.errors.push(`Row ${i + 2}: server '${row.server_code}' not found`);
+            continue;
+          }
+          serverId = srv.id;
+        }
+        if (!serverId) {
+          results.errors.push(`Row ${i + 2}: missing server_code or destination_server_id`);
+          continue;
+        }
+
+        // Resolve source zone: accept UUID or zone code
+        let srcZoneId: string | null = row.source_zone_id || null;
+        if (!srcZoneId && row.source_zone_code) {
+          const zone = await this.prisma.networkZone.findFirst({
+            where: { code: row.source_zone_code, environment: row.environment as any, deleted_at: null },
+            select: { id: true },
+          });
+          if (zone) srcZoneId = zone.id;
+        }
+
+        // Resolve destination zone: accept UUID or zone code
+        let dstZoneId: string | null = row.destination_zone_id || null;
+        if (!dstZoneId && row.destination_zone_code) {
+          const zone = await this.prisma.networkZone.findFirst({
+            where: { code: row.destination_zone_code, environment: row.environment as any, deleted_at: null },
+            select: { id: true },
+          });
+          if (zone) dstZoneId = zone.id;
+        }
+
+        // Resolve port: accept UUID (destination_port_id) or port_number + server lookup
+        let portId: string | null = row.destination_port_id || null;
+        if (!portId && row.port_number && serverId) {
+          const portNum = parseInt(row.port_number, 10);
+          if (!isNaN(portNum)) {
+            const port = await this.prisma.port.findFirst({
+              where: {
+                port_number: portNum,
+                deployment: { server_id: serverId },
+                deleted_at: null,
+              },
+              select: { id: true },
+            });
+            if (port) portId = port.id;
+          }
+        }
+
         const existing = await this.prisma.firewallRule.findFirst({
           where: {
             source_ip: row.source_ip || null,
-            destination_server_id: row.destination_server_id,
-            destination_port_id: row.destination_port_id || null,
+            destination_server_id: serverId,
+            destination_port_id: portId,
             environment: row.environment as any,
             deleted_at: null,
           },
@@ -142,22 +197,26 @@ export class FirewallRuleService {
               name: row.name,
               action: (row.action || 'ALLOW') as any,
               status: (row.status || 'PENDING_APPROVAL') as any,
-              source_zone_id: row.source_zone_id || null,
-              destination_zone_id: row.destination_zone_id || null,
+              source_zone_id: srcZoneId,
+              destination_zone_id: dstZoneId,
+              destination_server_id: serverId,
+              destination_port_id: portId,
               protocol: row.protocol || 'TCP',
               notes: row.notes || null,
             },
           });
+          results.skipped++;
         } else {
           await this.prisma.firewallRule.create({
             data: {
               name: row.name,
+              description: row.description || null,
               environment: row.environment as any,
               source_ip: row.source_ip || null,
-              source_zone_id: row.source_zone_id || null,
-              destination_server_id: row.destination_server_id,
-              destination_port_id: row.destination_port_id || null,
-              destination_zone_id: row.destination_zone_id || null,
+              source_zone_id: srcZoneId,
+              destination_server_id: serverId,
+              destination_port_id: portId,
+              destination_zone_id: dstZoneId,
               protocol: row.protocol || 'TCP',
               action: (row.action || 'ALLOW') as any,
               status: (row.status || 'PENDING_APPROVAL') as any,
