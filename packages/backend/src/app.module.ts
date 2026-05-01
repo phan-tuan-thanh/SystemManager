@@ -30,6 +30,8 @@ import { ChangeSetModule } from './modules/changeset/changeset.module';
 import { ImportModule } from './modules/import/import.module';
 import { AlertModule } from './modules/alert/alert.module';
 import { HelpModule } from './modules/help/help.module';
+import { NetworkZoneModule } from './modules/network-zone/network-zone.module';
+import { FirewallRuleModule } from './modules/firewall-rule/firewall-rule.module';
 
 @Module({
   imports: [
@@ -72,6 +74,8 @@ import { HelpModule } from './modules/help/help.module';
     ImportModule,
     AlertModule,
     HelpModule,
+    NetworkZoneModule,
+    FirewallRuleModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },

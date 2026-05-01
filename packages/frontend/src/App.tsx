@@ -30,6 +30,8 @@ import ChangeSetDetailPage from './pages/changeset/[id]';
 import ChangeSetPreviewPage from './pages/changeset/preview';
 import AuthCallbackPage from './pages/auth/AuthCallbackPage';
 import GuidePage from './pages/guide/GuidePage';
+import NetworkZonePage from './pages/network-zone/index';
+import FirewallRulePage from './pages/firewall-rule/index';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -84,6 +86,8 @@ export default function App() {
 
                 {/* Network routes */}
                 <Route path="/networks" element={<NetworkListPage />} />
+                <Route path="/network-zones" element={<NetworkZonePage />} />
+                <Route path="/firewall-rules" element={<FirewallRulePage />} />
 
                 {/* Infra System routes */}
                 <Route path="/infra-systems" element={<InfraSystemListPage />} />

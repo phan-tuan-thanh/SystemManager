@@ -880,6 +880,44 @@ Hệ thống hỗ trợ phân quyền truy cập theo từng InfraSystem:
 
 ---
 
+## 4.9. Phân vùng mạng & Quản lý Firewall Rule
+
+### 4.9.1 Network Zone — Phân vùng mạng
+**Mô tả:** Quản lý các phân vùng mạng trong hạ tầng (LOCAL, DMZ, DB, DEV, INTERNET, MANAGEMENT, STORAGE, BACKUP, CUSTOM...). Mỗi zone có tập hợp địa chỉ IP/CIDR thuộc về zone đó, phục vụ quản lý và phân tích firewall rule.
+**Actor:** ADMIN | OPERATOR
+**Acceptance Criteria:**
+- AC1: CRUD zone — mỗi zone có name, code (unique/env), loại (NetworkZoneType), mô tả, màu sắc (hex), môi trường.
+- AC2: Quản lý danh sách IP/CIDR trong zone — thêm từng IP hoặc import hàng loạt từ text/CSV.
+- AC3: IP entry có thể là địa chỉ đơn (192.168.1.1) hoặc dải CIDR (192.168.1.0/24).
+- AC4: Validate IP/CIDR format trước khi lưu.
+- AC5: Filter danh sách zone theo environment.
+**Added:** 2026-04-30
+
+### 4.9.2 Firewall Rule Management — Quản lý quy tắc firewall
+**Mô tả:** Quản lý danh sách firewall rule: cho phép/từ chối kết nối từ IP nguồn (trong zone) đến server đích tại cổng đang lắng nghe. Hỗ trợ import từ CSV/XLSX và xuất tài liệu XLSX để trình cấp phê duyệt.
+**Actor:** ADMIN | OPERATOR
+**Acceptance Criteria:**
+- AC1: Mỗi rule gồm: tên, môi trường, IP/zone nguồn, server đích, port đích, giao thức, hành động (ALLOW/DENY), trạng thái (ACTIVE/INACTIVE/PENDING_APPROVAL/REJECTED), ngày yêu cầu, người phê duyệt, ghi chú.
+- AC2: Import rule từ CSV/XLSX — upsert theo (source_ip, destination_server_id, destination_port_id).
+- AC3: Export danh sách rule ra file XLSX định dạng tài liệu rule request (bảng chuẩn gồm STT, IP Nguồn, Zone Nguồn, Server Đích, IP Đích, Cổng, Giao thức, Hành động, Trạng thái, Ghi chú).
+- AC4: Filter rule theo: environment, action, status, source zone, server đích.
+- AC5: Soft delete — không xóa cứng record.
+**Added:** 2026-04-30
+
+### 4.9.3 Firewall Topology — Topology phân vùng mạng
+**Mô tả:** Loại topology mới thể hiện kết nối từ các IP/zone nguồn đến các server đích theo port, biểu diễn trực quan các firewall rule đang ACTIVE/PENDING. Bổ sung vào trang Topology hiện có dưới dạng tab riêng.
+**Actor:** ADMIN | OPERATOR | VIEWER
+**Acceptance Criteria:**
+- AC1: Tab "Firewall" trong trang Topology, hiển thị graph riêng biệt với tab App Topology.
+- AC2: Node types: Zone (hình chữ nhật màu zone), Server (hình vuông), Port (badge trên server node).
+- AC3: Edge từ Zone/IP → Server thể hiện rule ALLOW (xanh) hoặc DENY (đỏ).
+- AC4: Tooltip/hover trên edge hiển thị chi tiết rule: IP nguồn, port đích, giao thức, trạng thái.
+- AC5: Filter theo environment, action (ALLOW/DENY), status (ACTIVE/PENDING_APPROVAL).
+- AC6: Dữ liệu lấy từ API `/api/v1/firewall-rules` — không cần thay đổi topology backend hiện tại.
+**Added:** 2026-04-30
+
+---
+
 # 🔗 5. Yêu cầu phi chức năng
 
 ## Hiệu năng
