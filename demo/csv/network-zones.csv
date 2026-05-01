@@ -1,15 +1,16 @@
 code,name,zone_type,environment,color,description
-DMZ_PROD,DMZ Zone PROD,DMZ,PROD,#FF6B6B,Vùng DMZ PROD — máy chủ gateway và load balancer tiếp nhận traffic từ internet
-APP_PROD,Application Zone PROD,LOCAL,PROD,#1890FF,Vùng ứng dụng nội bộ PROD — các app server Core Banking và Internet Banking
-DB_PROD,Database Zone PROD,DB,PROD,#722ED1,Vùng cơ sở dữ liệu PROD — PostgreSQL clusters (Core Banking và Mobile Banking)
-INFRA_PROD,Infrastructure Zone PROD,MANAGEMENT,PROD,#13C2C2,Vùng hạ tầng PROD — Redis cache và RabbitMQ message queue
-DMZ_DR,DMZ Zone DR,DMZ,PROD,#FF9C6E,Vùng DMZ DR site — Nginx gateway dự phòng
-APP_DR,Application Zone DR,LOCAL,PROD,#69C0FF,Vùng ứng dụng DR site — standby app servers cho Core Banking
-DB_DR,Database Zone DR,DB,PROD,#B37FEB,Vùng cơ sở dữ liệu DR site — PostgreSQL replica từ PROD DC
-INTERNET,Internet / External,INTERNET,PROD,#8C8C8C,Vùng Internet — nguồn traffic từ bên ngoài (end users và partner APIs)
-APP_UAT,Application Zone UAT,UAT,UAT,#52C41A,Vùng ứng dụng UAT — kiểm thử nghiệm thu toàn bộ luồng nghiệp vụ
-DB_UAT,Database Zone UAT,DB,UAT,#722ED1,Vùng cơ sở dữ liệu UAT — PostgreSQL dùng cho kiểm thử
-DMZ_UAT,DMZ Zone UAT,DMZ,UAT,#FF6B6B,Vùng DMZ UAT — Nginx gateway cho môi trường kiểm thử
-APP_DEV,Application Zone DEV,DEV,DEV,#FAAD14,Vùng ứng dụng DEV — phát triển và debug các service
-DB_DEV,Database Zone DEV,DB,DEV,#722ED1,Vùng cơ sở dữ liệu DEV — PostgreSQL dùng chung cho tất cả team
-INFRA_DEV,Infrastructure Zone DEV,MANAGEMENT,DEV,#13C2C2,Vùng hạ tầng DEV — Redis standalone và Elasticsearch
+DMZ_PROD,DMZ Zone PROD,DMZ,PROD,#FF6B6B,Vùng DMZ PROD DC — API Gateway (10.31) và Load Balancer (10.32): điểm vào duy nhất từ internet vào hệ thống ngân hàng
+APP_PROD,Application Zone PROD,LOCAL,PROD,#1890FF,Vùng ứng dụng nội bộ PROD DC — app servers (10.11-10.13): Core Banking & IB & Mobile Banking & Payment
+DB_PROD,Database Zone PROD,DB,PROD,#722ED1,Vùng cơ sở dữ liệu PROD DC — DB servers (10.21-10.23): PostgreSQL Core Banking & Mobile Banking
+INFRA_PROD,Infrastructure Zone PROD,MANAGEMENT,PROD,#13C2C2,Vùng hạ tầng nội bộ PROD DC — Redis Sentinel (10.41) và RabbitMQ (10.42): cache & message queue
+MGMT_PROD,Management Zone PROD,MANAGEMENT,PROD,#FF7A45,Vùng quản trị PROD — mạng nội bộ DevOps/DBA/Ops (10.200.0.0/24) và monitoring (10.200.1.0/24)
+INTERNET,Internet / External,INTERNET,PROD,#8C8C8C,Vùng internet — nguồn traffic từ bên ngoài: end-user internet banking và đối tác API bên thứ ba
+DMZ_DR,DMZ Zone DR,DMZ,PROD,#FF9C6E,Vùng DMZ DR site — API Gateway & PAY_GATEWAY dự phòng (192.168.20.31)
+APP_DR,Application Zone DR,LOCAL,PROD,#69C0FF,Vùng ứng dụng DR site — Core Banking & IB_API standby (192.168.20.11), active-passive với PROD DC
+DB_DR,Database Zone DR,DB,PROD,#B37FEB,Vùng cơ sở dữ liệu DR site — PostgreSQL streaming replica từ PROD DC (192.168.20.21)
+DMZ_UAT,DMZ Zone UAT,DMZ,UAT,#FF6B6B,Vùng DMZ UAT — Nginx gateway & PAY_GATEWAY cho kiểm thử end-to-end (192.168.30.31)
+APP_UAT,Application Zone UAT,UAT,UAT,#52C41A,Vùng ứng dụng UAT — server dùng chung toàn bộ service kiểm thử nghiệm thu (192.168.30.11)
+DB_UAT,Database Zone UAT,DB,UAT,#722ED1,Vùng cơ sở dữ liệu UAT — PostgreSQL dùng chung tất cả service UAT (192.168.30.21)
+APP_DEV,Application Zone DEV,DEV,DEV,#FAAD14,Vùng ứng dụng DEV — DEV-APP-001 (Core Banking/IB, 40.11) và DEV-APP-002 (Mobile/Payment, 40.12)
+DB_DEV,Database Zone DEV,DB,DEV,#722ED1,Vùng cơ sở dữ liệu DEV — PostgreSQL dùng chung toàn bộ team phát triển (192.168.40.21)
+INFRA_DEV,Infrastructure Zone DEV,MANAGEMENT,DEV,#13C2C2,Vùng hạ tầng DEV — Redis standalone (40.41) và Elasticsearch (trên DEV-APP-001)
