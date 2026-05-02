@@ -8,7 +8,7 @@
 
 ## 1. Tổng quan & Mục tiêu (Sprint Goal)
 
-> Quản lý cấu hình giao diện mạng, IP (Private/Public/NAT) và cơ chế phát hiện xung đột cấu hình trong hệ thống hạ tầng.
+> Quản lý cấu hình giao diện mạng, IP (Private/Public/NAT) và cơ chế phát hiện xung đột cấu hình.
 
 ## 2. Đặc tả các trường dữ liệu (Data Fields & Structures)
 
@@ -16,44 +16,46 @@
 | Field | Type | Description | Constraints / Validation |
 |---|---|---|---|
 | `interface` | `String` | Tên giao diện mạng (VD: 'eth0') | `VarChar(50)` |
-| `private_ip` | `String` | Địa chỉ IP nội bộ | `VarChar(45)` (Hỗ trợ IPv6) |
+| `private_ip` | `String` | Địa chỉ IP nội bộ | `VarChar(45)` |
 | `public_ip` | `String` | Địa chỉ IP public | `VarChar(45)` |
-| `domain` | `String` | Tên miền gắn với IP | `VarChar(255)` |
-| `dns` | `String[]` | Danh sách DNS server | Mảng các chuỗi |
-
-#### **Hằng số & Enums (Constants & Options)**
-- `NetworkConflictCode`: Mã lỗi chuyên biệt trả về FE (VD: `ERR_IP_CONFLICT`).
+| `nat_ip` | `String` | Địa chỉ IP NAT | `VarChar(45)` |
+| `domain` | `String` | Tên miền | `VarChar(255)` |
 
 ## 3. Luồng xử lý kỹ thuật & Business Logic
 
 ### 3.1. Tầng Backend (Server-side Logic)
-- **IP Conflict Detection Rules:** Trước khi lưu một `NetworkConfig` mới, DB thực hiện query kiểm tra `private_ip`. Quy tắc: Một `private_ip` KHÔNG được phép tồn tại trên hai Server khác nhau nếu hai Server này thuộc cùng chung một `Environment` (VD: PROD). 
+- **IP Conflict Detection:** Hệ thống kiểm tra `private_ip` KHÔNG được phép tồn tại trên hai Server khác nhau trong cùng một `Environment`.
+- **Validation:** Sử dụng `@IsIP()` từ `class-validator` để đảm bảo định dạng IP hợp lệ.
 
 ### 3.2. Tầng Frontend (Client-side Logic)
-- **Inline Tab CRUD:** Tại trang chi tiết Server, tab "Network" cung cấp một danh sách (Table). Khi nhấn "Thêm", một Modal hiện ra để thao tác nhanh mà không cần chuyển trang. 
-- **Domain Search Bar:** Bổ sung thanh tra cứu nhanh (Lookup) cho phép nhập Domain để tìm ngược ra Server chứa IP được trỏ tới.
+- **Inline Tab CRUD:** Quản lý cấu hình mạng trực tiếp trong tab chi tiết Server qua hook `useNetworkConfigs`.
 
 ## 4. Đặc tả API Interfaces
 
+### 4.1. Backend Endpoints
 | Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
 |---|---|---|---|
-| `/api/v1/network-configs` | `POST` | Khai báo IP mới kèm kiểm tra xung đột | `OPERATOR` |
-| `/api/v1/network-configs/lookup-domain` | `GET` | Tìm server dựa vào Domain | `VIEWER` |
+| `/api/v1/network-configs` | `POST` | Thêm cấu hình mạng | `OPERATOR` |
+| `/api/v1/network-configs/lookup-domain` | `GET` | Tìm server theo domain | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useNetworkConfigs()` | `POST /api/v1/network-configs` | Hook quản lý cấu hình mạng. |
 
 ## 5. Xử lý Lỗi & Ngoại lệ (Error Handling & Edge Cases)
 
-- **IP Conflict (Lỗi 409):** Hệ thống trả về `ConflictException` với thông điệp: "IP 10.0.0.1 đã được sử dụng bởi Server SRV-001 trong môi trường PROD".
-- **Invalid IP Format (Lỗi 400):** DTO Validator (`class-validator`) kiểm tra `@IsIP()` trước khi vào controller. Sai định dạng sẽ bị từ chối ngay.
+- **IP Conflict (Lỗi 409):** Ném lỗi khi IP đã được sử dụng.
 
 ## 6. Hướng dẫn Bảo trì & Debug
 
-- **Gotchas / Chú ý:** Khi Clone một Server, Backend không tự động clone NetworkConfig vì sẽ vi phạm luật Conflict IP.
+- **Gotchas / Chú ý:** Khi nhân bản (Clone) Server, các cấu hình IP cũ sẽ không được tự động sao chép để tránh xung đột.
 
 ---
 
 ## 7. Metrics & Tasks
 
 - Story Points: 15
-- Tasks: 6 (Network Schema, IP Validation logic, Domain search UI)
+- Tasks: 6 (Network Schema, Conflict logic, Domain search UI)
 
 _Tài liệu kỹ thuật chuẩn PROD (Agent-Ready) - Cập nhật ngày: 2026-05-02_

@@ -8,7 +8,7 @@
 
 ## 1. Tổng quan & Mục tiêu (Sprint Goal)
 
-> Xây dựng danh mục ứng dụng, phân loại ứng dụng và thiết lập các bản ghi triển khai (AppDeployments) lên Server.
+> Xây dựng danh mục ứng dụng và thiết lập các bản ghi triển khai (AppDeployments) lên Server.
 
 ## 2. Đặc tả các trường dữ liệu (Data Fields & Structures)
 
@@ -17,49 +17,52 @@
 |---|---|---|---|
 | `code` | `String` | Mã ứng dụng | `Unique`, `VarChar(50)` |
 | `name` | `String` | Tên hiển thị | `VarChar(255)` |
-| `application_type` | `Enum` | Phân loại ứng dụng | `BUSINESS`, `SYSTEM` |
+| `application_type` | `Enum` | Phân loại | `BUSINESS`, `SYSTEM` |
 
 #### **Model / DTO: AppDeployment**
 | Field | Type | Description | Constraints / Validation |
 |---|---|---|---|
-| `version` | `String` | Phiên bản (VD: 'v1.2.0') | `Required` |
-| `status` | `Enum` | Trạng thái triển khai | `RUNNING`, `STOPPED` |
+| `version` | `String` | Phiên bản | `Required` |
+| `status` | `Enum` | Trạng thái | `RUNNING`, `STOPPED`, `DEPRECATED` |
 | `cmc_name` | `String` | Tên phiếu yêu cầu (CMC) | `Nullable` |
-
-#### **Hằng số & Enums (Constants & Options)**
-- `DeploymentStatus`: Trạng thái thực thi (`RUNNING`, `STOPPED`, `DEPRECATED`).
 
 ## 3. Luồng xử lý kỹ thuật & Business Logic
 
 ### 3.1. Tầng Backend (Server-side Logic)
-- **Version Tracking & History:** Mỗi khi một Deployment được PATCH (VD: cập nhật từ version 1.0 lên 1.1), Backend chụp lại trạng thái và đẩy vào `DeploymentHistory`.
-- **Doc Profile Auto-generation:** Transaction: Khi INSERT thành công bản ghi `AppDeployment`, một Trigger logic sẽ query danh sách các `DeploymentDocType` đang ACTIVE và tạo sẵn (Pre-fill) các bản ghi `DeploymentDoc` tương ứng cho Deployment đó.
+- **Version History:** Mỗi lần cập nhật Deployment (`version`), hệ thống chụp ảnh state lưu vào `DeploymentHistory`.
+- **Pre-fill Docs:** Khi tạo mới `AppDeployment`, hệ thống tự động tạo các bản ghi `DeploymentDoc` trống dựa trên các `DeploymentDocType` đang ở trạng thái `ACTIVE` cho môi trường tương ứng.
 
 ### 3.2. Tầng Frontend (Client-side Logic)
-- **Deployment Wizard:** Giao diện đăng ký triển khai trải qua 3 bước sử dụng `Steps` component. State được gom nhóm lại trong bộ nhớ React và chỉ submit 1 lần ở bước cuối cùng.
-- **Grouped App Catalog:** Sử dụng `Collapse` và `Badge` để nhóm các ứng dụng theo `ApplicationGroup`, đồng thời đếm số lượng instance đang chạy để hiển thị trực quan.
+- **Deployment Wizard:** Giao diện 3 bước qua component `Steps` để đăng ký triển khai.
+- **Application Hook:** Sử dụng `useApplications` và `useDeployments`.
 
 ## 4. Đặc tả API Interfaces
 
+### 4.1. Backend Endpoints
 | Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
 |---|---|---|---|
 | `/api/v1/applications` | `GET` | Danh mục ứng dụng | `VIEWER` |
-| `/api/v1/deployments` | `POST` | Đăng ký triển khai ứng dụng lên server | `OPERATOR` |
-| `/api/v1/applications/:id/where-running` | `GET` | Xem các server đang chạy ứng dụng này | `VIEWER` |
+| `/api/v1/deployments` | `POST` | Đăng ký triển khai | `OPERATOR` |
+
+### 4.2. Frontend Services / Hooks
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useApplications()` | `GET /api/v1/applications` | Hook quản lý danh mục ứng dụng. |
+| `useDeployments()` | `POST /api/v1/deployments` | Hook quản lý hồ sơ triển khai. |
 
 ## 5. Xử lý Lỗi & Ngoại lệ (Error Handling & Edge Cases)
 
-- **Duplicate Deployment (Lỗi 409):** Triển khai cùng 1 Ứng dụng, trên cùng 1 Server, ở cùng 1 Môi trường sẽ bị văng lỗi Conflict (Ràng buộc Unique kết hợp).
+- **Duplicate Deployment (Lỗi 409):** Triển khai cùng App, Server và Environment sẽ bị chặn.
 
 ## 6. Hướng dẫn Bảo trì & Debug
 
-- **Gotchas / Chú ý:** Khi tạo Deployment, nếu cấu hình Document Types đang trống, hệ thống sẽ bỏ qua bước tạo hồ sơ mà không ném lỗi.
+- **Gotchas / Chú ý:** Khi tạo Deployment, hệ thống sẽ tự động quét danh sách hồ sơ bắt buộc (Checklist) để người dùng hoàn thiện sau.
 
 ---
 
 ## 7. Metrics & Tasks
 
 - Story Points: 22
-- Tasks: 9 (App Schema, Deployment logic, Version history UI)
+- Tasks: 9 (App Schema, Deployment logic, Wizard UI)
 
 _Tài liệu kỹ thuật chuẩn PROD (Agent-Ready) - Cập nhật ngày: 2026-05-02_
