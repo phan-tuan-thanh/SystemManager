@@ -11,58 +11,58 @@
 
 > [Mô tả mục tiêu của Sprint. Các tính năng/nghiệp vụ nào được giải quyết? Trị giá của tính năng này đối với toàn bộ hệ thống là gì?]
 
-## 2. Kiến trúc & Schema Database (Architecture & Schema Changes)
+## 2. Đặc tả các trường dữ liệu (Data Fields & Structures)
 
-- **Các Table mới/Cập nhật:**
-  - `ModelName`: Mô tả mục đích của bảng. Các trường dữ liệu quan trọng (ví dụ: khoá ngoại, field JSON).
-  - `EnumName`: Các giá trị Enum mới thêm vào.
-- **Quan hệ (Relations):**
-  - Mô tả sự liên kết giữa các bảng mới và các module cũ (ví dụ: `1-n` từ `User` đến `AuditLog`).
+Phần này mô tả cấu trúc dữ liệu, các hằng số (Constants), Options và các trường dữ liệu (Fields) trong Database/DTO giúp Agent hiểu rõ cấu trúc mà không cần đọc schema.
 
-## 3. Luồng xử lý kỹ thuật & Business Logic (Technical Workflow)
+#### **Model / DTO: [Tên Model hoặc DTO]**
+| Field | Type | Description | Constraints / Validation |
+|---|---|---|---|
+| `field_name` | `String` | Mô tả chi tiết | `Unique`, `Required`, `maxLength(255)` |
+| `status` | `Enum` | Các Option trạng thái | `ACTIVE`, `INACTIVE` (Default: `ACTIVE`) |
 
-Phần này đặc tả chi tiết logic bên trong code, giúp Agent và team bảo trì theo dõi và debug dễ dàng mà không cần đọc từng dòng code.
+#### **Hằng số & Enums (Constants & Options)**
+- `ENUM_NAME`: [Giải thích ý nghĩa các options]
+- `CONSTANT_NAME`: [Mô tả ý nghĩa hằng số trong code]
 
-### 3.1. [Tên luồng chính 1 - ví dụ: Luồng Xác thực (Auth Flow)]
-- **Bước 1:** [Mô tả chi tiết, ví dụ: Client gửi POST /auth/login. Server kiểm tra username/password bằng bcrypt.]
-- **Bước 2:** [Nếu hợp lệ, sinh cặp JWT Access Token (15m) và Refresh Token (7d). Hash refresh token và lưu vào `User.refresh_token`.]
-- **Bước 3:** [Cơ chế revoke: Khi logout hoặc đổi mật khẩu, set `refresh_token` trong DB về `null`.]
+## 3. Luồng xử lý kỹ thuật & Business Logic
 
-### 3.2. [Tên luồng chính 2 - ví dụ: Cơ chế Phân quyền (RBAC)]
-- **Cơ chế hoạt động:** 
-- **Cách inject:** 
+Phần này đặc tả chi tiết logic bên trong code cho cả Backend và Frontend, giúp Agent theo dõi và debug dễ dàng.
 
-*(Thêm các tiểu mục 3.x tương ứng với các luồng logic quan trọng khác trong Sprint)*
+### 3.1. Tầng Backend (Server-side Logic)
+- **[Tên logic 1 - VD: Transaction Logic]:** Mô tả chi tiết cách xử lý đồng bộ dữ liệu. Khi nào commit, khi nào rollback.
+- **[Tên logic 2 - VD: Validation Rules]:** Các logic validate nghiệp vụ (Ví dụ: Không cho phép trùng IP trong cùng Environment).
+- **[Cơ chế đặc thù]:** (VD: Regex Parsing, In-memory Session, Caching, Recursive Dependency check).
 
-## 4. Đặc tả API Interfaces (Key APIs)
+### 3.2. Tầng Frontend (Client-side Logic)
+- **[Tên workflow - VD: Multi-step Wizard]:** Mô tả các bước tương tác UI (Ví dụ: Step 1 -> Upload, Step 2 -> Map cột).
+- **State Management:** Cách quản lý state (VD: Dùng Zustand persist, cache TanStack Query).
+- **Dynamic UI / Interaction:** Tương tác UI phức tạp (VD: Kéo thả ReactFlow, Ẩn/hiện trường động dựa trên Enum).
 
-Tóm tắt các API quan trọng được phát triển trong Sprint:
+## 4. Đặc tả API Interfaces
 
-| Endpoint | Method | Params / Payload | Response / Chức năng chính | Quyền hạn (Roles) |
-|---|---|---|---|---|
-| `/api/v1/module/action` | `POST` | `{ "field": "value" }` | Xử lý XYZ, trả về `Entity` | `ADMIN` |
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/resource` | `POST` | Mô tả chức năng API | `ADMIN`, `OPERATOR` |
 
 ## 5. Xử lý Lỗi & Ngoại lệ (Error Handling & Edge Cases)
 
-Các case lỗi thường gặp và cách hệ thống đang xử lý:
+Các case lỗi thường gặp, logic chặn lỗi và cách hệ thống/UI hiển thị cho người dùng:
 
-- **Conflict Data:** (ví dụ: Tạo trùng username) -> Hệ thống ném `ConflictException` (409) chặn ở mức Service.
-- **Data Not Found:** (ví dụ: Update record bị xoá mềm) -> Trả về `NotFoundException` (404).
-- **Transaction Rollback:** (ví dụ: Khi import bulk data lỗi 1 dòng) -> Mô tả cơ chế xử lý transaction trong Prisma.
+- **Conflict Data (Lỗi 409):** Ví dụ: Tạo trùng Port/IP -> Ném `ConflictException`, UI hiển thị thông báo lỗi bằng Notification màu đỏ.
+- **Forbidden Action (Lỗi 403):** Người dùng VIEWER cố gắng thao tác POST -> Guard chặn lại.
+- **Ngoại lệ FE:** Global Error Boundary bắt lỗi crash UI và log về Server (ClientLog).
 
-## 6. Hướng dẫn Bảo trì & Debug (Maintenance Guide)
+## 6. Hướng dẫn Bảo trì & Debug
 
-- **Log files / Audit Trails:** Tính năng này được ghi log tại đâu? (Ví dụ: Bảng `AuditLog`, hoặc file `winston.log`).
-- **Các điểm cần lưu ý khi mở rộng (Gotchas):** Nếu team sau muốn thêm tính năng vào module này, cần cẩn thận điều gì? (Ví dụ: Phải update cả schema validator, hoặc nhớ xoá cache redis).
+- **Log & Trace:** Thao tác này có được Audit Log ghi lại không?
+- **Gotchas / Chú ý:** Khi chỉnh sửa code phần này trong tương lai cần lưu ý điểm gì? (VD: Nhớ cập nhật Constants nếu thêm Option mới).
 
 ---
 
 ## 7. Metrics & Tasks
 
-| Metric | Giá trị |
-|---|---|
-| Điểm Story Points | XX |
-| Tổng số Tasks | XX |
-| Lỗi phát sinh (Bugs) | XX |
+- Story Points: XX
+- Tasks: X (Tóm tắt các đầu việc đã làm)
 
-_Tài liệu kỹ thuật chuẩn PROD - Phục vụ bàn giao và bảo trì._
+_Tài liệu kỹ thuật chuẩn PROD (Agent-Ready) - Cập nhật ngày: YYYY-MM-DD_
