@@ -8,36 +8,46 @@
 
 ## 1. Tổng quan & Mục tiêu (Sprint Goal)
 
-> Quản lý các cấu hình giao diện mạng, địa chỉ IP (Private/Public/NAT) và phát hiện xung đột cấu hình trong hệ thống.
+> Quản lý cấu hình giao diện mạng, IP (Private/Public/NAT) và cơ chế phát hiện xung đột cấu hình trong hệ thống hạ tầng.
 
-## 2. Đặc tả các trường dữ liệu (Data Fields)
+## 2. Đặc tả các trường dữ liệu (Data Fields & Structures)
 
-#### **Model: NetworkConfig**
-| Field | Type | Description | Constraints |
+#### **Model / DTO: NetworkConfig**
+| Field | Type | Description | Constraints / Validation |
 |---|---|---|---|
-| `interface` | `String` | Tên giao diện (VD: 'eth0', 'ens192') | |
-| `private_ip` | `String` | Địa chỉ IP nội bộ | VarChar(45) |
-| `public_ip` | `String` | Địa chỉ IP public | |
-| `nat_ip` | `String` | Địa chỉ IP sau NAT | |
-| `domain` | `String` | Tên miền gắn với IP này | |
+| `interface` | `String` | Tên giao diện mạng (VD: 'eth0') | `VarChar(50)` |
+| `private_ip` | `String` | Địa chỉ IP nội bộ | `VarChar(45)` (Hỗ trợ IPv6) |
+| `public_ip` | `String` | Địa chỉ IP public | `VarChar(45)` |
+| `domain` | `String` | Tên miền gắn với IP | `VarChar(255)` |
 | `dns` | `String[]` | Danh sách DNS server | Mảng các chuỗi |
+
+#### **Hằng số & Enums (Constants & Options)**
+- `NetworkConflictCode`: Mã lỗi chuyên biệt trả về FE (VD: `ERR_IP_CONFLICT`).
 
 ## 3. Luồng xử lý kỹ thuật & Business Logic
 
-### 3.1. Tầng Backend (IP Conflict Detection)
-- **Ràng buộc duy nhất theo môi trường:** Một địa chỉ `private_ip` không được phép xuất hiện lặp lại trên hai server khác nhau trong cùng một **Môi trường (Environment)**. 
-- **Validation Logic:** Trước khi lưu, Backend thực hiện query kiểm tra tồn tại IP. Nếu phát hiện trùng lặp, trả về lỗi `409 Conflict` kèm thông tin Server đang chiếm giữ IP đó.
+### 3.1. Tầng Backend (Server-side Logic)
+- **IP Conflict Detection Rules:** Trước khi lưu một `NetworkConfig` mới, DB thực hiện query kiểm tra `private_ip`. Quy tắc: Một `private_ip` KHÔNG được phép tồn tại trên hai Server khác nhau nếu hai Server này thuộc cùng chung một `Environment` (VD: PROD). 
 
-### 3.2. Tầng Frontend (Interface Config)
-- **Inline CRUD:** Trong trang chi tiết Server, tab "Network" cho phép thêm/sửa/xoá các dòng cấu hình IP trực tiếp mà không cần chuyển trang.
-- **Domain Lookup:** Tính năng tra cứu nhanh từ Domain sang Server giúp kỹ sư vận hành xác định nhanh server đích khi nhận được phản ánh về lỗi truy cập tên miền.
+### 3.2. Tầng Frontend (Client-side Logic)
+- **Inline Tab CRUD:** Tại trang chi tiết Server, tab "Network" cung cấp một danh sách (Table). Khi nhấn "Thêm", một Modal hiện ra để thao tác nhanh mà không cần chuyển trang. 
+- **Domain Search Bar:** Bổ sung thanh tra cứu nhanh (Lookup) cho phép nhập Domain để tìm ngược ra Server chứa IP được trỏ tới.
 
 ## 4. Đặc tả API Interfaces
 
-| Endpoint | Method | Chức năng | Quyền |
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
 |---|---|---|---|
-| `/network-configs` | `POST` | Khai báo IP mới (kiểm tra trùng) | `OPERATOR` |
-| `/network-configs/lookup-domain` | `GET` | Tìm server theo domain | `VIEWER` |
+| `/api/v1/network-configs` | `POST` | Khai báo IP mới kèm kiểm tra xung đột | `OPERATOR` |
+| `/api/v1/network-configs/lookup-domain` | `GET` | Tìm server dựa vào Domain | `VIEWER` |
+
+## 5. Xử lý Lỗi & Ngoại lệ (Error Handling & Edge Cases)
+
+- **IP Conflict (Lỗi 409):** Hệ thống trả về `ConflictException` với thông điệp: "IP 10.0.0.1 đã được sử dụng bởi Server SRV-001 trong môi trường PROD".
+- **Invalid IP Format (Lỗi 400):** DTO Validator (`class-validator`) kiểm tra `@IsIP()` trước khi vào controller. Sai định dạng sẽ bị từ chối ngay.
+
+## 6. Hướng dẫn Bảo trì & Debug
+
+- **Gotchas / Chú ý:** Khi Clone một Server, Backend không tự động clone NetworkConfig vì sẽ vi phạm luật Conflict IP.
 
 ---
 
@@ -46,4 +56,4 @@
 - Story Points: 15
 - Tasks: 6 (Network Schema, IP Validation logic, Domain search UI)
 
-_Tài liệu kỹ thuật chuẩn PROD - Cập nhật ngày: 2026-05-02_
+_Tài liệu kỹ thuật chuẩn PROD (Agent-Ready) - Cập nhật ngày: 2026-05-02_

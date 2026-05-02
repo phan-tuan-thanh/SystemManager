@@ -8,39 +8,44 @@
 
 ## 1. Tổng quan & Mục tiêu (Sprint Goal)
 
-> Trực quan hóa toàn bộ hạ tầng và các mối quan hệ kết nối dưới dạng sơ đồ mạng (Graph) tương tác mạnh mẽ.
+> Trực quan hóa cấu trúc liên kết mạng và máy chủ dưới dạng sơ đồ đồ thị (Graph) tương tác 2D. Cho phép lưu lại các "Bản chụp" (Snapshots) để theo dõi lịch sử kiến trúc.
 
-## 2. Đặc tả các trường dữ liệu (Data Fields)
+## 2. Đặc tả các trường dữ liệu (Data Fields & Structures)
 
-#### **Model: TopologySnapshot**
-| Field | Type | Description | Constraints |
+#### **Model / DTO: TopologySnapshot**
+| Field | Type | Description | Constraints / Validation |
 |---|---|---|---|
-| `label` | `String` | Tên bản chụp (VD: 'Trước nâng cấp') | |
-| `environment` | `String` | Môi trường | |
-| `payload` | `Json` | Dữ liệu Nodes/Edges tại thời điểm lưu | |
+| `label` | `String` | Tên bản chụp định danh | `VarChar(255)` |
+| `environment` | `String` | Môi trường | `PROD`, `UAT`, `DEV` |
+| `payload` | `Json` | Dữ liệu Nodes/Edges | Định dạng JSON thô |
 
-#### **Topology Node JSON Payload**
-| Key | Type | Description |
-|---|---|---|
-| `id` | `String` | Unique ID (Server/App ID) |
-| `type` | `String` | `serverNode` / `appNode` |
-| `position` | `Object` | Tọa độ {x, y} |
+#### **Hằng số & Enums (Constants & Options)**
+- `NodeType`: Loại đối tượng trên bản đồ (`serverNode`, `appNode`).
 
 ## 3. Luồng xử lý kỹ thuật & Business Logic
 
-### 3.1. Tầng Backend (Snapshot Logic)
-- **Point-in-time Snapshot:** Hệ thống cho phép chụp lại trạng thái của toàn bộ Graph (vị trí các node, các kết nối hiện hữu). Payload được nén dưới dạng JSON để phục vụ việc xem lại lịch sử kiến trúc hạ tầng mà không bị ảnh hưởng bởi các thay đổi thực tế sau đó.
+### 3.1. Tầng Backend (Server-side Logic)
+- **Snapshot Storage Logic:** Dữ liệu topology rất linh động và không cần query phân tích sâu bằng DB, do đó Backend lưu trữ trực tiếp mảng Nodes và Edges của Frontend vào trường `payload` dạng JSONB.
 
-### 3.2. Tầng Frontend (Graph Engine)
-- **ReactFlow Integration:** Sử dụng ReactFlow để render hàng nghìn node với hiệu năng cao.
-- **Parallel Edge Spreading:** Thuật toán tự động dàn hàng các mũi tên kết nối (Edges) giữa hai Node nếu có nhiều hơn một giao thức đang chạy đồng thời (VD: cả HTTPS và GRPC).
-- **Collision Avoidance:** Cơ chế tự động đẩy các node lân cận ra xa khi một node mới được thêm vào hoặc được kéo thả, đảm bảo sơ đồ luôn thoáng đạt và không bị chồng lấn.
+### 3.2. Tầng Frontend (Client-side Logic)
+- **ReactFlow Engine:** Sử dụng thư viện ReactFlow để vẽ các Node. Tối ưu performance bằng cách tắt animation khi số lượng Node > 500.
+- **Parallel Edge Spreading Algorithm:** Khi có nhiều luồng kết nối (Edges) giữa hai Node (Ví dụ App gọi tới DB qua 3 cổng khác nhau), thuật toán sẽ cấp phát một `offset` tính toán dựa trên góc vẽ, để các mũi tên tản ra, không bị vẽ chồng đè lên nhau.
+- **Auto Layout (Dagre/ELK):** Tích hợp thư viện ELKjs để tự động xếp gọn các Node theo hình dạng Cây phân cấp (Hierarchical Tree) dựa trên luồng upstream/downstream thay vì xếp random.
 
 ## 4. Đặc tả API Interfaces
 
-| Endpoint | Method | Chức năng | Quyền |
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
 |---|---|---|---|
-| `/topology-snapshots` | `POST` | Lưu trạng thái sơ đồ | `OPERATOR` |
+| `/api/v1/topology-snapshots` | `POST` | Lưu trạng thái hiện tại thành snapshot | `OPERATOR` |
+| `/api/v1/topology-snapshots/:id` | `GET` | Load lại bản chụp lên màn hình | `VIEWER` |
+
+## 5. Xử lý Lỗi & Ngoại lệ (Error Handling & Edge Cases)
+
+- **Canvas Overflow:** Render hơn 2000 Nodes có thể gây giật lag trình duyệt. UI cảnh báo khi tải bản chụp lớn và tự động tắt chế độ `FitView` animation.
+
+## 6. Hướng dẫn Bảo trì & Debug
+
+- **Gotchas / Chú ý:** Khi viết Custom Node Component cho ReactFlow, bắt buộc phải dùng thuộc tính `memo` của React để tránh Re-render hàng loạt mỗi khi kéo thả chuột.
 
 ---
 
@@ -49,4 +54,4 @@
 - Story Points: 25
 - Tasks: 10 (Graph UI, Auto-layout, Snapshot logic, Edge spreading)
 
-_Tài liệu kỹ thuật chuẩn PROD - Cập nhật ngày: 2026-05-02_
+_Tài liệu kỹ thuật chuẩn PROD (Agent-Ready) - Cập nhật ngày: 2026-05-02_

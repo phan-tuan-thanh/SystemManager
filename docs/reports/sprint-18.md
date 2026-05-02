@@ -8,30 +8,38 @@
 
 ## 1. Tổng quan & Mục tiêu (Sprint Goal)
 
-> Nâng cấp khả năng nhập liệu Deployment hỗ trợ nhiều cổng dịch vụ (Multi-port) thông qua kỹ thuật bóc tách chuỗi phức tạp.
+> Xử lý việc nhập liệu phức tạp bằng thuật toán bóc tách dữ liệu chuỗi. Hợp nhất các Wizard nhỏ lẻ thành một giao diện Import đa năng.
 
-## 2. Đặc tả dữ liệu (Data Formats)
+## 2. Đặc tả các trường dữ liệu (Data Fields & Structures)
 
-#### **Multi-port String Format**
-- **Pattern:** `PORT-PROTOCOL:SERVICE_NAME` (Cách nhau bởi dấu cách)
-- **Ví dụ:** `8080-TCP:api-gateway 9092-TCP:kafka-broker 443-HTTPS:web-ui`
+#### **Hằng số & Enums (Constants & Options)**
+- **Multi-port String Format:** `PORT-PROTOCOL:SERVICE_NAME` (Cách nhau bởi khoảng trắng)
+- **Ví dụ chuỗi hợp lệ:** `"8080-TCP:API 443-HTTPS:UI"`
 
 ## 3. Luồng xử lý kỹ thuật & Business Logic
 
-### 3.1. Tầng Backend (Regex Parsing Engine)
-- **Complex String Parsing:** Backend sử dụng Regular Expression (`Regex`) để bóc tách chuỗi Port. 
-  - Regex: `/(\d+)-(TCP|UDP|HTTPS|GRPC):?([^\s]*)/g`
-- **Data Transformation:** Chuỗi thô từ CSV được chuyển đổi thành mảng các Object `Port` tương ứng. Sau đó, hệ thống thực hiện vòng lặp để tạo hàng loạt bản ghi trong bảng `Port` và liên kết chúng với bản ghi `AppDeployment` vừa tạo.
+### 3.1. Tầng Backend (Server-side Logic)
+- **Regex Parsing Engine:** Để import nhanh Deployment cùng lúc nhiều cổng, Backend cài đặt bộ bóc tách dùng Regular Expression: `/(\d+)-(TCP|UDP|HTTPS|GRPC):?([^\s]*)/g`.
+- **Transformation Logic:** Vòng lặp bóc tách chuỗi CSV thô thành mảng các Object `Port`, sau đó gộp chung thành một mảng payload để chạy `prisma.port.createMany` trong cùng Transaction của Deployment.
+- **Value Alias Handling:** Tích hợp bộ quy đổi từ khoá (`Alias`). Ví dụ user nhập môi trường là "Sản xuất" trong file CSV, backend tự động đối chiếu map thành enum `PROD`.
 
-### 3.2. Tầng Frontend (Import Consolidation)
-- **Unified Import Page:** Hợp nhất 3 trang upload riêng lẻ (App, Deployment, Connection) vào một trang duy nhất sử dụng Tab.
-- **Value Mapping UI:** Khi import Ứng dụng, hệ thống cho phép người dùng ánh xạ các giá trị Alias (VD: trong CSV là 'UAT1' nhưng trong DB là 'UAT').
+### 3.2. Tầng Frontend (Client-side Logic)
+- **Tabbed Import Interface:** Hợp nhất 3 trang upload (App, Infra, Connections) vào một trang `/upload` với cấu trúc Tabbed, giúp luồng nghiệp vụ gọn gàng.
+- **Quick Import Detection:** Bổ sung logic tự động nhận diện header CSV. Nếu file tải lên có cột header khớp chuẩn 100% với template, Frontend bỏ qua Bước 2 (Mapping) và đẩy user thẳng qua Bước 3 (Preview) để tiết kiệm thao tác.
 
 ## 4. Đặc tả API Interfaces
 
-| Endpoint | Method | Chức năng | Quyền |
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
 |---|---|---|---|
-| `/import/preview?type=deployment` | `POST` | Preview kèm bóc tách port | `OPERATOR` |
+| `/api/v1/import/preview?type=deployment` | `POST` | Phân tích file deployment kèm regex bóc port | `OPERATOR` |
+
+## 5. Xử lý Lỗi & Ngoại lệ (Error Handling & Edge Cases)
+
+- **Regex Mismatch (Lỗi Validation):** Một cụm string như `80X-TCP` sẽ không qua được Regex, cell đó trong bảng Preview sẽ bị mark đỏ báo lỗi "Sai định dạng Port".
+
+## 6. Hướng dẫn Bảo trì & Debug
+
+- **Gotchas / Chú ý:** Cẩn trọng với ký tự ngắt dòng (`\r\n`) trong ô CSV chứa chuỗi port, nó có thể làm sai kết quả quét Regex nếu không `trim()` trước khi parse.
 
 ---
 
@@ -40,4 +48,4 @@
 - Story Points: 15
 - Tasks: 6 (Regex parsing, Unified UI, Alias mapping)
 
-_Tài liệu kỹ thuật chuẩn PROD - Cập nhật ngày: 2026-05-02_
+_Tài liệu kỹ thuật chuẩn PROD (Agent-Ready) - Cập nhật ngày: 2026-05-02_

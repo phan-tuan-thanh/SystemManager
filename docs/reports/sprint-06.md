@@ -8,40 +8,52 @@
 
 ## 1. Tổng quan & Mục tiêu (Sprint Goal)
 
-> Xây dựng danh mục ứng dụng nghiệp vụ và quản lý các bản ghi triển khai thực tế trên hạ tầng.
+> Xây dựng danh mục ứng dụng, phân loại ứng dụng và thiết lập các bản ghi triển khai (AppDeployments) lên Server.
 
-## 2. Đặc tả các trường dữ liệu (Data Fields)
+## 2. Đặc tả các trường dữ liệu (Data Fields & Structures)
 
-#### **Model: Application**
-| Field | Type | Description | Constraints |
+#### **Model / DTO: Application**
+| Field | Type | Description | Constraints / Validation |
 |---|---|---|---|
-| `code` | `String` | Mã ứng dụng (VD: 'CORE_BANKING') | Unique |
-| `name` | `String` | Tên hiển thị | |
-| `application_type` | `Enum` | Loại (`BUSINESS` / `SYSTEM`) | |
+| `code` | `String` | Mã ứng dụng | `Unique`, `VarChar(50)` |
+| `name` | `String` | Tên hiển thị | `VarChar(255)` |
+| `application_type` | `Enum` | Phân loại ứng dụng | `BUSINESS`, `SYSTEM` |
 
-#### **Model: AppDeployment**
-| Field | Type | Description | Constraints |
+#### **Model / DTO: AppDeployment**
+| Field | Type | Description | Constraints / Validation |
 |---|---|---|---|
-| `version` | `String` | Phiên bản đang chạy (VD: '1.2.0-stable') | Required |
-| `status` | `Enum` | Trạng thái (`RUNNING`, `STOPPED`) | |
-| `cmc_name` | `String` | Tên ticket/phiếu yêu cầu triển khai | |
+| `version` | `String` | Phiên bản (VD: 'v1.2.0') | `Required` |
+| `status` | `Enum` | Trạng thái triển khai | `RUNNING`, `STOPPED` |
+| `cmc_name` | `String` | Tên phiếu yêu cầu (CMC) | `Nullable` |
+
+#### **Hằng số & Enums (Constants & Options)**
+- `DeploymentStatus`: Trạng thái thực thi (`RUNNING`, `STOPPED`, `DEPRECATED`).
 
 ## 3. Luồng xử lý kỹ thuật & Business Logic
 
-### 3.1. Tầng Backend (Deployment Logic)
-- **Version Tracking:** Mỗi lần cập nhật bản ghi Deployment, hệ thống tạo bản ghi mới trong `DeploymentHistory` để lưu vết lịch sử nâng cấp phiên bản ứng dụng trên server đó.
-- **Auto-populate Doc Profile:** Khi một Deployment mới được tạo, hệ thống tự động sinh ra danh sách các đầu mục tài liệu (DeploymentDocs) dựa trên các loại tài liệu (`DocTypes`) đang ở trạng thái `ACTIVE` trong cấu hình hệ thống.
+### 3.1. Tầng Backend (Server-side Logic)
+- **Version Tracking & History:** Mỗi khi một Deployment được PATCH (VD: cập nhật từ version 1.0 lên 1.1), Backend chụp lại trạng thái và đẩy vào `DeploymentHistory`.
+- **Doc Profile Auto-generation:** Transaction: Khi INSERT thành công bản ghi `AppDeployment`, một Trigger logic sẽ query danh sách các `DeploymentDocType` đang ACTIVE và tạo sẵn (Pre-fill) các bản ghi `DeploymentDoc` tương ứng cho Deployment đó.
 
-### 3.2. Tầng Frontend (App Catalog)
-- **Grouped View:** Danh sách ứng dụng được phân nhóm theo `ApplicationGroup`. Người dùng có thể xem nhanh số lượng instance đang chạy của từng ứng dụng qua các Badge số lượng.
-- **Deployment Wizard:** Giao diện 3 bước để đăng ký triển khai mới: Chọn Ứng dụng → Chọn Server đích → Nhập thông tin phiên bản & CMC.
+### 3.2. Tầng Frontend (Client-side Logic)
+- **Deployment Wizard:** Giao diện đăng ký triển khai trải qua 3 bước sử dụng `Steps` component. State được gom nhóm lại trong bộ nhớ React và chỉ submit 1 lần ở bước cuối cùng.
+- **Grouped App Catalog:** Sử dụng `Collapse` và `Badge` để nhóm các ứng dụng theo `ApplicationGroup`, đồng thời đếm số lượng instance đang chạy để hiển thị trực quan.
 
 ## 4. Đặc tả API Interfaces
 
-| Endpoint | Method | Chức năng | Quyền |
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
 |---|---|---|---|
-| `/deployments` | `POST` | Đăng ký triển khai ứng dụng | `OPERATOR` |
-| `/applications/:id/where-running` | `GET` | Xem các server đang chạy app này | `VIEWER` |
+| `/api/v1/applications` | `GET` | Danh mục ứng dụng | `VIEWER` |
+| `/api/v1/deployments` | `POST` | Đăng ký triển khai ứng dụng lên server | `OPERATOR` |
+| `/api/v1/applications/:id/where-running` | `GET` | Xem các server đang chạy ứng dụng này | `VIEWER` |
+
+## 5. Xử lý Lỗi & Ngoại lệ (Error Handling & Edge Cases)
+
+- **Duplicate Deployment (Lỗi 409):** Triển khai cùng 1 Ứng dụng, trên cùng 1 Server, ở cùng 1 Môi trường sẽ bị văng lỗi Conflict (Ràng buộc Unique kết hợp).
+
+## 6. Hướng dẫn Bảo trì & Debug
+
+- **Gotchas / Chú ý:** Khi tạo Deployment, nếu cấu hình Document Types đang trống, hệ thống sẽ bỏ qua bước tạo hồ sơ mà không ném lỗi.
 
 ---
 
@@ -50,4 +62,4 @@
 - Story Points: 22
 - Tasks: 9 (App Schema, Deployment logic, Version history UI)
 
-_Tài liệu kỹ thuật chuẩn PROD - Cập nhật ngày: 2026-05-02_
+_Tài liệu kỹ thuật chuẩn PROD (Agent-Ready) - Cập nhật ngày: 2026-05-02_

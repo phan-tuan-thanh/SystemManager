@@ -8,39 +8,47 @@
 
 ## 1. Tổng quan & Mục tiêu (Sprint Goal)
 
-> Xây dựng hệ thống cấu hình tham số động cho ứng dụng và cơ chế thu thập log từ phía người dùng (Frontend) về server tập trung.
+> Quản lý các tham số cấu hình hệ thống (Hot-reload Configs) và triển khai cơ chế thu thập log từ người dùng (Frontend) đổ về trung tâm (Backend).
 
-## 2. Đặc tả các trường dữ liệu (Data Fields)
+## 2. Đặc tả các trường dữ liệu (Data Fields & Structures)
 
-#### **Model: SystemConfig**
-| Field | Type | Description | Constraints |
+#### **Model / DTO: SystemConfig**
+| Field | Type | Description | Constraints / Validation |
 |---|---|---|---|
-| `key` | `String` | Khoá cấu hình (VD: 'LOG_LEVEL') | Unique |
-| `value` | `String` | Giá trị cấu hình | |
+| `key` | `String` | Khoá nhận diện | `Unique`, `Required` |
+| `value` | `String` | Giá trị (Lưu dạng chuỗi) | `Required` |
 
-#### **Model: ClientLog**
-| Field | Type | Description | Constraints |
+#### **Model / DTO: ClientLog**
+| Field | Type | Description | Constraints / Validation |
 |---|---|---|---|
-| `level` | `String` | Mức độ (`INFO`, `ERROR`, `WARN`) | |
-| `message` | `String` | Nội dung log | |
-| `meta` | `Json` | Dữ liệu bổ sung (Browser, URL, UserAgent) | |
+| `level` | `String` | Mức độ cảnh báo | `INFO`, `ERROR`, `WARN` |
+| `message` | `String` | Chuỗi log thô | `Text` |
+| `meta` | `Json` | Object thông tin thêm | Browser info, URL, User-Agent |
 
 ## 3. Luồng xử lý kỹ thuật & Business Logic
 
-### 3.1. Tầng Backend (System Hot-reload)
-- **Dynamic Config Service:** Cung cấp cơ chế cache cấu hình. Khi Admin thay đổi giá trị trong bảng `SystemConfig`, các service liên quan sẽ tự động nhận giá trị mới mà không cần restart app.
-- **Log Aggregator:** Endpoint nhận log từ Frontend thực hiện bóc tách thông tin Session người dùng và ghi vào Database kèm theo thông tin địa chỉ IP của client.
+### 3.1. Tầng Backend (Server-side Logic)
+- **Dynamic Config Cache:** Cung cấp Service cache lại các giá trị cấu hình vào RAM. Khi có lệnh update cấu hình từ Admin, hệ thống phát event để xoá cache. Các module khác sử dụng giá trị này sẽ thay đổi hành vi ngay lập tức (Hot-reload) mà không cần restart server.
+- **Log Aggregator (Winston):** Đăng ký `LoggerModule` sử dụng Winston. Log từ Frontend gửi về qua API sẽ được Winston phân phối (ghi ra màn hình console, hoặc đẩy ra file logs tuỳ cấu hình đang chạy).
 
-### 3.2. Tầng Frontend (Log Collector)
-- **Global Error Boundary:** Tự động bắt mọi lỗi runtime trên trình duyệt và gửi về Backend thông qua API `ClientLog`.
-- **Log Console UI:** Giao diện cho phép Admin xem danh sách các log lỗi từ phía client theo thời gian thực để hỗ trợ xử lý sự cố nhanh chóng.
+### 3.2. Tầng Frontend (Client-side Logic)
+- **Global Error Boundary (React):** Bao bọc toàn bộ App. Bắt lại các lỗi crash render UI (JavaScript Error), ngăn trang web bị trắng bóc. Sau đó tự động gọi API POST `/client-logs` kèm call stack về Backend.
+- **Axios Error Interceptor:** Bắt toàn bộ lỗi Network (VD: 500 Internal Server Error) và gửi log về hệ thống giám sát.
 
 ## 4. Đặc tả API Interfaces
 
-| Endpoint | Method | Chức năng | Quyền |
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
 |---|---|---|---|
-| `/system-configs/:key` | `GET` | Lấy giá trị cấu hình | `VIEWER` |
-| `/client-logs` | `POST` | Frontend gửi log lỗi về server | `@Public()` |
+| `/api/v1/system-configs` | `GET` | Truy vấn tham số cấu hình | `VIEWER` |
+| `/api/v1/client-logs` | `POST` | Endpoint nhận log từ Client | `@Public()` |
+
+## 5. Xử lý Lỗi & Ngoại lệ (Error Handling & Edge Cases)
+
+- **Log Spam Protection:** API `client-logs` sử dụng Rate Limit (Giới hạn truy cập) để ngăn bị DDOS do lỗi vòng lặp bên Frontend.
+
+## 6. Hướng dẫn Bảo trì & Debug
+
+- **Gotchas / Chú ý:** Khi đổi giá trị `LOG_LEVEL` qua UI, cần đảm bảo Winston đang lắng nghe sự thay đổi của biến này để cập nhật transport tương ứng.
 
 ---
 
@@ -49,4 +57,4 @@
 - Story Points: 15
 - Tasks: 6 (Config Schema, Logging Service, Log Viewer UI)
 
-_Tài liệu kỹ thuật chuẩn PROD - Cập nhật ngày: 2026-05-02_
+_Tài liệu kỹ thuật chuẩn PROD (Agent-Ready) - Cập nhật ngày: 2026-05-02_
