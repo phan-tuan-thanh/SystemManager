@@ -573,13 +573,20 @@
   "next_tasks": [
     {
       "priority": 1,
+      "task": "Merge feat/sprint-23-network-zone-firewall → main",
+      "description": "PR #5 đã tạo. Review và merge.",
+      "pr": "https://github.com/phan-tuan-thanh/SystemManager/pull/5",
+      "sprint": "Sprint 23 close-out"
+    },
+    {
+      "priority": 2,
       "task": "Merge feat/sprint-22-topology-ux → main",
       "description": "PR #4 đã tạo. Review và merge.",
       "pr": "https://github.com/phan-tuan-thanh/SystemManager/pull/4",
       "sprint": "Sprint 22 close-out"
     },
     {
-      "priority": 2,
+      "priority": 3,
       "task": "Fix pre-existing TS errors trong 3D topology files",
       "description": "Topology3DView.tsx, ConnectionEdge3D.tsx có lỗi three.js/react-three-fiber type mismatch. CreateConnectionModal.tsx unused imports.",
       "files": [
@@ -590,7 +597,7 @@
       "sprint": "Backlog / Sprint 23"
     },
     {
-      "priority": 3,
+      "priority": 4,
       "task": "Dashboard — real data từ API",
       "description": "DashboardPage hiện tại là 4 Statistic cards static (0). Cần call /servers, /applications, /deployments, /connections để hiện số thật.",
       "files": ["packages/frontend/src/pages/dashboard/DashboardPage.tsx"],
@@ -598,7 +605,7 @@
       "sprint": "Sprint 23"
     },
     {
-      "priority": 4,
+      "priority": 5,
       "task": "Production deployment — Docker Compose với nginx + SSL",
       "description": "Configure nginx reverse proxy, SSL certificates, environment separation for PROD.",
       "files": ["docker-compose.prod.yml", "nginx/nginx.conf"],
@@ -606,7 +613,7 @@
       "sprint": "Backlog BL-09"
     },
     {
-      "priority": 5,
+      "priority": 6,
       "task": "CI/CD GitHub Actions — lint + test + build + deploy",
       "description": "Set up GitHub Actions pipeline: lint, unit tests, Docker build, deploy to staging.",
       "files": [".github/workflows/ci.yml"],
