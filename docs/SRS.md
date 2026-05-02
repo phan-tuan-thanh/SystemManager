@@ -44,9 +44,9 @@ Entity chính:
 * **ApplicationGroup** — nhóm phân loại ứng dụng, phân loại qua `GroupType` (`BUSINESS` | `INFRASTRUCTURE`)
 * **Application** — ứng dụng nghiệp vụ hoặc phần mềm hạ tầng (OS, DB, Middleware, Runtime...)
 * **AppDeployment** — bản ghi triển khai: Application × Server × Environment (kèm hồ sơ tài liệu)
-* **DeploymentHistory** — lịch sử thay đổi phiên bản/trạng thái của Deployment (Change Management) *(môi trường Sprint 16)*
-* **DeploymentDocType** — loại tài liệu triển khai, cấu hình tập trung *(thêm mới)*
-* **DeploymentDoc** — tài liệu thực tế của 1 AppDeployment (preview + final file) *(thêm mới)*
+* **DeploymentHistory** — lịch sử thay đổi phiên bản/trạng thái của Deployment (Change Management)
+* **DeploymentDocType** — loại tài liệu triển khai, cấu hình tập trung 
+* **DeploymentDoc** — tài liệu thực tế của 1 AppDeployment (preview + final file) 
 * **AppConnection** — kết nối giữa 2 application (upstream/downstream)
 * **Port Mapping** — port listen của application trên server
 * **TopologySnapshot** — bản chụp toàn bộ topology tại 1 thời điểm
@@ -54,8 +54,8 @@ Entity chính:
 * **ChangeItem** — 1 thay đổi đơn lẻ trong ChangeSet
 * **AuditLog** — bản ghi mọi thao tác người dùng
 * **ChangeHistory** — snapshot cấu hình từng object theo thời gian
-* **InfraSystem** — nhóm các server theo hệ thống nghiệp vụ (ví dụ: LOS, BPM, Mobile App...) *(môi trường Sprint 9)*
-* **InfraSystemAccess** — phân quyền truy cập hệ thống theo người dùng hoặc nhóm *(môi trường Sprint 9)*
+* **InfraSystem** — nhóm các server theo hệ thống nghiệp vụ (ví dụ: LOS, BPM, Mobile App...)
+* **InfraSystemAccess** — phân quyền truy cập hệ thống theo người dùng hoặc nhóm
 
 ### Quan hệ ERD chính
 
@@ -688,91 +688,16 @@ DRAFT → PREVIEWING → APPLIED
 * Nhiều người cùng xem/review 1 ChangeSet trước khi Apply
 * ChangeSet `APPLIED` và `DISCARDED` được giữ lại làm lịch sử (không xoá)
 
-### 4.5.3 Khả năng tương tác Topology 2D & Networks Layout
-**Mô tả:** Bổ sung trình bày Topology 2D theo kiểu Networks (phân nhóm Server Box). Cho phép tạo, xóa connection bằng cách tương tác trực tiếp (kéo-thả/click) trên sơ đồ. Khi tạo kết nối, nếu target app có 1 port thì tự động tạo kết nối; nếu >1 port, hỏi port nào.
-**Actor:** ADMIN | OPERATOR
-**Acceptance Criteria:**
-- AC1: AppNodes được render bên trong Server Box theo parent-child.
-- AC2: Có thể kéo cạnh từ Node này sang Node kia trên graph để tạo connection.
-- AC3: Hiển thị popup chọn port khi kéo thả thành công, hoặc auto-assign nếu đích trả về 1 port duy nhất.
-- AC4: Có thể xoá cạnh trực tiếp khỏi giao diện graph.
-**Added:** 2026-04-21
+### 4.5.3. Các tính năng nâng cao Topology 2D
 
-### 4.5.4 Topology 2D — UX Improvements
-**Mô tả:** Tối ưu trải nghiệm người dùng trên màn hình Topology 2D bao gồm: sắp xếp tự động khớp viewport, kết nối có thể kéo nhãn để tránh chồng lấp, drag/drop node với vị trí được ghi nhớ sau khi reload, và nút xem toàn màn hình.
-**Actor:** ADMIN | OPERATOR | VIEWER
-**Acceptance Criteria:**
-- AC1: Nút "Tự động sắp xếp" sắp xếp toàn bộ node theo layout dagre rồi tự động zoom fitView để tất cả node nằm gọn trong viewport.
-- AC2: Nhãn kết nối (protocol label) có thể kéo (drag) tự do để di chuyển khỏi vị trí chồng lấp với các nhãn khác; vị trí nhãn được lưu trong state cho đến khi dữ liệu reload.
-- AC3: Người dùng có thể kéo (drag/drop) từng node lên bất kỳ vị trí nào trên canvas; vị trí đã kéo được giữ nguyên khi dữ liệu tự động làm mới (realtime refetch), chỉ reset khi bấm "Tự động sắp xếp".
-- AC4: Nút toàn màn hình (fullscreen) hiển thị trong toolbar khi đang ở chế độ 2D; bấm vào sẽ mở rộng canvas chiếm toàn bộ màn hình, bấm lại hoặc nhấn Esc để thoát.
-**Added:** 2026-04-22
+Hệ thống Topology 2D cung cấp các công cụ và tính năng tương tác chuyên sâu nhằm giúp người dùng quản lý hạ tầng một cách trực quan và hiệu quả:
 
-### 4.5.5 Topology 2D — Orthogonal Edge Style & Auto-Routing
-**Mô tả:** Bổ sung chế độ hiển thị kết nối thẳng góc (orthogonal / step path) cho Topology 2D. Người dùng có thể chọn giữa "Cong" (Bezier) và "Thẳng góc" (Smooth-step) cho tất cả cạnh trên graph. Các cạnh song song (parallel edges) tự động spread theo offset để tránh chồng lên nhau.
-**Actor:** ADMIN | OPERATOR | VIEWER
-**Acceptance Criteria:**
-- AC1: Filter panel có Select "Edges" với 2 lựa chọn: "Cong" (Bezier, mặc định) và "Thẳng góc" (Orthogonal).
-- AC2: Khi chọn "Thẳng góc", tất cả cạnh render dưới dạng smooth-step path với góc vuông và bo tròn nhẹ (borderRadius=8).
-- AC3: Các cạnh song song (cùng cặp node) được spread bằng offset để không chồng lấp trong cả 2 chế độ.
-- AC4: Protocol label vẫn hiển thị đúng màu, drag được, và nằm đúng vị trí midpoint của cạnh trong cả 2 chế độ.
-- AC5: Không có TypeScript error mới sau khi thêm tính năng.
-**Added:** 2026-04-29
-
-### 4.5.6 Topology — Node Visibility Filter (Ẩn/hiện hệ thống, server, ứng dụng)
-**Mô tả:** Cho phép người dùng lọc và ẩn/hiện các hệ thống (nhóm ứng dụng), server cụ thể và ứng dụng cụ thể trực tiếp trên màn hình Topology mà không cần rời trang. Bộ lọc áp dụng cho cả ReactFlow, vis-network và Mermaid.
-**Actor:** ADMIN | OPERATOR | VIEWER
-**Acceptance Criteria:**
-- AC1: Filter panel có 3 multi-select dropdown: "Hệ thống" (nhóm ứng dụng), "Servers", "Ứng dụng".
-- AC2: Khi không chọn gì (empty), mặc định hiển thị tất cả (no filter).
-- AC3: Khi chọn một hoặc nhiều giá trị, chỉ hiển thị các node/edge liên quan đến lựa chọn đó.
-- AC4: Kết nối (edges) tự động ẩn nếu một trong hai đầu không còn hiển thị.
-- AC5: Các server không còn app nào hiển thị sẽ bị ẩn khỏi sơ đồ.
-- AC6: Options trong dropdown được lấy động từ dữ liệu topology hiện tại (không hardcode).
-**Added:** 2026-04-29
-
-### 4.5.7 Topology 2D — Smart Auto-Layout & Collision Avoidance
-**Mô tả:** Nâng cấp hệ thống layout cho Topology 2D React Flow. Cho phép chọn thuật toán sắp xếp (Dagre / ELK), chọn hướng layout (Top→Bottom / Left→Right) độc lập, và cải thiện collision avoidance khi kéo thả node.
-**Actor:** ADMIN | OPERATOR | VIEWER
-**Acceptance Criteria:**
-- AC1: Filter bar có Segmented "Thuật toán: Dagre | ELK" (React Flow only).
-- AC2: Filter bar có Segmented "Hướng: ↓ TB | → LR" (React Flow only).
-- AC3: Bấm "Sắp xếp" áp dụng thuật toán và hướng đã chọn, fit view sau khi xong.
-- AC4: ELK layout tránh node chồng lên nhau tốt hơn dagre với graph phức tạp.
-- AC5: Khi kéo node vào vùng node khác, node tự động đẩy ra vị trí gần nhất theo 8 hướng.
-- AC6: Dagre vẫn là default (synchronous) khi load lần đầu và khi đổi filter.
-**Added:** 2026-04-30
-
-### 4.5.8 Topology 2D — Auto-Arrange on Algorithm/Direction Change
-**Mô tả:** Khi người dùng thay đổi dropdown "Thuật toán" hoặc "Hướng" trong React Flow, hệ thống tự động chạy lại layout mà không cần bấm nút "Sắp xếp".
-**Actor:** ADMIN | OPERATOR | VIEWER
-**Acceptance Criteria:**
-- AC1: Thay đổi thuật toán (Dagre/ELK/*) → tự động sắp xếp lại ngay lập tức.
-- AC2: Thay đổi hướng (TB/BT/LR/RL) → tự động sắp xếp lại ngay lập tức.
-- AC3: Auto-arrange chỉ kích hoạt khi đang dùng React Flow engine, không ảnh hưởng vis-network.
-- AC4: Sau khi tự sắp xếp, fit view để hiển thị toàn bộ graph.
-**Added:** 2026-04-30
-
-### 4.5.9 Topology 2D — Cascade Node Filter (Group → Server → App)
-**Mô tả:** Bộ lọc node hoạt động theo cascade: chọn hệ thống (AppGroup) → chỉ hiện servers chứa app thuộc hệ thống đó; chọn server → chỉ hiện apps deploy trên server đó.
-**Actor:** ADMIN | OPERATOR | VIEWER
-**Acceptance Criteria:**
-- AC1: Trong modal "Lọc node", khi chọn một hoặc nhiều Hệ thống, danh sách Servers chỉ hiện những server có app thuộc hệ thống đó.
-- AC2: Khi chọn một hoặc nhiều Server, danh sách Ứng dụng chỉ hiện app deploy trên servers đó.
-- AC3: Khi xóa filter Hệ thống → Server/App options trở về đầy đủ (reset cascade).
-- AC4: Kết hợp được: chọn group + server → app options là intersection.
-**Added:** 2026-04-30
-
-### 4.5.10 Topology 2D — Connection Health Check
-**Mô tả:** Panel phân tích chất lượng kết nối, phát hiện các vấn đề trong topology: circular dependency, single point of failure, orphaned apps, cross-environment connections, dead connections (đến app không hoạt động).
-**Actor:** ADMIN | OPERATOR | VIEWER
-**Acceptance Criteria:**
-- AC1: Nút "Kiểm tra kết nối" trong PageHeader, hiển thị badge số lượng issue.
-- AC2: Click mở Drawer hiển thị danh sách issue phân loại theo severity (ERROR/WARNING/INFO).
-- AC3: Phát hiện: circular dependency (A→B→…→A), SPoF (node kết nối > 5 chiều), orphaned app, cross-env connection, dead link (app INACTIVE/STOPPED).
-- AC4: Click vào issue → highlight node liên quan trên graph.
-- AC5: Tính toán pure FE từ dữ liệu topology hiện tại, không cần API mới.
-**Added:** 2026-04-30
+* **Tương tác trực tiếp (Networks Layout):** AppNodes hiển thị bên trong Server Box theo parent-child. Có thể kéo/thả để tạo kết nối giữa các node, hệ thống sẽ tự động chọn port hoặc hiện popup chọn port.
+* **Tự động sắp xếp (Smart Auto-Layout):** Hỗ trợ các thuật toán Dagre và ELK với các hướng (Top-Bottom, Left-Right). Hệ thống sẽ tự động sắp xếp lại khi người dùng thay đổi thuật toán hoặc hướng.
+* **Kiểu kết nối:** Có thể chọn kiểu "Cong" (Bezier) hoặc "Thẳng góc" (Orthogonal / Smooth-step) cho các cạnh. Nhãn kết nối có thể kéo thả tự do để tránh chồng lấp.
+* **Bộ lọc nâng cao (Node Visibility & Cascade Filter):** Cho phép ẩn/hiện node theo hệ thống, server, ứng dụng. Bộ lọc hỗ trợ chức năng cascade (nhóm → server → app) giúp dễ dàng thu hẹp phạm vi tìm kiếm.
+* **Đánh giá sức khỏe kết nối (Connection Health Check):** Panel phân tích chất lượng kết nối giúp phát hiện: Circular Dependency, Single Point of Failure (SPoF), ứng dụng mồ côi (orphaned), kết nối chéo môi trường, kết nối chết (đến app không hoạt động).
+* **Quản lý vùng (Network Zone & Firewall):** Hiển thị riêng một tab "Firewall Topology" trực quan hóa các kết nối mạng qua firewall rules (ALLOW/DENY) giữa các vùng và server.
 
 ---
 

@@ -6,6 +6,13 @@ A chronological record of project milestones, updates, and sprint summaries.
 
 ## 2026-04-30 — Sprint 23: Network Zone & Firewall Rule Management ✅ Hoàn thành
 
+- Yêu cầu ghi nhận vào SRS.md sections 4.9.1, 4.9.2, 4.9.3
+- Sprint plan tạo mới: `docs/plans/sprint-23-network-zone-firewall.md`
+- Kế hoạch kỹ thuật: `docs/IMPLEMENTATION_DETAILS.md` (entry Sprint 23)
+- Tasks mới: S23-01 đến S23-09 (29 points)
+- Nội dung: NetworkZone + ZoneIpEntry BE/FE, FirewallRule BE/FE + import/export XLSX, Firewall Topology view
+
+**Kết quả thực hiện:**
 - ✅ S23-01: Prisma schema — NetworkZone + ZoneIpEntry + FirewallRule + 3 enums (NetworkZoneType, FirewallAction, FirewallRuleStatus)
 - ✅ S23-02: Migration add_network_zone_firewall_rule applied via SQL trực tiếp
 - ✅ S23-03: NetworkZone module — 9 endpoints: CRUD zone + list/add/bulk-import/delete IPs
@@ -20,18 +27,15 @@ A chronological record of project milestones, updates, and sprint summaries.
 
 ---
 
-## 2026-04-30 — Sprint 23: Bắt đầu implement Network Zone & Firewall Rule Management
-
-- Yêu cầu ghi nhận vào SRS.md sections 4.9.1, 4.9.2, 4.9.3
-- Sprint plan tạo mới: `docs/plans/sprint-23-network-zone-firewall.md`
-- Kế hoạch kỹ thuật: `docs/IMPLEMENTATION_DETAILS.md` (entry Sprint 23)
-- Tasks mới: S23-01 đến S23-09 (29 points)
-- Nội dung: NetworkZone + ZoneIpEntry BE/FE, FirewallRule BE/FE + import/export XLSX, Firewall Topology view
-
----
-
 ## 2026-04-30 — Sprint 22: Topology UX Enhancements ✅ Hoàn thành
 
+- Yêu cầu ghi nhận vào SRS.md sections 4.5.8, 4.5.9, 4.5.10
+- Sprint plan tạo mới: `docs/plans/sprint-22-topology-ux.md`
+- Kế hoạch kỹ thuật: `docs/IMPLEMENTATION_DETAILS.md` (entry Sprint 22)
+- Tasks mới: S22-01 đến S22-03 (10 points)
+- Nội dung: auto-arrange on filter change, cascade filter, connection health drawer
+
+**Kết quả thực hiện:**
 - ✅ S22-01: Auto-arrange khi thay đổi layoutAlgorithm/layoutDirection (stable ref + useEffect)
 - ✅ S22-02: Cascade filter group→server→app trong FilterPanel modal (serverGroupsMap + serverAppsMap)
 - ✅ S22-03: ConnectionHealthDrawer — analyzeTopologyHealth() 5 issue types, Badge count, focus node
@@ -40,26 +44,7 @@ A chronological record of project milestones, updates, and sprint summaries.
 
 ---
 
-## 2026-04-30 — Sprint 22: Bắt đầu implement Topology UX Enhancements
-
-- Yêu cầu ghi nhận vào SRS.md sections 4.5.8, 4.5.9, 4.5.10
-- Sprint plan tạo mới: `docs/plans/sprint-22-topology-ux.md`
-- Kế hoạch kỹ thuật: `docs/IMPLEMENTATION_DETAILS.md` (entry Sprint 22)
-- Tasks mới: S22-01 đến S22-03 (10 points)
-- Nội dung: auto-arrange on filter change, cascade filter, connection health drawer
-
----
-
 ## 2026-04-30 — Sprint 21: Topology Smart Auto-Layout ✅ Hoàn thành
-
-- ✅ S21-01: FilterState thêm `layoutAlgorithm` / `layoutDirection`; FilterPanel: Segmented Dagre|ELK + ↓TB|→LR
-- ✅ S21-02: `elkjs` installed; `applyElkLayout` async (ELK layered, fallback dagre); handleAutoArrange async
-- ✅ S21-03: 8-direction collision push trong handleNodeDragStop (N/NE/E/SE/S/SW/W/NW, nearest by Euclidean dist)
-- Bonus: fix pre-existing TS warnings trong topology/index.tsx
-- Branch: `feat/sprint-21-topology-smart-layout` pushed
-- Sprint plan: `docs/plans/sprint-21-topology-smart-layout.md` cập nhật
-
-## 2026-04-30 — Sprint 21: Bắt đầu implement Topology Smart Auto-Layout
 
 - Yêu cầu ghi nhận vào SRS.md section 4.5.7
 - Sprint plan tạo mới: `docs/plans/sprint-21-topology-smart-layout.md`
@@ -67,10 +52,25 @@ A chronological record of project milestones, updates, and sprint summaries.
 - Tasks mới: S21-01 đến S21-03 (9 points)
 - Nội dung: layoutDirection control, ELK engine, 8-direction collision push
 
+**Kết quả thực hiện:**
+- ✅ S21-01: FilterState thêm `layoutAlgorithm` / `layoutDirection`; FilterPanel: Segmented Dagre|ELK + ↓TB|→LR
+- ✅ S21-02: `elkjs` installed; `applyElkLayout` async (ELK layered, fallback dagre); handleAutoArrange async
+- ✅ S21-03: 8-direction collision push trong handleNodeDragStop (N/NE/E/SE/S/SW/W/NW, nearest by Euclidean dist)
+- Bonus: fix pre-existing TS warnings trong topology/index.tsx
+- Branch: `feat/sprint-21-topology-smart-layout` pushed
+- Sprint plan: `docs/plans/sprint-21-topology-smart-layout.md` cập nhật
+
 ---
 
 ## 2026-04-30 — Sprint 20: UI/UX Polish ✅ Hoàn thành
 
+- Yêu cầu ghi nhận vào SRS.md section 4.2.4, 4.1.3, 4.6.1
+- Sprint plan tạo mới: `docs/plans/sprint-20-ux-polish.md`
+- Kế hoạch kỹ thuật: `docs/IMPLEMENTATION_DETAILS.md` (entry Sprint 20)
+- Tasks mới: S20-01 đến S20-05 (13 points)
+- Nội dung: Dragger+Steps wizard, guide docs, AppGroup bulk delete, HardwareTab KV editor, form layout
+
+**Kết quả thực hiện:**
 - ✅ S20-01: `infra-upload/index.tsx` — Dragger + Steps 4-bước wizard (đồng nhất với app-import)
 - ✅ S20-02: GuidePage thêm menu "Import CSV"; `import.md` rewrite; `guide_infra.md` bổ sung bước import hàng loạt
 - ✅ S20-03: `AppGroupList.tsx` — rowSelection + bulk delete Popconfirm
@@ -78,14 +78,6 @@ A chronological record of project milestones, updates, and sprint summaries.
 - ✅ S20-05: `ServerForm`, `ApplicationForm`, `AppGroupModal` — Row/Col 2-column layout
 - Branch: `feat/sprint-20-ux-polish` pushed
 - Sprint plan: `docs/plans/sprint-20-ux-polish.md`
-
-## 2026-04-30 — Sprint 20: Bắt đầu implement UI/UX Polish
-
-- Yêu cầu ghi nhận vào SRS.md section 4.2.4, 4.1.3, 4.6.1
-- Sprint plan tạo mới: `docs/plans/sprint-20-ux-polish.md`
-- Kế hoạch kỹ thuật: `docs/IMPLEMENTATION_DETAILS.md` (entry Sprint 20)
-- Tasks mới: S20-01 đến S20-05 (13 points)
-- Nội dung: Dragger+Steps wizard, guide docs, AppGroup bulk delete, HardwareTab KV editor, form layout
 
 ---
 
@@ -98,19 +90,18 @@ A chronological record of project milestones, updates, and sprint summaries.
 
 ## 2026-04-29 — Sprint 19: Topology Orthogonal Edges ✅ Hoàn thành
 
-- ✅ S19-01: Thêm `edgeStyle: 'bezier' | 'step'` vào FilterState + Select "Edges" trong TopologyFilterPanel
-- ✅ S19-02: Import `getSmoothStepPath`, ProtocolEdge dual-mode, parallel spread via offset, buildGraph/computeLayout param, filters default
-- Branch: `feat/sprint-19-topology-orthogonal-edges` pushed
-- TypeScript: 0 lỗi mới trong các file thay đổi
-- Sprint plan: `docs/plans/sprint-19-topology-orthogonal-edges.md` cập nhật
-
-## 2026-04-29 — Sprint 19: Bắt đầu implement Topology Orthogonal Edges
-
 - Yêu cầu ghi nhận vào SRS.md section 4.5.5
 - Sprint plan tạo mới: `docs/plans/sprint-19-topology-orthogonal-edges.md`
 - Kế hoạch kỹ thuật: `docs/IMPLEMENTATION_DETAILS.md` (entry Sprint 19)
 - Tasks mới: S19-01 đến S19-02 (3 points)
 - Nội dung: edgeStyle filter, getSmoothStepPath dual-mode, parallel spread
+
+**Kết quả thực hiện:**
+- ✅ S19-01: Thêm `edgeStyle: 'bezier' | 'step'` vào FilterState + Select "Edges" trong TopologyFilterPanel
+- ✅ S19-02: Import `getSmoothStepPath`, ProtocolEdge dual-mode, parallel spread via offset, buildGraph/computeLayout param, filters default
+- Branch: `feat/sprint-19-topology-orthogonal-edges` pushed
+- TypeScript: 0 lỗi mới trong các file thay đổi
+- Sprint plan: `docs/plans/sprint-19-topology-orthogonal-edges.md` cập nhật
 
 ## 2026-04-25 — Sprint 18: Upload UI Consolidation & Topology Layout Fix ✅
 
@@ -124,6 +115,12 @@ A chronological record of project milestones, updates, and sprint summaries.
 
 ## 2026-04-25 — Sprint 18: Multi-Port Deployment & Connection Import ✅
 
+- Yêu cầu ghi nhận vào SRS.md sections 4.8.4, 4.8.5
+- Sprint plan tạo mới: `docs/plans/sprint-18-multi-port-connection-import.md`
+- Tasks mới: S18-01 đến S18-09 (16 points)
+- Nội dung: cột `ports` multi-port, trang `/connection-upload`, file demo `connections.csv`
+
+**Kết quả thực hiện:**
 - ✅ S18-01: `parsePortsString()` — parse format `PORT-PROTOCOL:service_name` space-separated
 - ✅ S18-02: `importDeployment()` — tạo nhiều Port records per deployment, backward compat
 - ✅ S18-03: `importConnection()` — upsert AppConnection, resolve `target_port_id`
@@ -135,13 +132,6 @@ A chronological record of project milestones, updates, and sprint summaries.
 - ✅ S18-09: `connections.csv` — 30 kết nối PROD/UAT/DEV (GRPC, HTTPS, HTTP)
 - Branch: `feat/sprint-18-multi-port-connection-import` pushed
 
-## 2026-04-25 — Sprint 18: Bắt đầu implement Multi-Port & Connection Import
-
-- Yêu cầu ghi nhận vào SRS.md sections 4.8.4, 4.8.5
-- Sprint plan tạo mới: `docs/plans/sprint-18-multi-port-connection-import.md`
-- Tasks mới: S18-01 đến S18-09 (16 points)
-- Nội dung: cột `ports` multi-port, trang `/connection-upload`, file demo `connections.csv`
-
 ## 2026-04-25 — Sprint 17: Bổ sung Port/Protocol vào Deployment Import ✅
 
 - ✅ S17-06: `importDeployment` — tạo Port record trong transaction cùng với deployment
@@ -152,6 +142,12 @@ A chronological record of project milestones, updates, and sprint summaries.
 
 ## 2026-04-25 — Sprint 17: Deployment Upload UI ✅ Hoàn thành
 
+- Yêu cầu ghi nhận vào SRS.md section 4.7.4
+- Sprint plan tạo mới: `docs/plans/sprint-17-deployment-upload.md`
+- Tasks mới: S17-01 đến S17-05 (7 points)
+- Nội dung: trang `/deployment-upload`, fix upsert duplicate, header aliases
+
+**Kết quả thực hiện:**
 - ✅ S17-01: `DEPLOYMENT_HEADER_ALIASES` — normalize header CSV variants
 - ✅ S17-02: `importDeployment` — upsert theo (app+server+env), tránh duplicate
 - ✅ S17-03: Trang `/deployment-upload` — 4 bước đầy đủ, inline edit, error table
@@ -159,13 +155,6 @@ A chronological record of project milestones, updates, and sprint summaries.
 - ✅ S17-05: Menu "Upload Deployment" trong Sidebar nhóm Ứng dụng
 - Branch: `feat/sprint-17-deployment-upload` pushed
 - Sprint plan: `docs/plans/sprint-17-deployment-upload.md`
-
-## 2026-04-25 — Sprint 17: Bắt đầu implement Deployment Upload UI
-
-- Yêu cầu ghi nhận vào SRS.md section 4.7.4
-- Sprint plan tạo mới: `docs/plans/sprint-17-deployment-upload.md`
-- Tasks mới: S17-01 đến S17-05 (7 points)
-- Nội dung: trang `/deployment-upload`, fix upsert duplicate, header aliases
 
 ---
 

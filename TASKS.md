@@ -20,6 +20,62 @@
 
 ---
 
+
+## 🌟 Sprints Đang Thực Hiện (In Progress)
+
+## Sprint 15 — Server Import & Data Enrichment 🔄 IN PROGRESS
+
+**Mục tiêu:** Cải thiện logic import Server từ CSV (OS, Hardware specs) và đơn giản hóa quy trình import bằng cách tập trung vào Server.
+
+| # | Task | Points | Status | SRS Ref |
+|---|---|---|---|---|
+| S15-01 | `[BE]` Thêm trường `os` vào model `Server` và tạo migration | 2 | ✅ | 4.1 |
+| S15-02 | `[BE]` Cập nhật DTOs & ServerService hỗ trợ trường `os` | 2 | ✅ | 4.1 |
+| S15-03 | `[BE]` Cập nhật ImportService: map OS và chuẩn hóa Hardware specs | 3 | ✅ | 4.1 |
+| S15-04 | `[FE]` Sidebar: Rename "Upload" → "Upload Server" | 1 | ✅ | 6.0 |
+| S15-05 | `[FE]` Refactor `InfraUploadPage`: Chỉ giữ lại chức năng Upload Server | 3 | ✅ | 4.1 |
+| S15-06 | `[FE]` UI: Hiển thị OS và Hardware specs chi tiết (Cores, GB) | 3 | ✅ | 4.1 |
+| S15-07 | `[FE]` ServerForm: Thêm trường nhập liệu Hệ điều hành | 2 | ✅ | 4.1 |
+
+#### Sprint 15 Extension — OS Lifecycle Tracking
+
+| # | Task | Points | Status | SRS Ref |
+|---|---|---|---|---|
+| S15-08 | `[BE]` Schema — ServerOsInstall + migrate server.os | 3 | ⬜ | 4.8.2 |
+| S15-09 | `[BE]` Application — thêm sw_type enum + OS catalog API | 2 | ⬜ | 4.8.2 |
+| S15-10 | `[BE]` ServerOsInstall — CRUD API | 4 | ⬜ | 4.8.2 |
+| S15-11 | `[BE]` ImportService — xử lý OS qua catalog | 3 | ⬜ | 4.8.2 |
+| S15-12 | `[BE]` Server query — include OS display | 1 | ⬜ | 4.8.2 |
+| S15-13 | `[FE]` Import wizard — bước OS Resolution | 5 | ⬜ | 4.8.2 |
+| S15-14 | `[FE]` Server Detail — OS History tab/section | 4 | ⬜ | 4.8.2 |
+| S15-15 | `[FE]` Cập nhật ServerForm & ServerList | 2 | ⬜ | 4.8.2 |
+
+
+## Sprint 16 — App Group Restructure & Catalog Unification 🔄 IN PROGRESS
+
+**Mục tiêu:** Tái cấu trúc nhóm ứng dụng (Business vs Infra), hợp nhất Catalog phần mềm hệ thống.
+
+| # | Task | Points | Status | SRS Ref |
+|---|---|---|---|---|
+| S16-01 | `[BE]` Schema: Thêm GroupType enum & field vào ApplicationGroup | 2 | ✅ | 4.8.3 |
+| S16-02 | `[BE]` Schema: Thêm eol_date, vendor vào Application model | 1 | ✅ | 4.8.3 |
+| S16-03 | `[BE]` Data Migration: SystemSoftware -> Application Catalog | 3 | ✅ | 4.8.3 |
+| S16-04 | `[BE]` AppGroup DTO & Service: Phân loại theo GroupType | 2 | ✅ | 4.8.3 |
+| S16-05 | `[BE]` Application DTO & Service: Validation type & group | 3 | ✅ | 4.8.3 |
+| S16-06 | `[BE]` SystemSoftware endpoint: Delegate sang ApplicationService | 2 | ✅ | 4.8.3 |
+| S16-07 | `[FE]` Types & Hooks: Cập nhật cho GroupType và App Metadata | 1 | ✅ | 4.8.3 |
+| S16-08 | `[FE]` AppGroup UI: Badge phân loại & Filter theo GroupType | 2 | ✅ | 4.8.3 |
+| S16-09 | `[FE]` Application Form: Dropdown lọc nhóm theo context + SYSTEM fields | 3 | ✅ | 4.8.3 |
+| S16-10 | `[FE]` Application Page: Tách tab Nghiệp vụ / Hạ tầng / Nhóm | 3 | ✅ | 4.8.3 |
+| S16-11 | `[FE]` SystemSoftware Page: Redirect sang /applications?tab=infra | 1 | ✅ | 4.8.3 |
+| S16-12 | `[BE]` Sidebar: Link Phần mềm hạ tầng | 1 | ✅ | 4.8.3 |
+| S16-13 | `[BE]` Import: Auto-create group với đúng GroupType | 1 | ✅ | 4.8.3 |
+
+---
+
+
+## ✅ Sprints Đã Hoàn Thành
+
 ## Sprint 0 — Bootstrap & Infrastructure ✅ DONE
 
 **Mục tiêu:** Scaffolding monorepo, Docker environment, Auth, Setup Wizard  
@@ -50,6 +106,7 @@
 | S0-20 | Vite proxy to backend container (process.env.BACKEND_URL) | 1 | ✅ |
 
 ---
+
 
 ## Sprint 1 — User & UserGroup Management (Backend) ✅ DONE
 
@@ -86,6 +143,7 @@
 
 ---
 
+
 ## Sprint 2 — User & UserGroup Frontend ✅ DONE
 
 **Mục tiêu:** Trang quản lý User và UserGroup trong khu vực Admin  
@@ -111,6 +169,7 @@
 **Sprint 2 Total: 48 points**
 
 ---
+
 
 ## Sprint 3 — Server & Hardware Backend ✅ DONE
 
@@ -139,6 +198,7 @@
 
 ---
 
+
 ## Sprint 4 — Network & Server Frontend ✅ DONE
 
 **Mục tiêu:** Network backend + toàn bộ UI cho Server/Hardware/Network  
@@ -163,6 +223,7 @@
 **Sprint 4 Total: 46 points**
 
 ---
+
 
 ## Sprint 5 — Application & AppGroup Backend ✅ DONE
 
@@ -189,6 +250,7 @@
 **Sprint 5 Total: 40 points**
 
 ---
+
 
 ## Sprint 6 — Deployment Docs & Application Frontend ✅ DONE
 
@@ -217,6 +279,7 @@
 
 ---
 
+
 ## Sprint 7 — Connection & Audit Log ✅ DONE
 
 **Mục tiêu:** AppConnection CRUD + Audit Log UI + Change History  
@@ -241,6 +304,7 @@
 **Sprint 7 Total: 54 points**
 
 ---
+
 
 ## Sprint 8 — Topology 2D (Phase 2 Start) ✅ DONE
 
@@ -268,6 +332,7 @@
 **Sprint 8 Total: 61 points**
 
 ---
+
 
 ## Sprint 9 — System Management & CSV Import ✅ DONE
 
@@ -319,6 +384,7 @@
 
 ---
 
+
 ## Sprint 10 — Topology 3D & Realtime ✅ DONE
 
 **Mục tiêu:** 3D visualization + GraphQL subscriptions realtime  
@@ -342,6 +408,7 @@
 **Sprint 10 Total: 51 points**
 
 ---
+
 
 ## Sprint 11 — ChangeSet Draft & Preview ✅ DONE
 
@@ -368,6 +435,7 @@
 
 ---
 
+
 ## Sprint 12 — Polish, Performance & SSO ✅ DONE
 
 **Mục tiêu:** Microsoft 365 SSO, UI polish, performance, CSV import  
@@ -391,6 +459,7 @@
 **Sprint 12 Total: 57 points**
 
 ---
+
 
 ## Sprint 13 — Interactive Topology 2D & Networks Layout ✅ DONE
 
@@ -417,6 +486,7 @@
 
 ---
 
+
 ## Sprint 14 — UX Polish & Floating Filters ✅ DONE
 
 **Mục tiêu:** Cải thiện trải nghiệm người dùng trên trang Topology, đảm bảo bộ lọc luôn hiển thị ở top của view kể cả khi ở chế độ toàn màn hình. Đồng bộ bộ lọc trên tất cả các engine 2D và 3D.
@@ -433,148 +503,30 @@
 
 ---
 
-## Sprint 15 — Server Import & Data Enrichment 🔄 IN PROGRESS
 
-**Mục tiêu:** Cải thiện logic import Server từ CSV (OS, Hardware specs) và đơn giản hóa quy trình import bằng cách tập trung vào Server.
+## Sprint 17 — Deployment Upload UI ✅ DONE
 
-| # | Task | Points | Status | SRS Ref |
-|---|---|---|---|---|
-| S15-01 | `[BE]` Thêm trường `os` vào model `Server` và tạo migration | 2 | ✅ | 4.1 |
-| S15-02 | `[BE]` Cập nhật DTOs & ServerService hỗ trợ trường `os` | 2 | ✅ | 4.1 |
-| S15-03 | `[BE]` Cập nhật ImportService: map OS và chuẩn hóa Hardware specs | 3 | ✅ | 4.1 |
-| S15-04 | `[FE]` Sidebar: Rename "Upload" → "Upload Server" | 1 | ✅ | 6.0 |
-| S15-05 | `[FE]` Refactor `InfraUploadPage`: Chỉ giữ lại chức năng Upload Server | 3 | ✅ | 4.1 |
-| S15-06 | `[FE]` UI: Hiển thị OS và Hardware specs chi tiết (Cores, GB) | 3 | ✅ | 4.1 |
-| S15-07 | `[FE]` ServerForm: Thêm trường nhập liệu Hệ điều hành | 2 | ✅ | 4.1 |
-
-#### Sprint 15 Extension — OS Lifecycle Tracking
-
-| # | Task | Points | Status | SRS Ref |
-|---|---|---|---|---|
-| S15-08 | `[BE]` Schema — ServerOsInstall + migrate server.os | 3 | ⬜ | 4.8.2 |
-| S15-09 | `[BE]` Application — thêm sw_type enum + OS catalog API | 2 | ⬜ | 4.8.2 |
-| S15-10 | `[BE]` ServerOsInstall — CRUD API | 4 | ⬜ | 4.8.2 |
-| S15-11 | `[BE]` ImportService — xử lý OS qua catalog | 3 | ⬜ | 4.8.2 |
-| S15-12 | `[BE]` Server query — include OS display | 1 | ⬜ | 4.8.2 |
-| S15-13 | `[FE]` Import wizard — bước OS Resolution | 5 | ⬜ | 4.8.2 |
-| S15-14 | `[FE]` Server Detail — OS History tab/section | 4 | ⬜ | 4.8.2 |
-| S15-15 | `[FE]` Cập nhật ServerForm & ServerList | 2 | ⬜ | 4.8.2 |
-
-## Sprint 16 — App Group Restructure & Catalog Unification 🔄 IN PROGRESS
-
-**Mục tiêu:** Tái cấu trúc nhóm ứng dụng (Business vs Infra), hợp nhất Catalog phần mềm hệ thống.
-
-| # | Task | Points | Status | SRS Ref |
-|---|---|---|---|---|
-| S16-01 | `[BE]` Schema: Thêm GroupType enum & field vào ApplicationGroup | 2 | ✅ | 4.8.3 |
-| S16-02 | `[BE]` Schema: Thêm eol_date, vendor vào Application model | 1 | ✅ | 4.8.3 |
-| S16-03 | `[BE]` Data Migration: SystemSoftware -> Application Catalog | 3 | ✅ | 4.8.3 |
-| S16-04 | `[BE]` AppGroup DTO & Service: Phân loại theo GroupType | 2 | ✅ | 4.8.3 |
-| S16-05 | `[BE]` Application DTO & Service: Validation type & group | 3 | ✅ | 4.8.3 |
-| S16-06 | `[BE]` SystemSoftware endpoint: Delegate sang ApplicationService | 2 | ✅ | 4.8.3 |
-| S16-07 | `[FE]` Types & Hooks: Cập nhật cho GroupType và App Metadata | 1 | ✅ | 4.8.3 |
-| S16-08 | `[FE]` AppGroup UI: Badge phân loại & Filter theo GroupType | 2 | ✅ | 4.8.3 |
-| S16-09 | `[FE]` Application Form: Dropdown lọc nhóm theo context + SYSTEM fields | 3 | ✅ | 4.8.3 |
-| S16-10 | `[FE]` Application Page: Tách tab Nghiệp vụ / Hạ tầng / Nhóm | 3 | ✅ | 4.8.3 |
-| S16-11 | `[FE]` SystemSoftware Page: Redirect sang /applications?tab=infra | 1 | ✅ | 4.8.3 |
-| S16-12 | `[BE]` Sidebar: Link Phần mềm hạ tầng | 1 | ✅ | 4.8.3 |
-| S16-13 | `[BE]` Import: Auto-create group với đúng GroupType | 1 | ✅ | 4.8.3 |
-
----
-
-## Sprint 20 — UI/UX Polish: Import Consistency, Bulk Actions & Form Modernization ✅ DONE
-
-**Mục tiêu:** Đồng nhất trải nghiệm import server với app-import (Dragger + Steps), bổ sung hướng dẫn còn thiếu, thêm bulk-delete cho nhóm ứng dụng, form nhập phần cứng dùng key-value UI, cải thiện layout form.
-**Thời gian:** 2026-04-30
-**Branch:** `feat/sprint-20-ux-polish`
-**Plan:** [docs/plans/sprint-20-ux-polish.md](docs/plans/sprint-20-ux-polish.md)
+**Mục tiêu:** Bổ sung trang UI import deployment từ CSV, hoàn chỉnh bộ 3 upload flow (Server → Application → Deployment). Fix upsert duplicate trong importDeployment.  
+**Thời gian:** 2026-04-25  
+**Branch:** `feat/sprint-17-deployment-upload`  
+**Plan:** [docs/plans/sprint-17-deployment-upload.md](docs/plans/sprint-17-deployment-upload.md)
 
 | # | Task | Points | Status | SRS Ref |
 |---|------|--------|--------|---------|
-| S20-01 | `[FE]` Refactor `infra-upload/index.tsx`: Dragger + Steps 4-bước wizard (đồng nhất app-import) | 3 | ✅ | 4.2.4 |
-| S20-02 | `[FE/DOCS]` GuidePage: thêm menu "Import CSV"; cập nhật `import.md`, `guide_infra.md` | 2 | ✅ | — |
-| S20-03 | `[FE]` AppGroupList: thêm rowSelection + bulk delete (như infra-system) | 2 | ✅ | 4.6.1 |
-| S20-04 | `[FE]` HardwareTab: thay JSON textarea `specs` bằng Form.List key-value editor | 3 | ✅ | 4.1.3 |
-| S20-05 | `[FE]` ServerForm, ApplicationForm, AppGroupModal: Row/Col 2-column layout | 3 | ✅ | — |
+| S17-01 | `[BE]` Thêm `DEPLOYMENT_HEADER_ALIASES` vào validateRows | 1 | ✅ | 4.7.4 |
+| S17-02 | `[BE]` Refactor `importDeployment`: upsert theo (app+server+env) | 1 | ✅ | 4.7.4 |
+| S17-03 | `[FE]` Tạo `pages/deployment-upload/index.tsx` | 3 | ✅ | 4.7.4 |
+| S17-04 | `[FE]` Thêm route `/deployment-upload` vào `App.tsx` | 1 | ✅ | 4.7.4 |
+| S17-05 | `[FE]` Thêm menu item "Upload Deployment" vào Sidebar | 1 | ✅ | 4.7.4 |
+| S17-06 | `[BE]` Import port/protocol/service_name — tạo Port record trong transaction | 2 | ✅ | 4.4.3 |
+| S17-07 | `[BE]` Port conflict detection trong importDeployment (rollback nếu conflict) | 2 | ✅ | 4.4.3 |
+| S17-08 | `[FE]` Column mapper: thêm port/protocol/service_name target fields | 1 | ✅ | 4.4.3 |
+| S17-09 | Demo: cập nhật `deployments.csv` với port/protocol/service_name (verified no conflict) | 1 | ✅ | — |
 
-**Sprint 20 Total: 13 points**
-
----
-
-## Sprint 21 — Topology Smart Auto-Layout & Collision Avoidance ✅ DONE
-
-**Mục tiêu:** Nâng cấp layout Topology 2D: thêm thuật toán ELK, direction toggle TB/LR, cải thiện collision avoidance khi drag.
-**Thời gian:** 2026-04-30
-**Branch:** `feat/sprint-21-topology-smart-layout`
-**Plan:** [docs/plans/sprint-21-topology-smart-layout.md](docs/plans/sprint-21-topology-smart-layout.md)
-
-| # | Task | Points | Status | SRS Ref |
-|---|------|--------|--------|---------|
-| S21-01 | `[FE]` FilterState: thêm `layoutDirection` + cập nhật computeLayout + FilterPanel direction UI | 2 | ✅ | 4.5.7 |
-| S21-02 | `[FE]` Install elkjs + implement `applyElkLayout` async + thêm Algorithm selector trong FilterPanel | 5 | ✅ | 4.5.7 |
-| S21-03 | `[FE]` Cải thiện collision avoidance trong handleNodeDragStop: 8-direction push | 2 | ✅ | 4.5.7 |
-
-**Sprint 21 Total: 9 points**
+**Sprint 17 Total: 13 points**
 
 ---
 
-## Sprint 23 — Network Zone & Firewall Rule Management ✅ DONE
-
-**Mục tiêu:** Phân vùng mạng (NetworkZone + ZoneIpEntry), quản lý firewall rule (CRUD/import/export XLSX) và topology phân vùng mạng thể hiện kết nối IP→server:port.
-**Thời gian:** 2026-04-30
-**Branch:** `feat/sprint-23-network-zone-firewall`
-**Plan:** [docs/plans/sprint-23-network-zone-firewall.md](docs/plans/sprint-23-network-zone-firewall.md)
-
-| # | Task | Points | Status | SRS Ref |
-|---|------|--------|--------|---------|
-| S23-01 | `[BE]` Prisma schema: NetworkZone + ZoneIpEntry + FirewallRule + 3 enums | 3 | ✅ | 4.9.1 |
-| S23-02 | `[BE]` Migration: add_network_zone_firewall_rule | 1 | ✅ | 4.9.1 |
-| S23-03 | `[BE]` NetworkZone module: CRUD zone + ZoneIpEntry + bulk IP import | 3 | ✅ | 4.9.1 |
-| S23-04 | `[BE]` FirewallRule module: CRUD + import CSV/XLSX + export XLSX | 5 | ✅ | 4.9.2 |
-| S23-05 | `[BE]` Đăng ký NetworkZoneModule + FirewallRuleModule vào AppModule | 1 | ✅ | — |
-| S23-06 | `[FE]` NetworkZone page: list zones + IP management drawer | 5 | ✅ | 4.9.1 |
-| S23-07 | `[FE]` FirewallRule page: list + form + import + export XLSX | 5 | ✅ | 4.9.2 |
-| S23-08 | `[FE]` FirewallTopologyView: ReactFlow zone→server:port từ firewall rules | 5 | ✅ | 4.9.3 |
-| S23-09 | `[FE]` Routes + Sidebar: /network-zones + /firewall-rules | 1 | ✅ | — |
-
-**Sprint 23 Total: 29 points**
-
----
-
-## Sprint 22 — Topology UX: Auto-Layout Trigger, Cascade Filter & Connection Health ✅ DONE
-
-**Mục tiêu:** 3 cải tiến UX cho Topology 2D: tự động sắp xếp khi đổi thuật toán, lọc node theo cascade (group→server→app), và panel đánh giá chất lượng kết nối.
-**Thời gian:** 2026-04-30
-**Branch:** `feat/sprint-22-topology-ux`
-**Plan:** [docs/plans/sprint-22-topology-ux.md](docs/plans/sprint-22-topology-ux.md)
-
-| # | Task | Points | Status | SRS Ref |
-|---|------|--------|--------|---------|
-| S22-01 | `[FE]` Auto-arrange khi thay đổi `layoutAlgorithm` / `layoutDirection` trong ReactFlow | 2 | ✅ | 4.5.8 |
-| S22-02 | `[FE]` Cascade filter: chọn group → lọc server options; chọn server → lọc app options | 3 | ✅ | 4.5.9 |
-| S22-03 | `[FE]` ConnectionHealthDrawer: phân tích circular deps, SPoF, orphaned, cross-env, dead links | 5 | ✅ | 4.5.10 |
-
-**Sprint 22 Total: 10 points**
-
----
-
-## Sprint 19 — Topology Orthogonal Edges & UX Polish ✅ DONE
-
-**Mục tiêu:** Bổ sung chế độ kết nối thẳng góc (orthogonal edges) cho Topology 2D, cải thiện khả năng đọc hiểu sơ đồ khi có nhiều kết nối chồng lấp.
-**Thời gian:** 2026-04-29
-**Branch:** `feat/sprint-19-topology-orthogonal-edges`
-**Plan:** [docs/plans/sprint-19-topology-orthogonal-edges.md](docs/plans/sprint-19-topology-orthogonal-edges.md)
-
-| # | Task | Points | Status | SRS Ref |
-|---|------|--------|--------|---------|
-| S19-01 | `[FE]` Thêm `edgeStyle` vào `FilterState` + Select "Edges" trong `TopologyFilterPanel` | 1 | ✅ | 4.5.5 |
-| S19-02 | `[FE]` Import `getSmoothStepPath`, cập nhật `ProtocolEdge` dual-mode + parallel spread | 2 | ✅ | 4.5.5 |
-| S19-03 | `[FE]` Mở rộng FilterState + 3 multi-select visibility filter trong `TopologyFilterPanel` | 2 | ✅ | 4.5.6 |
-| S19-04 | `[FE]` Compute options + mở rộng `filteredData` useMemo áp dụng visibility filters | 1 | ✅ | 4.5.6 |
-
-**Sprint 19 Total: 6 points**
-
----
 
 ## Sprint 18 — Multi-Port per Deployment & Connection Import ✅ DONE
 
@@ -602,28 +554,105 @@
 
 ---
 
-## Sprint 17 — Deployment Upload UI ✅ DONE
 
-**Mục tiêu:** Bổ sung trang UI import deployment từ CSV, hoàn chỉnh bộ 3 upload flow (Server → Application → Deployment). Fix upsert duplicate trong importDeployment.  
-**Thời gian:** 2026-04-25  
-**Branch:** `feat/sprint-17-deployment-upload`  
-**Plan:** [docs/plans/sprint-17-deployment-upload.md](docs/plans/sprint-17-deployment-upload.md)
+## Sprint 19 — Topology Orthogonal Edges & UX Polish ✅ DONE
+
+**Mục tiêu:** Bổ sung chế độ kết nối thẳng góc (orthogonal edges) cho Topology 2D, cải thiện khả năng đọc hiểu sơ đồ khi có nhiều kết nối chồng lấp.
+**Thời gian:** 2026-04-29
+**Branch:** `feat/sprint-19-topology-orthogonal-edges`
+**Plan:** [docs/plans/sprint-19-topology-orthogonal-edges.md](docs/plans/sprint-19-topology-orthogonal-edges.md)
 
 | # | Task | Points | Status | SRS Ref |
 |---|------|--------|--------|---------|
-| S17-01 | `[BE]` Thêm `DEPLOYMENT_HEADER_ALIASES` vào validateRows | 1 | ✅ | 4.7.4 |
-| S17-02 | `[BE]` Refactor `importDeployment`: upsert theo (app+server+env) | 1 | ✅ | 4.7.4 |
-| S17-03 | `[FE]` Tạo `pages/deployment-upload/index.tsx` | 3 | ✅ | 4.7.4 |
-| S17-04 | `[FE]` Thêm route `/deployment-upload` vào `App.tsx` | 1 | ✅ | 4.7.4 |
-| S17-05 | `[FE]` Thêm menu item "Upload Deployment" vào Sidebar | 1 | ✅ | 4.7.4 |
-| S17-06 | `[BE]` Import port/protocol/service_name — tạo Port record trong transaction | 2 | ✅ | 4.4.3 |
-| S17-07 | `[BE]` Port conflict detection trong importDeployment (rollback nếu conflict) | 2 | ✅ | 4.4.3 |
-| S17-08 | `[FE]` Column mapper: thêm port/protocol/service_name target fields | 1 | ✅ | 4.4.3 |
-| S17-09 | Demo: cập nhật `deployments.csv` với port/protocol/service_name (verified no conflict) | 1 | ✅ | — |
+| S19-01 | `[FE]` Thêm `edgeStyle` vào `FilterState` + Select "Edges" trong `TopologyFilterPanel` | 1 | ✅ | 4.5.5 |
+| S19-02 | `[FE]` Import `getSmoothStepPath`, cập nhật `ProtocolEdge` dual-mode + parallel spread | 2 | ✅ | 4.5.5 |
+| S19-03 | `[FE]` Mở rộng FilterState + 3 multi-select visibility filter trong `TopologyFilterPanel` | 2 | ✅ | 4.5.6 |
+| S19-04 | `[FE]` Compute options + mở rộng `filteredData` useMemo áp dụng visibility filters | 1 | ✅ | 4.5.6 |
 
-**Sprint 17 Total: 13 points**
+**Sprint 19 Total: 6 points**
 
 ---
+
+
+## Sprint 20 — UI/UX Polish: Import Consistency, Bulk Actions & Form Modernization ✅ DONE
+
+**Mục tiêu:** Đồng nhất trải nghiệm import server với app-import (Dragger + Steps), bổ sung hướng dẫn còn thiếu, thêm bulk-delete cho nhóm ứng dụng, form nhập phần cứng dùng key-value UI, cải thiện layout form.
+**Thời gian:** 2026-04-30
+**Branch:** `feat/sprint-20-ux-polish`
+**Plan:** [docs/plans/sprint-20-ux-polish.md](docs/plans/sprint-20-ux-polish.md)
+
+| # | Task | Points | Status | SRS Ref |
+|---|------|--------|--------|---------|
+| S20-01 | `[FE]` Refactor `infra-upload/index.tsx`: Dragger + Steps 4-bước wizard (đồng nhất app-import) | 3 | ✅ | 4.2.4 |
+| S20-02 | `[FE/DOCS]` GuidePage: thêm menu "Import CSV"; cập nhật `import.md`, `guide_infra.md` | 2 | ✅ | — |
+| S20-03 | `[FE]` AppGroupList: thêm rowSelection + bulk delete (như infra-system) | 2 | ✅ | 4.6.1 |
+| S20-04 | `[FE]` HardwareTab: thay JSON textarea `specs` bằng Form.List key-value editor | 3 | ✅ | 4.1.3 |
+| S20-05 | `[FE]` ServerForm, ApplicationForm, AppGroupModal: Row/Col 2-column layout | 3 | ✅ | — |
+
+**Sprint 20 Total: 13 points**
+
+---
+
+
+## Sprint 21 — Topology Smart Auto-Layout & Collision Avoidance ✅ DONE
+
+**Mục tiêu:** Nâng cấp layout Topology 2D: thêm thuật toán ELK, direction toggle TB/LR, cải thiện collision avoidance khi drag.
+**Thời gian:** 2026-04-30
+**Branch:** `feat/sprint-21-topology-smart-layout`
+**Plan:** [docs/plans/sprint-21-topology-smart-layout.md](docs/plans/sprint-21-topology-smart-layout.md)
+
+| # | Task | Points | Status | SRS Ref |
+|---|------|--------|--------|---------|
+| S21-01 | `[FE]` FilterState: thêm `layoutDirection` + cập nhật computeLayout + FilterPanel direction UI | 2 | ✅ | 4.5.7 |
+| S21-02 | `[FE]` Install elkjs + implement `applyElkLayout` async + thêm Algorithm selector trong FilterPanel | 5 | ✅ | 4.5.7 |
+| S21-03 | `[FE]` Cải thiện collision avoidance trong handleNodeDragStop: 8-direction push | 2 | ✅ | 4.5.7 |
+
+**Sprint 21 Total: 9 points**
+
+---
+
+
+## Sprint 22 — Topology UX: Auto-Layout Trigger, Cascade Filter & Connection Health ✅ DONE
+
+**Mục tiêu:** 3 cải tiến UX cho Topology 2D: tự động sắp xếp khi đổi thuật toán, lọc node theo cascade (group→server→app), và panel đánh giá chất lượng kết nối.
+**Thời gian:** 2026-04-30
+**Branch:** `feat/sprint-22-topology-ux`
+**Plan:** [docs/plans/sprint-22-topology-ux.md](docs/plans/sprint-22-topology-ux.md)
+
+| # | Task | Points | Status | SRS Ref |
+|---|------|--------|--------|---------|
+| S22-01 | `[FE]` Auto-arrange khi thay đổi `layoutAlgorithm` / `layoutDirection` trong ReactFlow | 2 | ✅ | 4.5.8 |
+| S22-02 | `[FE]` Cascade filter: chọn group → lọc server options; chọn server → lọc app options | 3 | ✅ | 4.5.9 |
+| S22-03 | `[FE]` ConnectionHealthDrawer: phân tích circular deps, SPoF, orphaned, cross-env, dead links | 5 | ✅ | 4.5.10 |
+
+**Sprint 22 Total: 10 points**
+
+---
+
+
+## Sprint 23 — Network Zone & Firewall Rule Management ✅ DONE
+
+**Mục tiêu:** Phân vùng mạng (NetworkZone + ZoneIpEntry), quản lý firewall rule (CRUD/import/export XLSX) và topology phân vùng mạng thể hiện kết nối IP→server:port.
+**Thời gian:** 2026-04-30
+**Branch:** `feat/sprint-23-network-zone-firewall`
+**Plan:** [docs/plans/sprint-23-network-zone-firewall.md](docs/plans/sprint-23-network-zone-firewall.md)
+
+| # | Task | Points | Status | SRS Ref |
+|---|------|--------|--------|---------|
+| S23-01 | `[BE]` Prisma schema: NetworkZone + ZoneIpEntry + FirewallRule + 3 enums | 3 | ✅ | 4.9.1 |
+| S23-02 | `[BE]` Migration: add_network_zone_firewall_rule | 1 | ✅ | 4.9.1 |
+| S23-03 | `[BE]` NetworkZone module: CRUD zone + ZoneIpEntry + bulk IP import | 3 | ✅ | 4.9.1 |
+| S23-04 | `[BE]` FirewallRule module: CRUD + import CSV/XLSX + export XLSX | 5 | ✅ | 4.9.2 |
+| S23-05 | `[BE]` Đăng ký NetworkZoneModule + FirewallRuleModule vào AppModule | 1 | ✅ | — |
+| S23-06 | `[FE]` NetworkZone page: list zones + IP management drawer | 5 | ✅ | 4.9.1 |
+| S23-07 | `[FE]` FirewallRule page: list + form + import + export XLSX | 5 | ✅ | 4.9.2 |
+| S23-08 | `[FE]` FirewallTopologyView: ReactFlow zone→server:port từ firewall rules | 5 | ✅ | 4.9.3 |
+| S23-09 | `[FE]` Routes + Sidebar: /network-zones + /firewall-rules | 1 | ✅ | — |
+
+**Sprint 23 Total: 29 points**
+
+---
+
 
 ## Backlog — Chưa lên sprint
 
@@ -640,6 +669,7 @@
 | BL-09 | Production Docker Compose (nginx, SSL, env separation) | 5 | DevOps |
 
 ---
+
 
 ## Tổng kết roadmap
 
@@ -660,4 +690,3 @@
 2. **Kết thúc sprint**: viết sprint report, cập nhật trạng thái tasks trong file này
 3. **Handoff giữa sessions**: đọc `deployment-status.json` để biết runtime state, đọc file này để biết tiến độ feature
 4. **Ưu tiên thực hiện**: theo thứ tự sprint — không nhảy sprint sau khi sprint trước chưa xong (trừ khi có dependency rõ ràng)
-ó dependency rõ ràng)
