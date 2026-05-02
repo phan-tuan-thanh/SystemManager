@@ -1,52 +1,46 @@
-# Sprint 10 — Dashboard Tổng hợp & Xuất dữ liệu Audit Log
+# Sprint 10 — Dashboard Tổng quan & Báo cáo Audit
 
-**Ngày bắt đầu:** 2026-04-25  
-**Ngày kết thúc:** 2026-04-26  
+**Ngày bắt đầu:** 2026-04-30  
+**Ngày kết thúc:** 2026-05-02  
 **Trạng thái:** ✅ DONE  
 
 ---
 
 ## 1. Tổng quan & Mục tiêu (Sprint Goal)
 
-> Xây dựng trung tâm điều hành (Dashboard) trực quan hoá toàn bộ tài nguyên hệ thống và cung cấp công cụ xuất dữ liệu Audit Log phục vụ việc hậu kiểm (Audit).
+> Cung cấp cái nhìn tổng quát về sức khỏe hệ thống thông qua Dashboard và triển khai cơ chế xuất báo cáo Audit Log hàng loạt.
 
-## 2. Kiến trúc & Logic Tổng hợp (Architecture)
+## 2. Đặc tả các trường dữ liệu (Data Fields)
 
-- **Aggregation Logic:** Sử dụng các truy vấn `groupBy` và `count` của Prisma để tổng hợp dữ liệu theo môi trường và trạng thái triển khai.
-- **Audit Storage:** Bảng `AuditLog` lưu trữ snapshot dưới dạng JSONB để tối ưu hiệu suất truy vấn lịch sử.
+#### **Audit Log Export DTO**
+| Field | Type | Description |
+|---|---|---|
+| `from_date` | `DateTime` | Ngày bắt đầu lọc |
+| `to_date` | `DateTime` | Ngày kết thúc lọc |
+| `action` | `Enum` | Hành động cụ thể (`CREATE`, `DELETE`, ...) |
 
 ## 3. Luồng xử lý kỹ thuật & Business Logic
 
-### 3.1. Tầng Backend (Aggregation & Export Logic)
-- **Streaming CSV Export:** Để tránh tràn bộ nhớ (OOM) khi xuất hàng trăm ngàn dòng log, backend sử dụng cơ chế `batch fetching`. Dữ liệu được đọc từng cụm 500 dòng, chuyển đổi sang CSV và stream trực tiếp về client qua HTTP response.
-- **Parallel Status Check:** API `/system/status` thực hiện nhiều truy vấn đếm song song (`Promise.all`) để giảm thời gian phản hồi của Dashboard.
+### 3.1. Tầng Backend (Aggregation & Streaming)
+- **Status Aggregation:** API Dashboard thực hiện đếm (Count) số lượng tài nguyên theo môi trường và trạng thái (VD: bao nhiêu Server PROD đang Active, bao nhiêu Deployment đang Stopped).
+- **Audit CSV Streaming:** Khi xuất log ra CSV, thay vì load toàn bộ dữ liệu vào bộ nhớ, Backend sử dụng cơ chế **Stream** (kết hợp `csv-stringify`) để đẩy dữ liệu trực tiếp về client theo từng dòng, giúp xử lý được các file log hàng triệu dòng mà không gây sập server.
 
-### 3.2. Tầng Frontend (Reporting UI)
-- **Dynamic Charts:** Sử dụng component `Progress` và `Statistic` để biểu diễn tỉ lệ phân bổ server theo môi trường (DEV/UAT/PROD). Màu sắc được đồng bộ hoá toàn hệ thống.
-- **Real-time Polling:** Dashboard được thiết lập `staleTime: 30s`, tự động làm mới dữ liệu ngầm để đảm bảo số lượng tài nguyên hiển thị luôn cập nhật.
-- **Recent Changes List:** Hiển thị 8 thay đổi gần nhất từ Audit Log, bóc tách thông tin `resource_name` từ JSON snapshot để hiển thị nhãn thân thiện cho người dùng.
+### 3.2. Tầng Frontend (Analytics UI)
+- **Statistic Cards:** Sử dụng các thẻ số liệu lớn (Statistic) với màu sắc cảnh báo: Xanh (Bình thường), Cam (Cảnh báo), Đỏ (Sự cố).
+- **Recent Changes List:** Hiển thị 10 thao tác thay đổi cấu hình gần nhất giúp Admin nắm bắt nhanh các biến động trong ngày.
 
 ## 4. Đặc tả API Interfaces
 
 | Endpoint | Method | Chức năng | Quyền |
 |---|---|---|---|
-| `/audit-logs/export` | `GET` | Xuất CSV (Streaming) | `ADMIN` |
-| `/system/status` | `GET` | Lấy số liệu Dashboard | `VIEWER` |
-
-## 5. Xử lý Lỗi & Ngoại lệ (Error Handling)
-
-- **Timeout:** Các truy vấn aggregation lớn được đặt timeout để tránh làm treo database.
-- **Export Failure:** Nếu quá trình stream file bị ngắt quãng, backend sẽ đóng connection và ghi log lỗi để admin xử lý.
-
-## 6. Hướng dẫn Bảo trì & Debug
-
-- **Audit Purge:** Cần lập lịch dọn dẹp các bản ghi audit log cũ hơn 1 năm để giải phóng dung lượng DB.
+| `/audit-logs/export` | `GET` | Xuất file CSV (Streaming) | `ADMIN` |
+| `/system/status` | `GET` | Thống kê Dashboard | `VIEWER` |
 
 ---
 
 ## 7. Metrics & Tasks
 
 - Story Points: 15
-- Tasks: 6 (Audit Schema, CSV Export logic, Aggregation API, Dashboard UI)
+- Tasks: 6 (Aggregation logic, Streaming export, Dashboard UI)
 
 _Tài liệu kỹ thuật chuẩn PROD - Cập nhật ngày: 2026-05-02_

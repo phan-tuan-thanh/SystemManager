@@ -8,47 +8,43 @@
 
 ## 1. Tổng quan & Mục tiêu (Sprint Goal)
 
-> Xây dựng hệ thống quản lý tập trung các quy tắc tường lửa (Firewall Rules). Đảm bảo kiểm soát chặt chẽ luồng truy cập giữa các vùng mạng và tích hợp phân quyền thao tác (RBAC) cho đội ngũ vận hành.
+> Xây dựng hệ thống quản lý tập trung các quy tắc tường lửa (Firewall Rules) và kiểm soát quyền truy cập dựa trên vai trò (RBAC).
 
-## 2. Kiến trúc Bảo mật (Security Architecture)
+## 2. Đặc tả các trường dữ liệu (Data Fields)
 
-- **Model `FirewallRule`:** Lưu thông tin Source IP/Zone, Destination Server/Port, và hành động (`ALLOW`/`DENY`).
-- **RBAC UI:** Ẩn/Hiện chức năng dựa trên quyền thực tế của người dùng (`ADMIN`, `OPERATOR`).
+#### **Model: FirewallRule**
+| Field | Type | Description | Constraints |
+|---|---|---|---|
+| `name` | `String` | Tên gợi nhớ của luật | VarChar(200) |
+| `environment` | `Enum` | Môi trường áp dụng | Required |
+| `source_zone_id` | `UUID` | Vùng mạng nguồn | Foreign Key |
+| `source_ip` | `String` | IP nguồn cụ thể | Nullable |
+| `destination_server_id` | `UUID` | Server đích | Foreign Key |
+| `action` | `Enum` | `ALLOW` hoặc `DENY` | Default: `ALLOW` |
+| `status` | `Enum` | Trạng thái phê duyệt | Default: `PENDING` |
 
 ## 3. Luồng xử lý kỹ thuật & Business Logic
 
-### 3.1. Tầng Backend (Access Control Logic)
-- **Role-based Permission:** Backend sử dụng `RolesGuard` để bảo vệ các endpoint `POST/PATCH/DELETE`. Chỉ người dùng có quyền `ADMIN` hoặc `OPERATOR` mới có thể thay đổi luật firewall.
-- **Relational Validation:** Khi tạo rule, backend kiểm tra tính hợp lệ của cặp IP/Server đích. Nếu IP đích không thuộc Server đã chọn, hệ thống sẽ cảnh báo không nhất quán dữ liệu.
+### 3.1. Tầng Backend (Access Control)
+- **RBAC Enforcement:** Sử dụng `RolesGuard` để bảo vệ các thao tác thay đổi cấu hình. Chỉ người dùng có quyền `ADMIN` hoặc `OPERATOR` mới có thể tạo/sửa/xoá luật firewall.
+- **Data Integrity:** Khi tạo luật, hệ thống kiểm tra sự tồn tại của các tài nguyên liên quan (Zone, Server, Port). Nếu một Server đích bị xoá, các luật liên quan sẽ tự động được đánh dấu `INACTIVE`.
 
-### 3.2. Tầng Frontend (Admin Control UI)
-- **Giao diện Quản trị tập trung:** Hiển thị danh sách Rule dưới dạng bảng với các thẻ màu phân loại môi trường (`PROD` - đỏ, `DEV` - xanh).
-- **Hệ thống lọc đa tầng:** Hỗ trợ lọc đồng thời theo Môi trường, Hành động (Allow/Deny) và Trạng thái (Active/Pending).
-- **Import/Export XLSX:** Tích hợp bộ thư viện xử lý file chuyên sâu để xuất danh sách luật ra Excel phục vụ việc rà soát an ninh định kỳ.
-- **Conditional UI:** Nút "Tạo mới" và "Chỉnh sửa" tự động bị ẩn đối với người dùng chỉ có quyền `VIEWER`, đảm bảo an toàn tuyệt đối cho cấu hình hạ tầng.
+### 3.2. Tầng Frontend (Admin Control)
+- **Tag-based Rendering:** Các trường Zone, IP, Server được hiển thị dưới dạng các thẻ màu (Tag) giúp người dùng dễ dàng phân biệt các vùng mạng khác nhau.
+- **Conditional Actions:** Frontend tự động ẩn các nút "Delete", "Edit" nếu người dùng hiện tại chỉ có quyền `VIEWER`.
 
 ## 4. Đặc tả API Interfaces
 
 | Endpoint | Method | Chức năng | Quyền |
 |---|---|---|---|
-| `/firewall-rules` | `GET` | Tra cứu danh sách luật | `VIEWER` |
-| `/firewall-rules` | `POST` | Đăng ký luật mới | `OPERATOR` |
+| `/firewall-rules` | `GET` | Danh sách luật firewall | `VIEWER` |
 | `/firewall-rules/export` | `GET` | Xuất file XLSX | `VIEWER` |
-
-## 5. Xử lý Lỗi & Ngoại lệ (Error Handling)
-
-- **Forbidden Action:** Trả về `403 Forbidden` nếu một user VIEWER cố gắng gọi API xoá rule qua Postman.
-- **Duplicate Rule:** Backend kiểm tra trùng lặp luật (Source/Target/Port giống hệt nhau) để tránh rác dữ liệu.
-
-## 6. Hướng dẫn Bảo trì & Debug
-
-- **Audit Log:** Mọi thay đổi về Firewall Rule đều được ghi vết Snapshot chi tiết để phục vụ điều tra an ninh.
 
 ---
 
 ## 7. Metrics & Tasks
 
 - Story Points: 15
-- Tasks: 6 (Firewall Schema, RBAC logic, XLSX Export, Management UI)
+- Tasks: 6 (Firewall Schema, RBAC logic, Export XLSX)
 
 _Tài liệu kỹ thuật chuẩn PROD - Cập nhật ngày: 2026-05-02_

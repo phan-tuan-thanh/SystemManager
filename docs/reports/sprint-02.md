@@ -1,57 +1,54 @@
-# Sprint 02 — Quản trị Người dùng & Nhóm quyền
+# Sprint 02 — Quản lý Người dùng & Phân quyền RBAC
 
 **Ngày bắt đầu:** 2026-04-07  
-**Ngày kết thúc:** 2026-04-10  
+**Ngày kết thúc:** 2026-04-09  
 **Trạng thái:** ✅ DONE  
 
 ---
 
 ## 1. Tổng quan & Mục tiêu (Sprint Goal)
 
-> Quản lý vòng đời người dùng (User Lifecycle) và cấu trúc phân quyền theo Nhóm (Groups). Đảm bảo quản trị viên có thể cấp phát, thu hồi quyền hạn một cách linh hoạt và an toàn.
+> Xây dựng hệ thống quản lý người dùng tập trung và cơ chế phân quyền dựa trên vai trò (RBAC) kết hợp giữa quyền trực tiếp và quyền theo nhóm.
 
-## 2. Kiến trúc Dữ liệu (Schema)
+## 2. Đặc tả các trường dữ liệu (Data Fields)
 
-- **Model `User`:** Lưu trữ thông tin cơ bản, trạng thái (`ACTIVE`, `LOCKED`, `INACTIVE`) và cơ chế **Soft Delete** (`deleted_at`).
-- **Model `UserGroup`:** Định nghĩa các nhóm chức danh (VD: PTUD, VH_APP) kèm theo quyền mặc định (`default_role`).
-- **Quan hệ:** Nhiều - Nhiều (`User` <-> `UserGroup`).
+#### **Model: UserRole**
+| Field | Type | Description | Constraints |
+|---|---|---|---|
+| `user_id` | `UUID` | ID người dùng | Foreign Key |
+| `role` | `Enum` | Quyền (`ADMIN`, `OPERATOR`, `VIEWER`) | Composite Unique (`user_id`, `role`) |
+
+#### **Model: UserGroup**
+| Field | Type | Description | Constraints |
+|---|---|---|---|
+| `code` | `String` | Mã nhóm (VD: 'IT_INFRA') | Unique |
+| `default_role` | `Enum` | Quyền mặc định của nhóm | Default: `VIEWER` |
 
 ## 3. Luồng xử lý kỹ thuật & Business Logic
 
-### 3.1. Tầng Backend (Access Control Logic)
-- **Effective Roles Calculation:** Logic `computeEffectiveRoles` thực hiện hợp nhất (Union) các Role được gán trực tiếp cho User và các Role kế thừa từ tất cả các Nhóm mà User đó tham gia.
-- **Admin Protection:** Chặn hành động tự xoá chính mình hoặc tự gỡ quyền ADMIN của mình nếu đó là Admin cuối cùng trong hệ thống.
-- **Soft Delete:** Các API xoá người dùng thực chất chỉ cập nhật trường `deleted_at`, đảm bảo dữ liệu lịch sử (Audit Log) không bị mồ côi.
+### 3.1. Tầng Backend (Role Resolution)
+- **Quyền Hiệu lực (Effective Roles):** Một người dùng có thể có nhiều vai trò. Hệ thống tính toán quyền bằng cách lấy **Hợp (Union)** của:
+  1. Các quyền được gán trực tiếp trong bảng `UserRole`.
+  2. Các quyền mặc định (`default_role`) của tất cả các Nhóm mà người dùng tham gia.
+- **Last-Admin Guard:** Chặn hành động xoá quyền `ADMIN` cuối cùng của hệ thống để tránh tình trạng "mất quyền quản trị".
 
-### 3.2. Tầng Frontend (User Management UI)
-- **DataTable Component:** Sử dụng một component tuỳ chỉnh bọc ngoài **AntD Table**, hỗ trợ phân trang Server-side, tìm kiếm và lọc trạng thái.
-- **Quản lý Role:** Sử dụng **Modal & Popconfirm**. Khi Admin gán/gỡ Role, UI sẽ gọi API tương ứng và cập nhật lại danh sách ngay lập tức thông qua `Invalidate Query` (TanStack Query).
-- **Reset Mật khẩu:** Form reset mật khẩu yêu cầu xác nhận mật khẩu trùng khớp (Validator custom) trước khi cho phép gửi request lên backend.
-- **Lịch sử Đăng nhập:** Hiển thị danh sách các Refresh Token hiện có trong một Modal, cho phép Admin thu hồi (Revoke) phiên làm việc của user từ xa.
+### 3.2. Tầng Frontend (Admin UI)
+- **User Management Table:** Sử dụng component `DataTable` hỗ trợ phân trang server-side, tìm kiếm theo email và lọc theo trạng thái.
+- **Role Assignment Modal:** Cho phép Admin bật/tắt các quyền của user thông qua hệ thống Checkbox/Switch.
+- **Password Reset:** Admin có thể đặt lại mật khẩu cho user. Khi thực hiện, hệ thống tự động thu hồi (`Revoke`) toàn bộ `RefreshTokens` của user đó để bắt buộc đăng nhập lại.
 
 ## 4. Đặc tả API Interfaces
 
 | Endpoint | Method | Chức năng | Quyền |
 |---|---|---|---|
-| `/users` | `GET` | Danh sách người dùng (Pagination/Filter) | `ADMIN` |
-| `/users/:id/roles` | `POST` | Gán Role mới cho User | `ADMIN` |
-| `/users/:id/reset-password` | `POST` | Đổi mật khẩu bắt buộc | `ADMIN` |
-
-## 5. Xử lý Lỗi & Ngoại lệ (Error Handling)
-
-- **Conflict:** Trả về `409 Conflict` nếu cố tình tạo User với Email đã tồn tại (kể cả User đã bị xoá mềm).
-- **Validation:** Frontend chặn việc submit form nếu Email không đúng định dạng hoặc mật khẩu quá ngắn.
-
-## 6. Hướng dẫn Bảo trì & Debug
-
-- **Audit:** Mọi hành động thay đổi Role/Status đều được ghi vào bảng `AuditLog`.
-- **Query Cache:** Frontend sử dụng cache key `['users', filters]`. Khi thay đổi dữ liệu, hãy gọi `queryClient.invalidateQueries({ queryKey: ['users'] })`.
+| `/users/:id/roles` | `POST` | Gán quyền cho user | `ADMIN` |
+| `/user-groups/:id/members` | `POST` | Thêm thành viên vào nhóm | `ADMIN` |
 
 ---
 
 ## 7. Metrics & Tasks
 
 - Story Points: 18
-- Tasks: 9 (User CRUD, Group logic, Soft delete, Role mapping, Frontend Management UI)
+- Tasks: 7 (User CRUD, Group logic, Effective Role calculation)
 
 _Tài liệu kỹ thuật chuẩn PROD - Cập nhật ngày: 2026-05-02_

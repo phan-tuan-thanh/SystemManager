@@ -1,52 +1,55 @@
-# Sprint 04 — Quản lý Hạ tầng Phần cứng (Hardware Inventory)
+# Sprint 04 — Quản lý Hạ tầng & Linh kiện Phần cứng
 
-**Ngày bắt đầu:** 2026-04-13  
-**Ngày kết thúc:** 2026-04-14  
+**Ngày bắt đầu:** 2026-04-12  
+**Ngày kết thúc:** 2026-04-15  
 **Trạng thái:** ✅ DONE  
 
 ---
 
 ## 1. Tổng quan & Mục tiêu (Sprint Goal)
 
-> Xây dựng kho quản lý linh kiện phần cứng (Hardware Inventory) chi tiết. Hỗ trợ theo dõi cấu hình máy chủ vật lý và ảo thông qua các thông số kỹ thuật (Specs) linh hoạt.
+> Xây dựng hệ thống quản lý danh mục máy chủ (Inventory) và linh kiện phần cứng chi tiết gắn kèm.
 
-## 2. Kiến trúc Dữ liệu & Resource (Architecture)
+## 2. Đặc tả các trường dữ liệu (Data Fields)
 
-- **Model `HardwareComponent`:** Lưu trữ CPU, RAM, HDD/SSD, Network Card.
-- **JSON Specs:** Sử dụng kiểu dữ liệu JSON trong PostgreSQL để lưu trữ các thông số đặc thù cho từng loại linh kiện mà không cần sửa schema.
+#### **Model: Server**
+| Field | Type | Description | Constraints |
+|---|---|---|---|
+| `code` | `String` | Mã định danh duy nhất | Unique, VarChar(50) |
+| `hostname` | `String` | Tên máy chủ trên mạng | VarChar(255) |
+| `environment` | `Enum` | Môi trường (`PROD`, `UAT`, `DEV`) | Required |
+| `infra_type` | `Enum` | Loại hạ tầng (`VM`, `PHYSICAL`, `CLOUD`) | Default: `VM` |
+| `site` | `Enum` | Vị trí trung tâm dữ liệu (`DC`, `DR`, `TEST`) | |
+
+#### **Model: HardwareComponent**
+| Field | Type | Description | Constraints |
+|---|---|---|---|
+| `type` | `Enum` | Loại (`CPU`, `RAM`, `HDD`, `SSD`) | Required |
+| `model` | `String` | Tên model linh kiện | |
+| `specs` | `Json` | Thông số kỹ thuật chi tiết | Lưu dạng Key-Value |
 
 ## 3. Luồng xử lý kỹ thuật & Business Logic
 
 ### 3.1. Tầng Backend (Inventory Logic)
-- **Cơ chế Record History:** Mọi hành động Thêm/Sửa/Xoá phần cứng đều được `ChangeHistoryService` ghi lại một snapshot dữ liệu (Before/After).
-- **Thu hồi (Detach):** Khi linh kiện bị tháo khỏi server, hệ thống thực hiện Soft Delete bản ghi, lưu vết ngày thu hồi để quản lý tồn kho ảo.
+- **Automatic Code Generation:** Nếu không cung cấp mã code khi tạo, hệ thống tự động sinh mã theo pattern `SRV-{ENVIRONMENT}-{UUID}`.
+- **Change History Snapshot:** Mỗi khi thông tin Server hoặc linh kiện thay đổi, hệ thống chụp lại toàn bộ object cũ và lưu vào bảng `ChangeHistory` để phục vụ việc truy vết (Audit).
 
-### 3.2. Tầng Frontend (Hardware Management UI)
-- **KV Pair Editor:** Giao diện chỉnh sửa thông số kỹ thuật (Specs) được thiết kế dạng danh sách Key-Value linh hoạt sử dụng `Form.List`.
-- **Hệ thống Gợi ý (Spec Presets):** Dựa vào loại linh kiện người dùng chọn (VD: CPU), UI tự động hiển thị các Tag gợi ý (`cores`, `threads`, `speed_ghz`). Khi nhấn vào Tag, trường dữ liệu tương ứng sẽ tự động được thêm vào form.
-- **Hiển thị thông minh:** Component `HardwareTab` tự động bóc tách các field phổ biến (`gb`, `cores`) từ JSON để hiển thị ra cột "Thông số" trên bảng một cách thân thiện thay vì hiển thị code JSON thô.
+### 3.2. Tầng Frontend (Hardware Management)
+- **KV Editor:** Thay vì nhập JSON thô cho trường `specs`, Frontend cung cấp giao diện nhập theo cặp Key-Value động. Người dùng có thể thêm/xoá các hàng thông số một cách linh hoạt.
+- **Hardware Presets:** Hệ thống gợi ý các Key phổ biến dựa trên loại linh kiện (VD: CPU sẽ gợi ý `cores`, `clock_speed`; RAM gợi ý `bus_speed`, `capacity`).
 
 ## 4. Đặc tả API Interfaces
 
 | Endpoint | Method | Chức năng | Quyền |
 |---|---|---|---|
-| `/hardware` | `POST` | Thêm linh kiện mới vào Server | `OPERATOR` |
-| `/hardware/:id/detach`| `DELETE` | Thu hồi linh kiện khỏi Server | `OPERATOR` |
-
-## 5. Xử lý Lỗi & Ngoại lệ (Error Handling)
-
-- **Missing ID:** Chặn các request cập nhật nếu linh kiện không còn tồn tại trên server đã định danh.
-- **Validation:** Frontend kiểm tra tính hợp lệ của các cặp Key-Value (không cho phép Key trống) trước khi gửi lên Backend.
-
-## 6. Hướng dẫn Bảo trì & Debug
-
-- **JSON Data:** Nếu muốn thêm loại linh kiện mới, chỉ cần cập nhật mảng `HARDWARE_TYPES` và `SPEC_PRESETS` trên Frontend.
+| `/servers` | `GET` | Danh sách server (phân trang + lọc) | `VIEWER` |
+| `/hardware` | `POST` | Thêm linh kiện vào server | `OPERATOR` |
 
 ---
 
 ## 7. Metrics & Tasks
 
-- Story Points: 15
-- Tasks: 7 (Hardware Schema, JSON Specs support, Detach logic, KV Editor UI, Spec suggestions)
+- Story Points: 25
+- Tasks: 10 (Server CRUD, Hardware specs logic, KV Editor UI)
 
 _Tài liệu kỹ thuật chuẩn PROD - Cập nhật ngày: 2026-05-02_

@@ -1,54 +1,43 @@
-# Sprint 18 — Wizard Import Ứng dụng & Bóc tách Port phức tạp
+# Sprint 18 — Multi-port Import & Regex Parsing
 
-**Ngày bắt đầu:** 2026-05-13  
-**Ngày kết thúc:** 2026-05-15  
+**Ngày bắt đầu:** 2026-05-25  
+**Ngày kết thúc:** 2026-05-27  
 **Trạng thái:** ✅ DONE  
 
 ---
 
 ## 1. Tổng quan & Mục tiêu (Sprint Goal)
 
-> Mở rộng công cụ Import cho khối Ứng dụng và triển khai thuật toán bóc tách dữ liệu Port từ chuỗi văn bản phức tạp (Regex-based parsing).
+> Nâng cấp khả năng nhập liệu Deployment hỗ trợ nhiều cổng dịch vụ (Multi-port) thông qua kỹ thuật bóc tách chuỗi phức tạp.
 
-## 2. Kiến trúc Phân tích (Parsing Architecture)
+## 2. Đặc tả dữ liệu (Data Formats)
 
-- **Regex Engine:** Sử dụng các mẫu biểu thức chính quy để bóc tách cấu trúc `Port-Protocol:ServiceName`.
-- **Logic:** Hỗ trợ nhập liệu nhiều port trên một dòng (cách nhau bởi dấu phẩy).
+#### **Multi-port String Format**
+- **Pattern:** `PORT-PROTOCOL:SERVICE_NAME` (Cách nhau bởi dấu cách)
+- **Ví dụ:** `8080-TCP:api-gateway 9092-TCP:kafka-broker 443-HTTPS:web-ui`
 
 ## 3. Luồng xử lý kỹ thuật & Business Logic
 
-### 3.1. Tầng Backend (Advanced Parsing Logic)
-- **Multi-port String Parser:** Thuật toán bóc tách chuỗi (VD: "80-TCP:Web, 443-TCP:HTTPS").
-  - Phân tích dải port (Range) và giao thức đi kèm.
-  - Tự động chuẩn hoá tên dịch vụ (Service name).
-- **Auto-connection Resolver:** Khi import ứng dụng, hệ thống tự động kiểm tra bảng `AppConnection` để thiết lập các liên kết dựa trên mã ứng dụng nguồn/đích có trong file.
+### 3.1. Tầng Backend (Regex Parsing Engine)
+- **Complex String Parsing:** Backend sử dụng Regular Expression (`Regex`) để bóc tách chuỗi Port. 
+  - Regex: `/(\d+)-(TCP|UDP|HTTPS|GRPC):?([^\s]*)/g`
+- **Data Transformation:** Chuỗi thô từ CSV được chuyển đổi thành mảng các Object `Port` tương ứng. Sau đó, hệ thống thực hiện vòng lặp để tạo hàng loạt bản ghi trong bảng `Port` và liên kết chúng với bản ghi `AppDeployment` vừa tạo.
 
-### 3.2. Tầng Frontend (Application Import UI)
-- **Môi trường hoá (Environment Context):** Cho phép chọn môi trường áp dụng cho toàn bộ file import để giảm bớt việc nhập liệu trong CSV.
-- **In-place Error Correction:** Tương tự module hạ tầng, hỗ trợ sửa lỗi trực tiếp trên giao diện preview cho các trường Mã ứng dụng, Version, Team phụ trách.
-- **Mapping Aliases:** Hệ thống tự động nhận diện các cột dựa trên alias (VD: "Phòng ban", "Đơn vị" -> `owner_team`).
+### 3.2. Tầng Frontend (Import Consolidation)
+- **Unified Import Page:** Hợp nhất 3 trang upload riêng lẻ (App, Deployment, Connection) vào một trang duy nhất sử dụng Tab.
+- **Value Mapping UI:** Khi import Ứng dụng, hệ thống cho phép người dùng ánh xạ các giá trị Alias (VD: trong CSV là 'UAT1' nhưng trong DB là 'UAT').
 
 ## 4. Đặc tả API Interfaces
 
 | Endpoint | Method | Chức năng | Quyền |
 |---|---|---|---|
-| `/import/preview?type=app` | `POST` | Phân tích Ứng dụng & Port | `OPERATOR` |
-| `/import/execute` | `POST` | Lưu ứng dụng & Tạo kết nối | `OPERATOR` |
-
-## 5. Xử lý Lỗi & Ngoại lệ (Error Handling)
-
-- **Invalid Port Format:** Trả về lỗi chi tiết tại dòng có format port không hợp lệ (VD: "80/ABC").
-- **Group Code Missing:** Nếu mã nhóm không tồn tại, hệ thống gợi ý tạo mới nhóm hoặc bỏ qua.
-
-## 6. Hướng dẫn Bảo trì & Debug
-
-- **Regex Test:** Có thể kiểm tra lại biểu thức chính quy trong `ImportService.parsePortsString` nếu cần hỗ trợ thêm các format port mới.
+| `/import/preview?type=deployment` | `POST` | Preview kèm bóc tách port | `OPERATOR` |
 
 ---
 
 ## 7. Metrics & Tasks
 
-- Story Points: 20
-- Tasks: 8 (App Mapping logic, Regex Port Parser, Connection resolver, Import UI)
+- Story Points: 15
+- Tasks: 6 (Regex parsing, Unified UI, Alias mapping)
 
 _Tài liệu kỹ thuật chuẩn PROD - Cập nhật ngày: 2026-05-02_

@@ -1,52 +1,53 @@
-# Sprint 06 — Danh mục Ứng dụng & Nhóm Nghiệp vụ
+# Sprint 06 — Quản lý Ứng dụng & Triển khai (Deployments)
 
-**Ngày bắt đầu:** 2026-04-17  
-**Ngày kết thúc:** 2026-04-18  
+**Ngày bắt đầu:** 2026-04-19  
+**Ngày kết thúc:** 2026-04-21  
 **Trạng thái:** ✅ DONE  
 
 ---
 
 ## 1. Tổng quan & Mục tiêu (Sprint Goal)
 
-> Xây dựng thư viện quản lý toàn bộ các ứng dụng (Application Catalog) trong hệ thống. Phân loại ứng dụng theo nhóm nghiệp vụ (AppGroup) và quản lý phiên bản phần mềm nhất quán.
+> Xây dựng danh mục ứng dụng nghiệp vụ và quản lý các bản ghi triển khai thực tế trên hạ tầng.
 
-## 2. Kiến trúc Catalog (Catalog Architecture)
+## 2. Đặc tả các trường dữ liệu (Data Fields)
 
-- **Model `ApplicationGroup`:** Phân nhóm theo nghiệp vụ hoặc hạ tầng (VD: Core Banking, Middleware).
-- **Model `Application`:** Thông tin chi tiết về từng ứng dụng, team sở hữu (`owner_team`) và loại ứng dụng (`BUSINESS`, `SYSTEM`).
+#### **Model: Application**
+| Field | Type | Description | Constraints |
+|---|---|---|---|
+| `code` | `String` | Mã ứng dụng (VD: 'CORE_BANKING') | Unique |
+| `name` | `String` | Tên hiển thị | |
+| `application_type` | `Enum` | Loại (`BUSINESS` / `SYSTEM`) | |
+
+#### **Model: AppDeployment**
+| Field | Type | Description | Constraints |
+|---|---|---|---|
+| `version` | `String` | Phiên bản đang chạy (VD: '1.2.0-stable') | Required |
+| `status` | `Enum` | Trạng thái (`RUNNING`, `STOPPED`) | |
+| `cmc_name` | `String` | Tên ticket/phiếu yêu cầu triển khai | |
 
 ## 3. Luồng xử lý kỹ thuật & Business Logic
 
-### 3.1. Tầng Backend (Catalog Logic)
-- **Ràng buộc Loại ứng dụng (AppType Validation):** Khi tạo ứng dụng, hệ thống kiểm tra logic chéo giữa Nhóm ứng dụng và Loại ứng dụng để đảm bảo tính nhất quán (VD: Nhóm "Hạ tầng" chỉ chứa các ứng dụng loại "SYSTEM").
-- **Mã ứng dụng (Unique Code):** Tự động chuẩn hoá Code ứng dụng (viết hoa, không dấu, thay khoảng trắng bằng gạch dưới) để phục vụ việc định danh duy nhất toàn hệ thống.
+### 3.1. Tầng Backend (Deployment Logic)
+- **Version Tracking:** Mỗi lần cập nhật bản ghi Deployment, hệ thống tạo bản ghi mới trong `DeploymentHistory` để lưu vết lịch sử nâng cấp phiên bản ứng dụng trên server đó.
+- **Auto-populate Doc Profile:** Khi một Deployment mới được tạo, hệ thống tự động sinh ra danh sách các đầu mục tài liệu (DeploymentDocs) dựa trên các loại tài liệu (`DocTypes`) đang ở trạng thái `ACTIVE` trong cấu hình hệ thống.
 
-### 3.2. Tầng Frontend (Catalog UI)
-- **Giao diện Phân cấp:** Hiển thị danh sách Ứng dụng theo dạng Table có khả năng lọc nhanh theo Nhóm ứng dụng (AppGroup).
-- **Form Tạo mới thông minh:** Khi chọn Nhóm ứng dụng, UI tự động gợi ý loại ứng dụng phù hợp.
-- **Thống kê:** Hiển thị số lượng ứng dụng đang chạy (Running) và dừng (Stopped) ngay trên Dashboard của từng Nhóm.
+### 3.2. Tầng Frontend (App Catalog)
+- **Grouped View:** Danh sách ứng dụng được phân nhóm theo `ApplicationGroup`. Người dùng có thể xem nhanh số lượng instance đang chạy của từng ứng dụng qua các Badge số lượng.
+- **Deployment Wizard:** Giao diện 3 bước để đăng ký triển khai mới: Chọn Ứng dụng → Chọn Server đích → Nhập thông tin phiên bản & CMC.
 
 ## 4. Đặc tả API Interfaces
 
 | Endpoint | Method | Chức năng | Quyền |
 |---|---|---|---|
-| `/app-groups` | `GET` | Lấy danh sách nhóm ứng dụng | `VIEWER` |
-| `/applications` | `POST` | Đăng ký ứng dụng mới vào danh mục | `OPERATOR` |
-
-## 5. Xử lý Lỗi & Ngoại lệ (Error Handling)
-
-- **Duplicate Code:** Chặn việc tạo Ứng dụng có mã trùng với ứng dụng hiện có trong Catalog.
-- **Dependency:** Cảnh báo khi xoá một Ứng dụng nếu ứng dụng đó đang có các bản triển khai (Deployments) hiện hữu.
-
-## 6. Hướng dẫn Bảo trì & Debug
-
-- **Data Cleanup:** Thường xuyên kiểm tra các ứng dụng không có Deployment để tối ưu danh mục.
+| `/deployments` | `POST` | Đăng ký triển khai ứng dụng | `OPERATOR` |
+| `/applications/:id/where-running` | `GET` | Xem các server đang chạy app này | `VIEWER` |
 
 ---
 
 ## 7. Metrics & Tasks
 
-- Story Points: 15
-- Tasks: 6 (Application Schema, Grouping logic, Code normalizer, Catalog UI)
+- Story Points: 22
+- Tasks: 9 (App Schema, Deployment logic, Version history UI)
 
 _Tài liệu kỹ thuật chuẩn PROD - Cập nhật ngày: 2026-05-02_

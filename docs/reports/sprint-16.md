@@ -1,50 +1,50 @@
-# Sprint 16 — Phân tách Nhóm Hạ tầng & Nghiệp vụ
+# Sprint 16 — Phân loại Nhóm & Hợp nhất Catalog
 
-**Ngày bắt đầu:** 2026-05-08  
-**Ngày kết thúc:** 2026-05-09  
+**Ngày bắt đầu:** 2026-05-19  
+**Ngày kết thúc:** 2026-05-21  
 **Trạng thái:** ✅ DONE  
 
 ---
 
 ## 1. Tổng quan & Mục tiêu (Sprint Goal)
 
-> Chuẩn hoá việc phân loại nhóm ứng dụng thành hai luồng chính: Hạ tầng (Infrastructure) và Nghiệp vụ (Business). Giúp tách biệt quản lý phần mềm hệ thống và phần mềm nghiệp vụ.
+> Tái cấu trúc danh mục ứng dụng để phân biệt rõ giữa Phần mềm hệ thống (Hạ tầng) và Ứng dụng nghiệp vụ.
 
-## 2. Kiến trúc Phân loại (Classification)
+## 2. Đặc tả các trường dữ liệu (Data Fields)
 
-- **Group Type:** `INFRASTRUCTURE` vs `BUSINESS`.
-- **Phân tách UI:** Hai trang quản lý riêng biệt cho Phần mềm hạ tầng và Ứng dụng nghiệp vụ.
+#### **ApplicationGroup Updates**
+| Field | Type | Description | Constraints |
+|---|---|---|---|
+| `group_type` | `Enum` | `BUSINESS` hoặc `INFRASTRUCTURE` | Required |
+
+#### **Application Metadata (SYSTEM type)**
+| Field | Type | Description |
+|---|---|---|
+| `sw_type` | `Enum` | `OS`, `DATABASE`, `MIDDLEWARE`, ... |
+| `vendor` | `String` | Nhà sản xuất (VD: 'Canonical', 'Oracle') |
+| `eol_date` | `DateTime` | Ngày hết hạn hỗ trợ chính thức |
 
 ## 3. Luồng xử lý kỹ thuật & Business Logic
 
-### 3.1. Tầng Backend (Grouping Logic)
-- **Aggregated Counting:** API danh sách nhóm trả về kèm theo số lượng server và deployment tương ứng trong từng nhóm (sử dụng `_count` của Prisma).
-- **Type Restriction:** Ràng buộc chặt chẽ tại tầng Service: Không cho phép di chuyển một ứng dụng `SYSTEM` vào nhóm `BUSINESS`.
+### 3.1. Tầng Backend (Catalog Unification)
+- **Shared Application Base:** Thay vì quản lý `SystemSoftware` ở bảng riêng, toàn bộ được chuyển về bảng `Application` với cờ phân loại `application_type = SYSTEM`.
+- **Validation Rules:** Backend kiểm tra nếu ứng dụng thuộc nhóm `INFRASTRUCTURE` thì bắt buộc phải chọn `sw_type`.
 
-### 3.2. Tầng Frontend (View Separation)
-- **Sidebar Navigation:** Tách thành 2 mục menu: "Hạ tầng" (chứa Hệ thống, Servers, Networks) và "Ứng dụng" (chứa Ứng dụng nghiệp vụ, Deployments).
-- **Filtered List:** Trang danh sách Ứng dụng sử dụng tham số query `?type=BUSINESS` hoặc `?type=SYSTEM` để hiển thị dữ liệu phù hợp với ngữ cảnh người dùng đang xem.
+### 3.2. Tầng Frontend (Contextual Forms)
+- **Dynamic Field Visibility:** Form tạo Ứng dụng tự động ẩn/hiện các trường thông tin (Vendor, EOL) dựa trên loại Ứng dụng được chọn.
+- **Categorized Tabs:** Trang danh sách Ứng dụng được chia thành các Tab: "Nghiệp vụ" và "Hạ tầng" để người dùng dễ dàng quản lý theo mục đích sử dụng.
 
 ## 4. Đặc tả API Interfaces
 
 | Endpoint | Method | Chức năng | Quyền |
 |---|---|---|---|
-| `/app-groups?type=INFRA` | `GET` | Lấy nhóm hạ tầng | `VIEWER` |
-| `/app-groups?type=BUSINESS`| `GET` | Lấy nhóm nghiệp vụ | `VIEWER` |
-
-## 5. Xử lý Lỗi & Ngoại lệ (Error Handling)
-
-- **Access Denied:** Nếu user chỉ có quyền trên một số nhóm nhất định, backend thực hiện lọc dữ liệu (Data Filtering) ngay từ câu truy vấn SQL.
-
-## 6. Hướng dẫn Bảo trì & Debug
-
-- **System Softwares:** Các phần mềm như DB, WebServer, OS luôn được xếp vào nhóm Hạ tầng.
+| `/applications?type=SYSTEM` | `GET` | Danh sách phần mềm hệ thống | `VIEWER` |
 
 ---
 
 ## 7. Metrics & Tasks
 
-- Story Points: 10
-- Tasks: 4 (Group type extension, Counting logic, UI separation)
+- Story Points: 15
+- Tasks: 6 (Schema refactor, Data migration, Dynamic UI)
 
 _Tài liệu kỹ thuật chuẩn PROD - Cập nhật ngày: 2026-05-02_

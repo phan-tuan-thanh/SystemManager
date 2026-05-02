@@ -1,53 +1,49 @@
-# Sprint 05 — Cấu hình Mạng & Phát hiện Xung đột IP
+# Sprint 05 — Cấu hình Mạng & IP Management
 
-**Ngày bắt đầu:** 2026-04-15  
-**Ngày kết thúc:** 2026-04-16  
+**Ngày bắt đầu:** 2026-04-16  
+**Ngày kết thúc:** 2026-04-18  
 **Trạng thái:** ✅ DONE  
 
 ---
 
 ## 1. Tổng quan & Mục tiêu (Sprint Goal)
 
-> Quản lý cấu hình mạng cho các máy chủ. Đảm bảo tính duy nhất của địa chỉ IP trong từng môi trường và cung cấp công cụ tra cứu Reverse DNS/Domain nhanh chóng.
+> Quản lý các cấu hình giao diện mạng, địa chỉ IP (Private/Public/NAT) và phát hiện xung đột cấu hình trong hệ thống.
 
-## 2. Kiến trúc Mạng (Network Architecture)
+## 2. Đặc tả các trường dữ liệu (Data Fields)
 
-- **Model `NetworkConfig`:** Lưu trữ Private IP, Public IP, NAT IP, Subnet, Gateway và Domain.
-- **Ràng buộc:** Một Server có thể có nhiều Interface mạng (eth0, eth1, v.v.).
+#### **Model: NetworkConfig**
+| Field | Type | Description | Constraints |
+|---|---|---|---|
+| `interface` | `String` | Tên giao diện (VD: 'eth0', 'ens192') | |
+| `private_ip` | `String` | Địa chỉ IP nội bộ | VarChar(45) |
+| `public_ip` | `String` | Địa chỉ IP public | |
+| `nat_ip` | `String` | Địa chỉ IP sau NAT | |
+| `domain` | `String` | Tên miền gắn với IP này | |
+| `dns` | `String[]` | Danh sách DNS server | Mảng các chuỗi |
 
 ## 3. Luồng xử lý kỹ thuật & Business Logic
 
-### 3.1. Tầng Backend (Collision Detection Logic)
-- **Phát hiện Xung đột (IP Conflict):** Trước khi lưu một bản ghi mạng, hệ thống kiểm tra sự tồn tại của `private_ip` trong cùng một `environment`.
-  - Quy tắc: Có thể trùng IP giữa môi trường DEV và PROD, nhưng tuyệt đối không được trùng IP trong cùng một môi trường.
-- **Domain Lookup:** Khi cập nhật Domain, backend thực hiện chuẩn hoá chuỗi để đảm bảo định dạng FQDN hợp lệ.
+### 3.1. Tầng Backend (IP Conflict Detection)
+- **Ràng buộc duy nhất theo môi trường:** Một địa chỉ `private_ip` không được phép xuất hiện lặp lại trên hai server khác nhau trong cùng một **Môi trường (Environment)**. 
+- **Validation Logic:** Trước khi lưu, Backend thực hiện query kiểm tra tồn tại IP. Nếu phát hiện trùng lặp, trả về lỗi `409 Conflict` kèm thông tin Server đang chiếm giữ IP đó.
 
-### 3.2. Tầng Frontend (Network Interface UI)
-- **Giao diện Network Tab:** Hiển thị danh sách các card mạng gắn với Server.
-- **Form Interface:** Hỗ trợ nhập liệu đầy đủ các thông số từ IP đến DNS/Gateway. Sử dụng cơ chế validate IP Format (`IPv4 Regex`) ngay tại ô nhập liệu.
-- **Status Mapping:** Tự động hiển thị nhãn (Badge) phân loại IP (Private/Public/NAT) để kỹ thuật viên dễ dàng nhận diện luồng định tuyến.
+### 3.2. Tầng Frontend (Interface Config)
+- **Inline CRUD:** Trong trang chi tiết Server, tab "Network" cho phép thêm/sửa/xoá các dòng cấu hình IP trực tiếp mà không cần chuyển trang.
+- **Domain Lookup:** Tính năng tra cứu nhanh từ Domain sang Server giúp kỹ sư vận hành xác định nhanh server đích khi nhận được phản ánh về lỗi truy cập tên miền.
 
 ## 4. Đặc tả API Interfaces
 
 | Endpoint | Method | Chức năng | Quyền |
 |---|---|---|---|
-| `/network-config` | `POST` | Cấu hình mạng mới cho Server | `OPERATOR` |
-| `/network-config/check-conflict` | `GET` | Kiểm tra nhanh IP đã tồn tại chưa | `VIEWER` |
-
-## 5. Xử lý Lỗi & Ngoại lệ (Error Handling)
-
-- **Conflict Error:** Backend trả về `409 Conflict` kèm theo thông tin Server hiện đang chiếm giữ IP đó để Admin có thể kiểm tra chéo.
-- **Format Error:** Trả về `400 Bad Request` nếu IP không đúng định dạng IPv4.
-
-## 6. Hướng dẫn Bảo trì & Debug
-
-- **Troubleshooting:** Nếu không thể thêm IP, hãy kiểm tra trạng thái `deleted_at` của các bản ghi cũ trong DB (có thể IP đang bị "treo" bởi một server đã xoá mềm).
+| `/network-configs` | `POST` | Khai báo IP mới (kiểm tra trùng) | `OPERATOR` |
+| `/network-configs/lookup-domain` | `GET` | Tìm server theo domain | `VIEWER` |
 
 ---
 
 ## 7. Metrics & Tasks
 
 - Story Points: 15
-- Tasks: 6 (Network Schema, Conflict detection logic, IP Validation, Network UI Tab)
+- Tasks: 6 (Network Schema, IP Validation logic, Domain search UI)
 
 _Tài liệu kỹ thuật chuẩn PROD - Cập nhật ngày: 2026-05-02_

@@ -1,59 +1,50 @@
-# Sprint 17 — Wizard Import Hạ tầng (Server & Network)
+# Sprint 17 — Wizard Import & Quản lý Phiên dữ liệu
 
-**Ngày bắt đầu:** 2026-05-10  
-**Ngày kết thúc:** 2026-05-12  
+**Ngày bắt đầu:** 2026-05-22  
+**Ngày kết thúc:** 2026-05-24  
 **Trạng thái:** ✅ DONE  
 
 ---
 
 ## 1. Tổng quan & Mục tiêu (Sprint Goal)
 
-> Xây dựng công cụ nhập liệu hàng loạt (Bulk Import) cho tài nguyên hạ tầng. Giúp số hoá nhanh chóng hàng ngàn server từ các file Excel/CSV hiện có của doanh nghiệp.
+> Triển khai quy trình nhập dữ liệu hàng loạt (Bulk Import) thông qua Wizard 4 bước với khả năng xem trước và sửa lỗi trực tiếp.
 
-## 2. Kiến trúc Import (Import Engine Architecture)
+## 2. Đặc tả dữ liệu (Data Structures)
 
-- **Session-based Import:** Sử dụng bộ nhớ đệm (In-memory Map) để lưu trữ phiên làm việc tạm thời trước khi lưu chính thức vào DB.
-- **Components:** `ColumnMapper`, `ValueMapper`, `ValidationEngine`.
+#### **Import Preview DTO**
+| Field | Type | Description |
+|---|---|---|
+| `session_id` | `String` | ID phiên làm việc tạm thời |
+| `total_rows` | `Int` | Tổng số dòng trong file |
+| `valid_rows` | `Object[]` | Danh sách các dòng hợp lệ |
+| `invalid_rows` | `Object[]` | Danh sách các dòng có lỗi kèm lý do |
+| `mapping` | `Object` | Ánh xạ cột CSV -> Trường DB |
 
 ## 3. Luồng xử lý kỹ thuật & Business Logic
 
-### 3.1. Tầng Backend (Processing Logic)
-- **Session Management:** Khi user upload file, backend tạo một `sessionId` và lưu trữ dữ liệu đã map vào bộ nhớ. Phiên làm việc tự động hết hạn sau 30 phút.
-- **Phân tích OS (OS Resolution):** Thuật toán tự động tìm kiếm trong Danh mục ứng dụng để khớp tên OS trong file CSV. Nếu không tìm thấy, hệ thống gợi ý tạo mới OS dựa trên chuỗi văn bản thô.
-- **Transactional Deployment:** Quá trình import server, mạng và phần cứng được bọc trong một Database Transaction duy nhất để đảm bảo không xảy ra tình trạng dữ liệu "nửa vời".
+### 3.1. Tầng Backend (In-memory Session Management)
+- **Temporary Storage:** Khi upload file, Backend không ghi ngay vào DB chính mà lưu dữ liệu vào một **SessionMap** trong bộ nhớ (hoặc Redis). Session này có thời hạn sống (`TTL`) là 10 phút.
+- **Transactional Execution:** Khi người dùng nhấn "Xác nhận", toàn bộ danh sách `valid_rows` được thực thi bên trong một **Database Transaction**. Nếu một dòng bất kỳ gặp lỗi lúc ghi (VD: Database constraint), toàn bộ phiên nhập sẽ bị Rollback để đảm bảo sạch dữ liệu.
 
-### 3.2. Tầng Frontend (4-Step Wizard UI)
-- **Step 0 (Upload):** Sử dụng `Dragger` hỗ trợ kéo thả. Tích hợp tính năng **Import nhanh** (Tự động nhận diện cột và bỏ qua wizard nếu file chuẩn).
-- **Step 1 (Mapping):**
-  - `ColumnMapper`: Giao diện kéo thả hoặc chọn để khớp tiêu đề CSV với trường DB.
-  - `ValueMapper`: Xử lý ánh xạ giá trị Enum (VD: "Live" trong CSV -> "PROD" trong DB).
-- **Step 2 (Preview & In-place Edit):**
-  - Hiển thị bảng dữ liệu với các dòng lỗi được tô đỏ (`preview-row-error`).
-  - **Chỉnh sửa trực tiếp:** User có thể click vào ô dữ liệu lỗi để sửa trực tiếp trên bảng mà không cần sửa file CSV rồi upload lại.
-  - **Kiểm tra lại (Re-validate):** Nút gửi dữ liệu đã sửa lên backend để kiểm tra lại tính hợp lệ trước khi thực thi.
-- **Step 3 (Summary):** Hiển thị kết quả thống kê số lượng bản ghi Tạo mới (`Created`) và Cập nhật (`Updated`).
+### 3.2. Tầng Frontend (Multi-step Wizard)
+- **Step 1: Upload:** Kéo thả file CSV/XLSX.
+- **Step 2: Mapping:** Tự động gợi ý ánh xạ cột dựa trên tiêu đề file (Header Aliases). Người dùng có thể chỉnh sửa lại thủ công.
+- **Step 3: Preview & Edit:** Hiển thị bảng dữ liệu xem trước. Các ô có dữ liệu lỗi (VD: sai định dạng IP) được tô đỏ và cho phép **Sửa trực tiếp (Inline Edit)** ngay trên bảng.
+- **Step 4: Result:** Hiển thị kết quả nhập thành công/thất bại sau khi xử lý.
 
 ## 4. Đặc tả API Interfaces
 
 | Endpoint | Method | Chức năng | Quyền |
 |---|---|---|---|
-| `/import/preview` | `POST` | Phân tích file & tạo session | `OPERATOR` |
-| `/import/execute` | `POST` | Lưu dữ liệu từ session vào DB | `OPERATOR` |
-
-## 5. Xử lý Lỗi & Ngoại lệ (Error Handling)
-
-- **Session Expired:** Trả về `404` nếu user để trang preview quá lâu mới bấm Import.
-- **Port Conflict:** Cảnh báo nếu một IP/Port combo đã bị chiếm dụng bởi server khác.
-
-## 6. Hướng dẫn Bảo trì & Debug
-
-- **Cleanup:** Backend có cơ chế `CronJob` định kỳ xoá các file tạm trong thư mục `uploads/tmp`.
+| `/import/preview` | `POST` | Upload & Validate sơ bộ | `OPERATOR` |
+| `/import/execute` | `POST` | Ghi dữ liệu chính thức | `OPERATOR` |
 
 ---
 
 ## 7. Metrics & Tasks
 
-- Story Points: 25
-- Tasks: 10 (CSV Parser, Mapping logic, Preview UI, In-place editing, OS Resolution)
+- Story Points: 20
+- Tasks: 8 (Import Service, Session logic, 4-step UI wizard)
 
 _Tài liệu kỹ thuật chuẩn PROD - Cập nhật ngày: 2026-05-02_

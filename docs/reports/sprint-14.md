@@ -1,57 +1,52 @@
-# Sprint 14 — Engine Topology 2D & Trực quan hoá kết nối
+# Sprint 14 — Đồ thị Topology 2D Tương tác
 
-**Ngày bắt đầu:** 2026-05-03  
-**Ngày kết thúc:** 2026-05-05  
+**Ngày bắt đầu:** 2026-05-12  
+**Ngày kết thúc:** 2026-05-15  
 **Trạng thái:** ✅ DONE  
 
 ---
 
 ## 1. Tổng quan & Mục tiêu (Sprint Goal)
 
-> Xây dựng bản đồ tương tác (Interactive Map) hiển thị toàn bộ kiến trúc hệ thống. Cho phép người dùng theo dõi luồng dữ liệu giữa các ứng dụng và máy chủ một cách trực quan nhất.
+> Trực quan hóa toàn bộ hạ tầng và các mối quan hệ kết nối dưới dạng sơ đồ mạng (Graph) tương tác mạnh mẽ.
 
-## 2. Kiến trúc Engine (Topology Architecture)
+## 2. Đặc tả các trường dữ liệu (Data Fields)
 
-- **Library:** `ReactFlow` (Core), `Dagre` (Hierarchical layout), `ELKjs` (Advanced layout).
-- **Data Transformation:** Quy trình chuyển đổi từ dữ liệu Quan hệ (Relational) sang Graph (Nodes/Edges).
+#### **Model: TopologySnapshot**
+| Field | Type | Description | Constraints |
+|---|---|---|---|
+| `label` | `String` | Tên bản chụp (VD: 'Trước nâng cấp') | |
+| `environment` | `String` | Môi trường | |
+| `payload` | `Json` | Dữ liệu Nodes/Edges tại thời điểm lưu | |
+
+#### **Topology Node JSON Payload**
+| Key | Type | Description |
+|---|---|---|
+| `id` | `String` | Unique ID (Server/App ID) |
+| `type` | `String` | `serverNode` / `appNode` |
+| `position` | `Object` | Tọa độ {x, y} |
 
 ## 3. Luồng xử lý kỹ thuật & Business Logic
 
-### 3.1. Tầng Backend (Graph Data Provider)
-- **Deep Join Query:** Backend thực hiện truy vấn lồng nhau phức tạp để lấy Server kèm theo Deployments, NetworkConfigs và các Connections liên quan trong một request duy nhất.
-- **Normalization:** Chuẩn hoá dữ liệu để gán ID duy nhất cho Node (VD: `server-{id}`, `app-{id}-{serverId}`) tránh xung đột khi một ứng dụng chạy trên nhiều server.
+### 3.1. Tầng Backend (Snapshot Logic)
+- **Point-in-time Snapshot:** Hệ thống cho phép chụp lại trạng thái của toàn bộ Graph (vị trí các node, các kết nối hiện hữu). Payload được nén dưới dạng JSON để phục vụ việc xem lại lịch sử kiến trúc hạ tầng mà không bị ảnh hưởng bởi các thay đổi thực tế sau đó.
 
-### 3.2. Tầng Frontend (Canvas Rendering Logic)
-- **Custom Node Components:**
-  - **ServerNode:** Hiển thị Header với thông tin OS/IP và phần thân chứa danh sách các App đang chạy bên trong (`Compound Nodes`).
-  - **AppNode:** Hiển thị tên ứng dụng và trạng thái Deployment.
-- **Custom Edge (`ProtocolEdge`):** 
-  - Hiển thị nhãn Giao thức (HTTP, TCP, DATABASE) ngay trên đường nối.
-  - **Parallel Edge Spreading:** Thuật toán tự động tính toán độ cong (Curvature) hoặc độ lệch (Offset) khi có nhiều kết nối song song giữa 2 node, giúp đường nối không bị đè lên nhau.
-  - **Draggable Labels:** Người dùng có thể kéo nhãn giao thức đến vị trí bất kỳ để tránh bị che khuất bởi các thành phần khác.
-- **Layout Engines:** Hỗ trợ chuyển đổi linh hoạt giữa các thuật toán sắp xếp (Dagre, Elk-Layered, Elk-Radial) để phù hợp với quy mô sơ đồ khác nhau.
+### 3.2. Tầng Frontend (Graph Engine)
+- **ReactFlow Integration:** Sử dụng ReactFlow để render hàng nghìn node với hiệu năng cao.
+- **Parallel Edge Spreading:** Thuật toán tự động dàn hàng các mũi tên kết nối (Edges) giữa hai Node nếu có nhiều hơn một giao thức đang chạy đồng thời (VD: cả HTTPS và GRPC).
+- **Collision Avoidance:** Cơ chế tự động đẩy các node lân cận ra xa khi một node mới được thêm vào hoặc được kéo thả, đảm bảo sơ đồ luôn thoáng đạt và không bị chồng lấn.
 
 ## 4. Đặc tả API Interfaces
 
 | Endpoint | Method | Chức năng | Quyền |
 |---|---|---|---|
-| `/topology` | `GET` | Lấy cấu trúc graph toàn hệ thống | `VIEWER` |
-| `/topology/snapshot` | `POST` | Lưu trạng thái sơ đồ hiện tại | `OPERATOR` |
-
-## 5. Xử lý Lỗi & Ngoại lệ (Error Handling)
-
-- **Circular Dependencies:** Thuật toán layout xử lý các vòng lặp kết nối để không làm treo trình duyệt.
-- **Empty State:** Khi không có kết nối, hệ thống hiển thị danh sách các server "cô đơn" (Isolated nodes) ở phía dưới sơ đồ.
-
-## 6. Hướng dẫn Bảo trì & Debug
-
-- **Performance:** Với sơ đồ > 500 nodes, nên ưu tiên dùng `ELK-Layered` và tắt các animation animation của đường nối.
+| `/topology-snapshots` | `POST` | Lưu trạng thái sơ đồ | `OPERATOR` |
 
 ---
 
 ## 7. Metrics & Tasks
 
 - Story Points: 25
-- Tasks: 10 (ReactFlow setup, Dagre integration, Parallel edge logic, Custom Node UI)
+- Tasks: 10 (Graph UI, Auto-layout, Snapshot logic, Edge spreading)
 
 _Tài liệu kỹ thuật chuẩn PROD - Cập nhật ngày: 2026-05-02_

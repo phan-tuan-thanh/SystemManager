@@ -8,34 +8,43 @@
 
 ## 1. Tổng quan & Mục tiêu (Sprint Goal)
 
-> Xây dựng công cụ so sánh sự thay đổi của hệ thống giữa các thời điểm (Snapshot Comparison). Giúp Admin nắm bắt nhanh các thay đổi về hạ tầng và ứng dụng sau mỗi kỳ nâng cấp.
+> Xây dựng cơ chế lưu nháp các thay đổi (DRAFT) và so sánh sự khác biệt (Diff) trước khi áp dụng chính thức vào hệ thống.
 
-## 2. Kiến trúc So sánh (Comparison Architecture)
+## 2. Đặc tả các trường dữ liệu (Data Fields)
 
-- **Source:** Dữ liệu Audit Log (Snapshots).
-- **Logic:** Thuật toán `diff` so sánh các trường dữ liệu trong JSON.
+#### **Model: ChangeSet**
+| Field | Type | Description | Constraints |
+|---|---|---|---|
+| `status` | `String` | `DRAFT`, `APPLIED`, `DISCARDED` | Default: `DRAFT` |
+| `environment` | `String` | Môi trường áp dụng thay đổi | |
+
+#### **Model: ChangeItem (JSON Diff)**
+| Field | Type | Description |
+|---|---|---|
+| `action` | `String` | `CREATE`, `UPDATE`, `DELETE` |
+| `old_value` | `Json` | Snapshot dữ liệu cũ |
+| `new_value` | `Json` | Dữ liệu thay đổi mới |
 
 ## 3. Luồng xử lý kỹ thuật & Business Logic
 
-### 3.1. Tầng Backend (Diff Engine)
-- **JSON Deep Diff:** Backend thực hiện so sánh hai bản ghi Snapshot của cùng một tài nguyên. Bóc tách ra các trường bị Thay đổi, Thêm mới hoặc Xoá bỏ.
-- **ChangeSet Generation:** Nhóm các thay đổi liên quan trong cùng một phiên làm việc (Session) thành một ChangeSet duy nhất để dễ quản lý.
+### 3.1. Tầng Backend (Comparison Engine)
+- **Deep JSON Diff:** Sử dụng thuật toán so sánh đệ quy để tìm ra sự khác biệt giữa hai bản ghi JSON. Kết quả trả về danh sách các trường bị thay đổi kèm theo giá trị cũ và mới.
+- **Dry-run Execution:** Trước khi `Apply`, Backend thực hiện một phiên chạy thử (Dry-run) để kiểm tra xem các thay đổi có gây ra lỗi ràng buộc Database nào không (VD: trùng IP, trùng Port).
 
-### 3.2. Tầng Frontend (Visual Diff UI)
-- **Side-by-Side View:** Hiển thị hai cột dữ liệu Cũ và Mới. Các phần thay đổi được tô màu (Đỏ cho xoá, Xanh cho thêm).
-- **Timeline Integration:** Cho phép chọn các mốc thời gian trên Timeline để thực hiện so sánh nhanh.
+### 3.2. Tầng Frontend (Visual Diff)
+- **Side-by-Side Comparison:** Hiển thị bảng so sánh hai cột. Các dòng thay đổi được highlight màu sắc: **Xanh lá** (Thêm), **Vàng** (Sửa), **Đỏ** (Xoá).
 
 ## 4. Đặc tả API Interfaces
 
 | Endpoint | Method | Chức năng | Quyền |
 |---|---|---|---|
-| `/changesets/compare` | `POST` | Thực hiện diff 2 snapshots | `VIEWER` |
+| `/changesets/:id/apply` | `POST` | Áp dụng thay đổi vào DB | `ADMIN` |
 
 ---
 
 ## 7. Metrics & Tasks
 
 - Story Points: 15
-- Tasks: 5 (Diff logic, Comparison UI, Snapshot selector)
+- Tasks: 5 (Diff engine, ChangeSet logic, Visual Diff UI)
 
 _Tài liệu kỹ thuật chuẩn PROD - Cập nhật ngày: 2026-05-02_
