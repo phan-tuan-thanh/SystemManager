@@ -1,4 +1,4 @@
-# Sprint 10 — Dashboard Stats & Audit Log CSV Export
+# Sprint 10 — Dashboard Tổng hợp & Xuất dữ liệu Audit Log
 
 **Ngày bắt đầu:** 2026-04-25  
 **Ngày kết thúc:** 2026-04-26  
@@ -8,47 +8,45 @@
 
 ## 1. Tổng quan & Mục tiêu (Sprint Goal)
 
-> Xây dựng trung tâm điều hành (Dashboard) cung cấp cái nhìn tổng thể về sức khoẻ hạ tầng và triển khai ứng dụng. Hoàn thiện tính năng Audit Log với khả năng trích xuất dữ liệu (Export CSV) phục vụ mục đích báo cáo và tuân thủ (Compliance).
+> Xây dựng trung tâm điều hành (Dashboard) trực quan hoá toàn bộ tài nguyên hệ thống và cung cấp công cụ xuất dữ liệu Audit Log phục vụ việc hậu kiểm (Audit).
 
-## 2. Kiến trúc & Schema Database (Architecture & Schema Changes)
+## 2. Kiến trúc & Logic Tổng hợp (Architecture)
 
-- **Model `AuditLog`:** Lưu vết mọi hành động nhạy cảm (Action, Resource, User, Result, IP).
-- **Dashboard Logic:** Sử dụng `Prisma.groupBy` để tổng hợp dữ liệu thống kê theo môi trường và trạng thái mà không cần tải toàn bộ bản ghi về memory.
+- **Aggregation Logic:** Sử dụng các truy vấn `groupBy` và `count` của Prisma để tổng hợp dữ liệu theo môi trường và trạng thái triển khai.
+- **Audit Storage:** Bảng `AuditLog` lưu trữ snapshot dưới dạng JSONB để tối ưu hiệu suất truy vấn lịch sử.
 
 ## 3. Luồng xử lý kỹ thuật & Business Logic
 
-### 3.1. Thống kê Dashboard (Grouped Aggregation)
-- **Cơ chế:** Backend thực hiện `Promise.all` song song các truy vấn đếm (`count`) và nhóm (`groupBy`).
-- **Kết quả:** Trả về số lượng Server theo từng môi trường (`serversByEnv`) và số lượng Deployment theo trạng thái (`deploymentsByStatus`).
-- **Frontend:** Sử dụng `Ant Design Charts` để trực quan hoá dữ liệu dưới dạng Pie Chart và Bar Chart.
+### 3.1. Tầng Backend (Aggregation & Export Logic)
+- **Streaming CSV Export:** Để tránh tràn bộ nhớ (OOM) khi xuất hàng trăm ngàn dòng log, backend sử dụng cơ chế `batch fetching`. Dữ liệu được đọc từng cụm 500 dòng, chuyển đổi sang CSV và stream trực tiếp về client qua HTTP response.
+- **Parallel Status Check:** API `/system/status` thực hiện nhiều truy vấn đếm song song (`Promise.all`) để giảm thời gian phản hồi của Dashboard.
 
-### 3.2. Xuất dữ liệu Audit Log (Streaming CSV Export)
-- **Vấn đề:** Bảng Audit Log có thể chứa hàng chục nghìn bản ghi, việc load tất cả vào mảng sẽ gây lỗi tràn bộ nhớ (Memory Leak).
-- **Giải pháp:** 
-  - Sử dụng luồng lặp (`while(true)`) với cơ chế `skip/take` (Batch size: 500).
-  - Sử dụng `res.write()` để đẩy dữ liệu CSV xuống client theo từng đợt ngay khi vừa fetch xong.
-  - Thiết lập header `Content-Type: text/csv` và `Content-Disposition` để trình duyệt nhận diện file tải về.
+### 3.2. Tầng Frontend (Reporting UI)
+- **Dynamic Charts:** Sử dụng component `Progress` và `Statistic` để biểu diễn tỉ lệ phân bổ server theo môi trường (DEV/UAT/PROD). Màu sắc được đồng bộ hoá toàn hệ thống.
+- **Real-time Polling:** Dashboard được thiết lập `staleTime: 30s`, tự động làm mới dữ liệu ngầm để đảm bảo số lượng tài nguyên hiển thị luôn cập nhật.
+- **Recent Changes List:** Hiển thị 8 thay đổi gần nhất từ Audit Log, bóc tách thông tin `resource_name` từ JSON snapshot để hiển thị nhãn thân thiện cho người dùng.
 
 ## 4. Đặc tả API Interfaces
 
 | Endpoint | Method | Chức năng | Quyền |
 |---|---|---|---|
-| `/system/status` | `GET` | Lấy số liệu thống kê Dashboard | `VIEWER` |
-| `/audit/export` | `GET` | Stream CSV Audit Log | `ADMIN` |
+| `/audit-logs/export` | `GET` | Xuất CSV (Streaming) | `ADMIN` |
+| `/system/status` | `GET` | Lấy số liệu Dashboard | `VIEWER` |
 
 ## 5. Xử lý Lỗi & Ngoại lệ (Error Handling)
 
-- **CSV Escape:** Các trường dữ liệu trong CSV được bọc trong dấu ngoặc kép `""` và escape các ký tự đặc biệt để đảm bảo file Excel mở được chính xác dù nội dung log có chứa dấu phẩy hoặc xuống dòng.
+- **Timeout:** Các truy vấn aggregation lớn được đặt timeout để tránh làm treo database.
+- **Export Failure:** Nếu quá trình stream file bị ngắt quãng, backend sẽ đóng connection và ghi log lỗi để admin xử lý.
 
 ## 6. Hướng dẫn Bảo trì & Debug
 
-- **Polling:** Dashboard trên Frontend được cấu hình tự động làm mới dữ liệu mỗi 60 giây (Configurable) để đảm bảo thông tin luôn cập nhật.
+- **Audit Purge:** Cần lập lịch dọn dẹp các bản ghi audit log cũ hơn 1 năm để giải phóng dung lượng DB.
 
 ---
 
 ## 7. Metrics & Tasks
 
 - Story Points: 15
-- Tasks: 6 (Dashboard API, GroupBy queries, Streaming CSV Export, AntD Charts integration)
+- Tasks: 6 (Audit Schema, CSV Export logic, Aggregation API, Dashboard UI)
 
 _Tài liệu kỹ thuật chuẩn PROD - Cập nhật ngày: 2026-05-02_

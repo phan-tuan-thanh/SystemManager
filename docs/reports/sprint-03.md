@@ -1,4 +1,4 @@
-# Sprint 03 — Quản lý Cấu hình Module (Module Guard)
+# Sprint 03 — Cấu hình Module & Feature Toggle
 
 **Ngày bắt đầu:** 2026-04-11  
 **Ngày kết thúc:** 2026-04-12  
@@ -8,50 +8,50 @@
 
 ## 1. Tổng quan & Mục tiêu (Sprint Goal)
 
-> Phát triển cơ chế quản lý tính năng động (Feature Toggling). Cho phép Quản trị viên bật/tắt các Module nghiệp vụ (như Topology, Network, Hardware) thông qua giao diện mà không cần can thiệp vào mã nguồn hoặc cấu hình môi trường.
+> Xây dựng cơ chế bật/tắt tính năng động (Feature Toggle). Cho phép Admin quản lý các module trong hệ thống, kiểm soát sự phụ thuộc giữa các module và bảo vệ các chức năng cốt lõi (Core) khỏi việc bị vô hiệu hoá nhầm.
 
-## 2. Kiến trúc & Schema Database (Architecture & Schema Changes)
+## 2. Kiến trúc Module (Module Architecture)
 
-- **Table `ModuleConfig`:**
-  - `module_key`: Khoá định danh duy nhất (VD: `TOPOLOGY`, `NETWORK`).
-  - `status`: Enum `ENABLED` / `DISABLED`.
-  - `is_core`: Cờ đánh dấu module hệ thống bắt buộc (không được phép tắt).
+- **Phân loại Module:**
+  - **CORE:** Bắt buộc phải hoạt động (VD: Server Mgmt, User Mgmt). Không thể tắt.
+  - **EXTENDED:** Các module mở rộng (VD: Topology 3D, Import CSV). Có thể bật/tắt tuỳ nhu cầu.
+- **Dependencies:** Mỗi module có thể khai báo danh sách các module khác mà nó phụ thuộc (`dependencies` array).
 
 ## 3. Luồng xử lý kỹ thuật & Business Logic
 
-### 3.1. Cơ chế Kiểm soát Module (ModuleGuard)
-- **Decorator `@RequireModule(key)`:** Được sử dụng tại Controller hoặc Route để khai báo module phụ thuộc.
-- **Logic Guard (`ModuleGuard.ts`):**
-  - Sử dụng `Reflector` để lấy `moduleKey` từ metadata của route.
-  - Truy vấn `PrismaService.moduleConfig.findUnique` để lấy trạng thái thực tế.
-  - Nếu bản ghi không tồn tại hoặc có `status === 'DISABLED'`, ném ngay `ForbiddenException`.
-- **Ưu điểm:** Chặn request ngay từ tầng Guard, không cho phép logic service chạy, giúp bảo vệ tài nguyên hệ thống.
+### 3.1. Tầng Backend (Module Guard Logic)
+- **ModuleGuard:** Một Guard toàn cục sử dụng `Reflector` để đọc metadata `@RequireModule(key)` gắn trên các Controller/Route. 
+- **Cơ chế chặn:** Guard truy vấn bảng `ModuleConfig`. Nếu module tương ứng đang ở trạng thái `DISABLED`, API sẽ trả về `403 Forbidden` ngay lập tức.
+- **Idempotent Init:** Hàm `initialize` trong `SystemService` đảm bảo danh sách module luôn được đồng bộ với định nghĩa trong code (Upsert logic).
 
-### 3.2. Bảo vệ Module Core
-- Tại `ModuleConfigService.update`, hệ thống kiểm tra cờ `is_core`. Nếu user cố gắng chuyển trạng thái module core sang `DISABLED`, hệ thống sẽ trả về lỗi `BadRequestException` chặn hành động này.
+### 3.2. Tầng Frontend (Module Config UI)
+- **Dependency Modal (Logic then chốt):**
+  - **Khi Bật:** Frontend kiểm tra danh sách `dependencies` của module. Nếu có module phụ thuộc nào đang bị tắt, hệ thống hiển thị cảnh báo đỏ và chặn nút "Bật".
+  - **Khi Tắt:** Hệ thống quét toàn bộ danh sách module để tìm các module khác đang phụ thuộc vào module này. Nếu tìm thấy, hiển thị cảnh báo về các module sẽ bị ảnh hưởng (Cascading effect).
+- **Core Protection:** UI sử dụng thuộc tính `disabled` trên các Switch điều khiển đối với module loại `CORE`, ngăn chặn mọi tương tác nhầm lẫn từ phía Admin.
+- **UI State Sync:** Sử dụng `TanStack Query` để duy trì trạng thái "Loading" của Switch trong lúc đợi API phản hồi, tránh tình trạng click đúp (Double click).
 
 ## 4. Đặc tả API Interfaces
 
-| Endpoint | Method | Payload | Chức năng | Quyền |
-|---|---|---|---|---|
-| `/module-configs` | `GET` | N/A | Lấy danh sách trạng thái module | `ADMIN` |
-| `/module-configs/:key` | `PATCH` | `{ status: string }` | Bật/Tắt module | `ADMIN` |
+| Endpoint | Method | Chức năng | Quyền |
+|---|---|---|---|
+| `/system/modules` | `GET` | Lấy danh sách cấu hình module | `VIEWER` |
+| `/system/modules/:key/toggle` | `PATCH` | Bật/Tắt module mở rộng | `ADMIN` |
 
 ## 5. Xử lý Lỗi & Ngoại lệ (Error Handling)
 
-- **Module Missing:** Nếu decorator gọi một module key không có trong DB, hệ thống mặc định coi đó là `DISABLED` để đảm bảo an toàn.
-- **Response Format:** Lỗi do ModuleGuard ném ra có format chuẩn: `{ "statusCode": 403, "message": "Module 'XXX' is currently disabled" }`.
+- **Forbidden:** Nếu user truy cập link trực tiếp tới một trang đã bị tắt module, Backend trả về `403` và Frontend (Axios Interceptor) sẽ hiển thị trang báo lỗi "Feature Disabled".
+- **Dependency Conflict:** Backend kiểm tra lại một lần nữa logic phụ thuộc trước khi lưu DB để đảm bảo tính toàn vẹn ngay cả khi có người gọi API trực tiếp.
 
 ## 6. Hướng dẫn Bảo trì & Debug
 
-- **Thêm module mới:** Sau khi tạo module mới, cần chạy file seed hoặc thêm bản ghi vào bảng `ModuleConfig` thủ công để có thể sử dụng decorator `@RequireModule`.
-- **Kiểm tra logic:** Nếu một API bỗng dưng trả về 403 dù user là Admin, hãy kiểm tra trạng thái module tương ứng trong bảng `ModuleConfig`.
+- **New Module:** Khi thêm module mới, hãy khai báo trong `SystemService.initialize()` và chạy lại API khởi tạo.
 
 ---
 
 ## 7. Metrics & Tasks
 
-- Story Points: 12
-- Tasks: 5 (Module DB Schema, Decorator, ModuleGuard, Admin UI, Unit Tests)
+- Story Points: 15
+- Tasks: 6 (Module Schema, ModuleGuard, Dependency Logic, Admin UI, Switch components)
 
 _Tài liệu kỹ thuật chuẩn PROD - Cập nhật ngày: 2026-05-02_

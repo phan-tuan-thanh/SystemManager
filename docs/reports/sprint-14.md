@@ -1,55 +1,57 @@
-# Sprint 14 — Topology Engine & Data Mapping
+# Sprint 14 — Engine Topology 2D & Trực quan hoá kết nối
 
 **Ngày bắt đầu:** 2026-05-03  
-**Ngày kết thúc:** 2026-05-04  
+**Ngày kết thúc:** 2026-05-05  
 **Trạng thái:** ✅ DONE  
 
 ---
 
 ## 1. Tổng quan & Mục tiêu (Sprint Goal)
 
-> Xây dựng công cụ trực quan hoá hệ thống (Topology Engine). Chuyển đổi dữ liệu thô từ cơ sở dữ liệu thành cấu trúc đồ thị (Nodes & Edges) có khả năng tương tác, giúp quản trị viên nắm bắt nhanh chóng cấu trúc hạ tầng phức tạp.
+> Xây dựng bản đồ tương tác (Interactive Map) hiển thị toàn bộ kiến trúc hệ thống. Cho phép người dùng theo dõi luồng dữ liệu giữa các ứng dụng và máy chủ một cách trực quan nhất.
 
-## 2. Kiến trúc & Schema Database (Architecture)
+## 2. Kiến trúc Engine (Topology Architecture)
 
-- **Cấu trúc Dữ liệu Đồ thị:**
-  - **ServerNode:** Chứa thông tin Server và mảng các bản triển khai ứng dụng bên trong (`deployments`).
-  - **ConnectionEdge:** Chứa thông tin kết nối, loại giao thức và port giữa hai ứng dụng.
-- **TopologyData Interface:** Cấu trúc chuẩn hóa trả về cho Frontend (`{ servers: ServerNode[], connections: ConnectionEdge[] }`).
+- **Library:** `ReactFlow` (Core), `Dagre` (Hierarchical layout), `ELKjs` (Advanced layout).
+- **Data Transformation:** Quy trình chuyển đổi từ dữ liệu Quan hệ (Relational) sang Graph (Nodes/Edges).
 
 ## 3. Luồng xử lý kỹ thuật & Business Logic
 
-### 3.1. Tổng hợp Dữ liệu Đồ thị (Mass Data Fetching)
-- **Logic (`getTopology`):**
-  - Thực hiện các truy vấn lồng nhau (`include`) cực sâu để lấy toàn bộ: Server -> Deployment -> Application -> Group -> Ports -> NetworkConfigs.
-  - Áp dụng bộ lọc môi trường (`environment`) ngay từ tầng Database để giảm lượng dữ liệu truyền tải.
-- **Normalize:** Chuyển đổi dữ liệu từ định dạng quan hệ (Relational) sang định dạng phân cấp (Hierarchical) phù hợp với các thư viện đồ thị như ReactFlow hoặc Vis-network.
+### 3.1. Tầng Backend (Graph Data Provider)
+- **Deep Join Query:** Backend thực hiện truy vấn lồng nhau phức tạp để lấy Server kèm theo Deployments, NetworkConfigs và các Connections liên quan trong một request duy nhất.
+- **Normalization:** Chuẩn hoá dữ liệu để gán ID duy nhất cho Node (VD: `server-{id}`, `app-{id}-{serverId}`) tránh xung đột khi một ứng dụng chạy trên nhiều server.
 
-### 3.2. Phân tích Phụ thuộc Ứng dụng
-- Cung cấp API `getAppDependency` chuyên biệt cho chế độ xem Focus. Cho phép hiển thị chỉ những ứng dụng có liên quan trực tiếp đến một ứng dụng mục tiêu (1-hop neighbors).
+### 3.2. Tầng Frontend (Canvas Rendering Logic)
+- **Custom Node Components:**
+  - **ServerNode:** Hiển thị Header với thông tin OS/IP và phần thân chứa danh sách các App đang chạy bên trong (`Compound Nodes`).
+  - **AppNode:** Hiển thị tên ứng dụng và trạng thái Deployment.
+- **Custom Edge (`ProtocolEdge`):** 
+  - Hiển thị nhãn Giao thức (HTTP, TCP, DATABASE) ngay trên đường nối.
+  - **Parallel Edge Spreading:** Thuật toán tự động tính toán độ cong (Curvature) hoặc độ lệch (Offset) khi có nhiều kết nối song song giữa 2 node, giúp đường nối không bị đè lên nhau.
+  - **Draggable Labels:** Người dùng có thể kéo nhãn giao thức đến vị trí bất kỳ để tránh bị che khuất bởi các thành phần khác.
+- **Layout Engines:** Hỗ trợ chuyển đổi linh hoạt giữa các thuật toán sắp xếp (Dagre, Elk-Layered, Elk-Radial) để phù hợp với quy mô sơ đồ khác nhau.
 
 ## 4. Đặc tả API Interfaces
 
-| Endpoint | Method | Tham số | Chức năng | Quyền |
-|---|---|---|---|---|
-| `/topology` | `GET` | `?environment=PROD` | Lấy toàn bộ đồ thị môi trường | `VIEWER` |
-| `/topology/app/:id`| `GET` | N/A | Lấy phụ thuộc của 1 app | `VIEWER` |
+| Endpoint | Method | Chức năng | Quyền |
+|---|---|---|---|
+| `/topology` | `GET` | Lấy cấu trúc graph toàn hệ thống | `VIEWER` |
+| `/topology/snapshot` | `POST` | Lưu trạng thái sơ đồ hiện tại | `OPERATOR` |
 
 ## 5. Xử lý Lỗi & Ngoại lệ (Error Handling)
 
-- **Circular Dependencies:** Hệ thống hỗ trợ xử lý đồ thị có vòng lặp (VD: App A gọi B, B gọi A) mà không gây treo trình duyệt nhờ cơ chế render của thư viện frontend.
-- **Data Integrity:** Chỉ hiển thị các kết nối mà cả Ứng dụng Nguồn và Đích đều đang tồn tại (không bị xoá mềm).
+- **Circular Dependencies:** Thuật toán layout xử lý các vòng lặp kết nối để không làm treo trình duyệt.
+- **Empty State:** Khi không có kết nối, hệ thống hiển thị danh sách các server "cô đơn" (Isolated nodes) ở phía dưới sơ đồ.
 
 ## 6. Hướng dẫn Bảo trì & Debug
 
-- **Performance:** Với hạ tầng > 1000 nodes, khuyến nghị sử dụng bộ lọc môi trường để tối ưu tốc độ render.
-- **Layout Engine:** Hiện tại hệ thống đang sử dụng cơ chế sắp xếp mặc định (Dagre), có thể nâng cấp lên ELK Engine trong các sprint sau để có layout thông minh hơn.
+- **Performance:** Với sơ đồ > 500 nodes, nên ưu tiên dùng `ELK-Layered` và tắt các animation animation của đường nối.
 
 ---
 
 ## 7. Metrics & Tasks
 
-- Story Points: 20
-- Tasks: 8 (Topology Service, Data Interfaces, Mass fetching logic, Environment filtering)
+- Story Points: 25
+- Tasks: 10 (ReactFlow setup, Dagre integration, Parallel edge logic, Custom Node UI)
 
 _Tài liệu kỹ thuật chuẩn PROD - Cập nhật ngày: 2026-05-02_

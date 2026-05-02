@@ -1,4 +1,4 @@
-# Sprint 13 — UI/UX Polish & Dynamic Theme (Dark Mode)
+# Sprint 13 — Tối ưu UI/UX & Dark Mode
 
 **Ngày bắt đầu:** 2026-05-01  
 **Ngày kết thúc:** 2026-05-02  
@@ -8,38 +8,42 @@
 
 ## 1. Tổng quan & Mục tiêu (Sprint Goal)
 
-> Tối ưu hóa trải nghiệm người dùng cuối (UX) thông qua việc đồng bộ hóa giao diện (Dark Mode) và làm sạch luồng điều hướng. Đảm bảo hệ thống đạt chuẩn thẩm mỹ PROD với Ant Design v5.
+> Nâng cấp trải nghiệm người dùng thông qua việc tối ưu hoá giao diện, hỗ trợ Chế độ tối (Dark Mode) và cải thiện tính responsive trên các thiết bị.
 
-## 2. Kiến trúc & Logic Theme (Frontend Architecture)
+## 2. Kiến trúc Theme (Design System)
 
-- **Ant Design v5 Design Token:** Tận dụng cơ chế `ConfigProvider` của AntD để thay đổi bộ màu sắc động mà không cần reload trang.
-- **State Management:** Lưu trạng thái `isDarkMode` vào `Zustand Store` (hoặc Redux) và đồng bộ với `localStorage`.
+- **Framework:** Ant Design v5 Design Token.
+- **Algorithm:** `theme.defaultAlgorithm` và `theme.darkAlgorithm`.
 
 ## 3. Luồng xử lý kỹ thuật & Business Logic
 
-### 3.1. Chuyển đổi Theme động
-- **Logic:** Khi người dùng click chuyển chế độ:
-  - Cập nhật biến trạng thái trong global store.
-  - `ConfigProvider` nhận prop `theme` mới (sử dụng `theme.darkAlgorithm` hoặc `theme.defaultAlgorithm`).
-  - Toàn bộ các component (Button, Table, Card) tự động tính toán lại màu sắc dựa trên Design Tokens.
+### 3.1. Tầng Backend (User Preference)
+- **Theme Persistence:** Lưu trữ lựa chọn giao diện (`light`/`dark`) vào bảng `UserPreference` để đồng bộ hoá trải nghiệm khi user đăng nhập trên các trình duyệt khác nhau.
 
-### 3.2. Cấu hình Màu sắc Thương hiệu
-- Định nghĩa bộ màu Primary (`#1677ff`) và các màu trạng thái (Success, Warning, Error) đồng nhất cho cả hai chế độ Light/Dark.
-- Tùy chỉnh `borderRadius` và `boxShadow` để tạo cảm giác hiện đại, chuyên nghiệp.
+### 3.2. Tầng Frontend (Dynamic Theme Logic)
+- **Design Token Integration:** Toàn bộ CSS trong app được chuyển đổi sang sử dụng CSS Variables lấy từ Design Tokens của AntD. Điều này cho phép thay đổi màu sắc toàn app chỉ bằng cách cập nhật `ConfigProvider`.
+- **Animation & Micro-interactions:** Bổ sung các hiệu ứng chuyển cảnh mượt mà khi mở Drawer/Modal và hiệu ứng Skeleton loading khi đang tải dữ liệu.
+- **Responsive Layout:** Sử dụng hệ thống Grid (`Row/Col`) của AntD với các breakpoint chuẩn (`xs`, `sm`, `md`, `lg`, `xl`) để đảm bảo sidebar và nội dung tự động co giãn.
 
-## 4. Xử lý Lỗi & Ngoại lệ (Error Handling)
+## 4. Đặc tả API Interfaces
 
-- **Flash of Unstyled Content (FOUC):** Đảm bảo script đọc `localStorage` và gán class theme được chạy ngay từ thẻ `<head>` để tránh tình trạng giao diện bị nháy màu khi load trang.
+| Endpoint | Method | Chức năng | Quyền |
+|---|---|---|---|
+| `/users/preference` | `PATCH` | Cập nhật theme/ngôn ngữ | `VIEWER` |
 
-## 5. Hướng dẫn Bảo trì & Debug
+## 5. Xử lý Lỗi & Ngoại lệ (Error Handling)
 
-- **Custom Component:** Khi viết component thủ công (không dùng AntD), hãy sử dụng CSS Variables do AntD cung cấp hoặc hook `useToken()` để lấy mã màu theme hiện tại.
+- **Flicker Prevention:** Sử dụng `localStorage` để đọc theme ngay từ khi khởi tạo app, tránh hiện tượng màn hình bị nháy trắng trước khi áp dụng theme tối.
+
+## 6. Hướng dẫn Bảo trì & Debug
+
+- **Token Debug:** Có thể dùng tool `antd-token-previewer` để kiểm tra các biến màu sắc khi tuỳ chỉnh theme.
 
 ---
 
 ## 7. Metrics & Tasks
 
 - Story Points: 10
-- Tasks: 4 (Theme Context setup, AntD v5 Token mapping, Dark mode toggle, Persistence logic)
+- Tasks: 4 (Dark mode logic, Design token integration, Responsive optimization)
 
 _Tài liệu kỹ thuật chuẩn PROD - Cập nhật ngày: 2026-05-02_

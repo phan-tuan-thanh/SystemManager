@@ -8,43 +8,39 @@
 
 ## 1. Tổng quan & Mục tiêu (Sprint Goal)
 
-> Xây dựng cơ sở dữ liệu về mối quan hệ giữa các ứng dụng (Application Dependencies). Đây là dữ liệu đầu vào cốt lõi để vẽ sơ đồ Topology và phân tích ảnh hưởng (Impact Analysis) khi có sự cố.
+> Xây dựng cơ sở dữ liệu về mối quan hệ giữa các ứng dụng (Application Dependencies). Đây là dữ liệu đầu vào cốt lõi để vẽ sơ đồ Topology và phân tích ảnh hưởng (Impact Analysis).
 
-## 2. Kiến trúc & Schema Database (Architecture & Schema Changes)
+## 2. Kiến trúc & Schema Database (Architecture)
 
-- **Model `AppConnection`:**
-  - `source_app_id`: Ứng dụng nguồn (client).
-  - `target_app_id`: Ứng dụng đích (server/service).
-  - `target_port_id`: Cổng kết nối cụ thể của ứng dụng đích.
-  - `connection_type`: Enum (`REQUEST`, `SYNC`, `MESSAGE_QUEUE`, v.v.).
+- **Model `AppConnection`:** Lưu ứng dụng nguồn (`source`), ứng dụng đích (`target`) và port đích.
 
 ## 3. Luồng xử lý kỹ thuật & Business Logic
 
-### 3.1. Phân tích Phụ thuộc (Upstream & Downstream)
-- **Logic (`getDependencies`):**
-  - **Downstream (Phụ thuộc vào):** Các kết nối mà ứng dụng hiện tại đóng vai trò là Nguồn (`source`).
-  - **Upstream (Ứng dụng phụ thuộc):** Các kết nối mà ứng dụng hiện tại đóng vai trò là Đích (`target`).
-- Hệ thống hỗ trợ lọc theo môi trường (Environment) để xem sơ đồ phụ thuộc riêng rẽ giữa DEV, UAT và PROD.
+### 3.1. Tầng Backend (Dependency Analysis Logic)
+- **Upstream/Downstream logic:** Backend tính toán các mối quan hệ "Phụ thuộc vào" và "Được phụ thuộc bởi" theo môi trường.
+- **Self-loop Protection:** Chặn logic tạo kết nối tới chính mình tại tầng Service.
+- **Port Mapping:** Khi tạo kết nối, hệ thống kiểm tra `target_port_id` có thực sự thuộc về Ứng dụng đích đã chọn hay không.
 
-### 3.2. Ràng buộc Logic Kết nối
-- **Chống vòng lặp tự thân (Self-loop):** Chặn việc một ứng dụng tự kết nối tới chính nó tại tầng Service validation.
-- **Ràng buộc Port:** Khi gán `target_port_id`, hệ thống kiểm tra port đó có thực sự thuộc về ứng dụng đích (`target_app_id`) hay không.
+### 3.2. Tầng Frontend (Dependency UI)
+- **Chế độ xem Tập trung (Focus View):** Trong màn hình chi tiết Ứng dụng, hệ thống hiển thị danh sách các kết nối dưới dạng Table hoặc Tab phụ thuộc.
+- **Form Tạo kết nối:** Sử dụng Select Search để tìm nhanh Ứng dụng Nguồn/Đích. UI tự động lọc danh sách Port khả dụng của Ứng dụng đích sau khi người dùng chọn App.
+- **Trực quan hoá:** Sử dụng các nhãn màu sắc (Tag) để phân biệt loại kết nối (VD: `SYNC` - Xanh, `ASYNC` - Cam).
 
 ## 4. Đặc tả API Interfaces
 
 | Endpoint | Method | Chức năng | Quyền |
 |---|---|---|---|
-| `/connections` | `POST` | Tạo kết nối mới (validate port/self-loop) | `OPERATOR` |
+| `/connections` | `POST` | Tạo kết nối (validate port/self-loop) | `OPERATOR` |
 | `/connections/app/:id/deps`| `GET` | Lấy danh sách Upstream/Downstream | `VIEWER` |
 
 ## 5. Xử lý Lỗi & Ngoại lệ (Error Handling)
 
-- **Foreign Key Violation:** Nếu xoá một Ứng dụng đang có kết nối hiện hữu, hệ thống trả về lỗi ràng buộc.
-- **Port Mismatch:** Trả về `400 BadRequest` nếu port trỏ tới không thuộc ứng dụng đích đã chọn.
+- **Foreign Key Violation:** Trả về lỗi nếu xoá App đang có kết nối hiện hữu.
+- **Port Mismatch:** Frontend chặn chọn port nếu port đó không thuộc về App đích đã chọn.
 
 ## 6. Hướng dẫn Bảo trì & Debug
 
-- **Topology Input:** Dữ liệu từ bảng này là nguồn tin cậy duy nhất (Single source of truth) cho module Topology. Nếu sơ đồ Topology vẽ sai, hãy kiểm tra dữ liệu thô trong bảng `AppConnection`.
+- **Topology Input:** Bảng này là nguồn dữ liệu thô (Single source of truth) duy nhất cho module Topology.
 
 ---
 

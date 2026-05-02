@@ -1,4 +1,4 @@
-# Sprint 04 — Quản lý Linh kiện (Hardware Inventory)
+# Sprint 04 — Quản lý Hạ tầng Phần cứng (Hardware Inventory)
 
 **Ngày bắt đầu:** 2026-04-13  
 **Ngày kết thúc:** 2026-04-14  
@@ -8,51 +8,45 @@
 
 ## 1. Tổng quan & Mục tiêu (Sprint Goal)
 
-> Xây dựng hệ thống quản lý chi tiết linh kiện phần cứng (Hardware Inventory). Cho phép theo dõi cấu hình chi tiết (CPU, RAM, Disk) gắn với từng Server và lưu vết lịch sử thay đổi cấu hình linh kiện (Thêm/Bớt/Thay thế).
+> Xây dựng kho quản lý linh kiện phần cứng (Hardware Inventory) chi tiết. Hỗ trợ theo dõi cấu hình máy chủ vật lý và ảo thông qua các thông số kỹ thuật (Specs) linh hoạt.
 
-## 2. Kiến trúc & Schema Database (Architecture & Schema Changes)
+## 2. Kiến trúc Dữ liệu & Resource (Architecture)
 
-- **Model `HardwareComponent`:**
-  - `server_id`: Liên kết với bảng Server.
-  - `type`: Loại linh kiện (CPU, RAM, DISK, v.v.).
-  - `specs`: Trường JSON lưu thông số kỹ thuật động (VD: `{ cores: 8, threads: 16 }`).
-- **Quan hệ:** Một Server có quan hệ 1-n với `HardwareComponent`.
+- **Model `HardwareComponent`:** Lưu trữ CPU, RAM, HDD/SSD, Network Card.
+- **JSON Specs:** Sử dụng kiểu dữ liệu JSON trong PostgreSQL để lưu trữ các thông số đặc thù cho từng loại linh kiện mà không cần sửa schema.
 
 ## 3. Luồng xử lý kỹ thuật & Business Logic
 
-### 3.1. Quản lý Cấu hình Động (JSON Specs)
-- **Logic:** Vì mỗi loại linh kiện có các thông số khác nhau (RAM cần bus, dung lượng; Disk cần loại SSD/HDD, tốc độ), hệ thống sử dụng trường JSON `specs`.
-- **Frontend:** Sử dụng Form.List (Key-Value Editor) để người dùng nhập các cặp thông số tuỳ ý.
+### 3.1. Tầng Backend (Inventory Logic)
+- **Cơ chế Record History:** Mọi hành động Thêm/Sửa/Xoá phần cứng đều được `ChangeHistoryService` ghi lại một snapshot dữ liệu (Before/After).
+- **Thu hồi (Detach):** Khi linh kiện bị tháo khỏi server, hệ thống thực hiện Soft Delete bản ghi, lưu vết ngày thu hồi để quản lý tồn kho ảo.
 
-### 3.2. Theo dõi Lịch sử Thay đổi (Change History)
-- **Cơ chế:** Tích hợp `ChangeHistoryService`. 
-- Khi thực hiện `CREATE`, `UPDATE`, `ATTACH` (chuyển linh kiện sang server khác), hoặc `DETACH` (tháo linh kiện), hệ thống tự động lưu lại Snapshot dữ liệu trước và sau thay đổi.
-- **API `getHistory`:** Trả về Timeline các lần thay đổi của linh kiện đó.
-
-### 3.3. Tháo gỡ Linh kiện (Detach/Retire)
-- Khi tháo linh kiện (`detach`), hệ thống thực hiện Soft Delete (`deleted_at`) để đánh dấu linh kiện này đã ngừng sử dụng nhưng vẫn giữ lại lịch sử trong DB để phục vụ báo cáo.
+### 3.2. Tầng Frontend (Hardware Management UI)
+- **KV Pair Editor:** Giao diện chỉnh sửa thông số kỹ thuật (Specs) được thiết kế dạng danh sách Key-Value linh hoạt sử dụng `Form.List`.
+- **Hệ thống Gợi ý (Spec Presets):** Dựa vào loại linh kiện người dùng chọn (VD: CPU), UI tự động hiển thị các Tag gợi ý (`cores`, `threads`, `speed_ghz`). Khi nhấn vào Tag, trường dữ liệu tương ứng sẽ tự động được thêm vào form.
+- **Hiển thị thông minh:** Component `HardwareTab` tự động bóc tách các field phổ biến (`gb`, `cores`) từ JSON để hiển thị ra cột "Thông số" trên bảng một cách thân thiện thay vì hiển thị code JSON thô.
 
 ## 4. Đặc tả API Interfaces
 
-| Endpoint | Method | Payload | Chức năng | Quyền |
-|---|---|---|---|---|
-| `/hardware` | `POST` | `CreateHardwareDto` | Tạo mới và gắn vào Server | `OPERATOR` |
-| `/hardware/:id/attach` | `POST` | `{ server_id: string }` | Chuyển linh kiện sang Server khác | `OPERATOR` |
-| `/hardware/:id/history`| `GET` | N/A | Xem timeline thay đổi linh kiện | `VIEWER` |
+| Endpoint | Method | Chức năng | Quyền |
+|---|---|---|---|
+| `/hardware` | `POST` | Thêm linh kiện mới vào Server | `OPERATOR` |
+| `/hardware/:id/detach`| `DELETE` | Thu hồi linh kiện khỏi Server | `OPERATOR` |
 
 ## 5. Xử lý Lỗi & Ngoại lệ (Error Handling)
 
-- **Server Not Found:** Khi gắn linh kiện, hệ thống kiểm tra sự tồn tại và trạng thái của Server. Nếu Server đã bị xoá mềm, trả về `404 Not Found`.
+- **Missing ID:** Chặn các request cập nhật nếu linh kiện không còn tồn tại trên server đã định danh.
+- **Validation:** Frontend kiểm tra tính hợp lệ của các cặp Key-Value (không cho phép Key trống) trước khi gửi lên Backend.
 
 ## 6. Hướng dẫn Bảo trì & Debug
 
-- **Debug JSON Specs:** Nếu giao diện không hiển thị đúng specs, hãy kiểm tra raw JSON trong bảng `HardwareComponent`. Prisma sẽ tự động parse JSON thành Object khi fetch.
+- **JSON Data:** Nếu muốn thêm loại linh kiện mới, chỉ cần cập nhật mảng `HARDWARE_TYPES` và `SPEC_PRESETS` trên Frontend.
 
 ---
 
 ## 7. Metrics & Tasks
 
 - Story Points: 15
-- Tasks: 6 (Hardware Schema, Service Logic, ChangeHistory integration, Key-Value UI, History Timeline)
+- Tasks: 7 (Hardware Schema, JSON Specs support, Detach logic, KV Editor UI, Spec suggestions)
 
 _Tài liệu kỹ thuật chuẩn PROD - Cập nhật ngày: 2026-05-02_

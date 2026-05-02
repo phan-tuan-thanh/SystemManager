@@ -10,29 +10,28 @@
 
 > Xây dựng hệ thống quản lý hồ sơ tài liệu gắn với từng bản triển khai (Deployment). Mục tiêu là tự động hoá việc nhắc nhở các loại tài liệu bắt buộc và cung cấp cơ chế upload/phê duyệt hồ sơ chuẩn mực.
 
-## 2. Kiến trúc & Schema Database (Architecture & Schema Changes)
+## 2. Kiến trúc & Schema Database (Architecture)
 
-- **Model `DeploymentDocType`:** Định nghĩa các loại tài liệu (VD: Hướng dẫn cài đặt, Biên bản nghiệm thu). Có cờ `status` và mảng `environments` để lọc theo môi trường.
-- **Model `DeploymentDoc`:** Bản ghi thực tế của một tài liệu. Lưu `preview_path`, `final_path`, `status` (`PENDING`, `PREVIEW`, `COMPLETE`, `WAIVED`).
+- **Model `DeploymentDocType`:** Định nghĩa các loại tài liệu (VD: Hướng dẫn cài đặt).
+- **Model `DeploymentDoc`:** Bản ghi thực tế của một tài liệu. Lưu `preview_path`, `final_path`.
 - **Quan hệ:** `AppDeployment` (1) - (n) `DeploymentDoc`.
 
 ## 3. Luồng xử lý kỹ thuật & Business Logic
 
-### 3.1. Tự động khởi tạo Hồ sơ (Auto-provisioning Docs)
-- **Logic (`autoCreateDocs`):** Khi một `AppDeployment` được tạo mới, hệ thống tự động quét bảng `DeploymentDocType`.
-- Nếu loại tài liệu đó được cấu hình cho môi trường tương ứng (hoặc cho mọi môi trường), hệ thống tự động tạo các bản ghi `DeploymentDoc` ở trạng thái `PENDING`.
-- Điều này đảm bảo mỗi bản triển khai luôn có đầy đủ danh mục hồ sơ cần thiết ngay từ đầu.
+### 3.1. Tầng Backend (Upload & Control Logic)
+- **Auto-provisioning:** Khi tạo Deployment, backend tự động tạo các bản ghi `DeploymentDoc` trống dựa trên cấu hình môi trường.
+- **File Streaming:** API `serve-file` không trả về link trực tiếp mà sử dụng `createReadStream(path).pipe(res)`. Hệ thống tự động ánh xạ đuôi file sang chuẩn **MIME type** (VD: `.pdf` -> `application/pdf`).
+- **Phân loại Upload:**
+  - **Bản nháp (Preview):** Chấp nhận `.pdf`, `.docx`, `.xlsx`. Lưu vào thư mục `preview/`.
+  - **Bản chính thức (Final):** Chỉ chấp nhận `.pdf`. Khi upload thành công, tự động chuyển trạng thái tài liệu sang `COMPLETE`.
 
-### 3.2. Luồng Upload & Phê duyệt (Multer Integration)
-- **Cơ chế:** Sử dụng `Multer` để xử lý file upload.
-- **Phân loại:**
-  - **Upload Preview:** Lưu vào thư mục `preview/`. Dùng để kiểm tra nội dung sơ bộ.
-  - **Upload Final:** Lưu vào thư mục `final/`. Đánh dấu tài liệu đã hoàn tất (`COMPLETE`).
-- **Waive Logic:** Cho phép người dùng bỏ qua một tài liệu bắt buộc nếu có lý do chính đáng (`waived_reason`).
-
-### 3.3. Stream File An toàn
-- API không trả về đường dẫn trực tiếp đến file trên disk mà sử dụng stream: `createReadStream(absolutePath).pipe(res)`.
-- Hệ thống tự động ánh xạ đuôi file (pdf, docx, xlsx) sang chuẩn `MIME type` tương ứng để trình duyệt có thể hiển thị hoặc tải về chính xác.
+### 3.2. Tầng Frontend (Document Tracking UI)
+- **Tiến độ trực quan (Progress Tracking):** Sử dụng component `Progress` của AntD để hiển thị % hoàn thành hồ sơ dựa trên tổng số tài liệu bắt buộc.
+- **Dashboard Thống kê:** Sử dụng các `Statistic` cards hiển thị nhanh số lượng tài liệu Hoàn thành, Đang chờ, hoặc Đã miễn.
+- **Upload Card Component:** Mỗi loại tài liệu có một card điều khiển riêng (`DocUploadCard`). UI thay đổi linh hoạt:
+  - Nếu đã có bản nháp: Hiển thị nút "Xem nháp".
+  - Nếu đã nộp bản PDF: Khoá chức năng upload và hiển thị nhãn "Hoàn thành".
+- **Cơ chế Miễn trừ (Waive):** Tích hợp Modal yêu cầu nhập lý do (`waived_reason`) trước khi đánh dấu tài liệu là không bắt buộc.
 
 ## 4. Đặc tả API Interfaces
 
@@ -40,22 +39,21 @@
 |---|---|---|---|
 | `/deployments/:id/upload-final` | `POST` | Upload bản cuối (Multipart) | `OPERATOR` |
 | `/deployments/:id/serve-file` | `GET` | Tải/Xem file tài liệu | `VIEWER` |
-| `/deployments/:id/waive` | `POST` | Miễn trừ tài liệu bắt buộc | `OPERATOR` |
 
 ## 5. Xử lý Lỗi & Ngoại lệ (Error Handling)
 
-- **Disk Missing:** Nếu file trong DB tồn tại nhưng trên disk bị mất (do lỗi hạ tầng), hệ thống trả về `404 Not Found` thay vì crash.
-- **Validation:** Chặn upload nếu file không thuộc danh mục cho phép hoặc vượt quá dung lượng quy định.
+- **Disk Missing:** Nếu file trong DB tồn tại nhưng trên disk bị mất, hệ thống trả về `404 Not Found`.
+- **Validation:** Frontend chặn upload nếu file không thuộc danh mục cho phép (`.pdf` cho bản chính).
 
 ## 6. Hướng dẫn Bảo trì & Debug
 
-- **File Storage:** File được lưu tại `uploads/deployments/{deploymentId}/`. Nếu muốn đổi sang S3, chỉ cần thay đổi implementation trong `FileUploadService`.
+- **Storage:** File lưu tại `uploads/deployments/{deploymentId}/`. Có thể cấu hình lại path qua biến môi trường.
 
 ---
 
 ## 7. Metrics & Tasks
 
 - Story Points: 20
-- Tasks: 9 (Document Schema, Multer config, Auto-create logic, File Streaming, Progress calculation)
+- Tasks: 9 (Multer config, Auto-create logic, Progress calculation, DocUpload UI)
 
 _Tài liệu kỹ thuật chuẩn PROD - Cập nhật ngày: 2026-05-02_

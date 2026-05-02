@@ -1,51 +1,50 @@
-# Sprint 16 — App Group Restructure & Unified Catalog
+# Sprint 16 — Phân tách Nhóm Hạ tầng & Nghiệp vụ
 
-**Ngày bắt đầu:** 2026-05-07  
-**Ngày kết thúc:** 2026-05-08  
+**Ngày bắt đầu:** 2026-05-08  
+**Ngày kết thúc:** 2026-05-09  
 **Trạng thái:** ✅ DONE  
 
 ---
 
 ## 1. Tổng quan & Mục tiêu (Sprint Goal)
 
-> Tái cấu trúc logic phân nhóm ứng dụng. Phân định rõ ràng ranh giới giữa Nhóm nghiệp vụ (Business Group) và Nhóm hạ tầng (Infrastructure Group) để áp dụng các chính sách quản lý khác nhau cho từng loại tài nguyên.
+> Chuẩn hoá việc phân loại nhóm ứng dụng thành hai luồng chính: Hạ tầng (Infrastructure) và Nghiệp vụ (Business). Giúp tách biệt quản lý phần mềm hệ thống và phần mềm nghiệp vụ.
 
-## 2. Kiến trúc & Schema Database (Architecture & Schema Changes)
+## 2. Kiến trúc Phân loại (Classification)
 
-- **Cập nhật Model `ApplicationGroup`:**
-  - Thêm trường `group_type`: Enum (`BUSINESS`, `INFRASTRUCTURE`).
-  - Mỗi nhóm có thể cấu hình `default_role` cho các thành viên tham gia.
+- **Group Type:** `INFRASTRUCTURE` vs `BUSINESS`.
+- **Phân tách UI:** Hai trang quản lý riêng biệt cho Phần mềm hạ tầng và Ứng dụng nghiệp vụ.
 
 ## 3. Luồng xử lý kỹ thuật & Business Logic
 
-### 3.1. Phân tách Dữ liệu (Group Separation)
-- **Business Groups:** Chứa các ứng dụng nghiệp vụ phục vụ người dùng cuối. Tập trung vào các thuộc tính như `owner_team`, `deployments`.
-- **Infrastructure Groups:** Chứa các phần mềm hệ thống (OS, Middleware, DB Engine). Tập trung vào các thuộc tính `version`, `eol_date`.
-- **Thực thi:** API `list` hỗ trợ lọc theo `group_type`, cho phép xây dựng các màn hình quản trị riêng biệt cho Team Hạ tầng và Team Ứng dụng.
+### 3.1. Tầng Backend (Grouping Logic)
+- **Aggregated Counting:** API danh sách nhóm trả về kèm theo số lượng server và deployment tương ứng trong từng nhóm (sử dụng `_count` của Prisma).
+- **Type Restriction:** Ràng buộc chặt chẽ tại tầng Service: Không cho phép di chuyển một ứng dụng `SYSTEM` vào nhóm `BUSINESS`.
 
-### 3.2. Thống kê nhanh (Aggregated Count)
-- Trong API danh sách, hệ thống sử dụng tính năng `_count` của Prisma để trả về số lượng ứng dụng đang thuộc về từng nhóm, giúp hiển thị các Badge thống kê trên UI Dashboard của Nhóm.
+### 3.2. Tầng Frontend (View Separation)
+- **Sidebar Navigation:** Tách thành 2 mục menu: "Hạ tầng" (chứa Hệ thống, Servers, Networks) và "Ứng dụng" (chứa Ứng dụng nghiệp vụ, Deployments).
+- **Filtered List:** Trang danh sách Ứng dụng sử dụng tham số query `?type=BUSINESS` hoặc `?type=SYSTEM` để hiển thị dữ liệu phù hợp với ngữ cảnh người dùng đang xem.
 
 ## 4. Đặc tả API Interfaces
 
 | Endpoint | Method | Chức năng | Quyền |
 |---|---|---|---|
-| `/app-groups` | `GET` | Danh sách nhóm (kèm count) | `VIEWER` |
-| `/app-groups/:id` | `GET` | Chi tiết nhóm & Apps bên trong | `VIEWER` |
+| `/app-groups?type=INFRA` | `GET` | Lấy nhóm hạ tầng | `VIEWER` |
+| `/app-groups?type=BUSINESS`| `GET` | Lấy nhóm nghiệp vụ | `VIEWER` |
 
 ## 5. Xử lý Lỗi & Ngoại lệ (Error Handling)
 
-- **Safe Removal:** Chặn việc xoá một Nhóm ứng dụng nếu bên trong vẫn còn chứa các Ứng dụng hoặc Phần mềm hệ thống chưa được di dời hoặc xoá bỏ.
+- **Access Denied:** Nếu user chỉ có quyền trên một số nhóm nhất định, backend thực hiện lọc dữ liệu (Data Filtering) ngay từ câu truy vấn SQL.
 
 ## 6. Hướng dẫn Bảo trì & Debug
 
-- **Data Consistency:** Khi chuyển đổi một Ứng dụng từ Nhóm A sang Nhóm B, hệ thống sẽ kiểm tra tính tương thích của `group_type` để tránh sai lệch dữ liệu phân loại.
+- **System Softwares:** Các phần mềm như DB, WebServer, OS luôn được xếp vào nhóm Hạ tầng.
 
 ---
 
 ## 7. Metrics & Tasks
 
 - Story Points: 10
-- Tasks: 5 (AppGroup Schema update, Group Type Logic, Aggregated Stats API)
+- Tasks: 4 (Group type extension, Counting logic, UI separation)
 
 _Tài liệu kỹ thuật chuẩn PROD - Cập nhật ngày: 2026-05-02_

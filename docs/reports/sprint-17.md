@@ -1,57 +1,59 @@
-# Sprint 17 — Deployment Upload UI (Wizard) & Port Conflict Guard
+# Sprint 17 — Wizard Import Hạ tầng (Server & Network)
 
-**Ngày bắt đầu:** 2026-05-09  
-**Ngày kết thúc:** 2026-05-10  
+**Ngày bắt đầu:** 2026-05-10  
+**Ngày kết thúc:** 2026-05-12  
 **Trạng thái:** ✅ DONE  
 
 ---
 
 ## 1. Tổng quan & Mục tiêu (Sprint Goal)
 
-> Chuyên nghiệp hóa quy trình nhập liệu ứng dụng triển khai (Deployment) thông qua giao diện Wizard 4 bước. Tích hợp cơ chế bảo vệ, ngăn chặn xung đột cổng dịch vụ (Port Conflict) trên cùng một máy chủ vật lý/ảo.
+> Xây dựng công cụ nhập liệu hàng loạt (Bulk Import) cho tài nguyên hạ tầng. Giúp số hoá nhanh chóng hàng ngàn server từ các file Excel/CSV hiện có của doanh nghiệp.
 
-## 2. Kiến trúc & Logic Phân tích (Architecture)
+## 2. Kiến trúc Import (Import Engine Architecture)
 
-- **Import Session Management:** Sử dụng `importSessions` (In-memory Map) để lưu trữ kết quả validate tạm thời trong 30 phút, giúp giảm tải truy vấn lặp lại giữa bước Preview và Execute.
-- **Port Management:** Tách biệt bảng `Port` khỏi bảng `AppDeployment` để hỗ trợ một ứng dụng chạy trên nhiều port khác nhau.
+- **Session-based Import:** Sử dụng bộ nhớ đệm (In-memory Map) để lưu trữ phiên làm việc tạm thời trước khi lưu chính thức vào DB.
+- **Components:** `ColumnMapper`, `ValueMapper`, `ValidationEngine`.
 
 ## 3. Luồng xử lý kỹ thuật & Business Logic
 
-### 3.1. Quy trình Wizard 4 bước (Frontend & Backend)
-1. **Upload:** Người dùng tải file CSV lên. Backend parse và trả về `sessionId`.
-2. **Mapping:** Backend tự động ánh xạ tiêu đề cột (Aliases). VD: `ten_dich_vu` -> `service_name`.
-3. **Preview:** Hiển thị danh sách dòng hợp lệ và dòng lỗi. Người dùng kiểm tra trước khi xác nhận.
-4. **Execute:** Backend thực hiện `upsert` dữ liệu dựa trên `sessionId`.
+### 3.1. Tầng Backend (Processing Logic)
+- **Session Management:** Khi user upload file, backend tạo một `sessionId` và lưu trữ dữ liệu đã map vào bộ nhớ. Phiên làm việc tự động hết hạn sau 30 phút.
+- **Phân tích OS (OS Resolution):** Thuật toán tự động tìm kiếm trong Danh mục ứng dụng để khớp tên OS trong file CSV. Nếu không tìm thấy, hệ thống gợi ý tạo mới OS dựa trên chuỗi văn bản thô.
+- **Transactional Deployment:** Quá trình import server, mạng và phần cứng được bọc trong một Database Transaction duy nhất để đảm bảo không xảy ra tình trạng dữ liệu "nửa vời".
 
-### 3.2. Chống trùng Port (Conflict Guard)
-- **Logic:** Khi import Deployment kèm thông tin Port:
-  - Hệ thống kiểm tra trong Database: Đã có ứng dụng nào (khác ứng dụng đang import) chiếm dụng Port + Protocol này trên cùng một Server đó chưa?
-  - Nếu có, hệ thống ném lỗi ngay lập tức trong quá trình Import để người dùng điều chỉnh.
-
-### 3.3. Xử lý Port lồng nhau
-- Hỗ trợ gán nhiều Port cho một bản triển khai duy nhất thông qua quan hệ 1-n giữa `AppDeployment` và `Port`.
+### 3.2. Tầng Frontend (4-Step Wizard UI)
+- **Step 0 (Upload):** Sử dụng `Dragger` hỗ trợ kéo thả. Tích hợp tính năng **Import nhanh** (Tự động nhận diện cột và bỏ qua wizard nếu file chuẩn).
+- **Step 1 (Mapping):**
+  - `ColumnMapper`: Giao diện kéo thả hoặc chọn để khớp tiêu đề CSV với trường DB.
+  - `ValueMapper`: Xử lý ánh xạ giá trị Enum (VD: "Live" trong CSV -> "PROD" trong DB).
+- **Step 2 (Preview & In-place Edit):**
+  - Hiển thị bảng dữ liệu với các dòng lỗi được tô đỏ (`preview-row-error`).
+  - **Chỉnh sửa trực tiếp:** User có thể click vào ô dữ liệu lỗi để sửa trực tiếp trên bảng mà không cần sửa file CSV rồi upload lại.
+  - **Kiểm tra lại (Re-validate):** Nút gửi dữ liệu đã sửa lên backend để kiểm tra lại tính hợp lệ trước khi thực thi.
+- **Step 3 (Summary):** Hiển thị kết quả thống kê số lượng bản ghi Tạo mới (`Created`) và Cập nhật (`Updated`).
 
 ## 4. Đặc tả API Interfaces
 
 | Endpoint | Method | Chức năng | Quyền |
 |---|---|---|---|
-| `/import/preview` | `POST` | Parse file & lấy SessionId | `OPERATOR` |
-| `/import/execute` | `POST` | Thực thi import từ Session | `OPERATOR` |
+| `/import/preview` | `POST` | Phân tích file & tạo session | `OPERATOR` |
+| `/import/execute` | `POST` | Lưu dữ liệu từ session vào DB | `OPERATOR` |
 
 ## 5. Xử lý Lỗi & Ngoại lệ (Error Handling)
 
-- **Session Expired:** Trả về `404 Not Found` nếu người dùng để trang Preview quá lâu ( > 30 phút) mà không bấm Execute.
-- **Header Alias:** Hệ thống hỗ trợ hàng chục tên gọi khác nhau cho cùng một cột dữ liệu, giúp giảm bớt việc chỉnh sửa file Excel thủ công.
+- **Session Expired:** Trả về `404` nếu user để trang preview quá lâu mới bấm Import.
+- **Port Conflict:** Cảnh báo nếu một IP/Port combo đã bị chiếm dụng bởi server khác.
 
 ## 6. Hướng dẫn Bảo trì & Debug
 
-- **Memory:** Vì `importSessions` lưu trong RAM, nếu restart server trong khi đang import, session sẽ bị mất và user cần upload lại file.
+- **Cleanup:** Backend có cơ chế `CronJob` định kỳ xoá các file tạm trong thư mục `uploads/tmp`.
 
 ---
 
 ## 7. Metrics & Tasks
 
-- Story Points: 15
-- Tasks: 6 (Import Wizard UI, Session Manager, Port conflict logic, Header Alias mapping)
+- Story Points: 25
+- Tasks: 10 (CSV Parser, Mapping logic, Preview UI, In-place editing, OS Resolution)
 
 _Tài liệu kỹ thuật chuẩn PROD - Cập nhật ngày: 2026-05-02_

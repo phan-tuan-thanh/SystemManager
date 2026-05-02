@@ -1,55 +1,41 @@
-# Sprint 20 — UI/UX Polish & Bulk Actions
+# Sprint 20 — Quản lý Phân vùng Mạng (Network Zones)
 
-**Ngày bắt đầu:** 2026-04-30  
+**Ngày bắt đầu:** 2026-05-18  
+**Ngày kết thúc:** 2026-05-19  
 **Trạng thái:** ✅ DONE  
 
 ---
 
 ## 1. Tổng quan & Mục tiêu (Sprint Goal)
 
-> Hoàn thiện giao diện (Polish UX) trên toàn hệ thống trước khi đóng gói Phase 1. Đồng nhất trải nghiệm Upload qua Wizard 4 bước, hỗ trợ thao tác hàng loạt (Bulk Delete), và nâng cấp các form nhập liệu phức tạp thành Key-Value editor trực quan.
+> Định nghĩa các vùng an ninh mạng (Security Zones) và quản lý dải IP (VLAN) tương ứng. Đây là nền tảng để phân loại Server theo mức độ bảo mật.
 
-## 2. Kiến trúc & Schema Database
+## 2. Kiến trúc Phân vùng (Zoning Architecture)
 
-*Không có thay đổi về Schema DB. Tính năng Bulk Delete tái sử dụng API Delete theo Batch.*
+- **Model `NetworkZone`:** Lưu tên vùng (VD: DMZ, APP, DB), dải IP (`10.x.x.x`) và màu sắc nhận diện.
 
 ## 3. Luồng xử lý kỹ thuật & Business Logic
 
-### 3.1. Luồng Import Wizard (4-bước)
-- **Cấu trúc Component:** Hợp nhất luồng Upload CSV thành 4 bước (Step):
-  - **Step 1:** Upload File (Dùng Ant Design Dragger với tính năng parse CSV locally qua `papaparse`).
-  - **Step 2:** Mapping (Ánh xạ cột tự động dựa trên Header Aliases).
-  - **Step 3:** Validation & Review (Hiển thị bảng Preview, tự động check lỗi format, highlight cell lỗi).
-  - **Step 4:** Execute (Gọi backend API để import, xử lý progress bar).
-- **Trạng thái:** Toàn bộ state của Wizard được quản lý cục bộ tránh ảnh hưởng đến các màn hình khác.
+### 3.1. Tầng Backend (Zoning Logic)
+- **IP Range Overlap Check:** Khi khai báo một vùng mạng mới, backend kiểm tra dải IP của vùng đó có bị chồng lấn (Overlap) với các vùng hiện có hay không.
+- **Zone Association:** Tự động gán nhãn vùng mạng cho Server dựa trên địa chỉ IP của Server đó (logic `findZoneByIp`).
 
-### 3.2. Form Key-Value cho Hardware Specs
-- Chuyển đổi từ textarea nhập JSON (dễ sai cú pháp) sang giao diện List (Key-Value) cho thông số phần cứng.
-- Sử dụng `Form.List` của Ant Design.
-- **Preset Suggestion:** Cung cấp sẵn các Key tiêu chuẩn (như `Cores`, `Threads`, `Speed`, `Capacity`) dựa trên loại linh kiện (Hardware Type) người dùng chọn.
+### 3.2. Tầng Frontend (Zoning UI)
+- **Color Coding:** Cho phép chọn màu sắc đặc trưng cho từng Zone để dễ dàng nhận diện trên sơ đồ Topology và danh sách Server.
+- **Zone Dashboard:** Hiển thị số lượng Server đang nằm trong từng vùng mạng dưới dạng các thẻ (Card) trực quan.
 
 ## 4. Đặc tả API Interfaces
 
-*Không có API mới.*
-
-## 5. Xử lý Lỗi & Ngoại lệ (Error Handling)
-
-- **Lỗi Parse CSV:** Nếu file CSV sai encoding (không phải UTF-8) hoặc thiếu cột bắt buộc, hệ thống chặn ngay tại trình duyệt (Step 1) không đẩy lên backend gây tắc nghẽn.
-- **Bảo vệ Xoá hàng loạt (Bulk Delete Lock):** API Bulk Delete của AppGroup sẽ tự động `ROLLBACK` và trả lỗi nếu có bất kỳ 1 group nào trong danh sách đang chứa ứng dụng. Giao diện sẽ hiển thị lỗi chi tiết tên Group gây block.
-
-## 6. Hướng dẫn Bảo trì & Debug
-
-- Quy trình Wizard Import hiện là chuẩn cho mọi màn hình (App Import, Deployment Import, v.v.). Khi bảo trì cần chú ý giữ cấu trúc HOC (Higher-Order Component) nếu cần mở rộng.
+| Endpoint | Method | Chức năng | Quyền |
+|---|---|---|---|
+| `/network-zones` | `GET` | Lấy danh sách vùng mạng | `VIEWER` |
+| `/network-zones` | `POST` | Khai báo vùng mới | `ADMIN` |
 
 ---
 
-## 7. Metrics & Tasks (Lịch sử công việc)
+## 7. Metrics & Tasks
 
-### Danh sách Tasks
-- ✅ S20-01: `infra-upload/index.tsx` — Dragger + Steps 4-bước wizard
-- ✅ S20-02: Cập nhật tài liệu hướng dẫn import Markdown
-- ✅ S20-03: `AppGroupList.tsx` — rowSelection + bulk delete Popconfirm
-- ✅ S20-04: `HardwareTab.tsx` — Form.List key-value editor
-- ✅ S20-05: Chuyển đổi Form layout sang 2-column (Server, App, AppGroup)
+- Story Points: 10
+- Tasks: 4 (Zone Schema, Overlap logic, Zone UI)
 
-_Tài liệu kỹ thuật chuẩn PROD - Phục vụ bàn giao và bảo trì._
+_Tài liệu kỹ thuật chuẩn PROD - Cập nhật ngày: 2026-05-02_

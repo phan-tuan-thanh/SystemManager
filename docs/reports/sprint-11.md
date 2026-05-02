@@ -1,4 +1,4 @@
-# Sprint 11 — Microsoft 365 SSO & Account Linking
+# Sprint 11 — Tích hợp SSO Microsoft 365 (OIDC)
 
 **Ngày bắt đầu:** 2026-04-27  
 **Ngày kết thúc:** 2026-04-28  
@@ -8,49 +8,49 @@
 
 ## 1. Tổng quan & Mục tiêu (Sprint Goal)
 
-> Tích hợp đăng nhập một chạm (Single Sign-On) với hệ sinh thái Microsoft 365 / Azure AD. Mục tiêu là tối ưu trải nghiệm người dùng nội bộ và tự động hoá quy trình cấp phát tài khoản (Auto-provisioning).
+> Triển khai cơ chế đăng nhập một lần (SSO) thông qua tài khoản Microsoft 365. Giúp người dùng trong tổ chức truy cập hệ thống nhanh chóng mà không cần quản lý thêm mật khẩu riêng.
 
-## 2. Kiến trúc & Schema Database (Architecture & Schema Changes)
+## 2. Kiến trúc SSO (OIDC Flow)
 
-- **User Model Update:** Thêm trường `microsoft_id` (unique) và chuyển đổi `account_type` thành Enum (`LOCAL`, `MICROSOFT_365`).
-- **Refresh Token Table:** Lưu trữ `ip_address` và `user_agent` để quản lý phiên đăng nhập an toàn.
+- **Provider:** Microsoft Azure AD (Entra ID).
+- **Protocol:** OpenID Connect (OIDC).
+- **Library:** `passport-azure-ad` hoặc OAuth2 custom flow.
 
 ## 3. Luồng xử lý kỹ thuật & Business Logic
 
-### 3.1. Luồng OIDC Exchange
-- **B1:** Frontend chuyển hướng người dùng tới trang xác thực của Microsoft.
-- **B2:** Sau khi đăng nhập thành công, Microsoft trả về `code` cho Frontend.
-- **B3:** Frontend gửi `code` lên API `/auth/microsoft/login`.
-- **B4:** Backend sử dụng `MS365Strategy` để đổi `code` lấy `AccessToken` của Microsoft, sau đó gọi Microsoft Graph API để lấy thông tin Email và ID.
+### 3.1. Tầng Backend (SSO Exchange Logic)
+- **Token Exchange:** Backend nhận `code` từ Microsoft, đổi lấy `id_token` và `access_token`. Hệ thống giải mã `id_token` để lấy Email người dùng.
+- **Account Linking:**
+  - Nếu Email đã tồn tại trong hệ thống: Cập nhật trạng thái "Linked with SSO" và cho phép đăng nhập.
+  - Nếu Email chưa tồn tại: Tự động tạo tài khoản mới (`Auto-provisioning`) với Role mặc định là `VIEWER`.
+- **First Admin Protection:** Nếu đây là user đầu tiên của hệ thống (kể cả qua SSO), họ sẽ được tự động gán quyền `ADMIN`.
 
-### 3.2. Tự động Liên kết & Cấp phát (Account Linking)
-- **Trường hợp 1 (User mới):** Hệ thống tự động tạo User mới với quyền mặc định là `VIEWER`.
-- **Trường hợp 2 (User đã có tài khoản Local):** Nếu tìm thấy Email trùng khớp trong DB, hệ thống tự động cập nhật `microsoft_id` vào bản ghi đó (Liên kết tài khoản).
-- **Kết quả:** Trả về bộ đôi `JWT AccessToken` và `RefreshToken` chuẩn của hệ thống SystemManager.
-
-### 3.3. Khởi tạo Hệ thống (First Admin)
-- Một cơ chế đặc biệt tại `validateUser`: Nếu hệ thống hoàn toàn trống (chưa có bất kỳ Admin nào), người dùng đầu tiên đăng nhập thành công sẽ tự động được gán quyền `ADMIN` để khởi tạo dự án.
+### 3.2. Tầng Frontend (SSO UI Logic)
+- **Login Button:** Cung cấp nút "Sign in with Microsoft 365" với icon chuẩn.
+- **Callback Handling:** Sau khi đăng nhập thành công tại trang Microsoft, user được redirect về Frontend kèm theo JWT token. Frontend bóc tách token và lưu vào `authStore`.
+- **Error Mapping:** Nếu SSO thất bại (VD: User chưa được gán quyền trong Azure AD), frontend hiển thị thông báo lỗi chi tiết thay vì chỉ báo "Login failed".
 
 ## 4. Đặc tả API Interfaces
 
 | Endpoint | Method | Chức năng | Quyền |
 |---|---|---|---|
-| `/auth/microsoft/url` | `GET` | Lấy URL đăng nhập MS | `@Public()` |
-| `/auth/microsoft/login` | `POST` | Đổi code lấy JWT | `@Public()` |
+| `/auth/ms365` | `GET` | Redirect tới Microsoft Login | `@Public()` |
+| `/auth/ms365/callback`| `GET` | Tiếp nhận mã Auth code từ MS | `@Public()` |
 
 ## 5. Xử lý Lỗi & Ngoại lệ (Error Handling)
 
-- **Account Disabled:** Nếu tài khoản MS hợp lệ nhưng User tương ứng trong hệ thống đang bị khóa (`status: DISABLED`), API trả về `401 Unauthorized`.
+- **Insecure Redirect:** Chỉ cho phép redirect về các URL đã được cấu hình trong `allowed_origins`.
+- **Email Mismatch:** Nếu email trả về từ SSO trống hoặc không hợp lệ, hệ thống từ chối đăng nhập.
 
 ## 6. Hướng dẫn Bảo trì & Debug
 
-- **Cấu hình:** Các tham số `CLIENT_ID`, `CLIENT_SECRET`, `TENANT_ID` được quản lý qua biến môi trường (.env).
+- **App Registration:** Đảm bảo `ClientId` và `ClientSecret` trong file `.env` luôn trùng khớp với cấu hình trên Azure Portal.
 
 ---
 
 ## 7. Metrics & Tasks
 
-- Story Points: 18
-- Tasks: 7 (OIDC Strategy, MS Graph integration, Account linking logic, First Admin bootstrap)
+- Story Points: 20
+- Tasks: 8 (Azure AD Setup, OIDC Callback logic, Account linking, SSO Button UI)
 
 _Tài liệu kỹ thuật chuẩn PROD - Cập nhật ngày: 2026-05-02_

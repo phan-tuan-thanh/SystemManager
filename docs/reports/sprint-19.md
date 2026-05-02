@@ -1,54 +1,54 @@
-# Sprint 19 — Topology Orthogonal Edges & Node Visibility Filter
+# Sprint 19 — Quản lý Firewall Rule & Phân quyền thao tác
 
-**Ngày bắt đầu:** 2026-04-29  
+**Ngày bắt đầu:** 2026-05-16  
+**Ngày kết thúc:** 2026-05-17  
 **Trạng thái:** ✅ DONE  
 
 ---
 
 ## 1. Tổng quan & Mục tiêu (Sprint Goal)
 
-> Nâng cấp trải nghiệm người dùng (UX) trên bản đồ Topology 2D bằng cách hỗ trợ vẽ đường nối thẳng góc (Orthogonal Edges) giúp tránh rối mắt, tự động tách các cạnh song song, và cung cấp bộ lọc hiển thị Node đa tầng (ẩn/hiện tuỳ ý).
+> Xây dựng hệ thống quản lý tập trung các quy tắc tường lửa (Firewall Rules). Đảm bảo kiểm soát chặt chẽ luồng truy cập giữa các vùng mạng và tích hợp phân quyền thao tác (RBAC) cho đội ngũ vận hành.
 
-## 2. Kiến trúc & Schema Database
+## 2. Kiến trúc Bảo mật (Security Architecture)
 
-*Không có thay đổi về Schema DB. Toàn bộ tính năng thuộc tầng Frontend State Management.*
+- **Model `FirewallRule`:** Lưu thông tin Source IP/Zone, Destination Server/Port, và hành động (`ALLOW`/`DENY`).
+- **RBAC UI:** Ẩn/Hiện chức năng dựa trên quyền thực tế của người dùng (`ADMIN`, `OPERATOR`).
 
 ## 3. Luồng xử lý kỹ thuật & Business Logic
 
-### 3.1. Cơ chế vẽ đường nối góc vuông (Orthogonal Edges)
-- **Logic:** Khi người dùng chọn `edgeStyle = 'step'`, hệ thống sử dụng hàm `getSmoothStepPath` của ReactFlow thay vì `getBezierPath`.
-- **Xử lý cạnh song song (Parallel Edges Spread):** 
-  - Khi có nhiều kết nối giữa cùng 1 cặp Node (ví dụ Server A -> Server B nhưng qua nhiều port), các cạnh sẽ đè lên nhau.
-  - Hệ thống tính toán chỉ số `offset` dựa trên số lượng cạnh song song và tịnh tiến tọa độ (X/Y) để các cạnh tách rời nhau.
-  - Nhãn (Protocol label) luôn được tính toán lại toạ độ để nằm chính giữa cạnh đã dịch chuyển.
+### 3.1. Tầng Backend (Access Control Logic)
+- **Role-based Permission:** Backend sử dụng `RolesGuard` để bảo vệ các endpoint `POST/PATCH/DELETE`. Chỉ người dùng có quyền `ADMIN` hoặc `OPERATOR` mới có thể thay đổi luật firewall.
+- **Relational Validation:** Khi tạo rule, backend kiểm tra tính hợp lệ của cặp IP/Server đích. Nếu IP đích không thuộc Server đã chọn, hệ thống sẽ cảnh báo không nhất quán dữ liệu.
 
-### 3.2. Bộ lọc Node Visibility (Ẩn/Hiện Node)
-- **Cấu trúc State:** Mở rộng `FilterState` thêm các mảng: `visibleGroupNames`, `visibleServerIds`, `visibleAppIds`.
-- **Cơ chế Lọc (Cascade):** 
-  - Tại file `index.tsx`, hook `useMemo` sẽ duyệt qua tập dữ liệu Topology gốc.
-  - Các AppNode không có trong danh sách `visibleAppIds` sẽ bị loại bỏ. Tương tự với ServerNode.
-  - **Auto-hide Edges:** Nếu một trong hai đầu (source/target) của một Connection bị ẩn, hệ thống tự động loại bỏ cạnh đó khỏi Graph để tránh lỗi tham chiếu undefined.
+### 3.2. Tầng Frontend (Admin Control UI)
+- **Giao diện Quản trị tập trung:** Hiển thị danh sách Rule dưới dạng bảng với các thẻ màu phân loại môi trường (`PROD` - đỏ, `DEV` - xanh).
+- **Hệ thống lọc đa tầng:** Hỗ trợ lọc đồng thời theo Môi trường, Hành động (Allow/Deny) và Trạng thái (Active/Pending).
+- **Import/Export XLSX:** Tích hợp bộ thư viện xử lý file chuyên sâu để xuất danh sách luật ra Excel phục vụ việc rà soát an ninh định kỳ.
+- **Conditional UI:** Nút "Tạo mới" và "Chỉnh sửa" tự động bị ẩn đối với người dùng chỉ có quyền `VIEWER`, đảm bảo an toàn tuyệt đối cho cấu hình hạ tầng.
 
 ## 4. Đặc tả API Interfaces
 
-*Không có thêm API mới. Sử dụng API GraphQL Subscription hiện có của Topology.*
+| Endpoint | Method | Chức năng | Quyền |
+|---|---|---|---|
+| `/firewall-rules` | `GET` | Tra cứu danh sách luật | `VIEWER` |
+| `/firewall-rules` | `POST` | Đăng ký luật mới | `OPERATOR` |
+| `/firewall-rules/export` | `GET` | Xuất file XLSX | `VIEWER` |
 
 ## 5. Xử lý Lỗi & Ngoại lệ (Error Handling)
 
-- **Lỗi đứt gãy sơ đồ (Orphaned Edges):** ReactFlow sẽ crash nếu truyền vào một Edge có `source` hoặc `target` không tồn tại trong danh sách Nodes. Đã fix bằng filter chéo kiểm tra sự tồn tại của Node trước khi render Edge.
+- **Forbidden Action:** Trả về `403 Forbidden` nếu một user VIEWER cố gắng gọi API xoá rule qua Postman.
+- **Duplicate Rule:** Backend kiểm tra trùng lặp luật (Source/Target/Port giống hệt nhau) để tránh rác dữ liệu.
 
 ## 6. Hướng dẫn Bảo trì & Debug
 
-- **Debug Edge Position:** Khi thêm engine mới (như Cytoscape), logic tính offset cho song song có thể cần phải tinh chỉnh riêng vì Cytoscape có sẵn `curve-style: bezier` với multiple edges.
+- **Audit Log:** Mọi thay đổi về Firewall Rule đều được ghi vết Snapshot chi tiết để phục vụ điều tra an ninh.
 
 ---
 
-## 7. Metrics & Tasks (Lịch sử công việc)
+## 7. Metrics & Tasks
 
-### Danh sách Tasks
-- ✅ S19-01: Thêm `edgeStyle: 'bezier' | 'step'` vào FilterState + Select "Edges"
-- ✅ S19-02: Import `getSmoothStepPath`, spread offset, giữ draggable labels.
-- ✅ S19-03: Mở rộng FilterState + 3 multi-select filter panel.
-- ✅ S19-04: Compute options linh hoạt theo dữ liệu Topology trả về.
+- Story Points: 15
+- Tasks: 6 (Firewall Schema, RBAC logic, XLSX Export, Management UI)
 
-_Tài liệu kỹ thuật chuẩn PROD - Phục vụ bàn giao và bảo trì._
+_Tài liệu kỹ thuật chuẩn PROD - Cập nhật ngày: 2026-05-02_
