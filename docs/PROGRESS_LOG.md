@@ -158,8 +158,14 @@ A chronological record of project milestones, updates, and sprint summaries.
 
 ---
 
-## 2026-04-24: Sprint 16 — App Group Restructure & Catalog Unification ✅ Implemented
+## 2026-04-24: Sprint 16 — App Group Restructure & Catalog Unification ✅ Hoàn thành
 
+- Lập kế hoạch tái cấu trúc nhóm ứng dụng (Business vs Infra).
+- Quy hoạch lại module Deployments để quản lý tập trung và theo dõi thay đổi (Change Management).
+- Kế hoạch hợp nhất Catalog phần mềm hệ thống (SystemSoftware) vào Application Catalog.
+- Tài liệu: [sprint-16-app-group-restructure.md](docs/plans/sprint-16-app-group-restructure.md)
+
+**Kết quả thực hiện:**
 - ✅ S16-01: Schema — thêm `GroupType` enum + `group_type` vào `ApplicationGroup`
 - ✅ S16-02: Schema — thêm `eol_date`, `vendor` vào `Application`
 - ✅ S16-03: Data migration — copy `SystemSoftware` → `Application(type=SYSTEM)`; set `INFRASTRUCTURE` cho nhóm đúng loại
@@ -174,14 +180,6 @@ A chronological record of project milestones, updates, and sprint summaries.
 - ✅ S16-12: Sidebar & Route — `/system-software` redirect sang `/applications?tab=infra`
 - ✅ S16-13: Import service — auto-create group với đúng `group_type`
 - Branch: `feat/sprint-16-app-group-restructure`
-
-## 2026-04-24: Sprint 16 — App Group Restructure & Centralized Deployments
-**Status:** 🔄 Planning
- 
-- Lập kế hoạch tái cấu trúc nhóm ứng dụng (Business vs Infra).
-- Quy hoạch lại module Deployments để quản lý tập trung và theo dõi thay đổi (Change Management).
-- Kế hoạch hợp nhất Catalog phần mềm hệ thống (SystemSoftware) vào Application Catalog.
-- Tài liệu: [sprint-16-app-group-restructure.md](docs/plans/sprint-16-app-group-restructure.md)
 
 ---
 

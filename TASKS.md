@@ -50,8 +50,12 @@
 | S15-14 | `[FE]` Server Detail — OS History tab/section | 4 | ⬜ | 4.8.2 |
 | S15-15 | `[FE]` Cập nhật ServerForm & ServerList | 2 | ⬜ | 4.8.2 |
 
+---
 
-## Sprint 16 — App Group Restructure & Catalog Unification 🔄 IN PROGRESS
+
+## ✅ Sprints Đã Hoàn Thành
+
+## Sprint 16 — App Group Restructure & Catalog Unification ✅ DONE
 
 **Mục tiêu:** Tái cấu trúc nhóm ứng dụng (Business vs Infra), hợp nhất Catalog phần mềm hệ thống.
 
@@ -71,10 +75,8 @@
 | S16-12 | `[BE]` Sidebar: Link Phần mềm hạ tầng | 1 | ✅ | 4.8.3 |
 | S16-13 | `[BE]` Import: Auto-create group với đúng GroupType | 1 | ✅ | 4.8.3 |
 
+
 ---
-
-
-## ✅ Sprints Đã Hoàn Thành
 
 ## Sprint 0 — Bootstrap & Infrastructure ✅ DONE
 
