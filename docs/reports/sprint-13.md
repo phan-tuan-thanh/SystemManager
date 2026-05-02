@@ -31,7 +31,14 @@
 
 ## 4. Đặc tả API Interfaces
 
-*(Không áp dụng)*
+### 4.1. Backend Endpoints
+*(Không áp dụng cho Sprint UI)*
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useThemeStore()` | `Local Storage` | State store quản lý Dark/Light mode không gọi server. |*(Không áp dụng)*
 
 ## 5. Xử lý Lỗi & Ngoại lệ (Error Handling & Edge Cases)
 

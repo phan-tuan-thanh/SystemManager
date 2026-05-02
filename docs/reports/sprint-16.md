@@ -37,7 +37,16 @@
 
 ## 4. Đặc tả API Interfaces
 
-*(Cập nhật lại các param truy vấn cho endpoint `/applications`)*
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/applications` | `GET` | Thêm param `?type=SYSTEM` hoặc `BUSINESS` | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetApplicationsQuery({ type })` | `GET /api/v1/applications` | Sử dụng type param để chia danh sách 2 tab. |*(Cập nhật lại các param truy vấn cho endpoint `/applications`)*
 
 ## 5. Xử lý Lỗi & Ngoại lệ (Error Handling & Edge Cases)
 

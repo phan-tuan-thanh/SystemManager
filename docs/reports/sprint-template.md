@@ -41,9 +41,17 @@ Phần này đặc tả chi tiết logic bên trong code cho cả Backend và Fr
 
 ## 4. Đặc tả API Interfaces
 
+### 4.1. Backend Endpoints
 | Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
 |---|---|---|---|
 | `/api/v1/resource` | `POST` | Mô tả chức năng API | `ADMIN`, `OPERATOR` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetResources()` | `GET /api/v1/resource` | Hook lấy danh sách tài nguyên (GET). |
+| `createResourceMutation` | `POST /api/v1/resource` | Mutation tạo tài nguyên mới (POST). |
 
 ## 5. Xử lý Lỗi & Ngoại lệ (Error Handling & Edge Cases)
 

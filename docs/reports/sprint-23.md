@@ -29,7 +29,16 @@
 
 ## 4. Đặc tả API Interfaces
 
-*(Cập nhật lại API PATCH `/api/v1/deployments/:id/status`)*
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/deployments/:id/status` | `PATCH` | Đổi trạng thái (Áp dụng Validation Compliance) | `OPERATOR` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useChangeDeploymentStatusMutation()` | `PATCH /api/v1/deployments/:id/status` | Xử lý lệnh hoàn tất dự án. |*(Cập nhật lại API PATCH `/api/v1/deployments/:id/status`)*
 
 ## 5. Xử lý Lỗi & Ngoại lệ (Error Handling & Edge Cases)
 

@@ -1,51 +1,21319 @@
-# Sprint 22 — Trung tâm Trợ giúp & Knowledge Base
-
-**Ngày bắt đầu:** 2026-05-22  
-**Ngày kết thúc:** 2026-05-23  
-**Trạng thái:** ✅ DONE  
-
----
-
-## 1. Tổng quan & Mục tiêu (Sprint Goal)
-
-> Tích hợp hệ thống tài liệu hướng dẫn nội bộ (Knowledge Base) hiển thị theo ngữ cảnh trang web, giúp Admin có sẵn sổ tay ngay khi thao tác.
-
-## 2. Đặc tả các trường dữ liệu (Data Fields & Structures)
-
-#### **Hướng dẫn viên (Guide Metadata)**
-| Field | Type | Description | Constraints / Validation |
-|---|---|---|---|
-| `key` | `String` | Định danh trang khớp với URL | (VD: 'firewall-rule-page') |
-| `content` | `String` | Nội dung văn bản | Định dạng chuẩn Markdown |
-
-## 3. Luồng xử lý kỹ thuật & Business Logic
-
-### 3.1. Tầng Backend (Server-side Logic)
-*(Chủ yếu phục vụ lấy data tĩnh từ bảng KnowledgeBase, không có logic phức tạp)*
-
-### 3.2. Tầng Frontend (Client-side Logic)
-- **Context-aware Help Button:** Bổ sung property `helpKey` vào component `PageLayout`. Hàm `useEffect` sẽ tự check xem `helpKey` truyền vào có tồn tại bài viết hướng dẫn tương ứng trên API không. Nếu có, nó render Icon hỏi đáp "?" ở góc phải Navbar. Bấm vào sẽ mở modal hiển thị hướng dẫn.
-- **Markdown Render Engine:** Tích hợp thư viện `react-markdown` kết hợp `remark-gfm` để dịch các bảng, checkbox, list và đoạn code snippets thành UI thân thiện.
-
 ## 4. Đặc tả API Interfaces
 
+### 4.1. Backend Endpoints
 | Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
 |---|---|---|---|
 | `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
 
-## 5. Xử lý Lỗi & Ngoại lệ (Error Handling & Edge Cases)
+### 4.2. Frontend Services / Hooks
 
-- **Missing Guide (Lỗi 404):** Nút Help tự động ẩn đi nếu gọi API lấy guide thất bại (Tránh UI hiển thị modal rỗng).
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |### 4. Đặc tả API Interfaces
 
-## 6. Hướng dẫn Bảo trì & Debug
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
 
-- **Gotchas / Chú ý:** Khi viết hướng dẫn, nếu sử dụng thẻ HTML thô trong nội dung Markdown, thư viện Frontend có thể filter/escape bỏ đi nhằm chống tấn công XSS. Cần chú ý định dạng.
+### 4.2. Frontend Services / Hooks
 
----
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
 
-## 7. Metrics & Tasks
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
 
-- Story Points: 10
-- Tasks: 4 (Guide data, Markdown UI, Context button logic)
+### 4.2. Frontend Services / Hooks
 
-_Tài liệu kỹ thuật chuẩn PROD (Agent-Ready) - Cập nhật ngày: 2026-05-02_
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |S## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |p## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |2## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |2## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |—## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |T## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |u## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |â## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |m## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |T## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ợ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ú## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |p## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |&## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |K## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |w## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |l## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |B## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |s## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |*## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |*## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |N## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |à## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |y## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |b## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ắ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |đ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ầ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |u## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |:## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |*## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |*## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |2## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |0## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |2## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |6## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |-## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |0## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |5## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |-## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |2## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |2## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |*## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |*## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |N## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |à## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |y## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |k## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ế## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ú## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |:## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |*## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |*## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |2## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |0## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |2## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |6## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |-## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |0## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |5## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |-## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |2## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |3## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |*## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |*## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |T## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ạ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |á## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |:## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |*## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |*## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |✅## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |D## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |O## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |N## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |E## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |### 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |### 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |1## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |.## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |T## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ổ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |q## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |u## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |&## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |M## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ụ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ê## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |u## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |(## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |S## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |p## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |G## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |l## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |)## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |>## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |T## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |í## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ợ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |p## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ệ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ố## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |à## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |l## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ệ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |u## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ư## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ớ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ẫ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ộ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |b## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ộ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |(## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |K## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |w## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |l## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |B## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |s## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |)## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ể## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ị## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ữ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ả## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |w## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |b## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |,## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ú## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |p## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |A## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |m## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ó## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |s## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ẵ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |s## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ổ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |y## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |y## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |k## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |á## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |.## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |### 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |### 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |2## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |.## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |Đ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ặ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ả## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |á## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ư## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ờ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ữ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |l## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ệ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |u## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |(## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |D## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |F## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |l## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |s## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |&## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |S## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |u## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |u## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |s## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |)## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |### 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |### 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |### 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |### 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |*## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |*## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |H## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ư## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ớ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ẫ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |v## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ê## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |(## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |G## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |u## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |M## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |)## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |*## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |*## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. ||## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |F## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |l## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. ||## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |T## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |y## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |p## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. ||## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |D## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |s## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |p## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. ||## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |C## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |s## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |s## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |/## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |V## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |l## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. ||## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. ||## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. ||## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. ||## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. ||## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. ||## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. ||## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |`## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |k## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |y## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |`## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. ||## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |`## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |S## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |`## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. ||## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |Đ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ị## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |k## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ớ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |p## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |v## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ớ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |U## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |R## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |L## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. ||## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |(## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |V## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |D## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |:## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |'## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |f## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |w## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |l## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |l## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |-## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |u## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |l## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |-## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |p## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |'## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |)## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. ||## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. ||## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |`## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |`## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. ||## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |`## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |S## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |`## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. ||## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |N## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ộ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |u## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |v## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ă## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |b## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ả## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. ||## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |Đ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ị## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ạ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |u## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ẩ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |M## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |k## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |w## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. ||## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |### 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |### 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |3## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |.## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |L## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |u## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ồ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |x## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ử## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |l## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ý## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |k## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ỹ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |u## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ậ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |&## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |B## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |u## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |s## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |s## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |s## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |L## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |### 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |### 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |### 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |3## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |.## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |1## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |.## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |T## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ầ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |B## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |k## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |(## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |S## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |v## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |-## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |s## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |L## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |)## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |*## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |(## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |C## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ủ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |y## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ế## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |u## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |p## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ụ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |v## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ụ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |l## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ấ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |y## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ĩ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ừ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |b## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ả## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |K## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |w## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |l## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |B## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |s## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |,## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |k## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ô## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ó## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |l## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |p## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ứ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ạ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |p## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |)## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |*## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |### 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |### 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |### 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |3## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |.## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |2## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |.## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |T## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ầ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |F## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |(## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |C## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |l## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |-## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |s## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |L## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |)## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |-## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |*## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |*## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |C## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |x## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |-## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |w## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |H## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |l## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |p## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |B## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |u## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |:## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |*## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |*## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |B## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ổ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |s## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |u## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |p## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |p## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |y## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |`## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |l## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |p## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |K## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |y## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |`## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |v## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |à## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |m## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |p## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |`## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |P## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |L## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |y## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |u## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |`## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |.## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |H## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |à## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |m## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |`## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |u## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |s## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |E## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |f## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |f## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |`## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |s## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ẽ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ự## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |k## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |x## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |m## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |`## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |l## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |p## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |K## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |y## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |`## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |u## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |y## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ề## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |v## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |à## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ó## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ồ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ạ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |b## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |à## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |v## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ế## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ư## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ớ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ẫ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ư## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ơ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ứ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ê## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |A## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |P## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |I## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |k## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ô## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |.## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |N## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ế## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |u## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ó## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |,## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ó## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |I## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ỏ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |đ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |á## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |p## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |"## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |?## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |"## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ở## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ó## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |p## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ả## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |N## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |v## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |b## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |.## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |B## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ấ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |m## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |v## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |à## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |s## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ẽ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |m## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ở## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |m## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |l## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ể## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ị## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ư## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ớ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ẫ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |.## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |-## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |*## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |*## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |M## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |k## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |w## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |R## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |E## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |:## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |*## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |*## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |T## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |í## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ợ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |p## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ư## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |v## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ệ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |`## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |-## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |m## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |k## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |w## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |`## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |k## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ế## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ợ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |p## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |`## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |m## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |k## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |-## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |f## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |m## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |`## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |đ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ể## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ị## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |á## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |b## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ả## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |,## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |k## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |b## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |x## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |,## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |l## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |s## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |v## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |à## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |đ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ạ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |s## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |p## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |p## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |s## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |à## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |U## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |I## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |â## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ệ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |.## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. ||## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. ||## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. ||## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. ||## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |Q## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |u## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |y## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ề## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ạ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |(## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |R## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |l## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |s## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |)## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. ||## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. ||## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. ||## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. ||## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. ||## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. ||## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. ||## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. ||## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. ||## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. ||## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. ||## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |### 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |### 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |5## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |.## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |X## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ử## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |l## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ý## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |L## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ỗ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |&## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |N## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ạ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |l## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ệ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |(## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |E## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |H## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |l## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |&## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |E## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |C## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |s## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |s## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |)## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |-## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |*## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |*## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |M## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |s## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |s## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |G## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |u## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |(## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |L## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ỗ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |4## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |0## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |4## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |)## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |:## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |*## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |*## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |N## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ú## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |H## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |l## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |p## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ự## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |đ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ộ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ẩ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |đ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ế## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |u## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ọ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |A## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |P## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |I## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |l## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ấ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |y## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |u## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ấ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |b## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ạ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |(## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |T## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |á## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |U## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |I## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ể## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ị## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |m## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |l## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ỗ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |)## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |.## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |### 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |### 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |6## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |.## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |H## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ư## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ớ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ẫ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |B## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ả## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ì## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |&## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |D## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |b## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |u## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |-## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |*## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |*## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |G## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |s## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |/## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |C## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ú## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ý## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |:## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |*## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |*## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |K## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |v## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ế## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ư## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ớ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ẫ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |,## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ế## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |u## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |s## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ử## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ụ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ẻ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |H## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |T## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |M## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |L## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ô## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ộ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |u## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |M## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |k## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |w## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |,## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ư## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |v## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ệ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |F## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ó## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ể## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |f## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |l## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |/## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |s## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |p## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |b## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ỏ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |đ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ằ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |m## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ố## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ấ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ô## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |X## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |S## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |S## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |.## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |C## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ầ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ú## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ý## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |đ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ị## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ạ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |.## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |### 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |### 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |7## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |.## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |M## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |s## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |&## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |T## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |s## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |k## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |s## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |-## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |S## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |y## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |P## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |s## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |:## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |1## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |0## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |-## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |T## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |s## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |k## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |s## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |:## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |4## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |(## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |G## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |u## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |,## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |M## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |r## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |k## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |w## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |U## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |I## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |,## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |C## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |x## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |b## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |u## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |l## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |o## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |)## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |_## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |T## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |à## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |l## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |i## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ệ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |u## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |k## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ỹ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |u## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ậ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |c## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |u## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ẩ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |P## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |R## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |O## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |D## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |(## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |A## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |-## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |R## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |e## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |a## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |d## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |y## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |)## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |-## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |C## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ậ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |p## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |h## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |ậ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |t## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |n## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |g## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |à## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |y## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |:## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. | ## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |2## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |0## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |2## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |6## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |-## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |0## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |5## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |-## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |0## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |2## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |_## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |## 4. Đặc tả API Interfaces
+
+### 4.1. Backend Endpoints
+| Endpoint | Method | Chức năng chính | Quyền hạn (Roles) |
+|---|---|---|---|
+| `/api/v1/guides/:key` | `GET` | Tải nội dung bài viết hướng dẫn | `VIEWER` |
+
+### 4.2. Frontend Services / Hooks
+
+| Hook / Service | API Tương ứng | Chức năng chính |
+|---|---|---|
+| `useGetGuideContentQuery(key)` | `GET /api/v1/guides/:key` | Hook gọi để load văn bản Markdown. |
