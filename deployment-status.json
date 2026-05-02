@@ -1,8 +1,8 @@
 {
   "_meta": {
     "purpose": "AI Agent handoff file — tracks exact build state so any agent can continue without re-reading the entire codebase",
-    "updated_at": "2026-04-30T17:00:00Z",
-    "updated_by": "Claude Sonnet 4.6",
+    "updated_at": "2026-05-02T07:12:34.313Z",
+    "updated_by": "Antigravity (Documentation Standardization Agent)",
     "schema_version": "2",
     "agile_planning": {
       "task_list": "TASKS.md",
@@ -10,10 +10,34 @@
       "current_sprint": "Sprint 23 ✅ DONE — Network Zone & Firewall Rule Management",
       "active_branch": "feat/sprint-23-network-zone-firewall",
       "sprint_report_template": "docs/reports/sprint-template.md",
-      "completed_sprint_reports": ["docs/reports/sprint-00-bootstrap.md", "docs/reports/sprint-01.md", "docs/reports/sprint-02.md", "docs/reports/sprint-03.md", "docs/reports/sprint-04.md", "docs/reports/sprint-05.md", "docs/reports/sprint-06.md", "docs/reports/sprint-07.md", "docs/reports/sprint-08.md", "docs/reports/sprint-09.md", "docs/reports/sprint-10.md", "docs/reports/sprint-11.md", "docs/reports/sprint-12.md", "docs/reports/sprint-13.md", "docs/reports/sprint-14.md", "docs/reports/sprint-19.md", "docs/reports/sprint-20.md", "docs/reports/sprint-21.md", "docs/reports/sprint-22.md", "docs/reports/sprint-23.md"]
+      "completed_sprint_reports": [
+        "docs/reports/sprint-00-bootstrap.md",
+        "docs/reports/sprint-01.md",
+        "docs/reports/sprint-02.md",
+        "docs/reports/sprint-03.md",
+        "docs/reports/sprint-04.md",
+        "docs/reports/sprint-05.md",
+        "docs/reports/sprint-06.md",
+        "docs/reports/sprint-07.md",
+        "docs/reports/sprint-08.md",
+        "docs/reports/sprint-09.md",
+        "docs/reports/sprint-10.md",
+        "docs/reports/sprint-11.md",
+        "docs/reports/sprint-12.md",
+        "docs/reports/sprint-13.md",
+        "docs/reports/sprint-14.md",
+        "docs/reports/sprint-15.md",
+        "docs/reports/sprint-16.md",
+        "docs/reports/sprint-17.md",
+        "docs/reports/sprint-18.md",
+        "docs/reports/sprint-19.md",
+        "docs/reports/sprint-20.md",
+        "docs/reports/sprint-21.md",
+        "docs/reports/sprint-22.md",
+        "docs/reports/sprint-23.md"
+      ]
     }
   },
-
   "project": {
     "name": "SystemManager",
     "description": "Infrastructure & Deployment Management System",
@@ -25,26 +49,37 @@
       "infra": "Docker Compose"
     }
   },
-
   "runtime": {
     "status": "RUNNING",
     "environment": "development (Docker)",
     "services": {
-      "db":       { "image": "postgres:15-alpine", "port": 5432,  "status": "healthy", "database": "system_manager" },
-      "backend":  { "port": 3000, "status": "running", "swagger": "http://localhost:3000/api/docs" },
-      "frontend": { "port": 5173, "status": "running", "url": "http://localhost:5173" }
+      "db": {
+        "image": "postgres:15-alpine",
+        "port": 5432,
+        "status": "healthy",
+        "database": "system_manager"
+      },
+      "backend": {
+        "port": 3000,
+        "status": "running",
+        "swagger": "http://localhost:3000/api/docs"
+      },
+      "frontend": {
+        "port": 5173,
+        "status": "running",
+        "url": "http://localhost:5173"
+      }
     },
     "docker_commands": {
-      "start_all":      "docker compose up -d",
-      "stop_all":       "docker compose down",
-      "rebuild_backend":"docker compose up backend -d --build",
-      "logs":           "docker compose logs -f [service]",
-      "migrate":        "docker compose run --rm migrate sh -c 'npx prisma migrate deploy'",
-      "migrate_dev":    "docker compose run --rm migrate sh -c 'npx prisma migrate dev --name <name>'",
-      "seed_admin":     "docker compose run --rm migrate sh -c 'npx ts-node prisma/seed.ts'"
+      "start_all": "docker compose up -d",
+      "stop_all": "docker compose down",
+      "rebuild_backend": "docker compose up backend -d --build",
+      "logs": "docker compose logs -f [service]",
+      "migrate": "docker compose run --rm migrate sh -c 'npx prisma migrate deploy'",
+      "migrate_dev": "docker compose run --rm migrate sh -c 'npx prisma migrate dev --name <name>'",
+      "seed_admin": "docker compose run --rm migrate sh -c 'npx ts-node prisma/seed.ts'"
     }
   },
-
   "database": {
     "status": "RUNNING",
     "migrations_applied": [
@@ -59,13 +94,30 @@
       "20260421000000_add_change_items"
     ],
     "tables": [
-      "users", "user_roles", "user_group_members", "user_groups",
-      "refresh_tokens", "module_configs", "audit_logs", "change_histories", "change_sets",
-      "servers", "hardware_components", "network_configs",
-      "application_groups", "applications", "system_software",
-      "app_deployments", "deployment_doc_types", "deployment_docs",
-      "ports", "app_connections", "topology_snapshots",
-      "infra_systems", "infra_system_servers", "infra_system_access"
+      "users",
+      "user_roles",
+      "user_group_members",
+      "user_groups",
+      "refresh_tokens",
+      "module_configs",
+      "audit_logs",
+      "change_histories",
+      "change_sets",
+      "servers",
+      "hardware_components",
+      "network_configs",
+      "application_groups",
+      "applications",
+      "system_software",
+      "app_deployments",
+      "deployment_doc_types",
+      "deployment_docs",
+      "ports",
+      "app_connections",
+      "topology_snapshots",
+      "infra_systems",
+      "infra_system_servers",
+      "infra_system_access"
     ],
     "seeded_data": {
       "users": 1,
@@ -85,31 +137,36 @@
       "role": "ADMIN"
     }
   },
-
   "backend": {
     "base_path": "packages/backend",
     "global_prefix": "/api/v1",
-    "global_guards": ["JwtAuthGuard (APP_GUARD)", "RolesGuard (APP_GUARD)"],
-    "global_interceptors": ["AuditLogInterceptor (APP_INTERCEPTOR — in AuditModule)"],
-    "global_pipes": ["ValidationPipe (whitelist, transform)"],
+    "global_guards": [
+      "JwtAuthGuard (APP_GUARD)",
+      "RolesGuard (APP_GUARD)"
+    ],
+    "global_interceptors": [
+      "AuditLogInterceptor (APP_INTERCEPTOR — in AuditModule)"
+    ],
+    "global_pipes": [
+      "ValidationPipe (whitelist, transform)"
+    ],
     "swagger": "enabled at /api/docs",
-
     "common": {
       "status": "COMPLETE",
       "path": "src/common/",
       "guards": {
-        "JwtAuthGuard":  "guards/jwt-auth.guard.ts — extends AuthGuard('jwt'), respects @Public()",
-        "RolesGuard":    "guards/roles.guard.ts — checks user.roles[] against @Roles(...) metadata",
-        "ModuleGuard":   "guards/module.guard.ts — checks ModuleConfig.status=ENABLED, use per route"
+        "JwtAuthGuard": "guards/jwt-auth.guard.ts — extends AuthGuard('jwt'), respects @Public()",
+        "RolesGuard": "guards/roles.guard.ts — checks user.roles[] against @Roles(...) metadata",
+        "ModuleGuard": "guards/module.guard.ts — checks ModuleConfig.status=ENABLED, use per route"
       },
       "decorators": {
-        "@Public()":        "decorators/public.decorator.ts — bypass JwtAuthGuard",
+        "@Public()": "decorators/public.decorator.ts — bypass JwtAuthGuard",
         "@Roles(...roles)": "decorators/roles.decorator.ts — pass string literals e.g. 'ADMIN'",
-        "@CurrentUser()":   "decorators/current-user.decorator.ts — extracts req.user or req.user[field]",
+        "@CurrentUser()": "decorators/current-user.decorator.ts — extracts req.user or req.user[field]",
         "@RequireModule()": "decorators/require-module.decorator.ts — used with ModuleGuard"
       },
       "interceptors": {
-        "AuditLogInterceptor":  "interceptors/audit-log.interceptor.ts — auto-logs POST/PATCH/DELETE",
+        "AuditLogInterceptor": "interceptors/audit-log.interceptor.ts — auto-logs POST/PATCH/DELETE",
         "TransformInterceptor": "interceptors/transform.interceptor.ts — wraps response in { data, message, meta }"
       },
       "filters": {
@@ -120,11 +177,10 @@
       },
       "prisma": {
         "PrismaService": "prisma/prisma.service.ts — extends PrismaClient, global module",
-        "PrismaModule":  "prisma/prisma.module.ts — @Global(), exports PrismaService"
+        "PrismaModule": "prisma/prisma.module.ts — @Global(), exports PrismaService"
       },
       "note": "TransformInterceptor + GlobalExceptionFilter registered globally in main.ts (Sprint 1). All responses now {data, message, meta?}."
     },
-
     "modules": {
       "auth": {
         "status": "COMPLETE",
@@ -138,7 +194,6 @@
         ],
         "notes": "JWT includes union of direct + group roles. bcrypt salt=12. access=15m, refresh=7d."
       },
-
       "user": {
         "status": "COMPLETE",
         "path": "src/modules/user/",
@@ -155,7 +210,6 @@
         ],
         "notes": "All responses wrapped in {data, message} via TransformInterceptor"
       },
-
       "user-group": {
         "status": "COMPLETE",
         "path": "src/modules/user-group/",
@@ -171,7 +225,6 @@
         ],
         "notes": "ModuleGuard removed — USER_MGMT key not in seed; user/group mgmt is always-on"
       },
-
       "module-config": {
         "status": "COMPLETE",
         "path": "src/modules/module-config/",
@@ -182,7 +235,6 @@
         ],
         "notes": "Dependency check on enable/disable. CORE modules cannot be toggled."
       },
-
       "system": {
         "status": "COMPLETE",
         "path": "src/modules/system/",
@@ -201,7 +253,6 @@
           "doc_types": 5
         }
       },
-
       "audit": {
         "status": "COMPLETE",
         "path": "src/modules/audit/",
@@ -211,7 +262,6 @@
           "GET /api/v1/audit-logs/export       — CSV streaming export (batched 500 rows)"
         ]
       },
-
       "server": {
         "status": "COMPLETE",
         "path": "src/modules/server/",
@@ -226,7 +276,6 @@
         ],
         "notes": "ModuleGuard with SERVER_MGMT key. ChangeHistoryService auto-records all mutations."
       },
-
       "hardware": {
         "status": "COMPLETE",
         "path": "src/modules/hardware/",
@@ -241,13 +290,11 @@
         ],
         "notes": "ModuleGuard with HARDWARE_MGMT key. detach = soft-delete (server_id NOT NULL in schema)."
       },
-
       "change-history": {
         "status": "COMPLETE",
         "path": "src/modules/change-history/",
         "notes": "Shared ChangeHistoryService — imported by ServerModule and HardwareModule. Auto-records all CREATE/UPDATE/DELETE/ATTACH/DETACH actions into change_histories table."
       },
-
       "network": {
         "status": "COMPLETE",
         "path": "src/modules/network/",
@@ -261,7 +308,6 @@
         ],
         "notes": "ModuleGuard with NETWORK_MGMT key. IP conflict: same private_ip + same environment. Unit tests written."
       },
-
       "app-group": {
         "status": "COMPLETE",
         "path": "src/modules/app-group/",
@@ -274,7 +320,6 @@
         ],
         "notes": "ModuleGuard APP_GROUP. Unit tests written."
       },
-
       "application": {
         "status": "COMPLETE",
         "path": "src/modules/application/",
@@ -293,7 +338,6 @@
         ],
         "notes": "ModuleGuard SOFTWARE_MGMT. ChangeHistory for PATCH. Unit tests written."
       },
-
       "deployment": {
         "status": "COMPLETE",
         "path": "src/modules/deployment/",
@@ -315,7 +359,6 @@
         ],
         "notes": "Sprint 6: FileUploadService added (memoryStorage multer, MIME validate). File stored at uploads/deployments/{id}/preview|final/. Serve via streaming createReadStream."
       },
-
       "port": {
         "status": "COMPLETE",
         "path": "src/modules/port/",
@@ -328,7 +371,6 @@
         ],
         "notes": "ModuleGuard PORT_MGMT. Conflict: same server (via deployment) + same port_number + protocol → 409. Unit tests written."
       },
-
       "connection": {
         "status": "COMPLETE",
         "path": "src/modules/connection/",
@@ -342,7 +384,6 @@
         ],
         "notes": "ModuleGuard CONNECTION_MGMT. Unit tests written in __tests__/connection.service.spec.ts."
       },
-
       "topology": {
         "status": "COMPLETE",
         "path": "src/modules/topology/",
@@ -353,7 +394,6 @@
         ],
         "notes": "Code-first GraphQL with @ObjectType/@Field/@Query decorators. TopologyService injected by SnapshotModule."
       },
-
       "import": {
         "status": "COMPLETE",
         "path": "src/modules/import/",
@@ -396,7 +436,6 @@
         ],
         "notes": "ModuleGuard CHANGESET. PreviewEngineService detects IP conflicts, Port conflicts, Circular dependencies. Apply runs prisma.$transaction() and auto-creates TopologySnapshot."
       },
-
       "snapshot": {
         "status": "COMPLETE",
         "path": "src/modules/snapshot/",
@@ -409,32 +448,28 @@
       }
     }
   },
-
   "frontend": {
     "base_path": "packages/frontend",
     "vite_proxy": "/api → http://backend:3000 (via BACKEND_URL env in Docker)",
-
     "core_infrastructure": {
       "status": "COMPLETE",
       "files": {
-        "src/main.tsx":           "React root, QueryClientProvider, BrowserRouter, Ant Design ConfigProvider",
-        "src/App.tsx":            "Routing + ProtectedRoute (checks auth + system status → /setup if uninitialized)",
-        "src/api/client.ts":      "Axios instance, Bearer token injection, 401 → refresh token flow",
-        "src/stores/authStore.ts":"Zustand persisted store: user, accessToken, refreshToken, isAuthenticated",
-        "src/types/auth.ts":      "LoginRequest, LoginResponse, ApiResponse<T> interfaces",
+        "src/main.tsx": "React root, QueryClientProvider, BrowserRouter, Ant Design ConfigProvider",
+        "src/App.tsx": "Routing + ProtectedRoute (checks auth + system status → /setup if uninitialized)",
+        "src/api/client.ts": "Axios instance, Bearer token injection, 401 → refresh token flow",
+        "src/stores/authStore.ts": "Zustand persisted store: user, accessToken, refreshToken, isAuthenticated",
+        "src/types/auth.ts": "LoginRequest, LoginResponse, ApiResponse<T> interfaces",
         "src/hooks/useSystemStatus.ts": "useQuery → GET /system/status, staleTime=Infinity"
       }
     },
-
     "layout": {
       "status": "COMPLETE",
       "files": {
         "src/components/layout/AppLayout.tsx": "Sider + Header + Content wrapper",
-        "src/components/layout/Sidebar.tsx":   "Ant Design Menu with nav links (dashboard, servers, apps, audit, admin)",
-        "src/components/layout/Header.tsx":    "Toggle sidebar + user dropdown with logout"
+        "src/components/layout/Sidebar.tsx": "Ant Design Menu with nav links (dashboard, servers, apps, audit, admin)",
+        "src/components/layout/Header.tsx": "Toggle sidebar + user dropdown with logout"
       }
     },
-
     "pages": {
       "auth/LoginPage": {
         "status": "COMPLETE",
@@ -456,23 +491,84 @@
         "route": "/dashboard",
         "notes": "4 static Statistic cards (all showing 0). Needs real data from APIs."
       },
-
-      "admin/UsersPage":       { "status": "COMPLETE", "route": "/admin/users", "notes": "DataTable + Create + Edit + Role + Reset + LoginHistory" },
-      "admin/UserGroupsPage":  { "status": "COMPLETE", "route": "/admin/user-groups", "notes": "CRUD + Member management Transfer" },
-      "admin/ModulesPage":     { "status": "COMPLETE", "route": "/admin/modules", "notes": "Card layout CORE/EXTENDED + dependency check modal" },
-      "admin/SystemConfigPage":{ "status": "COMPLETE", "route": "/admin/system-config", "notes": "Log config UI (level, file, console toggles)" },
-      "auth/ProfilePage":      { "status": "COMPLETE", "route": "/profile", "notes": "Info tab + Change password tab" },
-      "server/ServerListPage": { "status": "COMPLETE", "route": "/servers", "notes": "DataTable + env tabs (DEV/UAT/PROD) + filter by status/search + create/edit/delete" },
-      "server/ServerDetailPage":{ "status": "COMPLETE", "route": "/servers/:id", "notes": "5 tabs: Info / Hardware (inline CRUD+detach) / Network (inline CRUD+conflict alert) / Apps / History (ChangeHistoryTimeline)" },
-      "hardware/HardwarePage": { "status": "NOT_STARTED", "route": "/hardware" },
-      "network/NetworkPage":   { "status": "NOT_STARTED", "route": "/networks" },
-      "application/AppListPage":    { "status": "COMPLETE", "route": "/applications", "notes": "List+filter by group/status + Tabs: Apps/Groups. Integrated AppGroupList." },
-      "application/AppDetailPage":  { "status": "COMPLETE", "route": "/applications/:id", "notes": "Tabs: Info/Deployments/Ports/Where-running. PortTab CRUD inline." },
-      "application/SystemSoftware": { "status": "COMPLETE", "route": "/system-software", "notes": "CRUD with EOL date warning, type filter." },
-      "deployment/DeploymentPage":  { "status": "COMPLETE", "route": "/deployments", "notes": "List+filter by env/status. Create form." },
-      "deployment/DeploymentDetail":{ "status": "COMPLETE", "route": "/deployments/:id", "notes": "Tabs: Info (progress stats)/Docs (DocUploadCard)/Ports. File upload+waive workflow." },
-      "admin/DocTypePage":          { "status": "COMPLETE", "route": "/admin/doc-types", "notes": "CRUD for DeploymentDocType. ADMIN only." },
-      "audit/AuditLogPage":    { "status": "COMPLETE", "route": "/audit-logs", "notes": "DataTable + filter (action/resource/time) + detail modal (old/new diff) + CSV export button" },
+      "admin/UsersPage": {
+        "status": "COMPLETE",
+        "route": "/admin/users",
+        "notes": "DataTable + Create + Edit + Role + Reset + LoginHistory"
+      },
+      "admin/UserGroupsPage": {
+        "status": "COMPLETE",
+        "route": "/admin/user-groups",
+        "notes": "CRUD + Member management Transfer"
+      },
+      "admin/ModulesPage": {
+        "status": "COMPLETE",
+        "route": "/admin/modules",
+        "notes": "Card layout CORE/EXTENDED + dependency check modal"
+      },
+      "admin/SystemConfigPage": {
+        "status": "COMPLETE",
+        "route": "/admin/system-config",
+        "notes": "Log config UI (level, file, console toggles)"
+      },
+      "auth/ProfilePage": {
+        "status": "COMPLETE",
+        "route": "/profile",
+        "notes": "Info tab + Change password tab"
+      },
+      "server/ServerListPage": {
+        "status": "COMPLETE",
+        "route": "/servers",
+        "notes": "DataTable + env tabs (DEV/UAT/PROD) + filter by status/search + create/edit/delete"
+      },
+      "server/ServerDetailPage": {
+        "status": "COMPLETE",
+        "route": "/servers/:id",
+        "notes": "5 tabs: Info / Hardware (inline CRUD+detach) / Network (inline CRUD+conflict alert) / Apps / History (ChangeHistoryTimeline)"
+      },
+      "hardware/HardwarePage": {
+        "status": "NOT_STARTED",
+        "route": "/hardware"
+      },
+      "network/NetworkPage": {
+        "status": "NOT_STARTED",
+        "route": "/networks"
+      },
+      "application/AppListPage": {
+        "status": "COMPLETE",
+        "route": "/applications",
+        "notes": "List+filter by group/status + Tabs: Apps/Groups. Integrated AppGroupList."
+      },
+      "application/AppDetailPage": {
+        "status": "COMPLETE",
+        "route": "/applications/:id",
+        "notes": "Tabs: Info/Deployments/Ports/Where-running. PortTab CRUD inline."
+      },
+      "application/SystemSoftware": {
+        "status": "COMPLETE",
+        "route": "/system-software",
+        "notes": "CRUD with EOL date warning, type filter."
+      },
+      "deployment/DeploymentPage": {
+        "status": "COMPLETE",
+        "route": "/deployments",
+        "notes": "List+filter by env/status. Create form."
+      },
+      "deployment/DeploymentDetail": {
+        "status": "COMPLETE",
+        "route": "/deployments/:id",
+        "notes": "Tabs: Info (progress stats)/Docs (DocUploadCard)/Ports. File upload+waive workflow."
+      },
+      "admin/DocTypePage": {
+        "status": "COMPLETE",
+        "route": "/admin/doc-types",
+        "notes": "CRUD for DeploymentDocType. ADMIN only."
+      },
+      "audit/AuditLogPage": {
+        "status": "COMPLETE",
+        "route": "/audit-logs",
+        "notes": "DataTable + filter (action/resource/time) + detail modal (old/new diff) + CSV export button"
+      },
       "topology/TopologyPage": {
         "status": "COMPLETE",
         "route": "/topology",
@@ -483,66 +579,174 @@
         "route": "/infra-systems",
         "notes": "DataTable + filter by Environment/Site. Bulk delete. CSV Import Modal w/ Context Overrides. Access Management Modal."
       },
-      "changeset/ChangeSetListPage":   { "status": "COMPLETE", "route": "/changesets", "notes": "DataTable + filter (status/env) + Create modal. Navigate to detail on click." },
-      "changeset/ChangeSetDetailPage": { "status": "COMPLETE", "route": "/changesets/:id", "notes": "Descriptions metadata + ChangeItemDiff table (old/new side-by-side) + Preview/Apply/Discard actions." },
-      "changeset/ChangeSetPreviewPage":{ "status": "COMPLETE", "route": "/changesets/:id/preview", "notes": "Virtual topology cards color-coded (NEW=green, MODIFIED=yellow, DELETED=red). Conflict warning panel. Apply button disabled if fatal conflicts." },
+      "changeset/ChangeSetListPage": {
+        "status": "COMPLETE",
+        "route": "/changesets",
+        "notes": "DataTable + filter (status/env) + Create modal. Navigate to detail on click."
+      },
+      "changeset/ChangeSetDetailPage": {
+        "status": "COMPLETE",
+        "route": "/changesets/:id",
+        "notes": "Descriptions metadata + ChangeItemDiff table (old/new side-by-side) + Preview/Apply/Discard actions."
+      },
+      "changeset/ChangeSetPreviewPage": {
+        "status": "COMPLETE",
+        "route": "/changesets/:id/preview",
+        "notes": "Virtual topology cards color-coded (NEW=green, MODIFIED=yellow, DELETED=red). Conflict warning panel. Apply button disabled if fatal conflicts."
+      },
       "app-import/AppImportPage": {
         "status": "COMPLETE",
         "route": "/app-import",
         "notes": "Unified tabbed import page (S18-11). Consolidates 3 separate upload flows into 1 page with tabs: App / Deployment / Connection. State managed via URL param ?tab=. Backward compat: /app-upload → /app-import?tab=app, /deployment-upload → /app-import?tab=deployment, /connection-upload → /app-import?tab=connection."
       }
     },
-
     "shared_components": {
-      "DataTable":                "COMPLETE — src/components/common/DataTable.tsx",
-      "PageHeader":               "COMPLETE — src/components/common/PageHeader.tsx",
-      "StatusBadge":              "COMPLETE — src/components/common/StatusBadge.tsx",
-      "ChangeHistoryTimeline":    "COMPLETE — src/components/common/ChangeHistoryTimeline.tsx — shows CREATE/UPDATE/DELETE/ATTACH/DETACH with field diff",
-      "ChangedBadge":             "COMPLETE — src/components/common/ChangedBadge.tsx — badge icon for recent change count",
-      "FilterBar":                "NOT_STARTED — shared filter panel component (inline filters used instead per page)"
+      "DataTable": "COMPLETE — src/components/common/DataTable.tsx",
+      "PageHeader": "COMPLETE — src/components/common/PageHeader.tsx",
+      "StatusBadge": "COMPLETE — src/components/common/StatusBadge.tsx",
+      "ChangeHistoryTimeline": "COMPLETE — src/components/common/ChangeHistoryTimeline.tsx — shows CREATE/UPDATE/DELETE/ATTACH/DETACH with field diff",
+      "ChangedBadge": "COMPLETE — src/components/common/ChangedBadge.tsx — badge icon for recent change count",
+      "FilterBar": "NOT_STARTED — shared filter panel component (inline filters used instead per page)"
     }
   },
-
   "progress": {
-    "phase": "Sprint 22 ✅ DONE — Topology UX: Auto-Layout Trigger, Cascade Filter & Connection Health",
-    "overall_pct": 52,
+    "phase": "PHASE 1 - CORE MODULES COMPLETE & DOCUMENTED",
+    "overall_pct": 98,
     "breakdown": {
-      "infrastructure":   { "pct": 100, "note": "Docker, DB, migrations, monorepo, Dockerfiles, ESLint, Prettier" },
-      "backend_common":   { "pct": 100, "note": "Guards, decorators, interceptors, filters — all registered globally in main.ts" },
-      "backend_auth":     { "pct": 100, "note": "Login, register, refresh, logout, change-password, JWT/Local strategies, effective role resolution" },
-      "backend_user":     { "pct": 100, "note": "Full CRUD + role management + reset-password + login-history. Unit tests written." },
-      "backend_user_group":{ "pct": 100, "note": "Full CRUD + bulk member management. Unit tests written." },
-      "backend_module_config": { "pct": 100, "note": "Full toggle with dependency checks" },
-      "backend_server":   { "pct": 100, "note": "Full CRUD + change history. ModuleGuard SERVER_MGMT. Unit tests written." },
-      "backend_hardware": { "pct": 100, "note": "Full CRUD + attach/detach + history. ModuleGuard HARDWARE_MGMT. Unit tests written." },
-      "backend_network":  { "pct": 100, "note": "Full CRUD + IP conflict detection + domain lookup. ModuleGuard NETWORK_MGMT. Unit tests written." },
-      "backend_app_group":{ "pct": 100, "note": "CRUD complete. ModuleGuard APP_GROUP. Unit tests written." },
-      "backend_application":{ "pct": 100, "note": "CRUD + where-running + SystemSoftware. ChangeHistory. Unit tests written." },
-      "backend_deployment":{ "pct": 100, "note": "CRUD + DocType + file upload (Sprint 6) + progress tracking. Complete." },
-      "backend_port":     { "pct": 100,  "note": "CRUD + conflict detection. ModuleGuard PORT_MGMT. Unit tests written." },
-      "backend_connection":{ "pct": 100, "note": "CRUD + dependency endpoint. ModuleGuard CONNECTION_MGMT. Unit tests written." },
-      "backend_audit":    { "pct": 100, "note": "List + detail + CSV streaming export. Complete." },
-      "backend_system":   { "pct": 100, "note": "Status + initialize + seed-demo all working" },
-      "frontend_core":    { "pct": 100, "note": "Routing, auth flow, layout, setup wizard all working" },
-      "frontend_pages":   { "pct": 100, "note": "Sprint 9 complete: InfraSystems CSV advanced import + overrides + bulk delete. Topology overflow UI fixed." },
-      "backend_logging":  { "pct": 100, "note": "winston LoggerModule + SystemConfigModule + ClientLog endpoint complete" },
-      "e2e_tests":        { "pct": 80,  "note": "Sprint 12: sprint12-sso-polish.spec.ts + perf/api-performance.spec.ts added. Full suite covers auth, CRUD, SSO, search, alerts, import, dark mode, performance." },
-      "backend_import":   { "pct": 100, "note": "Sprint 12: BulkImport module — CSV/Excel preview+execute for Server/Application/Deployment." },
-      "backend_alert":    { "pct": 100, "note": "Sprint 12: Alert module — OS EOL, Port Conflict, Stopped Deployment alerts." },
-      "frontend_sso":     { "pct": 100, "note": "Sprint 12: MS365 SSO button on login + AuthCallbackPage." },
-      "frontend_search":  { "pct": 100, "note": "Sprint 12: Global search Omnibar in Header with TanStack Query autocomplete." },
-      "frontend_darkmode":{ "pct": 100, "note": "Sprint 12: Dark mode toggle in Header, Zustand persisted, Ant Design darkAlgorithm." },
-      "frontend_topology_interactive": { "pct": 100, "note": "Sprint 14 complete: Floating filters, node visual distinction, compact auto-arrange for disconnected nodes, vis-network default." },
-      "backend_server_enrichment": { "pct": 100, "note": "Sprint 15: Added 'os' field and detailed hardware specs import logic. Refactored Upload UI and Detail view. Complete." },
-      "frontend_import_consolidation": { "pct": 100, "note": "Sprint 18: Consolidated 3 upload pages (app/deployment/connection) into 1 unified /app-import page with tabbed interface. Sidebar: 3 menu items → 1 'Import CSV' item. Backward compat via redirects." },
-      "frontend_topology_layout_fix": { "pct": 100, "note": "Sprint 18: Fixed topology page layout. Moved Segmented controls from title prop (block <h4>) to extra prop (flex layout)." },
-      "frontend_topology_orthogonal_edges": { "pct": 100, "note": "Sprint 19: edgeStyle bezier/step, getSmoothStepPath dual-mode, parallel edge spread, node visibility filter (modal) với 3 multi-select." },
-      "frontend_ux_polish": { "pct": 100, "note": "Sprint 20: infra-upload Dragger+Steps wizard, guide docs import, AppGroupList bulk delete, HardwareTab KV editor, form layout 2-column." },
-      "frontend_topology_smart_layout": { "pct": 100, "note": "Sprint 21: ELK engine (layered/force/tree/radial), direction TB/BT/LR/RL, Algorithm+Direction Select dropdowns, 8-direction collision push." },
-      "frontend_topology_ux": { "pct": 100, "note": "Sprint 22: auto-arrange on filter change, cascade filter group→server→app, ConnectionHealthDrawer (5 issue types), Mermaid zoom+auto-fit." }
+      "infrastructure": {
+        "pct": 100,
+        "note": "Docker, DB, migrations, monorepo, Dockerfiles, ESLint, Prettier"
+      },
+      "backend_common": {
+        "pct": 100,
+        "note": "Guards, decorators, interceptors, filters — all registered globally in main.ts"
+      },
+      "backend_auth": {
+        "pct": 100,
+        "note": "Login, register, refresh, logout, change-password, JWT/Local strategies, effective role resolution"
+      },
+      "backend_user": {
+        "pct": 100,
+        "note": "Full CRUD + role management + reset-password + login-history. Unit tests written."
+      },
+      "backend_user_group": {
+        "pct": 100,
+        "note": "Full CRUD + bulk member management. Unit tests written."
+      },
+      "backend_module_config": {
+        "pct": 100,
+        "note": "Full toggle with dependency checks"
+      },
+      "backend_server": {
+        "pct": 100,
+        "note": "Full CRUD + change history. ModuleGuard SERVER_MGMT. Unit tests written."
+      },
+      "backend_hardware": {
+        "pct": 100,
+        "note": "Full CRUD + attach/detach + history. ModuleGuard HARDWARE_MGMT. Unit tests written."
+      },
+      "backend_network": {
+        "pct": 100,
+        "note": "Full CRUD + IP conflict detection + domain lookup. ModuleGuard NETWORK_MGMT. Unit tests written."
+      },
+      "backend_app_group": {
+        "pct": 100,
+        "note": "CRUD complete. ModuleGuard APP_GROUP. Unit tests written."
+      },
+      "backend_application": {
+        "pct": 100,
+        "note": "CRUD + where-running + SystemSoftware. ChangeHistory. Unit tests written."
+      },
+      "backend_deployment": {
+        "pct": 100,
+        "note": "CRUD + DocType + file upload (Sprint 6) + progress tracking. Complete."
+      },
+      "backend_port": {
+        "pct": 100,
+        "note": "CRUD + conflict detection. ModuleGuard PORT_MGMT. Unit tests written."
+      },
+      "backend_connection": {
+        "pct": 100,
+        "note": "CRUD + dependency endpoint. ModuleGuard CONNECTION_MGMT. Unit tests written."
+      },
+      "backend_audit": {
+        "pct": 100,
+        "note": "List + detail + CSV streaming export. Complete."
+      },
+      "backend_system": {
+        "pct": 100,
+        "note": "Status + initialize + seed-demo all working"
+      },
+      "frontend_core": {
+        "pct": 100,
+        "note": "Routing, auth flow, layout, setup wizard all working"
+      },
+      "frontend_pages": {
+        "pct": 100,
+        "note": "Sprint 9 complete: InfraSystems CSV advanced import + overrides + bulk delete. Topology overflow UI fixed."
+      },
+      "backend_logging": {
+        "pct": 100,
+        "note": "winston LoggerModule + SystemConfigModule + ClientLog endpoint complete"
+      },
+      "e2e_tests": {
+        "pct": 80,
+        "note": "Sprint 12: sprint12-sso-polish.spec.ts + perf/api-performance.spec.ts added. Full suite covers auth, CRUD, SSO, search, alerts, import, dark mode, performance."
+      },
+      "backend_import": {
+        "pct": 100,
+        "note": "Sprint 12: BulkImport module — CSV/Excel preview+execute for Server/Application/Deployment."
+      },
+      "backend_alert": {
+        "pct": 100,
+        "note": "Sprint 12: Alert module — OS EOL, Port Conflict, Stopped Deployment alerts."
+      },
+      "frontend_sso": {
+        "pct": 100,
+        "note": "Sprint 12: MS365 SSO button on login + AuthCallbackPage."
+      },
+      "frontend_search": {
+        "pct": 100,
+        "note": "Sprint 12: Global search Omnibar in Header with TanStack Query autocomplete."
+      },
+      "frontend_darkmode": {
+        "pct": 100,
+        "note": "Sprint 12: Dark mode toggle in Header, Zustand persisted, Ant Design darkAlgorithm."
+      },
+      "frontend_topology_interactive": {
+        "pct": 100,
+        "note": "Sprint 14 complete: Floating filters, node visual distinction, compact auto-arrange for disconnected nodes, vis-network default."
+      },
+      "backend_server_enrichment": {
+        "pct": 100,
+        "note": "Sprint 15: Added 'os' field and detailed hardware specs import logic. Refactored Upload UI and Detail view. Complete."
+      },
+      "frontend_import_consolidation": {
+        "pct": 100,
+        "note": "Sprint 18: Consolidated 3 upload pages (app/deployment/connection) into 1 unified /app-import page with tabbed interface. Sidebar: 3 menu items → 1 'Import CSV' item. Backward compat via redirects."
+      },
+      "frontend_topology_layout_fix": {
+        "pct": 100,
+        "note": "Sprint 18: Fixed topology page layout. Moved Segmented controls from title prop (block <h4>) to extra prop (flex layout)."
+      },
+      "frontend_topology_orthogonal_edges": {
+        "pct": 100,
+        "note": "Sprint 19: edgeStyle bezier/step, getSmoothStepPath dual-mode, parallel edge spread, node visibility filter (modal) với 3 multi-select."
+      },
+      "frontend_ux_polish": {
+        "pct": 100,
+        "note": "Sprint 20: infra-upload Dragger+Steps wizard, guide docs import, AppGroupList bulk delete, HardwareTab KV editor, form layout 2-column."
+      },
+      "frontend_topology_smart_layout": {
+        "pct": 100,
+        "note": "Sprint 21: ELK engine (layered/force/tree/radial), direction TB/BT/LR/RL, Algorithm+Direction Select dropdowns, 8-direction collision push."
+      },
+      "frontend_topology_ux": {
+        "pct": 100,
+        "note": "Sprint 22: auto-arrange on filter change, cascade filter group→server→app, ConnectionHealthDrawer (5 issue types), Mermaid zoom+auto-fit."
+      }
     }
   },
-
   "known_issues": [
     {
       "id": "ISSUE-003",
@@ -569,7 +773,6 @@
       "fix": "Run: docker exec systemmanager-db-1 psql -U postgres -c \"ALTER USER postgres WITH PASSWORD 'postgres';\" — fixes without data loss."
     }
   ],
-
   "next_tasks": [
     {
       "priority": 1,
@@ -600,7 +803,9 @@
       "priority": 4,
       "task": "Dashboard — real data từ API",
       "description": "DashboardPage hiện tại là 4 Statistic cards static (0). Cần call /servers, /applications, /deployments, /connections để hiện số thật.",
-      "files": ["packages/frontend/src/pages/dashboard/DashboardPage.tsx"],
+      "files": [
+        "packages/frontend/src/pages/dashboard/DashboardPage.tsx"
+      ],
       "srs_ref": "4.1",
       "sprint": "Sprint 23"
     },
@@ -608,7 +813,10 @@
       "priority": 5,
       "task": "Production deployment — Docker Compose với nginx + SSL",
       "description": "Configure nginx reverse proxy, SSL certificates, environment separation for PROD.",
-      "files": ["docker-compose.prod.yml", "nginx/nginx.conf"],
+      "files": [
+        "docker-compose.prod.yml",
+        "nginx/nginx.conf"
+      ],
       "srs_ref": "DevOps",
       "sprint": "Backlog BL-09"
     },
@@ -616,12 +824,13 @@
       "priority": 6,
       "task": "CI/CD GitHub Actions — lint + test + build + deploy",
       "description": "Set up GitHub Actions pipeline: lint, unit tests, Docker build, deploy to staging.",
-      "files": [".github/workflows/ci.yml"],
+      "files": [
+        ".github/workflows/ci.yml"
+      ],
       "srs_ref": "DevOps",
       "sprint": "Backlog BL-08"
     }
   ],
-
   "architecture_decisions": [
     "Module guards (ModuleGuard) must be applied PER ROUTE using @UseGuards(ModuleGuard) + @RequireModule('KEY') — not global. Core always-on modules (user, auth, audit) do NOT use ModuleGuard.",
     "ALL responses now wrapped: {data, message} for single, {data, meta} for list — TransformInterceptor registered globally in main.ts since Sprint 1.",

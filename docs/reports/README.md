@@ -1,32 +1,30 @@
-# Sprint Reports
+# Báo cáo Triển khai Dự án (Project Implementation Reports)
 
-Thư mục này chứa báo cáo từng sprint của dự án SystemManager.
+Thư mục này chứa toàn bộ lịch sử triển khai và đặc tả kỹ thuật chi tiết theo từng Sprint của dự án **SystemManager**.
 
-## Cấu trúc
+> [!IMPORTANT]
+> **Tiêu chuẩn Tài liệu:** Toàn bộ báo cáo từ Sprint 00 đến Sprint 23 đã được nâng cấp lên chuẩn **Deep Dive Technical Specification**. Nội dung bao gồm chi tiết luồng xử lý (Business Logic) ở cả tầng Backend (NestJS) và Frontend (React/AntD).
 
-```
+## Danh mục Tài liệu Cốt lõi
+
+1.  **[AGILE_REQUIREMENTS.md](AGILE_REQUIREMENTS.md)**: Danh mục Epic và User Stories (Acceptance Criteria) - Nguồn tham chiếu cho Sprint Reports.
+2.  **[sprint-00-bootstrap.md](sprint-00-bootstrap.md)**: Thiết lập nền tảng, Infrastructure & Auth.
+3.  **[sprint-14.md](sprint-14.md)**: Chi tiết Engine Topology 2D & Layout Algorithms.
+4.  **[sprint-21.md](sprint-21.md)**: Hệ thống ChangeSets & So sánh cấu hình.
+
+## Cấu trúc thư mục
+
+```text
 reports/
 ├── README.md                    # File này
-├── sprint-template.md           # Template báo cáo sprint
-├── sprint-00-bootstrap.md       # Sprint 0: Bootstrap & Infrastructure (DONE)
-├── sprint-01.md                 # Sprint 1: User & UserGroup Backend
-├── sprint-02.md                 # Sprint 2: Admin Frontend
+├── AGILE_REQUIREMENTS.md        # Yêu cầu Agile (User Stories)
+├── sprint-template.md           # Template báo cáo sprint chuẩn
+├── sprint-00-bootstrap.md       # Báo cáo chi tiết từng Sprint
 └── ...
 ```
 
-## Quy ước đặt tên
+## Liên kết Quan trọng
 
-- `sprint-XX-<short-name>.md` — báo cáo sprint đã hoàn thành (có tên mô tả)
-- `sprint-XX.md` — báo cáo sprint chưa bắt đầu hoặc đang thực hiện
-
-## Khi nào tạo report
-
-1. **Đầu sprint**: copy `sprint-template.md`, điền goal + planned tasks
-2. **Giữa sprint**: cập nhật blockers, thay đổi scope
-3. **Cuối sprint**: điền actual velocity, achievements, retrospective
-
-## Liên kết
-
-- [TASKS.md](../TASKS.md) — Agile task list đầy đủ với sprint plan
-- [deployment-status.json](../deployment-status.json) — Trạng thái runtime hiện tại
-- [docs/SRS.md](../docs/SRS.md) — Software Requirements Specification
+- **[deployment-status.json](../../deployment-status.json)**: Trạng thái triển khai và build state hiện tại.
+- **[SRS.md](../../docs/SRS.md)**: Đặc tả yêu cầu phần mềm (High-level).
+- **[TASKS.md](../../TASKS.md)**: Danh sách Task chi tiết và phân bổ point.
