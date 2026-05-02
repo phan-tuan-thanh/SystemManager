@@ -2,9 +2,9 @@ import { IsIn, IsObject, IsOptional, IsString } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class ImportPreviewDto {
-  @ApiProperty({ description: 'Target entity type', enum: ['server', 'application', 'deployment', 'connection'] })
-  @IsIn(['server', 'application', 'deployment', 'connection'] as const)
-  type: 'server' | 'application' | 'deployment' | 'connection';
+  @ApiProperty({ description: 'Target entity type', enum: ['server', 'application', 'deployment', 'connection', 'network_zone', 'zone_ip'] })
+  @IsIn(['server', 'application', 'deployment', 'connection', 'network_zone', 'zone_ip'] as const)
+  type: 'server' | 'application' | 'deployment' | 'connection' | 'network_zone' | 'zone_ip';
 
   @ApiPropertyOptional({ description: 'Target environment for import' })
   @IsOptional()

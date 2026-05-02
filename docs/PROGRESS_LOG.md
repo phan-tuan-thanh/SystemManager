@@ -4,6 +4,32 @@ A chronological record of project milestones, updates, and sprint summaries.
 
 ---
 
+## 2026-04-30 — Sprint 23: Network Zone & Firewall Rule Management ✅ Hoàn thành
+
+- ✅ S23-01: Prisma schema — NetworkZone + ZoneIpEntry + FirewallRule + 3 enums (NetworkZoneType, FirewallAction, FirewallRuleStatus)
+- ✅ S23-02: Migration add_network_zone_firewall_rule applied via SQL trực tiếp
+- ✅ S23-03: NetworkZone module — 9 endpoints: CRUD zone + list/add/bulk-import/delete IPs
+- ✅ S23-04: FirewallRule module — 7 endpoints: CRUD + POST /import + GET /export (XLSX)
+- ✅ S23-05: AppModule đăng ký NetworkZoneModule + FirewallRuleModule
+- ✅ S23-06: FE /network-zones — DataTable + ZoneForm modal + ZoneIpDrawer
+- ✅ S23-07: FE /firewall-rules — DataTable + FirewallRuleForm Drawer + Import Modal + Export XLSX
+- ✅ S23-08: FirewallTopologyView — ReactFlow + dagre layout, Zone/Server/IP nodes, ALLOW(xanh)/DENY(đỏ) edges
+- ✅ S23-09: Routes App.tsx + Sidebar menu (GlobalOutlined + SafetyCertificateOutlined)
+- Branch: `feat/sprint-23-network-zone-firewall` pushed
+- Sprint plan: `docs/plans/sprint-23-network-zone-firewall.md` cập nhật
+
+---
+
+## 2026-04-30 — Sprint 23: Bắt đầu implement Network Zone & Firewall Rule Management
+
+- Yêu cầu ghi nhận vào SRS.md sections 4.9.1, 4.9.2, 4.9.3
+- Sprint plan tạo mới: `docs/plans/sprint-23-network-zone-firewall.md`
+- Kế hoạch kỹ thuật: `docs/IMPLEMENTATION_DETAILS.md` (entry Sprint 23)
+- Tasks mới: S23-01 đến S23-09 (29 points)
+- Nội dung: NetworkZone + ZoneIpEntry BE/FE, FirewallRule BE/FE + import/export XLSX, Firewall Topology view
+
+---
+
 ## 2026-04-30 — Sprint 22: Topology UX Enhancements ✅ Hoàn thành
 
 - ✅ S22-01: Auto-arrange khi thay đổi layoutAlgorithm/layoutDirection (stable ref + useEffect)

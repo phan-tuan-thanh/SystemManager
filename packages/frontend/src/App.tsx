@@ -23,13 +23,15 @@ import AuditLogPage from './pages/audit/AuditLogPage';
 import ConnectionListPage from './pages/connection/index';
 import TopologyPage from './pages/topology/index';
 import InfraSystemListPage from './pages/infra-system/index';
-import InfraUploadPage from './pages/infra-upload/index';
+import InfraImportPage from './pages/infra-import/index';
 import AppImportPage from './pages/app-import/index';
 import ChangeSetListPage from './pages/changeset/index';
 import ChangeSetDetailPage from './pages/changeset/[id]';
 import ChangeSetPreviewPage from './pages/changeset/preview';
 import AuthCallbackPage from './pages/auth/AuthCallbackPage';
 import GuidePage from './pages/guide/GuidePage';
+import NetworkZonePage from './pages/network-zone/index';
+import FirewallRulePage from './pages/firewall-rule/index';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -84,10 +86,14 @@ export default function App() {
 
                 {/* Network routes */}
                 <Route path="/networks" element={<NetworkListPage />} />
+                <Route path="/network-zones" element={<NetworkZonePage />} />
+                <Route path="/firewall-rules" element={<FirewallRulePage />} />
 
                 {/* Infra System routes */}
                 <Route path="/infra-systems" element={<InfraSystemListPage />} />
-                <Route path="/infra-upload" element={<InfraUploadPage />} />
+                <Route path="/infra-import" element={<InfraImportPage />} />
+                {/* Legacy — redirect to unified import */}
+                <Route path="/infra-upload" element={<Navigate to="/infra-import?tab=server" replace />} />
 
                 {/* Application routes */}
                 <Route path="/applications" element={<ApplicationListPage />} />

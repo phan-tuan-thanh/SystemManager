@@ -139,6 +139,32 @@ enum ConnectionType {
   DATABASE
 }
 
+enum NetworkZoneType {
+  LOCAL
+  DMZ
+  DB
+  DEV
+  UAT
+  PROD
+  INTERNET
+  MANAGEMENT
+  STORAGE
+  BACKUP
+  CUSTOM
+}
+
+enum FirewallAction {
+  ALLOW
+  DENY
+}
+
+enum FirewallRuleStatus {
+  ACTIVE
+  INACTIVE
+  PENDING_APPROVAL
+  REJECTED
+}
+
 // ─── User & Auth ────────────────────────────────────────────────
 
 model User {
@@ -347,6 +373,7 @@ model Server {
   infra_systems         InfraSystemServer[]
   current_os_install    ServerOsInstall?      @relation("CurrentOs", fields: [current_os_install_id], references: [id])
   os_installs           ServerOsInstall[]     @relation("ServerInstalls")
+  firewall_rules        FirewallRule[]
 
   @@index([environment])
   @@index([status])
@@ -538,6 +565,7 @@ model Port {
   application Application    @relation(fields: [application_id], references: [id])
   deployment  AppDeployment? @relation(fields: [deployment_id], references: [id])
   app_connections AppConnection[]
+  firewall_rules  FirewallRule[]
 
   @@index([application_id])
   @@index([deployment_id])
@@ -684,4 +712,77 @@ model ServerOsInstall {
   @@index([application_id])
   @@index([server_id, replaced_at])
   @@map("server_os_installs")
+}
+
+// ─── Network Zone & Firewall ──────────────────────────────────────
+
+model NetworkZone {
+  id          String          @id @default(uuid()) @db.Uuid
+  name        String          @db.VarChar(100)
+  code        String          @db.VarChar(50)
+  zone_type   NetworkZoneType @default(CUSTOM)
+  description String?         @db.Text
+  color       String?         @db.VarChar(20)
+  environment Environment
+  created_at  DateTime        @default(now())
+  updated_at  DateTime        @updatedAt
+  deleted_at  DateTime?
+
+  ip_entries          ZoneIpEntry[]
+  firewall_rules_src  FirewallRule[] @relation("SrcZone")
+  firewall_rules_dst  FirewallRule[] @relation("DstZone")
+
+  @@unique([code, environment])
+  @@index([environment])
+  @@map("network_zones")
+}
+
+model ZoneIpEntry {
+  id          String   @id @default(uuid()) @db.Uuid
+  zone_id     String   @db.Uuid
+  ip_address  String   @db.VarChar(50)
+  label       String?  @db.VarChar(200)
+  description String?  @db.Text
+  is_range    Boolean  @default(false)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  deleted_at  DateTime?
+
+  zone NetworkZone @relation(fields: [zone_id], references: [id])
+
+  @@index([zone_id])
+  @@map("zone_ip_entries")
+}
+
+model FirewallRule {
+  id                    String             @id @default(uuid()) @db.Uuid
+  name                  String             @db.VarChar(200)
+  description           String?            @db.Text
+  environment           Environment
+  source_zone_id        String?            @db.Uuid
+  source_ip             String?            @db.VarChar(50)
+  destination_zone_id   String?            @db.Uuid
+  destination_server_id String             @db.Uuid
+  destination_port_id   String?            @db.Uuid
+  protocol              String             @default("TCP") @db.VarChar(10)
+  action                FirewallAction     @default(ALLOW)
+  status                FirewallRuleStatus @default(PENDING_APPROVAL)
+  request_date          DateTime?
+  approved_by           String?            @db.VarChar(200)
+  notes                 String?            @db.Text
+  created_at            DateTime           @default(now())
+  updated_at            DateTime           @updatedAt
+  deleted_at            DateTime?
+
+  source_zone        NetworkZone? @relation("SrcZone", fields: [source_zone_id], references: [id])
+  destination_zone   NetworkZone? @relation("DstZone", fields: [destination_zone_id], references: [id])
+  destination_server Server       @relation(fields: [destination_server_id], references: [id])
+  destination_port   Port?        @relation(fields: [destination_port_id], references: [id])
+
+  @@index([environment])
+  @@index([source_zone_id])
+  @@index([destination_server_id])
+  @@index([destination_port_id])
+  @@index([status])
+  @@map("firewall_rules")
 }

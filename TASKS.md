@@ -1,6 +1,6 @@
 # SystemManager — Agile Task List & Sprint Plan
 
-> **Trạng thái hiện tại:** Sprint 22 ✅ DONE — Topology UX: Auto-Layout Trigger, Cascade Filter & Connection Health
+> **Trạng thái hiện tại:** Sprint 23 ✅ DONE — Network Zone & Firewall Rule Management
 
 ---
 
@@ -515,6 +515,29 @@
 | S21-03 | `[FE]` Cải thiện collision avoidance trong handleNodeDragStop: 8-direction push | 2 | ✅ | 4.5.7 |
 
 **Sprint 21 Total: 9 points**
+
+---
+
+## Sprint 23 — Network Zone & Firewall Rule Management ✅ DONE
+
+**Mục tiêu:** Phân vùng mạng (NetworkZone + ZoneIpEntry), quản lý firewall rule (CRUD/import/export XLSX) và topology phân vùng mạng thể hiện kết nối IP→server:port.
+**Thời gian:** 2026-04-30
+**Branch:** `feat/sprint-23-network-zone-firewall`
+**Plan:** [docs/plans/sprint-23-network-zone-firewall.md](docs/plans/sprint-23-network-zone-firewall.md)
+
+| # | Task | Points | Status | SRS Ref |
+|---|------|--------|--------|---------|
+| S23-01 | `[BE]` Prisma schema: NetworkZone + ZoneIpEntry + FirewallRule + 3 enums | 3 | ✅ | 4.9.1 |
+| S23-02 | `[BE]` Migration: add_network_zone_firewall_rule | 1 | ✅ | 4.9.1 |
+| S23-03 | `[BE]` NetworkZone module: CRUD zone + ZoneIpEntry + bulk IP import | 3 | ✅ | 4.9.1 |
+| S23-04 | `[BE]` FirewallRule module: CRUD + import CSV/XLSX + export XLSX | 5 | ✅ | 4.9.2 |
+| S23-05 | `[BE]` Đăng ký NetworkZoneModule + FirewallRuleModule vào AppModule | 1 | ✅ | — |
+| S23-06 | `[FE]` NetworkZone page: list zones + IP management drawer | 5 | ✅ | 4.9.1 |
+| S23-07 | `[FE]` FirewallRule page: list + form + import + export XLSX | 5 | ✅ | 4.9.2 |
+| S23-08 | `[FE]` FirewallTopologyView: ReactFlow zone→server:port từ firewall rules | 5 | ✅ | 4.9.3 |
+| S23-09 | `[FE]` Routes + Sidebar: /network-zones + /firewall-rules | 1 | ✅ | — |
+
+**Sprint 23 Total: 29 points**
 
 ---
 

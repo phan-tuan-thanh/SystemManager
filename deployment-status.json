@@ -1,16 +1,16 @@
 {
   "_meta": {
     "purpose": "AI Agent handoff file — tracks exact build state so any agent can continue without re-reading the entire codebase",
-    "updated_at": "2026-04-30T23:59:00+07:00",
+    "updated_at": "2026-04-30T17:00:00Z",
     "updated_by": "Claude Sonnet 4.6",
     "schema_version": "2",
     "agile_planning": {
       "task_list": "TASKS.md",
       "reports_folder": "docs/reports/",
-      "current_sprint": "Sprint 22 ✅ DONE — Topology UX: Auto-Layout Trigger, Cascade Filter & Connection Health",
-      "active_branch": "feat/sprint-22-topology-ux",
+      "current_sprint": "Sprint 23 ✅ DONE — Network Zone & Firewall Rule Management",
+      "active_branch": "feat/sprint-23-network-zone-firewall",
       "sprint_report_template": "docs/reports/sprint-template.md",
-      "completed_sprint_reports": ["docs/reports/sprint-00-bootstrap.md", "docs/reports/sprint-01.md", "docs/reports/sprint-02.md", "docs/reports/sprint-03.md", "docs/reports/sprint-04.md", "docs/reports/sprint-05.md", "docs/reports/sprint-06.md", "docs/reports/sprint-07.md", "docs/reports/sprint-08.md", "docs/reports/sprint-09.md", "docs/reports/sprint-10.md", "docs/reports/sprint-11.md", "docs/reports/sprint-12.md", "docs/reports/sprint-13.md", "docs/reports/sprint-14.md", "docs/reports/sprint-19.md", "docs/reports/sprint-20.md", "docs/reports/sprint-21.md", "docs/reports/sprint-22.md"]
+      "completed_sprint_reports": ["docs/reports/sprint-00-bootstrap.md", "docs/reports/sprint-01.md", "docs/reports/sprint-02.md", "docs/reports/sprint-03.md", "docs/reports/sprint-04.md", "docs/reports/sprint-05.md", "docs/reports/sprint-06.md", "docs/reports/sprint-07.md", "docs/reports/sprint-08.md", "docs/reports/sprint-09.md", "docs/reports/sprint-10.md", "docs/reports/sprint-11.md", "docs/reports/sprint-12.md", "docs/reports/sprint-13.md", "docs/reports/sprint-14.md", "docs/reports/sprint-19.md", "docs/reports/sprint-20.md", "docs/reports/sprint-21.md", "docs/reports/sprint-22.md", "docs/reports/sprint-23.md"]
     }
   },
 
@@ -573,13 +573,20 @@
   "next_tasks": [
     {
       "priority": 1,
+      "task": "Merge feat/sprint-23-network-zone-firewall → main",
+      "description": "PR #5 đã tạo. Review và merge.",
+      "pr": "https://github.com/phan-tuan-thanh/SystemManager/pull/5",
+      "sprint": "Sprint 23 close-out"
+    },
+    {
+      "priority": 2,
       "task": "Merge feat/sprint-22-topology-ux → main",
       "description": "PR #4 đã tạo. Review và merge.",
       "pr": "https://github.com/phan-tuan-thanh/SystemManager/pull/4",
       "sprint": "Sprint 22 close-out"
     },
     {
-      "priority": 2,
+      "priority": 3,
       "task": "Fix pre-existing TS errors trong 3D topology files",
       "description": "Topology3DView.tsx, ConnectionEdge3D.tsx có lỗi three.js/react-three-fiber type mismatch. CreateConnectionModal.tsx unused imports.",
       "files": [
@@ -590,7 +597,7 @@
       "sprint": "Backlog / Sprint 23"
     },
     {
-      "priority": 3,
+      "priority": 4,
       "task": "Dashboard — real data từ API",
       "description": "DashboardPage hiện tại là 4 Statistic cards static (0). Cần call /servers, /applications, /deployments, /connections để hiện số thật.",
       "files": ["packages/frontend/src/pages/dashboard/DashboardPage.tsx"],
@@ -598,7 +605,7 @@
       "sprint": "Sprint 23"
     },
     {
-      "priority": 4,
+      "priority": 5,
       "task": "Production deployment — Docker Compose với nginx + SSL",
       "description": "Configure nginx reverse proxy, SSL certificates, environment separation for PROD.",
       "files": ["docker-compose.prod.yml", "nginx/nginx.conf"],
@@ -606,7 +613,7 @@
       "sprint": "Backlog BL-09"
     },
     {
-      "priority": 5,
+      "priority": 6,
       "task": "CI/CD GitHub Actions — lint + test + build + deploy",
       "description": "Set up GitHub Actions pipeline: lint, unit tests, Docker build, deploy to staging.",
       "files": [".github/workflows/ci.yml"],

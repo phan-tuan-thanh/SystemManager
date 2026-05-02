@@ -25,6 +25,11 @@ export default function LoginPage() {
     if (ssoError) {
       message.error(`Microsoft 365 login failed: ${ssoError.replace(/_/g, ' ')}`);
     }
+
+    if (localStorage.getItem('session_expired')) {
+      localStorage.removeItem('session_expired');
+      message.warning('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.', 6);
+    }
   }, []);
 
   const onFinish = async (values: { email: string; password: string }) => {

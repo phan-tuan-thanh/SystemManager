@@ -36,7 +36,9 @@ import {
   Badge,
   App,
   Tag,
+  Tabs,
 } from 'antd';
+import { useState as useTabState } from 'react';
 import {
   DownloadOutlined,
   ReloadOutlined,
@@ -59,6 +61,7 @@ import TopologyVisNetworkView, { type TopologyVisNetworkHandle } from './compone
 import TopologyMermaidView from './components/TopologyMermaidView';
 import { CreateConnectionModal } from './components/CreateConnectionModal';
 import ConnectionHealthDrawer, { analyzeTopologyHealth } from './components/ConnectionHealthDrawer';
+import FirewallTopologyView from './components/FirewallTopologyView';
 import { useTopologyQuery, ServerNode, ConnectionEdge } from './hooks/useTopology';
 import { useCreateSnapshot } from './hooks/useTopology';
 import { useTopologySubscription } from './hooks/useTopologySubscription';
@@ -1492,9 +1495,19 @@ function TopologyPageInner() {
 }
 
 export default function TopologyPage() {
+  const [activeTab, setActiveTab] = useTabState<'app' | 'firewall'>('app');
   return (
     <App>
-      <TopologyPageInner />
+      <Tabs
+        activeKey={activeTab}
+        onChange={(k) => setActiveTab(k as 'app' | 'firewall')}
+        style={{ padding: '0 24px' }}
+        items={[
+          { key: 'app', label: 'Sơ đồ ứng dụng' },
+          { key: 'firewall', label: '🔒 Firewall Topology' },
+        ]}
+      />
+      {activeTab === 'app' ? <TopologyPageInner /> : <FirewallTopologyView />}
     </App>
   );
 }

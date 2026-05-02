@@ -852,3 +852,7 @@ export default function ServerUploadPage() {
     </div>
   );
 }
+
+export function InfraUploadContent() {
+  return <ServerUploadPage />;
+}

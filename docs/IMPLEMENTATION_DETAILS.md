@@ -4,6 +4,34 @@ This document consolidates all past implementation plans and detailed technical 
 
 ---
 
+## Sprint 23 Network Zone & Firewall Rule Management (2026-04-30)
+
+**Status:** ✅ Completed
+**Context:** Hệ thống chưa có khái niệm phân vùng mạng (zone) và quản lý firewall rule. Cần bổ sung để quản lý tập trung IP theo zone, định nghĩa rule kết nối và xuất tài liệu trình cấp phê duyệt.
+**Decision:**
+- **NetworkZone**: model riêng, environment-scoped, có code unique per env, color để phân biệt trực quan. ZoneIpEntry là danh sách IP/CIDR thuộc zone.
+- **FirewallRule**: kết nối source_zone/source_ip → destination_server + destination_port; có action (ALLOW/DENY) và status workflow (PENDING_APPROVAL → ACTIVE/REJECTED/INACTIVE).
+- **Export XLSX**: dùng `exceljs` (đã có trong package.json) tạo bảng rule request chuẩn.
+- **Firewall Topology**: tab mới trong trang topology, ReactFlow graph, zone node + server:port node, edge màu theo action (xanh=ALLOW, đỏ=DENY).
+- Không thay đổi topology module backend — FE gọi trực tiếp `/api/v1/firewall-rules`.
+**Files impacted:**
+- `packages/backend/prisma/schema.prisma` — thêm 3 model + 3 enum (update)
+- `packages/backend/src/modules/network-zone/` — new module
+- `packages/backend/src/modules/firewall-rule/` — new module
+- `packages/backend/src/app.module.ts` — đăng ký 2 module mới (update)
+- `packages/frontend/src/pages/network-zone/` — new page
+- `packages/frontend/src/pages/firewall-rule/` — new page
+- `packages/frontend/src/pages/topology/components/FirewallTopologyView.tsx` — new
+- `packages/frontend/src/pages/topology/index.tsx` — thêm tab Firewall (update)
+- `packages/frontend/src/App.tsx` — routes mới (update)
+- `packages/frontend/src/components/layout/Sidebar.tsx` — menu items mới (update)
+**Trade-offs:** FirewallRule không dùng GraphQL subscription vì không cần realtime — REST đủ. Firewall Topology render pure FE từ rules list, không cần BE endpoint riêng.
+**Outcome:** S23-01~09 hoàn thành đầy đủ. BE: NetworkZoneModule (9 endpoints CRUD+IP), FirewallRuleModule (7 endpoints CRUD+import+export), migration SQL applied. FE: 3 pages mới (network-zone, firewall-rule, firewall topology tab), sidebar menu, routes. Export XLSX dùng exceljs. Firewall Topology dùng ReactFlow + dagre layout.
+**Completed:** 2026-04-30
+**Sprint plan ref:** `docs/plans/sprint-23-network-zone-firewall.md`
+
+---
+
 ## Sprint 22 Topology UX Enhancements (2026-04-30)
 
 **Status:** ✅ Completed
