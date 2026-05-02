@@ -127,6 +127,23 @@ const CONN_TYPE_ALIASES: Record<string, string> = {
   sql: 'DATABASE',
 };
 
+const NETWORK_ZONE_COLUMNS = ['code', 'name', 'zone_type', 'environment', 'color', 'description'];
+const ZONE_IP_COLUMNS = ['zone_code', 'environment', 'ip_address', 'label', 'description', 'is_range'];
+
+const ZONE_TYPE_VALUES = ['LOCAL','DMZ','DB','DEV','UAT','PROD','INTERNET','MANAGEMENT','STORAGE','BACKUP','CUSTOM'];
+
+const NETWORK_ZONE_ALIASES: Record<string, string> = {
+  zone_code: 'code', zone_name: 'name', type: 'zone_type',
+  env: 'environment', colour: 'color', desc: 'description', mo_ta: 'description',
+};
+
+const ZONE_IP_ALIASES: Record<string, string> = {
+  zone: 'zone_code', zone_id: 'zone_code', ip: 'ip_address',
+  ip_addr: 'ip_address', private_ip: 'ip_address', env: 'environment',
+  name: 'label', server_code: 'label', range: 'is_range',
+  is_cidr: 'is_range', desc: 'description', mo_ta: 'description',
+};
+
 // Header aliases: map common spreadsheet header variants to canonical keys
 const SERVER_HEADER_ALIASES: Record<string, string> = {
   'ip_address': 'ip',
@@ -208,7 +225,7 @@ export class ImportService {
     buffer: Buffer,
     mimetype: string,
     originalname: string,
-    type: 'server' | 'application' | 'deployment' | 'connection',
+    type: 'server' | 'application' | 'deployment' | 'connection' | 'network_zone' | 'zone_ip',
     environment?: string,
   ): Promise<ImportPreviewResult> {
     const rows = await this.parseFile(buffer, mimetype, originalname);
@@ -266,6 +283,12 @@ export class ImportService {
           breakdown.servers.created++;
         } else if (result.type === 'connection') {
           await this.importConnection(row);
+          breakdown.servers.created++;
+        } else if (result.type === 'network_zone') {
+          await this.importNetworkZone(row);
+          breakdown.servers.created++;
+        } else if (result.type === 'zone_ip') {
+          await this.importZoneIp(row);
           breakdown.servers.created++;
         }
       } catch (err) {
@@ -611,14 +634,56 @@ export class ImportService {
     }
   }
 
+  private async importNetworkZone(row: ImportRow): Promise<void> {
+    const d = row.data;
+    const code = String(d['code']).toUpperCase().trim();
+    const name = String(d['name']).trim();
+    const environment = String(d['environment']).toUpperCase() as any;
+    const zone_type = d['zone_type'] ? String(d['zone_type']).toUpperCase() : 'CUSTOM';
+    const color = d['color'] ? String(d['color']).trim() : null;
+    const description = d['description'] ? String(d['description']).trim() : null;
+
+    await this.prisma.networkZone.upsert({
+      where: { code_environment: { code, environment } },
+      create: { code, name, zone_type: zone_type as any, environment, color, description },
+      update: { name, zone_type: zone_type as any, color, description, deleted_at: null },
+    });
+  }
+
+  private async importZoneIp(row: ImportRow): Promise<void> {
+    const d = row.data;
+    const zoneCode = String(d['zone_code']).toUpperCase().trim();
+    const environment = String(d['environment']).toUpperCase() as any;
+    const ipAddress = String(d['ip_address']).trim();
+    const label = d['label'] ? String(d['label']).trim() : null;
+    const description = d['description'] ? String(d['description']).trim() : null;
+    const isRange = String(d['is_range'] ?? 'false').toLowerCase() === 'true';
+
+    const zone = await this.prisma.networkZone.findFirst({
+      where: { code: zoneCode, environment, deleted_at: null },
+    });
+    if (!zone) throw new Error(`Network zone '${zoneCode}' not found in environment ${environment}`);
+
+    const existing = await this.prisma.zoneIpEntry.findFirst({
+      where: { zone_id: zone.id, ip_address: ipAddress, deleted_at: null },
+    });
+    if (existing) return;
+
+    await this.prisma.zoneIpEntry.create({
+      data: { zone_id: zone.id, ip_address: ipAddress, label, description, is_range: isRange },
+    });
+  }
+
   private validateRows(
     rawRows: Record<string, string>[],
-    type: 'server' | 'application' | 'deployment' | 'connection',
+    type: 'server' | 'application' | 'deployment' | 'connection' | 'network_zone' | 'zone_ip',
     environment?: string,
   ): Omit<ImportPreviewResult, 'session_id'> {
     const columns = type === 'server' ? SERVER_COLUMNS
       : type === 'application' ? APPLICATION_COLUMNS
       : type === 'connection' ? CONNECTION_COLUMNS
+      : type === 'network_zone' ? NETWORK_ZONE_COLUMNS
+      : type === 'zone_ip' ? ZONE_IP_COLUMNS
       : DEPLOYMENT_COLUMNS;
 
     const requiredCols = type === 'server'
@@ -627,6 +692,10 @@ export class ImportService {
       ? ['code', 'name']
       : type === 'connection'
       ? ['source_app', 'target_app', 'environment']
+      : type === 'network_zone'
+      ? ['code', 'name', 'environment']
+      : type === 'zone_ip'
+      ? ['zone_code', 'environment', 'ip_address']
       : ['application_code', 'server_code', 'environment', 'version'];
 
     const rows: ImportRow[] = rawRows.map((raw, idx) => {
@@ -641,6 +710,8 @@ export class ImportService {
           : type === 'application' ? (APP_HEADER_ALIASES[key] ?? key)
           : type === 'deployment' ? (DEPLOYMENT_HEADER_ALIASES[key] ?? key)
           : type === 'connection' ? (CONNECTION_HEADER_ALIASES[key] ?? key)
+          : type === 'network_zone' ? (NETWORK_ZONE_ALIASES[key] ?? key)
+          : type === 'zone_ip' ? (ZONE_IP_ALIASES[key] ?? key)
           : key;
         normalised[canonical] = typeof v === 'string' ? v.trim() : v;
       }
@@ -693,6 +764,45 @@ export class ImportService {
             errors.push(`Invalid target_port: must be integer 1–65535`);
           } else {
             normalised['target_port'] = portNum;
+          }
+        }
+      }
+
+      // NetworkZone: validate environment and zone_type
+      if (type === 'network_zone') {
+        if (normalised['environment']) {
+          const envUp = String(normalised['environment']).toUpperCase();
+          const canonical = ENV_ALIASES[envUp.toLowerCase()] ?? envUp;
+          if (!['DEV', 'UAT', 'PROD'].includes(canonical)) {
+            errors.push(`Invalid environment: must be DEV, UAT, or PROD`);
+          } else {
+            normalised['environment'] = canonical;
+          }
+        }
+        if (normalised['zone_type']) {
+          const ztUp = String(normalised['zone_type']).toUpperCase();
+          if (!ZONE_TYPE_VALUES.includes(ztUp)) {
+            errors.push(`Invalid zone_type '${ztUp}': must be one of ${ZONE_TYPE_VALUES.join(', ')}`);
+          } else {
+            normalised['zone_type'] = ztUp;
+          }
+        }
+      }
+
+      // ZoneIp: validate environment and ip_address format
+      if (type === 'zone_ip') {
+        if (normalised['environment']) {
+          const envUp = String(normalised['environment']).toUpperCase();
+          normalised['environment'] = ENV_ALIASES[envUp.toLowerCase()] ?? envUp;
+        }
+        if (normalised['ip_address']) {
+          const ip = String(normalised['ip_address']).trim();
+          const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}(\/\d{1,2})?$/;
+          if (!ipv4Regex.test(ip)) {
+            errors.push(`Invalid ip_address '${ip}': must be IPv4 (e.g. 192.168.1.1) or CIDR (e.g. 192.168.1.0/24)`);
+          }
+          if (normalised['is_range'] === undefined || normalised['is_range'] === '') {
+            normalised['is_range'] = ip.includes('/') ? 'true' : 'false';
           }
         }
       }

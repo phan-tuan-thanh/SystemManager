@@ -45,6 +45,7 @@ apiClient.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${data.access_token}`;
         return apiClient(originalRequest);
       } catch {
+        localStorage.setItem('session_expired', '1');
         useAuthStore.getState().logout();
         return Promise.reject(error);
       }

@@ -131,7 +131,7 @@ export class NetworkZoneService {
       where: { zone_id: zoneId, deleted_at: null },
       orderBy: { created_at: 'asc' },
     });
-    return { data: entries };
+    return entries;
   }
 
   async addIp(zoneId: string, dto: CreateZoneIpDto) {

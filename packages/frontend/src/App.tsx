@@ -23,7 +23,7 @@ import AuditLogPage from './pages/audit/AuditLogPage';
 import ConnectionListPage from './pages/connection/index';
 import TopologyPage from './pages/topology/index';
 import InfraSystemListPage from './pages/infra-system/index';
-import InfraUploadPage from './pages/infra-upload/index';
+import InfraImportPage from './pages/infra-import/index';
 import AppImportPage from './pages/app-import/index';
 import ChangeSetListPage from './pages/changeset/index';
 import ChangeSetDetailPage from './pages/changeset/[id]';
@@ -91,7 +91,9 @@ export default function App() {
 
                 {/* Infra System routes */}
                 <Route path="/infra-systems" element={<InfraSystemListPage />} />
-                <Route path="/infra-upload" element={<InfraUploadPage />} />
+                <Route path="/infra-import" element={<InfraImportPage />} />
+                {/* Legacy — redirect to unified import */}
+                <Route path="/infra-upload" element={<Navigate to="/infra-import?tab=server" replace />} />
 
                 {/* Application routes */}
                 <Route path="/applications" element={<ApplicationListPage />} />

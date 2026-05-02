@@ -141,7 +141,7 @@ export default function FirewallTopologyView() {
   const { data: rulesResp, isLoading } = useQuery({
     queryKey: ['firewall-rules', 'topology', envFilter, actionFilter, statusFilter],
     queryFn: async () => {
-      const params: Record<string, string> = { limit: '1000', page: '1' };
+      const params: Record<string, string> = { limit: '500', page: '1' };
       if (envFilter) params.environment = envFilter;
       if (actionFilter) params.action = actionFilter;
       if (statusFilter) params.status = statusFilter;
