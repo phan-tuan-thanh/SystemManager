@@ -20,10 +20,12 @@
 
 ---
 
+---
 
-## 🌟 Sprints Đang Thực Hiện (In Progress)
 
-## Sprint 15 — Server Import & Data Enrichment 🔄 IN PROGRESS
+## ✅ Sprints Đã Hoàn Thành
+
+## Sprint 15 — Server Import & Data Enrichment ✅ DONE
 
 **Mục tiêu:** Cải thiện logic import Server từ CSV (OS, Hardware specs) và đơn giản hóa quy trình import bằng cách tập trung vào Server.
 
@@ -41,19 +43,17 @@
 
 | # | Task | Points | Status | SRS Ref |
 |---|---|---|---|---|
-| S15-08 | `[BE]` Schema — ServerOsInstall + migrate server.os | 3 | ⬜ | 4.8.2 |
-| S15-09 | `[BE]` Application — thêm sw_type enum + OS catalog API | 2 | ⬜ | 4.8.2 |
-| S15-10 | `[BE]` ServerOsInstall — CRUD API | 4 | ⬜ | 4.8.2 |
-| S15-11 | `[BE]` ImportService — xử lý OS qua catalog | 3 | ⬜ | 4.8.2 |
-| S15-12 | `[BE]` Server query — include OS display | 1 | ⬜ | 4.8.2 |
-| S15-13 | `[FE]` Import wizard — bước OS Resolution | 5 | ⬜ | 4.8.2 |
-| S15-14 | `[FE]` Server Detail — OS History tab/section | 4 | ⬜ | 4.8.2 |
-| S15-15 | `[FE]` Cập nhật ServerForm & ServerList | 2 | ⬜ | 4.8.2 |
+| S15-08 | `[BE]` Schema — ServerOsInstall + migrate server.os | 3 | ✅ | 4.8.2 |
+| S15-09 | `[BE]` Application — thêm sw_type enum + OS catalog API | 2 | ✅ | 4.8.2 |
+| S15-10 | `[BE]` ServerOsInstall — CRUD API | 4 | ✅ | 4.8.2 |
+| S15-11 | `[BE]` ImportService — xử lý OS qua catalog | 3 | ✅ | 4.8.2 |
+| S15-12 | `[BE]` Server query — include OS display | 1 | ✅ | 4.8.2 |
+| S15-13 | `[FE]` Import wizard — bước OS Resolution | 5 | ✅ | 4.8.2 |
+| S15-14 | `[FE]` Server Detail — OS History tab/section | 4 | ✅ | 4.8.2 |
+| S15-15 | `[FE]` Cập nhật ServerForm & ServerList | 2 | ✅ | 4.8.2 |
+
 
 ---
-
-
-## ✅ Sprints Đã Hoàn Thành
 
 ## Sprint 16 — App Group Restructure & Catalog Unification ✅ DONE
 

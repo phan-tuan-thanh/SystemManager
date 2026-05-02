@@ -183,9 +183,9 @@ A chronological record of project milestones, updates, and sprint summaries.
 
 ---
 
-## 2026-04-24: Sprint 15 — Server Import & OS Lifecycle
-**Status:** ✅ Completed
- 
+## 2026-04-24: Sprint 15 — Server Import & OS Lifecycle ✅ Hoàn thành
+
+**Kết quả thực hiện:**
 - Triển khai logic Import Server chi tiết (OS, CPU, RAM, Storage).
 - **OS Lifecycle Tracking**: Tách OS thành catalog + bảng `ServerOsInstall` lưu lịch sử cài đặt/nâng cấp.
 - Interactive Import: Hỗ trợ người dùng ánh xạ (map) OS từ file CSV vào danh mục hệ thống.
