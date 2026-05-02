@@ -1,44 +1,55 @@
-# Sprint 21 Report — Topology Smart Auto-Layout & Collision Avoidance
+# Sprint 21 — Topology Smart Auto-Layout
 
-**Cập nhật:** 2026-04-30
-**Branch:** `feat/sprint-21-topology-smart-layout`
-**Tổng story points:** 9 / 9 ✅
-
----
-
-## Tính năng đã implement
-
-### S21-01 — Layout Direction Control (2pts)
-- Thêm `layoutDirection: 'TB' | 'BT' | 'LR' | 'RL'` vào `FilterState`
-- `computeLayout` và `handleAutoArrange` nhận direction rõ ràng (không còn suy ra từ `layout: 'force'|'hierarchical'`)
-- FilterPanel ReactFlow: Segmented 4 hướng (↓TB / ↑BT / →LR / ←RL)
-- vis-network giữ nguyên "Auto | Phân cấp" riêng
-
-### S21-02 — ELK Layout Engine (5pts)
-- Cài `elkjs@0.11.1` vào workspace root
-- Thêm `layoutAlgorithm: 'dagre' | 'elk-layered' | 'elk-force' | 'elk-tree' | 'elk-radial'`
-- `applyElkLayout(nodes, edges, algorithm, direction): Promise<Node[]>` async function
-- ELK_ALGO_MAP + ELK_DIR_MAP lookup tables
-- `handleAutoArrange` async, dispatch sang ELK hoặc dagre dựa trên algorithm
-- Fallback về dagre nếu ELK throw
-- FilterPanel: Select dropdown 5 algorithms thay vì Segmented
-
-### S21-03 — 8-Direction Collision Avoidance (2pts)
-- `handleNodeDragStop` cải thiện: khi phát hiện collision, thử 8 hướng la bàn (N/NE/E/SE/S/SW/W/NW)
-- Ring search outward, chọn vị trí free gần nhất theo khoảng cách Euclidean từ điểm thả
-- Max 20 ring, step = max(nodeW, nodeH) + GAP
+**Ngày bắt đầu:** 2026-04-30  
+**Trạng thái:** ✅ DONE  
 
 ---
 
-## Files thay đổi
+## 1. Tổng quan & Mục tiêu (Sprint Goal)
 
-| File | Thay đổi |
-|------|---------|
-| `packages/frontend/package.json` | thêm `elkjs@0.11.1` |
-| `packages/frontend/src/pages/topology/index.tsx` | ELK import, ELK_ALGO_MAP, applyElkLayout, handleAutoArrange async, 8-dir collision |
-| `packages/frontend/src/pages/topology/components/TopologyFilterPanel.tsx` | Algorithm Select (5 options) + Direction Select (4 options) |
+> Bổ sung sức mạnh cho Topology bằng việc tích hợp engine sắp xếp đồ thị ELK (Eclipse Layout Kernel) thay thế cho Dagre, hỗ trợ đổi hướng linh hoạt và cơ chế chống đè (Collision Avoidance) khi kéo thả thủ công.
+
+## 2. Kiến trúc & Schema Database
+
+*Không có thay đổi về Database.*
+
+## 3. Luồng xử lý kỹ thuật & Business Logic
+
+### 3.1. Tích hợp ELK Engine (`elkjs`)
+- **Vấn đề của Dagre:** Thường xếp node quá dàn trải theo hàng ngang, lãng phí diện tích màn hình.
+- **Luồng xử lý ELK:** 
+  - Khi bấm "Tự động sắp xếp", hệ thống gọi hàm async `applyElkLayout`.
+  - Hàm convert cấu trúc ReactFlow Nodes/Edges sang chuẩn JSON của ELK (`children`, `edges`).
+  - ELK xử lý thuật toán phân tầng (Layered) dưới nền Web Worker (để không làm đơ UI).
+  - Cập nhật lại `position` của từng Node từ kết quả trả về, gọi `fitView` để đưa graph về giữa màn hình.
+
+### 3.2. Chống đè Node 8 Hướng (8-Direction Collision Push)
+- Khi người dùng kéo thả (drag) một node A vào vị trí đang bị chiếm bởi node B.
+- **Logic Tính toán:** Tại event `onNodeDragStop`:
+  - Tìm Bounding Box của Node được kéo thả.
+  - Duyệt toàn bộ Node khác để tìm va chạm (Intersect).
+  - Nếu va chạm, tính toán khoảng cách Euclidean (Distance) theo 8 hướng (N, NE, E, SE, S, SW, W, NW).
+  - Chọn hướng gần nhất để "đẩy" Node B ra xa Node A.
+
+## 4. Đặc tả API Interfaces
+
+*Không có API.*
+
+## 5. Xử lý Lỗi & Ngoại lệ (Error Handling)
+
+- **Fallback Engine:** `elkjs` chạy async, nếu xảy ra lỗi do data cyclic quá phức tạp, hệ thống sẽ log lỗi và tự động fallback (chạy lùi) về engine `dagre` synchronous mặc định để đảm bảo graph vẫn được sắp xếp.
+
+## 6. Hướng dẫn Bảo trì & Debug
+
+- Việc dùng ELK yêu cầu thư viện `elkjs/lib/elk.bundled.js`. Nếu update ReactFlow lên version mới, cần kiểm tra lại cơ chế tương thích kích thước Node (do ELK yêu cầu width/height cố định trước khi layout).
 
 ---
 
-## Known Issues
-- Không có lỗi mới. Pre-existing TS warnings trong topology đã được fix kèm (dagre @ts-expect-error, typed stableUpdateEdgeLabel).
+## 7. Metrics & Tasks (Lịch sử công việc)
+
+### Danh sách Tasks
+- ✅ S21-01: FilterState thêm `layoutAlgorithm` (Dagre|ELK) và `layoutDirection` (TB|LR)
+- ✅ S21-02: Cài đặt `elkjs`, viết thuật toán `applyElkLayout` async
+- ✅ S21-03: Viết logic 8-direction collision push trong `handleNodeDragStop`
+
+_Tài liệu kỹ thuật chuẩn PROD - Phục vụ bàn giao và bảo trì._
