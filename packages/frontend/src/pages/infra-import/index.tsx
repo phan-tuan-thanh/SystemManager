@@ -6,14 +6,16 @@ import {
   GlobalOutlined,
   NodeIndexOutlined,
   SafetyCertificateOutlined,
+  ThunderboltOutlined,
 } from '@ant-design/icons';
 import PageHeader from '../../components/common/PageHeader';
 import { InfraUploadContent } from '../infra-upload/index';
 import SimpleImportContent from './SimpleImportContent';
 import FirewallImportContent from './FirewallImportContent';
+import QuickImportContent from './QuickImportContent';
 import type { TargetField } from '../../components/common/ColumnMapper';
 
-const TAB_KEYS = ['server', 'network_zone', 'zone_ip', 'firewall'] as const;
+const TAB_KEYS = ['quick', 'server', 'network_zone', 'zone_ip', 'firewall'] as const;
 type TabKey = typeof TAB_KEYS[number];
 
 const ZONE_TYPE_OPTIONS = [
@@ -117,6 +119,15 @@ const ZONE_IP_FIELDS: TargetField[] = [
 
 const TAB_ITEMS = [
   {
+    key: 'quick' as TabKey,
+    label: (
+      <span>
+        <ThunderboltOutlined /> Nhập nhanh (Quick Import)
+      </span>
+    ),
+    children: <QuickImportContent />,
+  },
+  {
     key: 'server' as TabKey,
     label: (
       <span>
@@ -168,12 +179,12 @@ const TAB_ITEMS = [
 
 export default function InfraImportPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const tab = (searchParams.get('tab') as TabKey) ?? 'server';
-  const activeTab: TabKey = TAB_KEYS.includes(tab) ? tab : 'server';
+  const tab = (searchParams.get('tab') as TabKey) ?? 'quick';
+  const activeTab: TabKey = TAB_KEYS.includes(tab) ? tab : 'quick';
 
   useEffect(() => {
     if (!TAB_KEYS.includes(tab)) {
-      setSearchParams({ tab: 'server' }, { replace: true });
+      setSearchParams({ tab: 'quick' }, { replace: true });
     }
   }, [tab, setSearchParams]);
 
@@ -181,7 +192,7 @@ export default function InfraImportPage() {
     <div className="p-6">
       <PageHeader
         title="Nhập dữ liệu hạ tầng (Infra CSV Import)"
-        subtitle="Nhập dữ liệu hạ tầng từ file CSV: Máy chủ (Server), Phân vùng mạng (Network Zone), Zone IPs và Firewall Rules"
+        subtitle="Nhập dữ liệu hạ tầng từ file CSV: Nhập nhanh nhiều file cùng lúc, hoặc nhập từng loại với wizard ánh xạ cột."
         helpKey="network"
       />
       <Tabs
