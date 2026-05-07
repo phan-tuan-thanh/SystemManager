@@ -120,7 +120,7 @@ const TAB_ITEMS = [
     key: 'server' as TabKey,
     label: (
       <span>
-        <CloudServerOutlined /> Server
+        <CloudServerOutlined /> Máy chủ (Server)
       </span>
     ),
     children: <InfraUploadContent />,
@@ -129,13 +129,13 @@ const TAB_ITEMS = [
     key: 'network_zone' as TabKey,
     label: (
       <span>
-        <GlobalOutlined /> Phân vùng mạng
+        <GlobalOutlined /> Phân vùng mạng (Network Zone)
       </span>
     ),
     children: (
       <SimpleImportContent
         type="network_zone"
-        title="Phân vùng mạng"
+        title="Phân vùng mạng (Network Zone)"
         targetFields={NETWORK_ZONE_FIELDS}
       />
     ),
@@ -144,13 +144,13 @@ const TAB_ITEMS = [
     key: 'zone_ip' as TabKey,
     label: (
       <span>
-        <NodeIndexOutlined /> Zone IPs
+        <NodeIndexOutlined /> Zone IPs (Zone IP Entries)
       </span>
     ),
     children: (
       <SimpleImportContent
         type="zone_ip"
-        title="Zone IP Entries"
+        title="Zone IPs (Zone IP Entries)"
         targetFields={ZONE_IP_FIELDS}
       />
     ),
@@ -180,8 +180,8 @@ export default function InfraImportPage() {
   return (
     <div className="p-6">
       <PageHeader
-        title="Import CSV"
-        subtitle="Nhập dữ liệu hạ tầng: server, phân vùng mạng, zone IPs và firewall rules từ file CSV"
+        title="Nhập dữ liệu hạ tầng (Infra CSV Import)"
+        subtitle="Nhập dữ liệu hạ tầng từ file CSV: Máy chủ (Server), Phân vùng mạng (Network Zone), Zone IPs và Firewall Rules"
         helpKey="network"
       />
       <Tabs

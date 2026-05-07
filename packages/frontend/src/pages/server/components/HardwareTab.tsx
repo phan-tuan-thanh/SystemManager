@@ -211,7 +211,7 @@ export default function HardwareTab({ serverId }: HardwareTabProps) {
   const handleDetach = async (id: string) => {
     try {
       await detach.mutateAsync(id);
-      message.success('Đã thu hồi phần cứng');
+      message.success('Thu hồi phần cứng thành công');
     } catch {
       message.error('Không thể thu hồi phần cứng');
     }

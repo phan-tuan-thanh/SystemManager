@@ -164,7 +164,7 @@ export default function ZoneIpDrawer({ zone, open, onClose }: ZoneIpDrawerProps)
     if (!zone) return;
     try {
       await removeIp({ zoneId: zone.id, ipId });
-      message.success('Đã xoá IP');
+      message.success('Xóa IP thành công');
     } catch (e: unknown) {
       const err = e as { response?: { data?: { error?: { message?: string } } } };
       message.error(err?.response?.data?.error?.message ?? 'Không thể xoá IP');
@@ -199,9 +199,9 @@ export default function ZoneIpDrawer({ zone, open, onClose }: ZoneIpDrawerProps)
       fixed: 'right',
       render: (_: unknown, record: ZoneIpEntry) => (
         <Popconfirm
-          title="Xoá địa chỉ IP này?"
+          title="Xóa địa chỉ IP này?"
           onConfirm={() => handleDelete(record.id)}
-          okText="Xoá"
+          okText="Xóa"
           cancelText="Huỷ"
           okType="danger"
         >

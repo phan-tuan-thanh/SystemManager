@@ -58,10 +58,10 @@ export default function ConnectionListPage() {
     try {
       if (editing) {
         await updateConn.mutateAsync({ id: editing.id, ...values });
-        message.success('Đã cập nhật kết nối');
+        message.success('Cập nhật kết nối thành công');
       } else {
         await createConn.mutateAsync(values);
-        message.success('Đã tạo kết nối');
+        message.success('Tạo kết nối thành công');
       }
       setFormOpen(false);
       setEditing(null);
@@ -73,7 +73,7 @@ export default function ConnectionListPage() {
   const handleDelete = async (id: string) => {
     try {
       await deleteConn.mutateAsync(id);
-      message.success('Đã xoá kết nối');
+      message.success('Xóa kết nối thành công');
       setSelectedRowKeys((prev) => prev.filter((k) => k !== id));
     } catch {
       message.error('Không thể xoá kết nối');
@@ -86,8 +86,8 @@ export default function ConnectionListPage() {
     );
     const failed = results.filter((r) => r.status === 'rejected').length;
     const succeeded = results.length - failed;
-    if (succeeded > 0) message.success(`Đã xoá ${succeeded} kết nối`);
-    if (failed > 0) message.error(`${failed} kết nối không thể xoá`);
+    if (succeeded > 0) message.success(`Xóa ${succeeded} kết nối thành công`);
+    if (failed > 0) message.error(`Không thể xóa ${failed} kết nối`);
     setSelectedRowKeys([]);
   };
 
@@ -167,9 +167,9 @@ export default function ConnectionListPage() {
             onClick={() => { setEditing(r); setFormOpen(true); }}
           />
           <Popconfirm
-            title="Xác nhận xoá kết nối này?"
+            title="Xác nhận xóa kết nối này?"
             onConfirm={() => handleDelete(r.id)}
-            okText="Xoá"
+            okText="Xóa"
             cancelText="Huỷ"
             okButtonProps={{ danger: true }}
           >
@@ -189,14 +189,14 @@ export default function ConnectionListPage() {
           <Space>
             {selectedRowKeys.length > 0 && (
               <Popconfirm
-                title={`Xoá ${selectedRowKeys.length} kết nối đã chọn?`}
+                title={`Xóa ${selectedRowKeys.length} kết nối đã chọn?`}
                 onConfirm={handleBulkDelete}
-                okText="Xoá"
+                okText="Xóa"
                 cancelText="Huỷ"
                 okType="danger"
               >
                 <Button danger icon={<DeleteOutlined />}>
-                  Xoá {selectedRowKeys.length} mục
+                  Xóa ({selectedRowKeys.length})
                 </Button>
               </Popconfirm>
             )}

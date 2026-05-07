@@ -15,7 +15,7 @@ const TAB_ITEMS = [
     key: 'app' as TabKey,
     label: (
       <span>
-        <AppstoreOutlined /> Ứng dụng
+        <AppstoreOutlined /> Ứng dụng (Application)
       </span>
     ),
     children: <AppUploadContent />,
@@ -24,7 +24,7 @@ const TAB_ITEMS = [
     key: 'deployment' as TabKey,
     label: (
       <span>
-        <DeploymentUnitOutlined /> Deployment
+        <DeploymentUnitOutlined /> Triển khai (Deployment)
       </span>
     ),
     children: <DeploymentUploadContent />,
@@ -33,7 +33,7 @@ const TAB_ITEMS = [
     key: 'connection' as TabKey,
     label: (
       <span>
-        <ApiOutlined /> Connection
+        <ApiOutlined /> Kết nối (Connection)
       </span>
     ),
     children: <ConnectionUploadContent />,
@@ -55,8 +55,8 @@ export default function AppImportPage() {
   return (
     <div className="p-6">
       <PageHeader
-        title="Import CSV"
-        subtitle="Nhập dữ liệu ứng dụng, deployment và kết nối từ file CSV"
+        title="Nhập dữ liệu ứng dụng (App CSV Import)"
+        subtitle="Nhập dữ liệu từ file CSV: Ứng dụng (Application), Triển khai (Deployment) và Kết nối (Connection)"
         helpKey="application"
       />
       <Tabs

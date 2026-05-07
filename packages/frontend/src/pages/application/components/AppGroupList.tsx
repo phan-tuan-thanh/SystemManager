@@ -27,7 +27,7 @@ export default function AppGroupList() {
   const handleDelete = async (id: string) => {
     try {
       await deleteGroup.mutateAsync(id);
-      message.success('Đã xoá nhóm ứng dụng');
+      message.success('Xóa nhóm ứng dụng thành công');
       setSelectedRowKeys((prev) => prev.filter((k) => k !== id));
     } catch {
       message.error('Không thể xoá nhóm ứng dụng');
@@ -40,8 +40,8 @@ export default function AppGroupList() {
     );
     const failed = results.filter((r) => r.status === 'rejected').length;
     const succeeded = results.length - failed;
-    if (succeeded > 0) message.success(`Đã xoá ${succeeded} nhóm ứng dụng`);
-    if (failed > 0) message.error(`${failed} nhóm không thể xoá (đang chứa ứng dụng)`);
+    if (succeeded > 0) message.success(`Xóa ${succeeded} nhóm ứng dụng thành công`);
+    if (failed > 0) message.error(`Không thể xóa ${failed} nhóm (đang chứa ứng dụng)`);
     setSelectedRowKeys([]);
   };
 
@@ -95,7 +95,7 @@ export default function AppGroupList() {
             onClick={() => { setEditGroup(record); setModalOpen(true); }}
           />
           <Popconfirm
-            title="Xoá nhóm ứng dụng?"
+            title="Xóa nhóm ứng dụng này?"
             description="Hành động này không thể hoàn tác"
             onConfirm={() => handleDelete(record.id)}
             okType="danger"
@@ -134,15 +134,15 @@ export default function AppGroupList() {
         <Space>
           {selectedRowKeys.length > 0 && (
             <Popconfirm
-              title={`Xoá ${selectedRowKeys.length} nhóm đã chọn?`}
+              title={`Xóa ${selectedRowKeys.length} nhóm đã chọn?`}
               description="Hành động này không thể hoàn tác"
               onConfirm={handleBulkDelete}
-              okText="Xoá"
+              okText="Xóa"
               cancelText="Huỷ"
               okType="danger"
             >
               <Button danger icon={<DeleteOutlined />}>
-                Xoá {selectedRowKeys.length} nhóm
+                Xóa ({selectedRowKeys.length})
               </Button>
             </Popconfirm>
           )}

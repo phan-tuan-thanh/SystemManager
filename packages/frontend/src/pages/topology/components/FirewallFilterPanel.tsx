@@ -471,7 +471,7 @@ export default function FirewallFilterPanel({
             <Button size="small" type="link" danger style={{ padding: 0, fontSize: 12 }}
               onClick={() => onChange({ ...filters, visibleSourceZoneIds: [], visibleDestServerIds: [] })}
             >
-              Xoá bộ lọc
+              Xóa bộ lọc
             </Button>
           )}
         </Space>
@@ -486,7 +486,7 @@ export default function FirewallFilterPanel({
         footer={
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Button size="small" danger disabled={pendingCount === 0} onClick={() => { setLocalZones([]); setLocalServers([]); }}>
-              Xoá tất cả
+              Xóa tất cả
             </Button>
             <Space>
               <Button size="small" onClick={() => setModalOpen(false)}>Huỷ</Button>

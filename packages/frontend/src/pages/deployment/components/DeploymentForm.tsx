@@ -45,10 +45,10 @@ export default function DeploymentForm({ open, deployment, onClose }: Props) {
     try {
       if (deployment) {
         await update.mutateAsync({ id: deployment.id, ...dto });
-        message.success('Đã cập nhật deployment');
+        message.success('Cập nhật deployment thành công');
       } else {
         await create.mutateAsync(dto);
-        message.success('Đã tạo deployment');
+        message.success('Tạo deployment thành công');
       }
       form.resetFields();
       onClose();

@@ -77,10 +77,10 @@ function ZoneModal({ open, editZone, onClose }: ZoneModalProps) {
     try {
       if (isEdit) {
         await update({ id: editZone.id, ...values });
-        message.success('Đã cập nhật zone');
+        message.success('Cập nhật network zone thành công');
       } else {
         await create(values);
-        message.success('Đã tạo zone mới');
+        message.success('Tạo network zone thành công');
       }
       onClose();
     } catch (e: unknown) {
@@ -142,7 +142,7 @@ export default function NetworkZonePage() {
   const handleDelete = async (id: string) => {
     try {
       await deleteZone.mutateAsync(id);
-      message.success('Đã xoá zone');
+      message.success('Xóa network zone thành công');
     } catch (e: unknown) {
       const err = e as { response?: { data?: { error?: { message?: string } } } };
       message.error(err?.response?.data?.error?.message ?? 'Không thể xoá zone');
@@ -280,11 +280,11 @@ export default function NetworkZonePage() {
                 title="Xóa zone này?"
                 description="Tất cả IP trong zone cũng sẽ bị xoá."
                 onConfirm={() => handleDelete(record.id)}
-                okText="Xoá"
+                okText="Xóa"
                 cancelText="Huỷ"
                 okType="danger"
               >
-                <Tooltip title="Xoá">
+                <Tooltip title="Xóa">
                   <Button size="small" danger icon={<DeleteOutlined />} />
                 </Tooltip>
               </Popconfirm>

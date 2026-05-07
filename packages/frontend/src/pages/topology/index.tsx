@@ -1074,7 +1074,7 @@ function TopologyPageInner() {
               connection_type: 'HTTP',
               target_port_id: targetApp.ports[0].id,
             } as any);
-            message.success('Đã tạo kết nối');
+            message.success('Tạo kết nối thành công');
             refetch();
           } catch (e: any) {
             message.error(e?.response?.data?.error?.message ?? 'Không thể tạo kết nối');
@@ -1096,7 +1096,7 @@ function TopologyPageInner() {
         environment: connectionDraft.sourceApp.environment,
         ...values,
       });
-      message.success('Đã tạo kết nối');
+      message.success('Tạo kết nối thành công');
       setCreateConnModalVisible(false);
       setConnectionDraft(null);
       refetch();
@@ -1117,7 +1117,7 @@ function TopologyPageInner() {
   const handleDeleteConnection = useCallback(async (conn: ConnectionEdge) => {
     try {
       await deleteConnection.mutateAsync(conn.id);
-      message.success('Đã xoá kết nối');
+      message.success('Xóa kết nối thành công');
       setSelectedConnection(null);
       refetch();
     } catch (e: any) {

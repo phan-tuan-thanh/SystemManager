@@ -35,7 +35,7 @@ export default function DeploymentListPage() {
   const handleDelete = async (id: string) => {
     try {
       await deleteDeployment.mutateAsync(id);
-      message.success('Đã xoá deployment');
+      message.success('Xóa deployment thành công');
       setSelectedRowKeys((prev) => prev.filter((k) => k !== id));
     } catch {
       message.error('Không thể xoá deployment');
@@ -48,8 +48,8 @@ export default function DeploymentListPage() {
     );
     const failed = results.filter((r) => r.status === 'rejected').length;
     const succeeded = results.length - failed;
-    if (succeeded > 0) message.success(`Đã xoá ${succeeded} deployment`);
-    if (failed > 0) message.error(`${failed} deployment không thể xoá`);
+    if (succeeded > 0) message.success(`Xóa ${succeeded} deployment thành công`);
+    if (failed > 0) message.error(`Không thể xóa ${failed} deployment`);
     setSelectedRowKeys([]);
   };
 
@@ -107,7 +107,7 @@ export default function DeploymentListPage() {
         <Space size="small">
           <Button size="small" icon={<EyeOutlined />} onClick={() => navigate(`/deployments/${record.id}`)} />
           <Popconfirm
-            title="Xoá deployment?"
+            title="Xóa deployment này?"
             description="Hành động này không thể hoàn tác"
             onConfirm={() => handleDelete(record.id)}
             okType="danger"
@@ -129,14 +129,14 @@ export default function DeploymentListPage() {
           <Space>
             {selectedRowKeys.length > 0 && (
               <Popconfirm
-                title={`Xoá ${selectedRowKeys.length} deployment đã chọn?`}
+                title={`Xóa ${selectedRowKeys.length} deployment đã chọn?`}
                 onConfirm={handleBulkDelete}
-                okText="Xoá"
+                okText="Xóa"
                 cancelText="Huỷ"
                 okType="danger"
               >
                 <Button danger icon={<DeleteOutlined />}>
-                  Xoá {selectedRowKeys.length} mục
+                  Xóa ({selectedRowKeys.length})
                 </Button>
               </Popconfirm>
             )}

@@ -109,7 +109,7 @@ export default function InfraSystemListPage() {
               }}
             />
           </Tooltip>
-          <Tooltip title="Access">
+          <Tooltip title="Quyền truy cập">
             <Button
               type="text"
               icon={<TeamOutlined />}
@@ -125,11 +125,11 @@ export default function InfraSystemListPage() {
               description={
                 record.server_count > 0
                   ? `Cảnh báo: hệ thống đang chứa ${record.server_count} server`
-                  : 'Hành động này không thể hoàn tác'
+                  : 'Thao tác này không thể hoàn tác'
               }
               onConfirm={() =>
                 deleteMutation.mutateAsync(record.id).then(() => {
-                  message.success('Đã xóa hệ thống');
+                  message.success('Xóa hệ thống thành công');
                   setSelectedRowKeys((prev) => prev.filter((k) => k !== record.id));
                 }).catch((e: any) => {
                   message.error(e?.response?.data?.error?.message ?? 'Không thể xóa hệ thống');
@@ -153,8 +153,8 @@ export default function InfraSystemListPage() {
     );
     const failed = results.filter((r) => r.status === 'rejected').length;
     const succeeded = results.length - failed;
-    if (succeeded > 0) message.success(`Đã xóa ${succeeded} hệ thống`);
-    if (failed > 0) message.error(`${failed} hệ thống không thể xóa (đang chứa server)`);
+    if (succeeded > 0) message.success(`Xóa ${succeeded} hệ thống thành công`);
+    if (failed > 0) message.error(`Không thể xóa ${failed} hệ thống (đang chứa server)`);
     setSelectedRowKeys([]);
   };
 
@@ -163,23 +163,23 @@ export default function InfraSystemListPage() {
     try {
       if (editRecord) {
         await updateMutation.mutateAsync({ ...values, id: editRecord.id });
-        message.success('System updated');
+        message.success('Cập nhật hệ thống thành công');
       } else {
         await createMutation.mutateAsync(values);
-        message.success('System created');
+        message.success('Tạo hệ thống thành công');
       }
       setCreateOpen(false);
       form.resetFields();
       setEditRecord(null);
     } catch (error) {
-      message.error(error instanceof Error ? error.message : 'Failed to save system');
+      message.error(error instanceof Error ? error.message : 'Không thể lưu hệ thống');
     }
   };
 
   return (
     <div className="p-6">
       <PageHeader
-        title="Infra Systems"
+        title="Hệ thống hạ tầng (Infra Systems)"
         helpKey="infrastructure"
         extra={
           <Space>
@@ -205,7 +205,7 @@ export default function InfraSystemListPage() {
                 setCreateOpen(true);
               }}
             >
-              Add System
+              Thêm hệ thống hạ tầng
             </Button>
           </Space>
         }
@@ -214,7 +214,7 @@ export default function InfraSystemListPage() {
       {/* Search & Filter */}
       <Space style={{ marginBottom: 16 }} className="w-full flex">
         <Input.Search
-          placeholder="Search by name or code..."
+          placeholder="Tìm theo tên hoặc mã..."
           onChange={(e) => {
             setSearch(e.target.value);
             setPage(1);
@@ -241,7 +241,7 @@ export default function InfraSystemListPage() {
 
       {/* Create/Edit Modal */}
       <Modal
-        title={editRecord ? `Edit System` : 'Create System'}
+        title={editRecord ? 'Chỉnh sửa hệ thống hạ tầng' : 'Tạo hệ thống hạ tầng mới'}
         open={createOpen}
         onOk={() => form.submit()}
         onCancel={() => {
@@ -253,20 +253,20 @@ export default function InfraSystemListPage() {
       >
         <Form form={form} layout="vertical" onFinish={handleCreateOrUpdate}>
           <Form.Item
-            label="Code"
+            label="Mã (Code)"
             name="code"
-            rules={[{ required: true, message: 'Code is required' }]}
+            rules={[{ required: true, message: 'Mã là trường bắt buộc' }]}
           >
             <Input placeholder="BPM_PROCESS_CENTER" disabled={!!editRecord} />
           </Form.Item>
           <Form.Item
-            label="Name"
+            label="Tên"
             name="name"
-            rules={[{ required: true, message: 'Name is required' }]}
+            rules={[{ required: true, message: 'Tên là trường bắt buộc' }]}
           >
             <Input placeholder="BPM Process Center" />
           </Form.Item>
-          <Form.Item label="Description" name="description">
+          <Form.Item label="Mô tả" name="description">
             <Input.TextArea rows={3} />
           </Form.Item>
         </Form>
@@ -275,31 +275,31 @@ export default function InfraSystemListPage() {
       {/* Access Management Drawer */}
       {selectedSystemId && (
         <Drawer
-          title="Manage Access"
+          title="Quản lý quyền truy cập"
           onClose={() => setAccessOpen(false)}
           open={accessOpen}
           width={600}
         >
           {/* Current Grants */}
-          <h4>Current Grants</h4>
+          <h4>Quyền đã cấp</h4>
           {accessData && accessData.length > 0 ? (
             <Table
               columns={[
                 {
-                  title: 'Type',
-                  render: (_, record) => (record.user ? 'User' : 'Group'),
+                  title: 'Loại',
+                  render: (_, record) => (record.user ? 'Người dùng' : 'Nhóm'),
                   width: 80,
                 },
                 {
-                  title: 'Name',
+                  title: 'Tên',
                   render: (_, record) => record.user?.full_name || record.group?.name,
                 },
                 {
-                  title: 'Email/Code',
+                  title: 'Email/Mã',
                   render: (_, record) => record.user?.email || record.group?.code,
                 },
                 {
-                  title: 'Action',
+                  title: 'Thao tác',
                   render: (_, record) => (
                     <Button
                       type="text"
@@ -307,11 +307,11 @@ export default function InfraSystemListPage() {
                       size="small"
                       onClick={() =>
                         revokeMutation.mutate(record.id, {
-                          onSuccess: () => message.success('Access revoked'),
+                          onSuccess: () => message.success('Thu hồi quyền truy cập thành công'),
                         })
                       }
                     >
-                      Revoke
+                      Thu hồi
                     </Button>
                   ),
                 },
@@ -322,16 +322,16 @@ export default function InfraSystemListPage() {
               style={{ marginBottom: 24 }}
             />
           ) : (
-            <p className="text-gray-400">No access grants</p>
+            <p className="text-gray-400">Chưa có quyền truy cập</p>
           )}
 
           {/* Grant New Access */}
-          <h4 style={{ marginTop: 24 }}>Grant Access</h4>
+          <h4 style={{ marginTop: 24 }}>Cấp quyền truy cập</h4>
           <Space direction="vertical" style={{ width: '100%' }}>
             <div>
-              <label>User</label>
+              <label>Người dùng</label>
               <Select
-                placeholder="Select user"
+                placeholder="Chọn người dùng"
                 options={
                   usersData?.items?.map((u) => ({
                     label: `${u.full_name} (${u.email})`,
@@ -343,16 +343,16 @@ export default function InfraSystemListPage() {
                   grantMutation.mutate(
                     { user_id: userId },
                     {
-                      onSuccess: () => message.success('Access granted'),
+                      onSuccess: () => message.success('Cấp quyền truy cập thành công'),
                     },
                   );
                 }}
               />
             </div>
             <div>
-              <label>UserGroup</label>
+              <label>Nhóm người dùng</label>
               <Select
-                placeholder="Select group"
+                placeholder="Chọn nhóm"
                 options={
                   groupsData?.items?.map((g) => ({
                     label: g.name,
@@ -363,7 +363,7 @@ export default function InfraSystemListPage() {
                   grantMutation.mutate(
                     { group_id: groupId },
                     {
-                      onSuccess: () => message.success('Access granted'),
+                      onSuccess: () => message.success('Cấp quyền truy cập thành công'),
                     },
                   );
                 }}

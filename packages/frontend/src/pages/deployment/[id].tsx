@@ -31,7 +31,7 @@ export default function DeploymentDetailPage() {
   const handleDelete = async () => {
     try {
       await deleteDeployment.mutateAsync(deployment.id);
-      message.success('Đã xoá deployment');
+      message.success('Xóa deployment thành công');
       navigate('/deployments');
     } catch {
       message.error('Không thể xoá deployment');
@@ -54,12 +54,12 @@ export default function DeploymentDetailPage() {
           <Space>
             <Button icon={<EditOutlined />} onClick={() => setEditOpen(true)}>Sửa</Button>
             <Popconfirm
-              title="Xoá deployment này?"
+              title="Xóa deployment này?"
               description="Hành động không thể hoàn tác"
               onConfirm={handleDelete}
               okType="danger"
             >
-              <Button danger icon={<DeleteOutlined />}>Xoá</Button>
+              <Button danger icon={<DeleteOutlined />}>Xóa</Button>
             </Popconfirm>
           </Space>
         }

@@ -130,10 +130,10 @@ export default function FirewallRulePage() {
     try {
       if (editRule) {
         await updateRule({ id: editRule.id, ...values });
-        message.success('Đã cập nhật firewall rule');
+        message.success('Cập nhật firewall rule thành công');
       } else {
         await createRule(values);
-        message.success('Đã tạo firewall rule mới');
+        message.success('Tạo firewall rule thành công');
       }
       handleCloseDrawer();
     } catch (e: unknown) {
@@ -145,10 +145,10 @@ export default function FirewallRulePage() {
   const handleDelete = async (id: string) => {
     try {
       await deleteRule.mutateAsync(id);
-      message.success('Đã xoá firewall rule');
+      message.success('Xóa firewall rule thành công');
     } catch (e: unknown) {
       const err = e as { response?: { data?: { error?: { message?: string } } } };
-      message.error(err?.response?.data?.error?.message ?? 'Không thể xoá firewall rule');
+      message.error(err?.response?.data?.error?.message ?? 'Không thể xóa firewall rule');
     }
   };
 
@@ -297,11 +297,11 @@ export default function FirewallRulePage() {
                 title="Xóa firewall rule này?"
                 description="Thao tác này không thể hoàn tác."
                 onConfirm={() => handleDelete(record.id)}
-                okText="Xoá"
+                okText="Xóa"
                 cancelText="Huỷ"
                 okType="danger"
               >
-                <Tooltip title="Xoá">
+                <Tooltip title="Xóa">
                   <Button size="small" danger icon={<DeleteOutlined />} />
                 </Tooltip>
               </Popconfirm>
@@ -317,7 +317,7 @@ export default function FirewallRulePage() {
   return (
     <div>
       <PageHeader
-        title="Quản lý Firewall Rule"
+        title="Quản lý quy tắc tường lửa (Firewall Rule Management)"
         breadcrumbs={[
           { label: 'Dashboard', path: '/dashboard' },
           { label: 'Firewall Rules' },
@@ -339,7 +339,7 @@ export default function FirewallRulePage() {
                 icon={<ImportOutlined />}
                 onClick={() => setImportOpen(true)}
               >
-                Import CSV/XLSX
+                Nhập CSV/XLSX
               </Button>
             )}
             <Button
@@ -347,7 +347,7 @@ export default function FirewallRulePage() {
               loading={exporting}
               onClick={handleExport}
             >
-              Export XLSX
+              Xuất XLSX
             </Button>
           </Space>
         }

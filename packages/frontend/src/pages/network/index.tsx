@@ -32,10 +32,10 @@ export default function NetworkListPage() {
   const handleDelete = async (id: string) => {
     try {
       await deleteNetwork.mutateAsync(id);
-      message.success('Đã xoá network config');
+      message.success('Xóa network config thành công');
       setSelectedRowKeys((prev) => prev.filter((k) => k !== id));
     } catch (e: any) {
-      message.error(e?.response?.data?.error?.message ?? 'Không thể xoá network config');
+      message.error(e?.response?.data?.error?.message ?? 'Không thể xóa network config');
     }
   };
 
@@ -45,8 +45,8 @@ export default function NetworkListPage() {
     );
     const failed = results.filter((r) => r.status === 'rejected').length;
     const succeeded = results.length - failed;
-    if (succeeded > 0) message.success(`Đã xoá ${succeeded} network config`);
-    if (failed > 0) message.error(`${failed} config không thể xoá (server đang có deployment)`);
+    if (succeeded > 0) message.success(`Xóa ${succeeded} network config thành công`);
+    if (failed > 0) message.error(`Không thể xóa ${failed} network config (server đang có deployment)`);
     setSelectedRowKeys([]);
   };
 
@@ -94,10 +94,10 @@ export default function NetworkListPage() {
       width: 80,
       render: (_: unknown, record: NetworkConfig) => (
         <Popconfirm
-          title="Xoá network config này?"
-          description="Chỉ xoá được nếu server không có ứng dụng đang chạy."
+          title="Xóa network config này?"
+          description="Chỉ xóa được nếu server không có ứng dụng đang chạy."
           onConfirm={() => handleDelete(record.id)}
-          okText="Xoá"
+          okText="Xóa"
           cancelText="Huỷ"
           okType="danger"
         >
@@ -110,20 +110,20 @@ export default function NetworkListPage() {
   return (
     <App>
       <PageHeader
-        title="Network Configs"
-        breadcrumbs={[{ label: 'Dashboard', path: '/dashboard' }, { label: 'Networks' }]}
+        title="Cấu hình mạng (Network Configs)"
+        breadcrumbs={[{ label: 'Dashboard', path: '/dashboard' }, { label: 'Network Configs' }]}
         helpKey="network"
         extra={
           selectedRowKeys.length > 0 ? (
             <Popconfirm
-              title={`Xoá ${selectedRowKeys.length} network config đã chọn?`}
+              title={`Xóa ${selectedRowKeys.length} network config đã chọn?`}
               onConfirm={handleBulkDelete}
-              okText="Xoá"
+              okText="Xóa"
               cancelText="Huỷ"
               okType="danger"
             >
               <Button danger icon={<DeleteOutlined />}>
-                Xoá {selectedRowKeys.length} mục
+                Xóa ({selectedRowKeys.length})
               </Button>
             </Popconfirm>
           ) : undefined

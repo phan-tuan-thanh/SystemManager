@@ -24,7 +24,7 @@ export default function PortTab({ applicationId }: Props) {
   const handleDelete = async (id: string) => {
     try {
       await deletePort.mutateAsync(id);
-      message.success('Đã xoá port');
+      message.success('Xóa port thành công');
     } catch {
       message.error('Không thể xoá port');
     }
@@ -35,7 +35,7 @@ export default function PortTab({ applicationId }: Props) {
     try {
       if (editPort) {
         await updatePort.mutateAsync({ id: editPort.id, ...values });
-        message.success('Đã cập nhật port');
+        message.success('Cập nhật port thành công');
       } else {
         await createPort.mutateAsync({ ...values, application_id: applicationId });
         message.success('Đã thêm port');
@@ -97,7 +97,7 @@ export default function PortTab({ applicationId }: Props) {
         <Space size="small">
           <Button size="small" icon={<EditOutlined />} onClick={() => openEdit(record)} />
           <Popconfirm
-            title="Xoá port này?"
+            title="Xóa port này?"
             onConfirm={() => handleDelete(record.id)}
             okType="danger"
           >
