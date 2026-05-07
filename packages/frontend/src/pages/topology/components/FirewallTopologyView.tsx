@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import {
-  Space, Tag, Empty, Spin, Card, Button, Tooltip, Badge, Dropdown, Typography,
+  Space, Tag, Empty, Spin, Button, Tooltip, Badge, Dropdown, Typography,
+  Drawer, Descriptions, Divider,
 } from 'antd';
 import { Network } from 'vis-network';
 import { DataSet } from 'vis-data';
@@ -23,7 +24,6 @@ let mermaidSeq = 0;
 const { Text } = Typography;
 
 const ACTION_COLOR: Record<string, string> = { ALLOW: '#52c41a', DENY: '#ff4d4f' };
-const ZONE_DEFAULT_COLOR = '#1890ff';
 
 // ── Graph builder ────────────────────────────────────────────────────
 function buildVisGraph(rules: FirewallRule[], edgeStyle: 'smooth' | 'straight') {
@@ -38,14 +38,27 @@ function buildVisGraph(rules: FirewallRule[], edgeStyle: 'smooth' | 'straight') 
     }
   };
 
+  // 1. First pass: Map IPs to Server Node IDs for source-to-server connections
+  const ipToNodeId = new Map<string, string>();
+  rules.forEach(r => {
+    const destSrv = r.destination_server as any;
+    if (destSrv?.network_configs) {
+      destSrv.network_configs.forEach((nc: any) => {
+        if (nc.private_ip) ipToNodeId.set(nc.private_ip, `server-${destSrv.id}`);
+      });
+    }
+  });
+
   rules.forEach((r) => {
     let sourceId = '';
     const srcZoneId = r.source_zone_id;
-    const srcZone = r.source_zone;
 
-    // 1. Determine Source Node
-    // Instead of creating fake nodes for IPs or "Any", we connect directly from the Source Zone's Anchor!
-    if (srcZoneId) {
+    // Determine Source Node
+    // PRIORITY: If source_ip matches a known server in our dataset, start from that server!
+    if (r.source_ip && ipToNodeId.has(r.source_ip)) {
+      sourceId = ipToNodeId.get(r.source_ip)!;
+    } else if (srcZoneId) {
+      // Otherwise, start from the Zone's gravity center
       sourceId = `gravity-center-${srcZoneId}`;
     } else {
       // Truly unknown source (Internet)
@@ -59,7 +72,7 @@ function buildVisGraph(rules: FirewallRule[], edgeStyle: 'smooth' | 'straight') 
         zoneId: 'external',
         zoneName: 'External',
         zoneColor: '#ff4d4f',
-        mass: 50, // Heavy like an anchor
+        mass: 50, 
       });
     }
 
@@ -87,7 +100,6 @@ function buildVisGraph(rules: FirewallRule[], edgeStyle: 'smooth' | 'straight') 
       ? `${r.destination_port.protocol} ${r.destination_port.port_number}` : r.protocol || '?';
     const edgeColor = ACTION_COLOR[r.action] ?? '#8c8c8c';
     
-    // Include source IP in the edge label if it exists
     const edgeLabel = r.source_ip 
       ? `[${r.source_ip}] ${portLabel} (${r.action})` 
       : `${portLabel} (${r.action})`;
@@ -105,7 +117,7 @@ function buildVisGraph(rules: FirewallRule[], edgeStyle: 'smooth' | 'straight') 
         ? { enabled: true, type: 'continuous', roundness: 0.3 }
         : { enabled: false },
       width: r.action === 'DENY' ? 1 : 2,
-      physics: true, // Allow rules to influence placement naturally
+      physics: true, 
       title: `Rule: ${r.name}\nSource IP: ${r.source_ip || 'Any'}\nAction: ${r.action}\nStatus: ${r.status}${r.notes ? `\nNotes: ${r.notes}` : ''}`,
     });
   });
@@ -137,46 +149,61 @@ function buildVisGraph(rules: FirewallRule[], edgeStyle: 'smooth' | 'straight') 
   const centerIds: string[] = [];
   const totalZones = zoneInfo.size;
   let zoneIndex = 0;
-  const radius = totalZones > 1 ? 400 : 0; 
+  const radius = totalZones > 1 ? 500 : 0;
 
   zoneInfo.forEach((info, zoneId) => {
     const centerId = `gravity-center-${zoneId}`;
     centerIds.push(centerId);
     
-    // Calculate initial position
+    // Calculate initial position for zone center
     const angle = (2 * Math.PI * zoneIndex) / totalZones;
     const baseX = Math.cos(angle) * radius;
     const baseY = Math.sin(angle) * radius;
     zoneIndex++;
     
-    // Create a VISIBLE anchor node that acts as the Zone Title
+    // Create a HIDDEN anchor node that handles physics for the zone
     rawNodes.push({
       id: centerId,
-      label: info.name.toUpperCase(),
-      shape: 'text',
-      font: { color: info.color, bold: true, size: 14, background: 'transparent', vadjust: -55 },
-      mass: 10, 
-      hidden: false, 
+      label: '',
+      shape: 'dot',
+      size: 0,
+      color: { background: 'transparent', border: 'transparent' },
+      mass: 15, 
+      hidden: false,
+      fixed: false,
       x: baseX,
       y: baseY,
-      title: `Kéo tên Zone này để di chuyển cả nhóm`,
       zoneId: zoneId,
       zoneName: info.name,
       zoneColor: info.color,
     });
     
-    // Pull all nodes in this zone to the center
-    info.nodes.forEach(nId => {
+    // Pre-layout servers in a grid around the center so they start inside the zone
+    const cols = Math.ceil(Math.sqrt(info.nodes.length)) || 1;
+    const spacing = 140;
+    info.nodes.forEach((nId, idx) => {
+      const col = idx % cols;
+      const row = Math.floor(idx / cols);
+      const offsetX = (col - (cols - 1) / 2) * spacing;
+      const offsetY = (row * spacing) + 20; // shift down a bit for title
+      const serverNode = rawNodes.find(n => n.id === nId);
+      if (serverNode) {
+        serverNode.x = baseX + offsetX;
+        serverNode.y = baseY + offsetY;
+      }
+      // Tight spring to keep server close to zone center
       rawEdges.push({
         from: nId,
         to: centerId,
-        hidden: false,
+        hidden: true,
         color: { color: 'transparent', highlight: 'transparent', hover: 'transparent' },
         width: 0,
         arrows: { to: { enabled: false } },
         physics: true,
-        length: 100, // Distance between server and zone title
-        springConstant: 0.1, // Stiff spring for better "dragging" feel
+        length: 80 + Math.floor(idx / cols) * spacing,
+        springConstant: 0.25,
+        selectable: false,
+        hoverWidth: 0,
       });
     });
   });
@@ -275,9 +302,12 @@ export default function FirewallTopologyView() {
 
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [mermaidModalOpen, setMermaidModalOpen] = useState(false);
+  const [selectedRule, setSelectedRule] = useState<FirewallRule | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const networkRef = useRef<Network | null>(null);
+  // Keep an up-to-date map of ruleId -> FirewallRule for fast edge-click lookup
+  const rulesMapRef = useRef<Map<string, FirewallRule>>(new Map());
 
   // Fullscreen
   useEffect(() => {
@@ -332,6 +362,11 @@ export default function FirewallTopologyView() {
 
   const mermaidCode = useMemo(() => parseFirewallToMermaid(rules), [rules]);
   const { nodes, edges } = useMemo(() => buildVisGraph(rules, filters.edgeStyle), [rules, filters.edgeStyle]);
+
+  // Keep rulesMapRef in sync for edge-click lookups
+  useEffect(() => {
+    rulesMapRef.current = new Map(rules.map(r => [r.id, r]));
+  }, [rules]);
 
   // Stats
   const allowCount = rules.filter((r) => r.action === 'ALLOW').length;
@@ -430,9 +465,18 @@ export default function FirewallTopologyView() {
       const positions = network.getPositions(nodeIds);
       const zoneMap = new Map<string, { minX: number; minY: number; maxX: number; maxY: number; color: string; name: string }>();
 
+      // ─── Zone bounding box with extra padding so servers always fit inside ───
+      const PAD_X = 80;
+      const PAD_Y = 80;
+      const PAD_TOP = 100; // Extra top padding for the title label
+
       nodeIds.forEach((id) => {
         const node = nodesDS.get(id) as any;
         if (!node || !node.zoneId) return;
+
+        // SKIP the gravity-center itself when calculating the bounding box
+        if (id.toString().startsWith('gravity-center-')) return;
+
         const pos = positions[id];
         if (!pos) return;
 
@@ -443,31 +487,31 @@ export default function FirewallTopologyView() {
           name: node.zoneName || 'Zone',
         };
 
-        // Node dimensions (approx) + ample padding
-        current.minX = Math.min(current.minX, pos.x - 60);
-        current.minY = Math.min(current.minY, pos.y - 60);
-        current.maxX = Math.max(current.maxX, pos.x + 60);
-        current.maxY = Math.max(current.maxY, pos.y + 60);
+        // Node half-width approx = 60px; add to bounds
+        current.minX = Math.min(current.minX, pos.x - PAD_X);
+        current.minY = Math.min(current.minY, pos.y - PAD_TOP);
+        current.maxX = Math.max(current.maxX, pos.x + PAD_X);
+        current.maxY = Math.max(current.maxY, pos.y + PAD_Y);
         zoneMap.set(zoneId, current);
       });
 
-      zoneMap.forEach((z, id) => {
+      zoneMap.forEach((z) => {
         if (z.minX === Infinity) return;
 
-        const width = z.maxX - z.minX + 20;
-        const height = z.maxY - z.minY + 40;
-        const x = z.minX - 10;
-        const y = z.minY - 30;
+        const x = z.minX;
+        const y = z.minY;
+        const width = z.maxX - z.minX;
+        const height = z.maxY - z.minY;
 
         // Draw background
         ctx.save();
-        ctx.setLineDash([5, 5]);
+        ctx.setLineDash([6, 4]);
         ctx.strokeStyle = z.color;
-        ctx.lineWidth = 1;
-        ctx.fillStyle = `${z.color}11`; // Very light alpha
+        ctx.lineWidth = 1.5;
+        ctx.fillStyle = `${z.color}18`;
         
         // Rounded rect
-        const r = 10;
+        const r = 12;
         ctx.beginPath();
         ctx.moveTo(x + r, y);
         ctx.lineTo(x + width - r, y);
@@ -481,6 +525,12 @@ export default function FirewallTopologyView() {
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
+
+        // Zone Title – painted inside the top bar area
+        ctx.setLineDash([]);
+        ctx.fillStyle = z.color;
+        ctx.font = 'bold 11px Inter, sans-serif';
+        ctx.fillText(z.name.toUpperCase(), x + 10, y + 16);
 
         ctx.restore();
       });
@@ -509,11 +559,103 @@ export default function FirewallTopologyView() {
       });
     }
 
-    // Drag events
+    // ── Edge click → show Rule detail drawer ──────────────────────────
+    network.on('selectEdge', (params) => {
+      if (!params.edges || params.edges.length === 0) return;
+      const edgeId = params.edges[0] as string;
+      const rule = rulesMapRef.current.get(edgeId);
+      if (rule) setSelectedRule(rule);
+    });
+    network.on('deselectEdge', () => {
+      // Don't clear immediately — let user interact with drawer
+    });
+
+    // ── Zone drag by clicking the Title ──────────────────────────────────
+    // Compute and cache zone bounding boxes each redraw for hit-testing
+    let zoneTitleHitBoxes: Array<{ zoneId: string; centerId: string; x: number; y: number; w: number; h: number }> = [];
+
+    network.on('afterDrawing', () => {
+      const nodeIds = nodesDS.getIds();
+      const positions = network.getPositions(nodeIds);
+      const zoneMap = new Map<string, { minX: number; minY: number; maxX: number; maxY: number }>();
+      const PAD_X = 80, PAD_Y = 80, PAD_TOP = 100;
+
+      nodeIds.forEach((id) => {
+        const node = nodesDS.get(id) as any;
+        if (!node?.zoneId || id.toString().startsWith('gravity-center-')) return;
+        const pos = positions[id];
+        if (!pos) return;
+        const cur = zoneMap.get(node.zoneId) || { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity };
+        cur.minX = Math.min(cur.minX, pos.x - PAD_X);
+        cur.minY = Math.min(cur.minY, pos.y - PAD_TOP);
+        cur.maxX = Math.max(cur.maxX, pos.x + PAD_X);
+        cur.maxY = Math.max(cur.maxY, pos.y + PAD_Y);
+        zoneMap.set(node.zoneId, cur);
+      });
+
+      zoneTitleHitBoxes = [];
+      zoneMap.forEach((b, zoneId) => {
+        if (b.minX === Infinity) return;
+        // The title strip is the top 22px of the zone box (canvas coords after transform)
+        const topLeft = network.canvasToDOM({ x: b.minX, y: b.minY });
+        const topRight = network.canvasToDOM({ x: b.maxX, y: b.minY + 22 });
+        zoneTitleHitBoxes.push({
+          zoneId,
+          centerId: `gravity-center-${zoneId}`,
+          x: topLeft.x,
+          y: topLeft.y,
+          w: topRight.x - topLeft.x,
+          h: topRight.y - topLeft.y,
+        });
+      });
+    });
+
+    // Intercept canvas mousedown – if it lands in a title strip, select the anchor and drag it
+    let zoneDragState: { centerId: string; startCanvas: { x: number; y: number } } | null = null;
+
+    const onCanvasMouseDown = (evt: MouseEvent) => {
+      const rect = container.getBoundingClientRect();
+      const cx = evt.clientX - rect.left;
+      const cy = evt.clientY - rect.top;
+
+      const hit = zoneTitleHitBoxes.find(
+        z => cx >= z.x && cx <= z.x + z.w && cy >= z.y && cy <= z.y + Math.max(z.h, 22)
+      );
+      if (!hit) return;
+
+      // Prevent vis-network from starting a pan
+      evt.stopPropagation();
+      const anchorPos = network.getPositions([hit.centerId])[hit.centerId];
+      if (!anchorPos) return;
+      zoneDragState = { centerId: hit.centerId, startCanvas: { x: cx, y: cy } };
+      network.setOptions({ physics: { enabled: true } });
+    };
+
+    const onCanvasMouseMove = (evt: MouseEvent) => {
+      if (!zoneDragState) return;
+      const rect = container.getBoundingClientRect();
+      const cx = evt.clientX - rect.left;
+      const cy = evt.clientY - rect.top;
+      const worldPos = network.DOMtoCanvas({ x: cx, y: cy });
+      // Move the anchor node to follow the cursor
+      nodesDS.update({ id: zoneDragState.centerId, x: worldPos.x, y: worldPos.y });
+    };
+
+    const onCanvasMouseUp = () => {
+      if (!zoneDragState) return;
+      zoneDragState = null;
+      const ms = filters.physics.dragSettleMs;
+      setTimeout(() => network.setOptions({ physics: { enabled: false } }), ms);
+    };
+
+    const canvas = container.querySelector('canvas');
+    canvas?.addEventListener('mousedown', onCanvasMouseDown, true);
+    canvas?.addEventListener('mousemove', onCanvasMouseMove);
+    canvas?.addEventListener('mouseup', onCanvasMouseUp);
+
+    // Drag events for regular node dragging
     let dragEndTimer: ReturnType<typeof setTimeout>;
     network.on('dragStart', (params) => {
-      // Only enable physics if they are dragging an actual node (like the Zone Anchor)
-      // If params.nodes is empty, they are just panning the canvas.
       if (params.nodes && params.nodes.length > 0) {
         clearTimeout(dragEndTimer);
         network.setOptions({ physics: { enabled: true } });
@@ -530,6 +672,9 @@ export default function FirewallTopologyView() {
 
     return () => {
       clearTimeout(dragEndTimer);
+      canvas?.removeEventListener('mousedown', onCanvasMouseDown, true);
+      canvas?.removeEventListener('mousemove', onCanvasMouseMove);
+      canvas?.removeEventListener('mouseup', onCanvasMouseUp);
       network.destroy();
       networkRef.current = null;
     };
@@ -693,7 +838,7 @@ export default function FirewallTopologyView() {
               <Text type="secondary" style={{ fontSize: 12 }}>- - - PENDING</Text>
             </div>
             <Text type="secondary" style={{ fontSize: 11, fontStyle: 'italic', marginLeft: 'auto' }}>
-              💡 Hover cạnh để xem chi tiết Rule. Click node để tập trung.
+              💡 Click mũi tên để xem chi tiết Rule. Hover để xem tóm tắt.
             </Text>
           </Space>
         </div>
@@ -739,6 +884,181 @@ export default function FirewallTopologyView() {
         onCancel={() => setMermaidModalOpen(false)}
         mermaidCode={mermaidCode}
       />
+
+      {/* ── Rule Detail Drawer ────────────────────────────────────── */}
+      <Drawer
+        title={
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 15, fontWeight: 600 }}>🔒 Chi tiết Firewall Rule</span>
+            {selectedRule && (
+              <Tag
+                color={selectedRule.action === 'ALLOW' ? 'success' : 'error'}
+                style={{ fontWeight: 700, fontSize: 12 }}
+              >
+                {selectedRule.action}
+              </Tag>
+            )}
+          </div>
+        }
+        open={!!selectedRule}
+        onClose={() => setSelectedRule(null)}
+        width={420}
+        styles={{ body: { padding: '12px 20px' } }}
+        mask={false}
+        style={{ position: 'absolute' }}
+        getContainer={wrapperRef.current ?? undefined}
+      >
+        {selectedRule && (
+          <>
+            <Descriptions column={1} size="small" bordered labelStyle={{ width: 130, background: '#fafafa', fontWeight: 600 }}>
+              <Descriptions.Item label="Tên Rule">{selectedRule.name}</Descriptions.Item>
+              <Descriptions.Item label="Môi trường">
+                <Tag color="blue">{selectedRule.environment}</Tag>
+              </Descriptions.Item>
+              <Descriptions.Item label="Hành động">
+                <Tag color={selectedRule.action === 'ALLOW' ? 'success' : 'error'} style={{ fontWeight: 700 }}>
+                  {selectedRule.action === 'ALLOW' ? '✓ ALLOW' : '✗ DENY'}
+                </Tag>
+              </Descriptions.Item>
+              <Descriptions.Item label="Trạng thái">
+                <Tag color={
+                  selectedRule.status === 'ACTIVE' ? 'green' :
+                  selectedRule.status === 'PENDING_APPROVAL' ? 'orange' :
+                  selectedRule.status === 'REJECTED' ? 'red' : 'default'
+                }>
+                  {selectedRule.status}
+                </Tag>
+              </Descriptions.Item>
+            </Descriptions>
+
+            <Divider orientation="left" style={{ fontSize: 12, color: '#8c8c8c', margin: '12px 0 8px' }}>Nguồn</Divider>
+            <Descriptions column={1} size="small" bordered labelStyle={{ width: 130, background: '#fafafa', fontWeight: 600 }}>
+              <Descriptions.Item label="Zone nguồn">
+                {selectedRule.source_zone?.name
+                  ? <Tag color="processing">{selectedRule.source_zone.name}</Tag>
+                  : <span style={{ color: '#8c8c8c' }}>— (Any)</span>
+                }
+              </Descriptions.Item>
+              <Descriptions.Item label="IP nguồn">
+                {selectedRule.source_ip
+                  ? <code style={{ background: '#f6f8fa', padding: '1px 5px', borderRadius: 3 }}>{selectedRule.source_ip}</code>
+                  : <span style={{ color: '#8c8c8c' }}>— (Any)</span>
+                }
+              </Descriptions.Item>
+            </Descriptions>
+
+            <Divider orientation="left" style={{ fontSize: 12, color: '#8c8c8c', margin: '12px 0 8px' }}>Đích</Divider>
+            <Descriptions column={1} size="small" bordered labelStyle={{ width: 130, background: '#fafafa', fontWeight: 600 }}>
+              <Descriptions.Item label="Zone đích">
+                {selectedRule.destination_zone?.name
+                  ? <Tag color="geekblue">{selectedRule.destination_zone.name}</Tag>
+                  : <span style={{ color: '#8c8c8c' }}>—</span>
+                }
+              </Descriptions.Item>
+              <Descriptions.Item label="Server đích">
+                <strong>{selectedRule.destination_server?.name ?? selectedRule.destination_server_id}</strong>
+                {selectedRule.destination_server?.code && (
+                  <Tag style={{ marginLeft: 6, fontSize: 10 }}>{selectedRule.destination_server.code}</Tag>
+                )}
+              </Descriptions.Item>
+              <Descriptions.Item label="Cổng / Giao thức">
+                {selectedRule.destination_port ? (
+                  <code style={{ background: '#f6f8fa', padding: '1px 5px', borderRadius: 3 }}>
+                    {selectedRule.destination_port.protocol}:{selectedRule.destination_port.port_number}
+                    {selectedRule.destination_port.service_name && ` (${selectedRule.destination_port.service_name})`}
+                  </code>
+                ) : (
+                  <Tag>{selectedRule.protocol}</Tag>
+                )}
+              </Descriptions.Item>
+            </Descriptions>
+
+            {/* Expiry */}
+            {(() => {
+              const r = selectedRule;
+              const isNever = r.never_expires || !r.expires_at;
+              if (isNever) {
+                return (
+                  <>
+                    <Divider orientation="left" style={{ fontSize: 12, color: '#8c8c8c', margin: '12px 0 8px' }}>Thời hạn</Divider>
+                    <Descriptions column={1} size="small" bordered labelStyle={{ width: 130, background: '#fafafa', fontWeight: 600 }}>
+                      <Descriptions.Item label="Thời hạn">
+                        <Tag color="default">Vô thời hạn</Tag>
+                      </Descriptions.Item>
+                    </Descriptions>
+                  </>
+                );
+              }
+              const exp = new Date(r.expires_at!);
+              const diffDays = Math.ceil((exp.getTime() - Date.now()) / 86400000);
+              const color = diffDays < 0 ? 'error' : diffDays <= 30 ? 'warning' : 'success';
+              const label = diffDays < 0 ? 'Đã hết hạn' : diffDays <= 30 ? `Còn ${diffDays} ngày` : exp.toLocaleDateString('vi-VN');
+              return (
+                <>
+                  <Divider orientation="left" style={{ fontSize: 12, color: '#8c8c8c', margin: '12px 0 8px' }}>Thời hạn</Divider>
+                  <Descriptions column={1} size="small" bordered labelStyle={{ width: 130, background: '#fafafa', fontWeight: 600 }}>
+                    <Descriptions.Item label="Ngày hết hạn">
+                      <Tag color={color}>{label}</Tag>
+                      <span style={{ marginLeft: 8, color: '#8c8c8c', fontSize: 12 }}>{exp.toLocaleDateString('vi-VN')}</span>
+                    </Descriptions.Item>
+                  </Descriptions>
+                  {diffDays < 0 && (
+                    <div style={{ marginTop: 8, padding: '6px 10px', background: '#fff1f0', border: '1px solid #ffccc7', borderRadius: 6, fontSize: 12, color: '#cf1322' }}>
+                      ⚠️ Rule này đã hết hạn. Cần xem xét gia hạn hoặc thu hồi.
+                    </div>
+                  )}
+                  {diffDays >= 0 && diffDays <= 30 && (
+                    <div style={{ marginTop: 8, padding: '6px 10px', background: '#fff7e6', border: '1px solid #ffd591', borderRadius: 6, fontSize: 12, color: '#d46b08' }}>
+                      ⏰ Rule sắp hết hạn. Vui lòng gia hạn nếu cần thiết.
+                    </div>
+                  )}
+                </>
+              );
+            })()}
+
+            {(selectedRule.request_date || selectedRule.approved_by) && (
+              <>
+                <Divider orientation="left" style={{ fontSize: 12, color: '#8c8c8c', margin: '12px 0 8px' }}>Phê duyệt</Divider>
+                <Descriptions column={1} size="small" bordered labelStyle={{ width: 130, background: '#fafafa', fontWeight: 600 }}>
+                  {selectedRule.request_date && (
+                    <Descriptions.Item label="Ngày yêu cầu">
+                      {new Date(selectedRule.request_date).toLocaleDateString('vi-VN')}
+                    </Descriptions.Item>
+                  )}
+                  {selectedRule.approved_by && (
+                    <Descriptions.Item label="Người phê duyệt">{selectedRule.approved_by}</Descriptions.Item>
+                  )}
+                </Descriptions>
+              </>
+            )}
+
+
+            {selectedRule.notes && (
+              <>
+                <Divider orientation="left" style={{ fontSize: 12, color: '#8c8c8c', margin: '12px 0 8px' }}>Ghi chú</Divider>
+                <div style={{
+                  background: '#fffbe6',
+                  border: '1px solid #ffe58f',
+                  borderRadius: 6,
+                  padding: '8px 12px',
+                  fontSize: 13,
+                  lineHeight: 1.6,
+                  color: '#614700',
+                }}>
+                  {selectedRule.notes}
+                </div>
+              </>
+            )}
+
+            {selectedRule.description && (
+              <>
+                <Divider orientation="left" style={{ fontSize: 12, color: '#8c8c8c', margin: '12px 0 8px' }}>Mô tả</Divider>
+                <div style={{ fontSize: 13, color: '#595959', lineHeight: 1.6 }}>{selectedRule.description}</div>
+              </>
+            )}
+          </>
+        )}
+      </Drawer>
     </div>
   );
 }

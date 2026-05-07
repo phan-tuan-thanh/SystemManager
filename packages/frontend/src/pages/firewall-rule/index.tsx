@@ -46,6 +46,30 @@ const STATUS_LABEL: Record<FirewallRuleStatus, string> = {
   REJECTED: 'Rejected',
 };
 
+// ─── Expiry helpers ────────────────────────────────────────────────────────────
+
+function computeExpiry(rule: FirewallRule): {
+  label: string;
+  color: string;
+  tooltip?: string;
+} {
+  if (rule.never_expires || !rule.expires_at) {
+    return { label: 'Vô thời hạn', color: 'default' };
+  }
+  const now = new Date();
+  const exp = new Date(rule.expires_at);
+  const diffMs = exp.getTime() - now.getTime();
+  const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffDays < 0) {
+    return { label: 'Đã hết hạn', color: 'error', tooltip: exp.toLocaleDateString('vi-VN') };
+  }
+  if (diffDays <= 30) {
+    return { label: `Còn ${diffDays} ngày`, color: 'warning', tooltip: exp.toLocaleDateString('vi-VN') };
+  }
+  return { label: exp.toLocaleDateString('vi-VN'), color: 'success' };
+}
+
 // ─── Main Page ──────────────────────────────────────────────────────────────────
 
 export default function FirewallRulePage() {
@@ -231,6 +255,19 @@ export default function FirewallRulePage() {
       render: (status: FirewallRuleStatus) => (
         <Tag color={STATUS_COLOR[status]}>{STATUS_LABEL[status]}</Tag>
       ),
+    },
+    {
+      title: 'Thời hạn',
+      key: 'expires_at',
+      width: 130,
+      render: (_: unknown, r: FirewallRule) => {
+        const { label, color, tooltip } = computeExpiry(r);
+        return (
+          <Tooltip title={tooltip}>
+            <Tag color={color} style={{ cursor: tooltip ? 'help' : 'default' }}>{label}</Tag>
+          </Tooltip>
+        );
+      },
     },
     {
       title: 'Ngày yêu cầu',

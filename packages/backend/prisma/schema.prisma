@@ -770,6 +770,8 @@ model FirewallRule {
   request_date          DateTime?
   approved_by           String?            @db.VarChar(200)
   notes                 String?            @db.Text
+  expires_at            DateTime?
+  never_expires         Boolean            @default(true)
   created_at            DateTime           @default(now())
   updated_at            DateTime           @updatedAt
   deleted_at            DateTime?
@@ -784,5 +786,6 @@ model FirewallRule {
   @@index([destination_server_id])
   @@index([destination_port_id])
   @@index([status])
+  @@index([expires_at])
   @@map("firewall_rules")
 }

@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
-  Form, Input, Select, Radio, Button, Space, DatePicker,
+  Form, Input, Select, Radio, Button, Space, DatePicker, Alert,
 } from 'antd';
 import dayjs from 'dayjs';
 import { useQuery } from '@tanstack/react-query';
@@ -25,6 +25,8 @@ interface PortOption {
   service_name?: string;
 }
 
+type ExpiryMode = 'never' | 'months' | 'custom';
+
 export interface FirewallRuleFormValues {
   name: string;
   description?: string;
@@ -40,6 +42,11 @@ export interface FirewallRuleFormValues {
   request_date?: string;
   approved_by?: string;
   notes?: string;
+  expires_at?: string | null;
+  never_expires?: boolean;
+  // Internal form-only fields
+  _expiry_months?: number;
+  _expiry_date?: string;
 }
 
 interface FirewallRuleFormProps {
@@ -72,6 +79,11 @@ const STATUS_OPTIONS: { value: FirewallRuleStatus; label: string }[] = [
   { value: 'REJECTED', label: 'Rejected' },
 ];
 
+const MONTH_OPTIONS = Array.from({ length: 12 }, (_, i) => ({
+  value: i + 1,
+  label: `${i + 1} tháng`,
+}));
+
 // ─── Component ─────────────────────────────────────────────────────────────────
 
 export default function FirewallRuleForm({
@@ -84,19 +96,28 @@ export default function FirewallRuleForm({
   const [form] = Form.useForm<FirewallRuleFormValues>();
   const envValue = Form.useWatch('environment', form);
   const destServerId = Form.useWatch('destination_server_id', form);
+  const [expiryMode, setExpiryMode] = useState<ExpiryMode>('never');
 
   // Reset form when initialValues change (e.g. switching between edit targets)
   useEffect(() => {
     if (initialValues) {
       form.setFieldsValue({
         ...initialValues,
-        request_date: undefined, // handled separately below
+        request_date: undefined,
       });
       if (initialValues.request_date) {
         form.setFieldValue('request_date', initialValues.request_date);
       }
+      // Restore expiry mode from saved data
+      if (initialValues.never_expires || !initialValues.expires_at) {
+        setExpiryMode('never');
+      } else if (initialValues.expires_at) {
+        setExpiryMode('custom');
+        form.setFieldValue('_expiry_date', dayjs(initialValues.expires_at));
+      }
     } else {
       form.resetFields();
+      setExpiryMode('never');
     }
   }, [initialValues, form]);
 
@@ -142,6 +163,18 @@ export default function FirewallRuleForm({
 
   const handleFinish = async (values: FirewallRuleFormValues) => {
     // DatePicker returns dayjs object — convert to ISO string if present
+    let expiresAt: string | null = null;
+    let neverExpires = true;
+
+    if (expiryMode === 'months' && values._expiry_months) {
+      expiresAt = dayjs().add(values._expiry_months, 'month').format('YYYY-MM-DD');
+      neverExpires = false;
+    } else if (expiryMode === 'custom' && values._expiry_date) {
+      const d = values._expiry_date as unknown;
+      expiresAt = dayjs.isDayjs(d) ? (d as ReturnType<typeof dayjs>).format('YYYY-MM-DD') : String(d);
+      neverExpires = false;
+    }
+
     const payload: FirewallRuleFormValues = {
       ...values,
       request_date: values.request_date
@@ -149,6 +182,10 @@ export default function FirewallRuleForm({
           ? (values.request_date as unknown as ReturnType<typeof dayjs>).format('YYYY-MM-DD')
           : values.request_date)
         : undefined,
+      expires_at: expiresAt,
+      never_expires: neverExpires,
+      _expiry_months: undefined,
+      _expiry_date: undefined,
     };
     await onFinish(payload);
   };
@@ -304,6 +341,58 @@ export default function FirewallRuleForm({
       <Form.Item name="description" label="Mô tả">
         <Input.TextArea rows={2} placeholder="Mô tả ngắn về rule" />
       </Form.Item>
+
+      {/* Expiry — 3-mode picker */}
+      <Form.Item label="Thời hạn hiệu lực" style={{ marginBottom: 8 }}>
+        <Radio.Group
+          value={expiryMode}
+          onChange={(e) => {
+            setExpiryMode(e.target.value);
+            form.setFieldValue('_expiry_months', undefined);
+            form.setFieldValue('_expiry_date', undefined);
+          }}
+        >
+          <Radio value="never">Vô thời hạn</Radio>
+          <Radio value="months">Số tháng</Radio>
+          <Radio value="custom">Ngày cụ thể</Radio>
+        </Radio.Group>
+      </Form.Item>
+
+      {expiryMode === 'months' && (
+        <Form.Item
+          name="_expiry_months"
+          label="Số tháng hiệu lực"
+          rules={[{ required: true, message: 'Vui lòng chọn số tháng' }]}
+          style={{ marginBottom: 8 }}
+        >
+          <Select placeholder="Chọn số tháng" options={MONTH_OPTIONS} style={{ width: 180 }} />
+        </Form.Item>
+      )}
+
+      {expiryMode === 'custom' && (
+        <Form.Item
+          name="_expiry_date"
+          label="Ngày hết hạn"
+          rules={[{ required: true, message: 'Vui lòng chọn ngày hết hạn' }]}
+          style={{ marginBottom: 8 }}
+        >
+          <DatePicker
+            style={{ width: '100%' }}
+            format="YYYY-MM-DD"
+            placeholder="Chọn ngày hết hạn"
+            disabledDate={(current) => current && current < dayjs().startOf('day')}
+          />
+        </Form.Item>
+      )}
+
+      {expiryMode !== 'never' && (
+        <Alert
+          type="info"
+          showIcon
+          message="Rule sẽ tự động hiển thị cảnh báo khi sắp hết hạn (≤ 30 ngày)."
+          style={{ marginBottom: 16, fontSize: 12 }}
+        />
+      )}
 
       {/* Notes */}
       <Form.Item name="notes" label="Ghi chú">

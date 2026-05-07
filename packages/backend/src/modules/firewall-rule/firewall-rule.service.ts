@@ -11,7 +11,18 @@ import { QueryFirewallRuleDto } from './dto/query-firewall-rule.dto';
 const RULE_INCLUDE = {
   source_zone: { select: { id: true, name: true, code: true, color: true } },
   destination_zone: { select: { id: true, name: true, code: true, color: true } },
-  destination_server: { select: { id: true, code: true, name: true, environment: true } },
+  destination_server: { 
+    select: { 
+      id: true, 
+      code: true, 
+      name: true, 
+      environment: true,
+      network_configs: {
+        where: { deleted_at: null },
+        select: { private_ip: true }
+      }
+    } 
+  },
   destination_port: { select: { id: true, port_number: true, protocol: true, service_name: true } },
 } as const;
 
@@ -78,6 +89,8 @@ export class FirewallRuleService {
         request_date: dto.request_date ? new Date(dto.request_date) : null,
         approved_by: dto.approved_by,
         notes: dto.notes,
+        expires_at: dto.expires_at ? new Date(dto.expires_at) : null,
+        never_expires: dto.never_expires ?? (!dto.expires_at),
       },
       include: RULE_INCLUDE,
     });
@@ -129,6 +142,11 @@ export class FirewallRuleService {
         ...(dto.request_date !== undefined && { request_date: dto.request_date ? new Date(dto.request_date) : null }),
         ...(dto.approved_by !== undefined && { approved_by: dto.approved_by }),
         ...(dto.notes !== undefined && { notes: dto.notes }),
+        // Expiry fields
+        ...(dto.expires_at !== undefined && { expires_at: dto.expires_at ? new Date(dto.expires_at) : null }),
+        ...(dto.never_expires !== undefined && { never_expires: dto.never_expires }),
+        // Auto-sync never_expires if expires_at is being cleared
+        ...(dto.expires_at === null && { never_expires: true }),
       },
       include: RULE_INCLUDE,
     });
@@ -269,6 +287,8 @@ export class FirewallRuleService {
               action: (row.action || 'ALLOW') as any,
               status: (row.status || 'PENDING_APPROVAL') as any,
               notes: row.notes || null,
+              expires_at: row.expires_at ? new Date(row.expires_at) : null,
+              never_expires: !row.expires_at,
             },
           });
           results.created++;
@@ -303,6 +323,7 @@ export class FirewallRuleService {
       { header: 'Hành động', key: 'action', width: 12 },
       { header: 'Trạng thái', key: 'status', width: 18 },
       { header: 'Ngày yêu cầu', key: 'request_date', width: 14 },
+      { header: 'Thời hạn', key: 'expires_at', width: 14 },
       { header: 'Người phê duyệt', key: 'approved_by', width: 20 },
       { header: 'Ghi chú', key: 'notes', width: 30 },
     ];
@@ -327,6 +348,7 @@ export class FirewallRuleService {
         action: r.action,
         status: r.status,
         request_date: r.request_date ? new Date(r.request_date).toISOString().slice(0, 10) : '',
+        expires_at: r.never_expires ? 'Vô thời hạn' : (r.expires_at ? new Date(r.expires_at).toISOString().slice(0, 10) : ''),
         approved_by: r.approved_by ?? '',
         notes: r.notes ?? '',
       });

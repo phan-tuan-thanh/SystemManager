@@ -1,5 +1,5 @@
 import {
-  IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength, IsIn, IsDateString,
+  IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength, IsIn, IsDateString, IsBoolean,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -81,4 +81,21 @@ export class CreateFirewallRuleDto {
   @IsOptional()
   @IsString()
   notes?: string;
+
+  @ApiPropertyOptional({
+    example: '2026-12-31',
+    description: 'Ngày hết hạn của rule (null = vô thời hạn). ISO date string.',
+  })
+  @IsOptional()
+  @IsDateString()
+  expires_at?: string;
+
+  @ApiPropertyOptional({
+    example: true,
+    description: 'True = rule không có thời hạn hết hạn (vô thời hạn)',
+    default: true,
+  })
+  @IsOptional()
+  @IsBoolean()
+  never_expires?: boolean;
 }

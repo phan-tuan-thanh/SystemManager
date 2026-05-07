@@ -33,6 +33,8 @@ export interface FirewallRule {
   request_date?: string;
   approved_by?: string;
   notes?: string;
+  expires_at?: string | null;
+  never_expires?: boolean;
   created_at: string;
   updated_at: string;
   source_zone?: Pick<NetworkZone, 'id' | 'name' | 'code' | 'color'>;
