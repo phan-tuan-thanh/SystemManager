@@ -148,12 +148,45 @@ export class ConnectionEdge {
 }
 
 @ObjectType()
+export class ImpliedConnectionEdge {
+  @Field(() => ID)
+  id: string; // synthetic: `implied-${ruleId}-${sourceAppId}-${targetAppId}`
+
+  @Field()
+  sourceAppId: string;
+
+  @Field()
+  targetAppId: string;
+
+  @Field()
+  sourceAppName: string;
+
+  @Field()
+  targetAppName: string;
+
+  @Field()
+  environment: string;
+
+  @Field()
+  firewallRuleId: string;
+
+  @Field()
+  firewallRuleName: string;
+
+  @Field(() => PortNode, { nullable: true })
+  targetPort?: PortNode;
+}
+
+@ObjectType()
 export class TopologyData {
   @Field(() => [ServerNode])
   servers: ServerNode[];
 
   @Field(() => [ConnectionEdge])
   connections: ConnectionEdge[];
+
+  @Field(() => [ImpliedConnectionEdge])
+  impliedConnections: ImpliedConnectionEdge[];
 }
 
 @ObjectType()

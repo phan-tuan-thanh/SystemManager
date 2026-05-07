@@ -5,6 +5,21 @@ A chronological record of project milestones, updates, and sprint summaries.
 
 ---
 
+## 2026-05-08 — Sprint 25: Two-Layer Connectivity Model ✅ Hoàn thành
+
+- ✅ S25-01 [BE] `ConnectionService.getFirewallCoverageStatus()` + `getFirewallCoverageStatusBatch()` với CIDR matching
+- ✅ S25-02 [BE] `GET /api/v1/connections/firewall-coverage` (batch) + `/:id/firewall-coverage`
+- ✅ S25-03 [BE] `TopologyService.getImpliedConnections()` + `impliedConnections` trong GraphQL topology query
+- ✅ S25-04 [FE] Hook `useConnectionFirewallCoverage`
+- ✅ S25-05 [FE] AppConnection list: column "Firewall Coverage" badge ✅/⚠️/—
+- ✅ S25-06 [FE] App Topology: implied edges (nét đứt, màu nhạt) + toggle "Implied"
+- ✅ S25-07 [FE] FirewallRule detail drawer: section "Kết nối ứng dụng dùng rule này"
+- ✅ S25-08 [FE] Firewall Topology: badge "N app / no app" trên ALLOW edges
+- ✅ S25-09 [FE] DependencyTree (upstream/downstream): coverage badge ✅/⚠️ mỗi connection
+- Branch: `feat/sprint-25-connectivity-model` — Docker build pass, 0 lỗi TS mới
+
+---
+
 ## 2026-05-08 — Sprint 25: Bắt đầu kế hoạch Two-Layer Connectivity Model 🔄
 
 - Yêu cầu ghi nhận vào SRS.md section 4.5.1 (Mô hình Kết nối 2 Lớp), 4.9.2 AC6, 4.9.3 AC9

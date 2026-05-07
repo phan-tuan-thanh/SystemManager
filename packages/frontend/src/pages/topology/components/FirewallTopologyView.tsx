@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import {
   Space, Tag, Empty, Spin, Button, Tooltip, Badge, Dropdown, Typography,
-  Drawer, Descriptions, Divider,
+  Drawer, Descriptions, Divider, List,
 } from 'antd';
 import { Network } from 'vis-network';
 import { DataSet } from 'vis-data';
@@ -12,6 +12,7 @@ import {
 } from '@ant-design/icons';
 import type { FirewallAction, FirewallRuleStatus, FirewallRule } from '../../../types/firewall-rule';
 import { useFirewallRuleList } from '../../firewall-rule/hooks/useFirewallRules';
+import { useConnectionList } from '../../../hooks/useConnections';
 import { parseFirewallToMermaid } from '../../../utils/firewall-mermaid-parser';
 import MermaidExportModal from './MermaidExportModal';
 import FirewallFilterPanel, { type FirewallFilterState, DEFAULT_PHYSICS } from './FirewallFilterPanel';
@@ -26,7 +27,7 @@ const { Text } = Typography;
 const ACTION_COLOR: Record<string, string> = { ALLOW: '#52c41a', DENY: '#ff4d4f' };
 
 // ── Graph builder ────────────────────────────────────────────────────
-function buildVisGraph(rules: FirewallRule[], edgeStyle: 'smooth' | 'straight') {
+function buildVisGraph(rules: FirewallRule[], edgeStyle: 'smooth' | 'straight', connCountByPort: Map<string, number> = new Map()) {
   const rawNodes: any[] = [];
   const rawEdges: any[] = [];
   const addedNodes = new Set<string>();
@@ -100,9 +101,11 @@ function buildVisGraph(rules: FirewallRule[], edgeStyle: 'smooth' | 'straight') 
       ? `${r.destination_port.protocol} ${r.destination_port.port_number}` : r.protocol || '?';
     const edgeColor = ACTION_COLOR[r.action] ?? '#8c8c8c';
     
-    const edgeLabel = r.source_ip 
-      ? `[${r.source_ip}] ${portLabel} (${r.action})` 
-      : `${portLabel} (${r.action})`;
+    const connCount = r.destination_port_id ? (connCountByPort.get(r.destination_port_id) ?? 0) : 0;
+    const connSuffix = r.action === 'ALLOW' ? ` · ${connCount > 0 ? `${connCount} app` : 'no app'}` : '';
+    const edgeLabel = r.source_ip
+      ? `[${r.source_ip}] ${portLabel} (${r.action})${connSuffix}`
+      : `${portLabel} (${r.action})${connSuffix}`;
 
     rawEdges.push({
       id: r.id,
@@ -332,6 +335,9 @@ export default function FirewallTopologyView() {
 
   const allRules = rulesData?.items ?? [];
 
+  // Connections data — used in the rule detail drawer to show related AppConnections
+  const { data: connectionsData } = useConnectionList({ limit: 500 });
+
   // Source zone & dest server options for filter panel
   const { sourceZoneOptions, destServerOptions } = useMemo(() => {
     const zoneMap = new Map<string, string>();
@@ -361,7 +367,18 @@ export default function FirewallTopologyView() {
   }, [allRules, filters.visibleSourceZoneIds, filters.visibleDestServerIds]);
 
   const mermaidCode = useMemo(() => parseFirewallToMermaid(rules), [rules]);
-  const { nodes, edges } = useMemo(() => buildVisGraph(rules, filters.edgeStyle), [rules, filters.edgeStyle]);
+  const connCountByPort = useMemo(() => {
+    const map = new Map<string, number>();
+    (connectionsData?.items ?? []).forEach((c) => {
+      if (c.target_port_id) map.set(c.target_port_id, (map.get(c.target_port_id) ?? 0) + 1);
+    });
+    return map;
+  }, [connectionsData?.items]);
+
+  const { nodes, edges } = useMemo(
+    () => buildVisGraph(rules, filters.edgeStyle, connCountByPort),
+    [rules, filters.edgeStyle, connCountByPort],
+  );
 
   // Keep rulesMapRef in sync for edge-click lookups
   useEffect(() => {
@@ -1056,6 +1073,40 @@ export default function FirewallTopologyView() {
                 <div style={{ fontSize: 13, color: '#595959', lineHeight: 1.6 }}>{selectedRule.description}</div>
               </>
             )}
+
+            {(() => {
+              const relatedConns = (connectionsData?.items ?? []).filter(
+                (c) => selectedRule.destination_port_id && c.target_port_id === selectedRule.destination_port_id,
+              );
+              return (
+                <>
+                  <Divider orientation="left" plain style={{ fontSize: 13, margin: '12px 0 8px' }}>
+                    Kết nối ứng dụng dùng rule này ({relatedConns.length})
+                  </Divider>
+                  {relatedConns.length === 0 ? (
+                    <Empty description="Chưa có AppConnection khai báo dùng port này" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+                  ) : (
+                    <List
+                      size="small"
+                      dataSource={relatedConns}
+                      renderItem={(c) => (
+                        <List.Item style={{ padding: '4px 0' }}>
+                          <Space size={4} wrap>
+                            <Tag color="blue">{c.source_app?.name ?? c.source_app_id}</Tag>
+                            <span style={{ color: '#8c8c8c' }}>→</span>
+                            <Tag color="green">{c.target_app?.name ?? c.target_app_id}</Tag>
+                            <Tag>{c.connection_type}</Tag>
+                            <Tag color={c.environment === 'PROD' ? 'red' : c.environment === 'UAT' ? 'blue' : 'green'}>
+                              {c.environment}
+                            </Tag>
+                          </Space>
+                        </List.Item>
+                      )}
+                    />
+                  )}
+                </>
+              );
+            })()}
           </>
         )}
       </Drawer>

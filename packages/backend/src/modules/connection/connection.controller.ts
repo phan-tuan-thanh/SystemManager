@@ -25,10 +25,23 @@ export class ConnectionController {
     return this.service.list(query);
   }
 
+  @ApiOperation({ summary: 'Get firewall coverage status for all connections in an environment' })
+  @ApiQuery({ name: 'environment', required: true, enum: ['DEV', 'UAT', 'PROD'] })
+  @Get('firewall-coverage')
+  getFirewallCoverageBatch(@Query('environment') environment: string) {
+    return this.service.getFirewallCoverageStatusBatch(environment);
+  }
+
   @ApiOperation({ summary: 'Get connection by ID' })
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.service.findOne(id);
+  }
+
+  @ApiOperation({ summary: 'Get firewall coverage status for a specific connection' })
+  @Get(':id/firewall-coverage')
+  getFirewallCoverage(@Param('id') id: string) {
+    return this.service.getFirewallCoverageStatus(id);
   }
 
   @ApiOperation({ summary: 'Create app connection' })

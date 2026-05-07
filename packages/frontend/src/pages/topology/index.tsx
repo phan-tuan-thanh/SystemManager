@@ -37,6 +37,7 @@ import {
   App,
   Tag,
   Tabs,
+  Tooltip,
 } from 'antd';
 import { useState as useTabState } from 'react';
 import {
@@ -48,6 +49,7 @@ import {
   FullscreenOutlined,
   FullscreenExitOutlined,
   MedicineBoxOutlined,
+  ApiOutlined,
 } from '@ant-design/icons';
 
 import ServerFlowNode from './components/ServerFlowNode';
@@ -62,7 +64,7 @@ import TopologyMermaidView from './components/TopologyMermaidView';
 import { CreateConnectionModal } from './components/CreateConnectionModal';
 import ConnectionHealthDrawer, { analyzeTopologyHealth } from './components/ConnectionHealthDrawer';
 import FirewallTopologyView from './components/FirewallTopologyView';
-import { useTopologyQuery, ServerNode, ConnectionEdge } from './hooks/useTopology';
+import { useTopologyQuery, ServerNode, ConnectionEdge, ImpliedConnectionEdge } from './hooks/useTopology';
 import { useCreateSnapshot } from './hooks/useTopology';
 import { useTopologySubscription } from './hooks/useTopologySubscription';
 import { useCreateConnection, useDeleteConnection } from '../../hooks/useConnections';
@@ -589,6 +591,7 @@ function TopologyPageInner() {
   const [createConnModalVisible, setCreateConnModalVisible] = useState(false);
   const [connectionDraft, setConnectionDraft] = useState<any>(null);
   const [healthDrawerOpen, setHealthDrawerOpen] = useState(false);
+  const [showImplied, setShowImplied] = useState(true);
 
   const reactFlowRef = useRef<ReactFlowInstance | null>(null);
   const visNetworkViewRef = useRef<TopologyVisNetworkHandle>(null);
@@ -768,8 +771,32 @@ function TopologyPageInner() {
         onLabelMove: (dx: number, dy: number) => stableUpdateEdgeLabel(e.id, dx, dy),
       },
     }));
-    return { nodes: result.nodes, edges: edgesWithCallback };
-  }, [filteredData, filters.nodeType, filters.layoutDirection, filters.edgeStyle, stableUpdateEdgeLabel]);
+
+    // ── Implied connection edges from FirewallRule ALLOW ─────────────
+    const impliedEdges: Edge[] = [];
+    if (showImplied && data?.topology?.impliedConnections) {
+      const allNodes = result.nodes;
+      data.topology.impliedConnections.forEach((ic: ImpliedConnectionEdge) => {
+        const sourceNodes = allNodes.filter((n) => n.id.startsWith(`app-${ic.sourceAppId}-`));
+        const targetNodes = allNodes.filter((n) => n.id.startsWith(`app-${ic.targetAppId}-`));
+        if (sourceNodes.length && targetNodes.length) {
+          impliedEdges.push({
+            id: ic.id,
+            source: sourceNodes[0].id,
+            target: targetNodes[0].id,
+            type: 'default',
+            style: { strokeDasharray: '5,5', stroke: '#91d5ff', opacity: 0.7 },
+            label: `[FW] ${ic.firewallRuleName}`,
+            labelStyle: { fontSize: 10, fill: '#91d5ff' },
+            data: { type: 'IMPLIED', firewallRuleId: ic.firewallRuleId },
+            animated: false,
+          });
+        }
+      });
+    }
+
+    return { nodes: result.nodes, edges: [...edgesWithCallback, ...impliedEdges] };
+  }, [filteredData, filters.nodeType, filters.layoutDirection, filters.edgeStyle, stableUpdateEdgeLabel, showImplied, data?.topology?.impliedConnections]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(computedNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(computedEdges);
@@ -1262,6 +1289,17 @@ function TopologyPageInner() {
                 Kiểm tra kết nối
               </Button>
             </Badge>
+            <Tooltip title="Hiện/ẩn kết nối ngầm định từ FirewallRule ALLOW">
+              <Button
+                size="small"
+                type={showImplied ? 'primary' : 'default'}
+                ghost={showImplied}
+                onClick={() => setShowImplied((v) => !v)}
+                icon={<ApiOutlined />}
+              >
+                Implied
+              </Button>
+            </Tooltip>
             <Button icon={<ReloadOutlined />} onClick={() => refetch()} loading={loading}>
               Làm mới
             </Button>

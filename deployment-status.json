@@ -7,7 +7,7 @@
     "agile_planning": {
       "task_list": "TASKS.md",
       "reports_folder": "docs/reports/",
-      "current_sprint": "Sprint 25 🔄 IN PROGRESS — Two-Layer Connectivity Model: Firewall Coverage & Implied Connections",
+      "current_sprint": "Sprint 25 ✅ DONE — Two-Layer Connectivity Model: Firewall Coverage & Implied Connections",
       "active_branch": "feat/sprint-25-connectivity-model",
       "sprint_report_template": "docs/reports/sprint-template.md",
       "completed_sprint_reports": [

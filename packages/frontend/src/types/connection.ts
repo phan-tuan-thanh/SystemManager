@@ -14,6 +14,7 @@ export interface AppConnection {
   target_app_id: string;
   environment: Environment;
   connection_type: ConnectionType;
+  target_port_id?: string | null;
   description: string | null;
   created_at: string;
   updated_at: string;
@@ -44,4 +45,10 @@ export interface ConnectionFilter {
   source_app_id?: string;
   target_app_id?: string;
   connection_type?: ConnectionType;
+}
+
+export interface FirewallCoverageResult {
+  connection_id: string;
+  status: 'COVERED' | 'UNCOVERED' | 'NO_PORT' | 'UNKNOWN';
+  covering_rules: { id: string; name: string; status: string; action: string }[];
 }

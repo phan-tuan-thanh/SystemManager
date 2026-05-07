@@ -6,7 +6,7 @@ This document consolidates all past implementation plans and detailed technical 
 
 ## Connectivity Model — Two-Layer Design (2026-05-08)
 
-**Status:** 📋 Design Decision — Sprint 25 scheduled
+**Status:** ✅ Completed
 **Context:** Sau Sprint 23 (FirewallRule), hệ thống có 2 entity đều liên quan đến kết nối: AppConnection (app→app) và FirewallRule (server→server). Cần làm rõ ranh giới và quan hệ để tránh chồng chéo, xác định khi nào dùng entity nào, và tạo ra giá trị cross-validation.
 
 **Decision — Mô hình 2 lớp:**
@@ -50,6 +50,8 @@ This document consolidates all past implementation plans and detailed technical 
 - Implied edges có thể gây noise nếu nhiều FirewallRule. Cần toggle ẩn/hiện.
 - Cross-validation là computed (không lưu vào DB) để tránh stale data. Tính real-time mỗi lần query.
 - Không thay đổi schema AppConnection (giữ `target_port_id` optional) — backward compatible.
+**Outcome:** S25-01~09 hoàn thành đầy đủ. BE: `getFirewallCoverageStatus()` + batch endpoint + `getImpliedConnections()` in TopologyService + `impliedConnections` field in GraphQL. FE: coverage badge column in AppConnection list, implied dashed edges in App Topology with toggle, AppConnections section in FirewallRule detail drawer, badge count "N app" on Firewall Topology ALLOW edges, coverage badge in DependencyTree upstream/downstream.
+**Completed:** 2026-05-08
 **Sprint plan ref:** `docs/plans/sprint-25-connectivity-model.md`
 
 ---

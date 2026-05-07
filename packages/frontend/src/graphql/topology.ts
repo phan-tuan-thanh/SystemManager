@@ -59,6 +59,21 @@ export const TOPOLOGY_QUERY = gql`
           service_name
         }
       }
+      impliedConnections {
+        id
+        sourceAppId
+        targetAppId
+        sourceAppName
+        targetAppName
+        environment
+        firewallRuleId
+        firewallRuleName
+        targetPort {
+          id
+          portNumber
+          protocol
+        }
+      }
     }
   }
 `;
