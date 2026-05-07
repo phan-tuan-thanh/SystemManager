@@ -61,10 +61,10 @@ export default function ServerListPage() {
   const handleDelete = async (id: string) => {
     try {
       await deleteServer.mutateAsync(id);
-      message.success('Đã xoá server');
+      message.success('Xóa server thành công');
       setSelectedRowKeys((prev) => prev.filter((k) => k !== id));
     } catch {
-      message.error('Không thể xoá server');
+      message.error('Không thể xóa server');
     }
   };
 
@@ -74,8 +74,8 @@ export default function ServerListPage() {
     );
     const failed = results.filter((r) => r.status === 'rejected').length;
     const succeeded = results.length - failed;
-    if (succeeded > 0) message.success(`Đã xoá ${succeeded} server`);
-    if (failed > 0) message.error(`${failed} server không thể xoá`);
+    if (succeeded > 0) message.success(`Xóa ${succeeded} server thành công`);
+    if (failed > 0) message.error(`Không thể xóa ${failed} server`);
     setSelectedRowKeys([]);
   };
 
@@ -181,10 +181,10 @@ export default function ServerListPage() {
             onClick={() => setEditServer(record)}
           />
           <Popconfirm
-            title="Xoá server này?"
+            title="Xóa server này?"
             description="Dữ liệu sẽ được giữ lại trong lịch sử."
             onConfirm={() => handleDelete(record.id)}
-            okText="Xoá"
+            okText="Xóa"
             cancelText="Huỷ"
           >
             <Button icon={<DeleteOutlined />} size="small" type="link" danger />
@@ -197,26 +197,26 @@ export default function ServerListPage() {
   return (
     <App>
       <PageHeader
-        title="Quản lý Server"
+        title="Quản lý server (Server Management)"
         helpKey="server"
-        breadcrumbs={[{ label: 'Dashboard', path: '/dashboard' }, { label: 'Servers' }]}
+        breadcrumbs={[{ label: 'Dashboard', path: '/dashboard' }, { label: 'Server' }]}
         extra={
           <Space>
             {selectedRowKeys.length > 0 && (
               <Popconfirm
-                title={`Xoá ${selectedRowKeys.length} server đã chọn?`}
+                title={`Xóa ${selectedRowKeys.length} server đã chọn?`}
                 onConfirm={handleBulkDelete}
-                okText="Xoá"
+                okText="Xóa"
                 cancelText="Huỷ"
                 okType="danger"
               >
                 <Button danger icon={<DeleteOutlined />}>
-                  Xoá {selectedRowKeys.length} server
+                  Xóa ({selectedRowKeys.length})
                 </Button>
               </Popconfirm>
             )}
             <Button icon={<UploadOutlined />} onClick={() => navigate('/infra-upload')}>
-              Import CSV
+              Nhập CSV
             </Button>
             <Button type="primary" icon={<PlusOutlined />} onClick={() => setCreateOpen(true)}>
               Thêm server

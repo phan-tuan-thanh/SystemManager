@@ -56,10 +56,10 @@ export default function ApplicationForm({ open, app, onClose, initialType }: Pro
     try {
       if (app) {
         await update.mutateAsync({ id: app.id, ...payload });
-        message.success('Đã cập nhật ứng dụng');
+        message.success('Cập nhật ứng dụng thành công');
       } else {
         await create.mutateAsync(payload);
-        message.success('Đã tạo ứng dụng');
+        message.success('Tạo ứng dụng thành công');
       }
       form.resetFields();
       onClose();

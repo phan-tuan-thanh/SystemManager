@@ -298,7 +298,7 @@ export class FirewallRuleService {
       }
     }
 
-    return { data: results };
+    return results;
   }
 
   // ─── Export XLSX ─────────────────────────────────────────────────

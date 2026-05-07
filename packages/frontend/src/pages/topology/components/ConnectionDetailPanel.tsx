@@ -112,15 +112,15 @@ export default function ConnectionDetailPanel({ connection, onClose, onDelete, d
       {onDelete && (
         <div style={{ marginTop: 24 }}>
           <Popconfirm
-            title="Xoá kết nối?"
-            description="Bạn có chắc chắn muốn xoá kết nối này?"
-            okText="Xoá"
+            title="Xóa kết nối này?"
+            description="Bạn có chắc chắn muốn xóa kết nối này?"
+            okText="Xóa"
             okType="danger"
             cancelText="Huỷ"
             onConfirm={() => onDelete(connection)}
           >
             <Button danger block icon={<DeleteOutlined />} loading={deleting}>
-              Xoá kết nối
+              Xóa kết nối
             </Button>
           </Popconfirm>
         </div>

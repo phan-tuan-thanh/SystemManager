@@ -240,7 +240,119 @@ onError: (error) => {
 
 ---
 
-## 6. Git Workflow
+## 6. UI Terminology Standards (Frontend)
+
+### Quy tắc từ ngữ bắt buộc — áp dụng cho toàn bộ frontend
+
+#### 6.1 Chính tả tiếng Việt
+| ❌ Sai | ✅ Đúng | Ghi chú |
+|--------|---------|---------|
+| `Xoá` | `Xóa` | Dùng nhất quán trong mọi ngữ cảnh |
+| `Huỷ` | `Huỷ` | Giữ nguyên (đã nhất quán) |
+
+#### 6.2 Format toast message (`message.success` / `message.error`)
+```typescript
+// ✅ Đúng — Verb + Noun + "thành công"
+message.success('Tạo server thành công');
+message.success('Cập nhật deployment thành công');
+message.success('Xóa kết nối thành công');
+message.success(`Xóa ${n} server thành công`);
+
+// ✅ Đúng — "Không thể" + Verb + Noun
+message.error('Không thể xóa server');
+message.error(`Không thể xóa ${n} deployment`);
+message.error(err?.response?.data?.error?.message ?? 'Không thể lưu server');
+
+// ❌ Sai — "Đã + Verb" format
+message.success('Đã xoá server');       // ❌
+message.success('Đã tạo server mới');   // ❌
+message.success('Đã cập nhật');         // ❌ (thiếu noun)
+
+// ❌ Sai — Passive error format
+message.error(`${n} server không thể xoá`);  // ❌
+message.error('Lỗi khi thực thi nhập.');      // ❌ → dùng "Không thể ..."
+```
+
+#### 6.3 Confirm dialog (`Popconfirm` / `modal.confirm`)
+```tsx
+// ✅ Đúng
+<Popconfirm
+  title="Xóa server này?"
+  description="Thao tác này không thể hoàn tác."
+  okText="Xóa"
+  cancelText="Huỷ"
+  okType="danger"
+>
+
+// ✅ Bulk delete
+<Popconfirm
+  title={`Xóa ${selectedRowKeys.length} server đã chọn?`}
+  okText="Xóa"
+  cancelText="Huỷ"
+>
+  <Button danger>Xóa ({selectedRowKeys.length})</Button>  {/* hiện số lượng trong ngoặc */}
+</Popconfirm>
+
+// ❌ Sai
+okText="Xoá"                           // ❌ sai chính tả
+description="Hành động này không thể hoàn tác"  // ❌ dùng "Thao tác" thay "Hành động"
+<Button>Xoá {n} mục</Button>           // ❌ → dùng Xóa ({n})
+```
+
+#### 6.4 Page title format (PageHeader)
+```tsx
+// ✅ Pattern: "Tên tiếng Việt (English Name)"
+title="Quản lý server (Server Management)"
+title="Hệ thống hạ tầng (Infra Systems)"
+title="Cấu hình mạng (Network Configs)"
+title="Quản lý quy tắc tường lửa (Firewall Rule Management)"
+title="Nhập dữ liệu hạ tầng (Infra CSV Import)"
+title="Nhập dữ liệu ứng dụng (App CSV Import)"
+```
+
+#### 6.5 Sidebar / Navigation labels
+```tsx
+// Group labels — dùng tiếng Việt + (English)
+label: 'Hạ tầng (Infrastructure)'
+label: 'Ứng dụng (Applications)'
+label: 'Giám sát (Monitoring)'
+label: 'Quản trị (Admin)'
+
+// Leaf items — dùng English thuần cho technical terms
+label: 'Infra Systems'    // không phải "Hệ thống"
+label: 'Network Zones'    // không phải "Phân vùng mạng"
+label: 'Network Configs'  // không phải "Networks"
+label: 'Applications'     // không phải "Ứng dụng" (child item trùng với group)
+label: 'Infra Software'   // không phải "Phần mềm hạ tầng"
+```
+
+#### 6.6 Import wizard steps (Tabs với Steps component)
+```tsx
+// ✅ Pattern: "Tiếng Việt (English)"
+items={[
+  { title: 'Tải lên (Upload)' },
+  { title: 'Ánh xạ cột (Mapping)' },
+  { title: 'Kiểm tra (Preview)' },
+  { title: 'Kết quả (Result)' },
+]}
+```
+
+#### 6.7 Column headers trong Table
+```tsx
+// Các cột kỹ thuật thuần — dùng English
+title: 'Code'          // Mã định danh
+title: 'Status'        // hoặc 'Trạng thái' nếu trang dùng tiếng Việt
+title: 'Actions'       // hoặc 'Thao tác' nếu trang dùng tiếng Việt
+
+// Quy tắc: nhất quán TRONG một page
+// Nếu trang dùng English headers → dùng tất cả English
+// Nếu trang dùng Vietnamese headers → dùng tất cả tiếng Việt
+// KHÔNG trộn lẫn trong cùng một table
+```
+
+---
+
+## 7. Git Workflow
 
 1. Create branch from `main`: `feat/<module>-<description>`
 2. Develop with small, focused commits

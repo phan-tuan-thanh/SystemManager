@@ -125,11 +125,11 @@ export default function FirewallImportContent() {
     const invalidCount = previewRows.filter((r) => !r.valid).length;
 
     modal.confirm({
-      title: 'Xác nhận import Firewall Rules',
+      title: 'Xác nhận nhập Firewall Rules',
       content: (
         <div>
           <p>
-            Import <strong>{validCount}</strong> rule hợp lệ
+            Nhập <strong>{validCount}</strong> dòng hợp lệ
             {invalidCount > 0 && (
               <span style={{ color: '#ff4d4f' }}>
                 , <strong>{invalidCount}</strong> dòng lỗi sẽ được ghi nhận
@@ -139,7 +139,7 @@ export default function FirewallImportContent() {
           </p>
         </div>
       ),
-      okText: 'Import',
+      okText: 'Xác nhận',
       cancelText: 'Huỷ',
       onOk: async () => {
         setLoading(true);
@@ -153,10 +153,10 @@ export default function FirewallImportContent() {
           setResult(res);
           setStep(2);
           message.success(
-            `Import hoàn thành: ${res.created} tạo mới, ${res.skipped} bỏ qua`,
+            `Nhập hoàn thành: ${res.created} tạo mới, ${res.skipped} bỏ qua`,
           );
         } catch (err: any) {
-          message.error(err?.response?.data?.message ?? 'Lỗi khi import firewall rules.');
+          message.error(err?.response?.data?.message ?? 'Không thể import firewall rules.');
         } finally {
           setLoading(false);
         }
@@ -206,9 +206,9 @@ export default function FirewallImportContent() {
         size="small"
         style={{ marginBottom: 24 }}
         items={[
-          { title: 'Chọn file' },
-          { title: 'Kiểm tra trước' },
-          { title: 'Kết quả' },
+          { title: 'Tải lên (Upload)' },
+          { title: 'Kiểm tra (Preview)' },
+          { title: 'Kết quả (Result)' },
         ]}
       />
 
@@ -225,8 +225,8 @@ export default function FirewallImportContent() {
             style={{ marginBottom: 16 }}
           >
             <p className="ant-upload-drag-icon"><InboxOutlined /></p>
-            <p className="ant-upload-text">Kéo thả hoặc click để chọn file CSV</p>
-            <p className="ant-upload-hint">Import Firewall Rules từ file CSV (UTF-8).</p>
+            <p className="ant-upload-text">Kéo thả hoặc chọn file CSV để tải lên</p>
+            <p className="ant-upload-hint">Nhập Firewall Rules từ file CSV (UTF-8).</p>
           </Dragger>
 
           <Alert
@@ -258,7 +258,7 @@ export default function FirewallImportContent() {
             disabled={!fileList.length}
             onClick={parseAndPreview}
           >
-            Kiểm tra file
+            Kiểm tra (Preview)
           </Button>
         </div>
       )}
@@ -284,7 +284,7 @@ export default function FirewallImportContent() {
             <Alert
               type="warning"
               showIcon
-              message={`${invalidCount} dòng thiếu trường bắt buộc — sẽ được ghi nhận là lỗi khi import.`}
+              message={`${invalidCount} dòng thiếu trường bắt buộc — sẽ được ghi nhận là lỗi khi nhập.`}
               style={{ marginBottom: 12 }}
             />
           )}
@@ -320,7 +320,7 @@ export default function FirewallImportContent() {
               disabled={!validCount}
               onClick={handleImport}
             >
-              Import {validCount} rules
+              Nhập {validCount} rules
             </Button>
           </Space>
         </div>
@@ -330,10 +330,10 @@ export default function FirewallImportContent() {
       {step === 2 && result && (
         <Result
           status={(result.errors?.length ?? 0) > 0 ? 'warning' : 'success'}
-          title={(result.errors?.length ?? 0) > 0 ? `Import hoàn thành với ${result.errors.length} lỗi` : 'Import thành công!'}
+          title={(result.errors?.length ?? 0) > 0 ? `Nhập hoàn thành với ${result.errors.length} lỗi` : 'Nhập thành công!'}
           subTitle={`Tạo mới: ${result.created} | Bỏ qua (trùng): ${result.skipped} | Lỗi: ${result.errors?.length ?? 0}`}
           extra={[
-            <Button key="again" type="primary" onClick={handleReset}>Import thêm</Button>,
+            <Button key="again" type="primary" onClick={handleReset}>Nhập thêm</Button>,
           ]}
         >
           {(result.errors?.length ?? 0) > 0 && (

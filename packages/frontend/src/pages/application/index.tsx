@@ -36,7 +36,7 @@ function BusinessTab() {
   const handleDelete = async (id: string) => {
     try {
       await deleteApp.mutateAsync(id);
-      message.success('Đã xoá ứng dụng');
+      message.success('Xóa ứng dụng thành công');
       setSelectedRowKeys((prev) => prev.filter((k) => k !== id));
     } catch {
       message.error('Không thể xoá ứng dụng');
@@ -49,8 +49,8 @@ function BusinessTab() {
     );
     const failed = results.filter((r) => r.status === 'rejected').length;
     const succeeded = results.length - failed;
-    if (succeeded > 0) message.success(`Đã xoá ${succeeded} ứng dụng`);
-    if (failed > 0) message.error(`${failed} ứng dụng không thể xoá`);
+    if (succeeded > 0) message.success(`Xóa ${succeeded} ứng dụng thành công`);
+    if (failed > 0) message.error(`Không thể xóa ${failed} ứng dụng`);
     setSelectedRowKeys([]);
   };
 
@@ -101,7 +101,7 @@ function BusinessTab() {
           <Button size="small" icon={<EyeOutlined />} onClick={() => navigate(`/applications/${record.id}`)} />
           <Button size="small" icon={<EditOutlined />} onClick={() => { setEditApp(record); setFormOpen(true); }} />
           <Popconfirm
-            title="Xoá ứng dụng?"
+            title="Xóa ứng dụng này?"
             description="Hành động này không thể hoàn tác"
             onConfirm={() => handleDelete(record.id)}
             okType="danger"
@@ -137,14 +137,14 @@ function BusinessTab() {
         <Space>
           {selectedRowKeys.length > 0 && (
             <Popconfirm
-              title={`Xoá ${selectedRowKeys.length} ứng dụng đã chọn?`}
+              title={`Xóa ${selectedRowKeys.length} ứng dụng đã chọn?`}
               onConfirm={handleBulkDelete}
-              okText="Xoá"
+              okText="Xóa"
               cancelText="Huỷ"
               okType="danger"
             >
               <Button danger icon={<DeleteOutlined />}>
-                Xoá {selectedRowKeys.length} mục
+                Xóa ({selectedRowKeys.length})
               </Button>
             </Popconfirm>
           )}
@@ -198,7 +198,7 @@ function InfraTab() {
   const handleDelete = async (id: string) => {
     try {
       await deleteApp.mutateAsync(id);
-      message.success('Đã xoá phần mềm hạ tầng');
+      message.success('Xóa phần mềm hạ tầng thành công');
       setSelectedRowKeys((prev) => prev.filter((k) => k !== id));
     } catch {
       message.error('Không thể xoá phần mềm hạ tầng');
@@ -211,8 +211,8 @@ function InfraTab() {
     );
     const failed = results.filter((r) => r.status === 'rejected').length;
     const succeeded = results.length - failed;
-    if (succeeded > 0) message.success(`Đã xoá ${succeeded} phần mềm hạ tầng`);
-    if (failed > 0) message.error(`${failed} mục không thể xoá`);
+    if (succeeded > 0) message.success(`Xóa ${succeeded} phần mềm hạ tầng thành công`);
+    if (failed > 0) message.error(`Không thể xóa ${failed} mục`);
     setSelectedRowKeys([]);
   };
 
@@ -270,7 +270,7 @@ function InfraTab() {
         <Space size="small">
           <Button size="small" icon={<EditOutlined />} onClick={() => { setEditApp(record); setFormOpen(true); }} />
           <Popconfirm
-            title="Xoá phần mềm?"
+            title="Xóa phần mềm này?"
             description="Hành động này không thể hoàn tác"
             onConfirm={() => handleDelete(record.id)}
             okType="danger"
@@ -321,14 +321,14 @@ function InfraTab() {
         <Space>
           {selectedRowKeys.length > 0 && (
             <Popconfirm
-              title={`Xoá ${selectedRowKeys.length} phần mềm đã chọn?`}
+              title={`Xóa ${selectedRowKeys.length} phần mềm đã chọn?`}
               onConfirm={handleBulkDelete}
-              okText="Xoá"
+              okText="Xóa"
               cancelText="Huỷ"
               okType="danger"
             >
               <Button danger icon={<DeleteOutlined />}>
-                Xoá {selectedRowKeys.length} mục
+                Xóa ({selectedRowKeys.length})
               </Button>
             </Popconfirm>
           )}

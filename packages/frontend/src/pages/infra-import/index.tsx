@@ -6,14 +6,16 @@ import {
   GlobalOutlined,
   NodeIndexOutlined,
   SafetyCertificateOutlined,
+  ThunderboltOutlined,
 } from '@ant-design/icons';
 import PageHeader from '../../components/common/PageHeader';
 import { InfraUploadContent } from '../infra-upload/index';
 import SimpleImportContent from './SimpleImportContent';
 import FirewallImportContent from './FirewallImportContent';
+import QuickImportContent from './QuickImportContent';
 import type { TargetField } from '../../components/common/ColumnMapper';
 
-const TAB_KEYS = ['server', 'network_zone', 'zone_ip', 'firewall'] as const;
+const TAB_KEYS = ['quick', 'server', 'network_zone', 'zone_ip', 'firewall'] as const;
 type TabKey = typeof TAB_KEYS[number];
 
 const ZONE_TYPE_OPTIONS = [
@@ -117,10 +119,19 @@ const ZONE_IP_FIELDS: TargetField[] = [
 
 const TAB_ITEMS = [
   {
+    key: 'quick' as TabKey,
+    label: (
+      <span>
+        <ThunderboltOutlined /> Nhập nhanh (Quick Import)
+      </span>
+    ),
+    children: <QuickImportContent />,
+  },
+  {
     key: 'server' as TabKey,
     label: (
       <span>
-        <CloudServerOutlined /> Server
+        <CloudServerOutlined /> Máy chủ (Server)
       </span>
     ),
     children: <InfraUploadContent />,
@@ -129,13 +140,13 @@ const TAB_ITEMS = [
     key: 'network_zone' as TabKey,
     label: (
       <span>
-        <GlobalOutlined /> Phân vùng mạng
+        <GlobalOutlined /> Phân vùng mạng (Network Zone)
       </span>
     ),
     children: (
       <SimpleImportContent
         type="network_zone"
-        title="Phân vùng mạng"
+        title="Phân vùng mạng (Network Zone)"
         targetFields={NETWORK_ZONE_FIELDS}
       />
     ),
@@ -144,13 +155,13 @@ const TAB_ITEMS = [
     key: 'zone_ip' as TabKey,
     label: (
       <span>
-        <NodeIndexOutlined /> Zone IPs
+        <NodeIndexOutlined /> Zone IPs (Zone IP Entries)
       </span>
     ),
     children: (
       <SimpleImportContent
         type="zone_ip"
-        title="Zone IP Entries"
+        title="Zone IPs (Zone IP Entries)"
         targetFields={ZONE_IP_FIELDS}
       />
     ),
@@ -168,20 +179,20 @@ const TAB_ITEMS = [
 
 export default function InfraImportPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const tab = (searchParams.get('tab') as TabKey) ?? 'server';
-  const activeTab: TabKey = TAB_KEYS.includes(tab) ? tab : 'server';
+  const tab = (searchParams.get('tab') as TabKey) ?? 'quick';
+  const activeTab: TabKey = TAB_KEYS.includes(tab) ? tab : 'quick';
 
   useEffect(() => {
     if (!TAB_KEYS.includes(tab)) {
-      setSearchParams({ tab: 'server' }, { replace: true });
+      setSearchParams({ tab: 'quick' }, { replace: true });
     }
   }, [tab, setSearchParams]);
 
   return (
     <div className="p-6">
       <PageHeader
-        title="Import CSV"
-        subtitle="Nhập dữ liệu hạ tầng: server, phân vùng mạng, zone IPs và firewall rules từ file CSV"
+        title="Nhập dữ liệu hạ tầng (Infra CSV Import)"
+        subtitle="Nhập dữ liệu hạ tầng từ file CSV: Nhập nhanh nhiều file cùng lúc, hoặc nhập từng loại với wizard ánh xạ cột."
         helpKey="network"
       />
       <Tabs

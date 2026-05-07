@@ -54,10 +54,10 @@ export default function DeploymentDocTypePage() {
     try {
       if (editDt) {
         await updateDt.mutateAsync({ id: editDt.id, ...values });
-        message.success('Đã cập nhật');
+        message.success('Cập nhật thành công');
       } else {
         await createDt.mutateAsync(values);
-        message.success('Đã tạo loại tài liệu');
+        message.success('Tạo loại tài liệu thành công');
       }
       setModalOpen(false);
       form.resetFields();

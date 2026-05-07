@@ -48,7 +48,7 @@ export default function ApplicationDetailPage() {
   const handleDelete = async () => {
     try {
       await deleteApp.mutateAsync(app.id);
-      message.success('Đã xoá ứng dụng');
+      message.success('Xóa ứng dụng thành công');
       navigate('/applications');
     } catch {
       message.error('Không thể xoá ứng dụng');
@@ -69,12 +69,12 @@ export default function ApplicationDetailPage() {
               Sửa
             </Button>
             <Popconfirm
-              title="Xoá ứng dụng này?"
+              title="Xóa ứng dụng này?"
               description="Hành động không thể hoàn tác"
               onConfirm={handleDelete}
               okType="danger"
             >
-              <Button danger>Xoá</Button>
+              <Button danger>Xóa</Button>
             </Popconfirm>
           </Space>
         }

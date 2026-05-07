@@ -38,32 +38,32 @@ const menuItems = [
   {
     key: 'infra-group',
     icon: <DatabaseOutlined />,
-    label: 'Hạ tầng',
+    label: 'Hạ tầng (Infrastructure)',
     children: [
-      { key: '/infra-systems', icon: <ClusterOutlined />, label: 'Hệ thống' },
+      { key: '/infra-systems', icon: <ClusterOutlined />, label: 'Infra Systems' },
       { key: '/servers', icon: <CloudServerOutlined />, label: 'Servers' },
-      { key: '/networks', icon: <ApartmentOutlined />, label: 'Networks' },
-      { key: '/network-zones', icon: <GlobalOutlined />, label: 'Phân vùng mạng' },
+      { key: '/networks', icon: <ApartmentOutlined />, label: 'Network Configs' },
+      { key: '/network-zones', icon: <GlobalOutlined />, label: 'Network Zones' },
       { key: '/firewall-rules', icon: <SafetyCertificateOutlined />, label: 'Firewall Rules' },
-      { key: '/infra-import', icon: <UploadOutlined />, label: 'Import CSV' },
+      { key: '/infra-import', icon: <UploadOutlined />, label: 'Nhập CSV' },
     ],
   },
   {
     key: 'app-group',
     icon: <AppstoreOutlined />,
-    label: 'Ứng dụng',
+    label: 'Ứng dụng (Applications)',
     children: [
-      { key: '/applications', icon: <AppstoreOutlined />, label: 'Ứng dụng' },
-      { key: '/applications?tab=infra', icon: <CodeOutlined />, label: 'Phần mềm hạ tầng' },
+      { key: '/applications', icon: <AppstoreOutlined />, label: 'Applications' },
+      { key: '/applications?tab=infra', icon: <CodeOutlined />, label: 'Infra Software' },
       { key: '/deployments', icon: <DeploymentUnitOutlined />, label: 'Deployments' },
       { key: '/connections', icon: <ApiOutlined />, label: 'Connections' },
-      { key: '/app-import', icon: <UploadOutlined />, label: 'Import CSV' },
+      { key: '/app-import', icon: <UploadOutlined />, label: 'Nhập CSV' },
     ],
   },
   {
     key: 'monitor-group',
     icon: <ShareAltOutlined />,
-    label: 'Giám sát',
+    label: 'Giám sát (Monitoring)',
     children: [
       { key: '/topology', icon: <ShareAltOutlined />, label: 'Topology 2D' },
       { key: '/changesets', icon: <DiffOutlined />, label: 'ChangeSets' },
@@ -76,13 +76,13 @@ const menuItems = [
   {
     key: 'admin-group',
     icon: <SettingOutlined />,
-    label: 'Quản trị',
+    label: 'Quản trị (Admin)',
     children: [
-      { key: '/admin/users', label: 'Người dùng' },
-      { key: '/admin/user-groups', label: 'Nhóm người dùng' },
+      { key: '/admin/users', label: 'Users' },
+      { key: '/admin/user-groups', label: 'User Groups' },
       { key: '/admin/modules', label: 'Modules' },
-      { key: '/admin/system-config', label: 'Cài đặt hệ thống' },
-      { key: '/admin/doc-types', label: 'Loại tài liệu' },
+      { key: '/admin/system-config', label: 'System Config' },
+      { key: '/admin/doc-types', label: 'Doc Types' },
     ],
   },
   {
@@ -91,7 +91,7 @@ const menuItems = [
   {
     key: '/guide',
     icon: <QuestionCircleOutlined />,
-    label: 'Hướng dẫn sử dụng',
+    label: 'Hướng dẫn (Guide)',
   },
 ];
 

@@ -26,10 +26,10 @@ export default function AppGroupModal({ open, group, onClose }: Props) {
     try {
       if (group) {
         await update.mutateAsync({ id: group.id, ...values });
-        message.success('Đã cập nhật nhóm ứng dụng');
+        message.success('Cập nhật nhóm ứng dụng thành công');
       } else {
         await create.mutateAsync(values);
-        message.success('Đã tạo nhóm ứng dụng');
+        message.success('Tạo nhóm ứng dụng thành công');
       }
       form.resetFields();
       onClose();

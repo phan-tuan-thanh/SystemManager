@@ -429,7 +429,7 @@ export default function TopologyFilterPanel({
               style={{ padding: 0, fontSize: 12 }}
               onClick={() => onChange({ ...filters, visibleGroupNames: [], visibleServerIds: [], visibleAppIds: [] })}
             >
-              Xoá bộ lọc
+              Xóa bộ lọc
             </Button>
           )}
         </Space>
@@ -455,7 +455,7 @@ export default function TopologyFilterPanel({
               disabled={pendingCount === 0}
               onClick={clearAll}
             >
-              Xoá tất cả
+              Xóa tất cả
             </Button>
             <Space>
               <Button size="small" onClick={() => setModalOpen(false)}>Huỷ</Button>

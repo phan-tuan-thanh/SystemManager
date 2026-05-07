@@ -105,7 +105,7 @@ export default function SystemSoftwarePage() {
   const handleDelete = async (id: string) => {
     try {
       await deleteSw.mutateAsync(id);
-      message.success('Đã xoá phần mềm hệ thống');
+      message.success('Xóa phần mềm hệ thống thành công');
     } catch {
       message.error('Không thể xoá');
     }
@@ -130,10 +130,10 @@ export default function SystemSoftwarePage() {
     try {
       if (editSw) {
         await updateSw.mutateAsync({ id: editSw.id, ...dto });
-        message.success('Đã cập nhật');
+        message.success('Cập nhật thành công');
       } else {
         await createSw.mutateAsync(dto);
-        message.success('Đã tạo');
+        message.success('Tạo thành công');
       }
       setModalOpen(false);
       form.resetFields();
@@ -199,7 +199,7 @@ export default function SystemSoftwarePage() {
         <Space size="small">
           <Button size="small" icon={<EditOutlined />} onClick={() => openModal(record)} />
           <Popconfirm
-            title="Xoá phần mềm này?"
+            title="Xóa phần mềm này?"
             onConfirm={() => handleDelete(record.id)}
             okType="danger"
           >

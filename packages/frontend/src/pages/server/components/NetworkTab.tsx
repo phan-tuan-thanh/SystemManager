@@ -125,7 +125,7 @@ export default function NetworkTab({ serverId }: NetworkTabProps) {
   const handleDelete = async (id: string) => {
     try {
       await deleteConfig.mutateAsync(id);
-      message.success('Đã xoá network config');
+      message.success('Xóa network config thành công');
     } catch {
       message.error('Không thể xoá network config');
     }
@@ -155,9 +155,9 @@ export default function NetworkTab({ serverId }: NetworkTabProps) {
         <Space size="small">
           <Button icon={<EditOutlined />} size="small" type="link" onClick={() => setEditItem(record)} />
           <Popconfirm
-            title="Xoá network config này?"
+            title="Xóa network config này?"
             onConfirm={() => handleDelete(record.id)}
-            okText="Xoá"
+            okText="Xóa"
             cancelText="Huỷ"
           >
             <Button icon={<DeleteOutlined />} size="small" type="link" danger />

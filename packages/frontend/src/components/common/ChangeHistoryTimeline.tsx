@@ -33,7 +33,7 @@ const ACTION_COLOR: Record<string, string> = {
 const ACTION_LABEL: Record<string, string> = {
   CREATE: 'Tạo mới',
   UPDATE: 'Cập nhật',
-  DELETE: 'Xoá',
+  DELETE: 'Xóa',
   ATTACH: 'Gắn vào',
   DETACH: 'Gỡ ra',
 };

@@ -174,7 +174,7 @@ export default function UserGroupsPage() {
   const handleDelete = async (id: string) => {
     try {
       await deleteGroup(id);
-      message.success('Đã xoá nhóm');
+      message.success('Xóa nhóm thành công');
     } catch (e: unknown) {
       const err = e as { response?: { data?: { error?: { message?: string } } } };
       message.error(err?.response?.data?.error?.message ?? 'Không thể xoá nhóm');
@@ -215,8 +215,8 @@ export default function UserGroupsPage() {
           <Tooltip title="Quản lý thành viên">
             <Button size="small" icon={<TeamOutlined />} onClick={() => setMemberGroup(record)} />
           </Tooltip>
-          <Popconfirm title="Xoá nhóm này?" onConfirm={() => handleDelete(record.id)} okText="Xoá" cancelText="Huỷ">
-            <Tooltip title="Xoá nhóm">
+          <Popconfirm title="Xóa nhóm này?" onConfirm={() => handleDelete(record.id)} okText="Xóa" cancelText="Huỷ">
+            <Tooltip title="Xóa nhóm">
               <Button size="small" danger icon={<DeleteOutlined />} />
             </Tooltip>
           </Popconfirm>

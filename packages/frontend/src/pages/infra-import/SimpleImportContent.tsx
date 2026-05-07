@@ -165,7 +165,7 @@ export default function SimpleImportContent({
           const previewResult: PreviewResult = data.data ?? data;
 
           modal.confirm({
-            title: 'Xác nhận Import nhanh',
+            title: 'Xác nhận Nhập nhanh',
             icon: <ThunderboltOutlined style={{ color: '#faad14' }} />,
             content: (
               <div>
@@ -178,10 +178,10 @@ export default function SimpleImportContent({
                   )}
                   .
                 </p>
-                <p>Tiếp tục import {title}?</p>
+                <p>Tiếp tục nhập {title}?</p>
               </div>
             ),
-            okText: 'Import',
+            okText: 'Xác nhận',
             cancelText: 'Xem chi tiết',
             onOk: async () => {
               try {
@@ -192,10 +192,10 @@ export default function SimpleImportContent({
                 setResult(execResult);
                 setStep(2);
                 message.success(
-                  `Import hoàn thành: ${execResult.summary.succeeded}/${execResult.summary.total} thành công`,
+                  `Import thành công: ${execResult.summary.succeeded}/${execResult.summary.total} bản ghi`,
                 );
               } catch {
-                message.error('Lỗi khi thực thi import.');
+                message.error('Không thể thực thi import.');
               }
             },
             onCancel: () => {
@@ -207,7 +207,7 @@ export default function SimpleImportContent({
             },
           });
         } catch {
-          message.error('Lỗi khi preview file.');
+          message.error('Không thể preview file.');
         } finally {
           setLoading(false);
         }
@@ -226,7 +226,7 @@ export default function SimpleImportContent({
       setPreview(data.data ?? data);
       setStep(2);
     } catch {
-      message.error('Lỗi khi preview dữ liệu.');
+      message.error('Không thể preview dữ liệu.');
     } finally {
       setLoading(false);
     }
@@ -235,8 +235,8 @@ export default function SimpleImportContent({
   const handleExecute = async () => {
     if (!preview?.session_id) return;
     modal.confirm({
-      title: `Xác nhận import ${title}`,
-      content: `Import ${preview.valid} dòng hợp lệ vào hệ thống?`,
+      title: `Xác nhận nhập ${title}`,
+      content: `Nhập ${preview.valid} dòng hợp lệ vào hệ thống?`,
       okText: 'Xác nhận',
       cancelText: 'Huỷ',
       okButtonProps: { danger: false },
@@ -250,10 +250,10 @@ export default function SimpleImportContent({
           setResult(execResult);
           setStep(3);
           message.success(
-            `Import hoàn thành: ${execResult.summary.succeeded}/${execResult.summary.total} thành công`,
+            `Import thành công: ${execResult.summary.succeeded}/${execResult.summary.total} bản ghi`,
           );
         } catch {
-          message.error('Lỗi khi thực thi import.');
+          message.error('Không thể thực thi import.');
         } finally {
           setLoading(false);
         }
@@ -305,10 +305,10 @@ export default function SimpleImportContent({
         size="small"
         style={{ marginBottom: 24 }}
         items={[
-          { title: 'Chọn file' },
-          { title: 'Ánh xạ cột' },
-          { title: 'Kiểm tra' },
-          { title: 'Kết quả' },
+          { title: 'Tải lên (Upload)' },
+          { title: 'Ánh xạ cột (Mapping)' },
+          { title: 'Kiểm tra (Preview)' },
+          { title: 'Kết quả (Result)' },
         ]}
       />
 
@@ -327,9 +327,9 @@ export default function SimpleImportContent({
             <p className="ant-upload-drag-icon">
               <InboxOutlined />
             </p>
-            <p className="ant-upload-text">Kéo thả hoặc click để chọn file CSV</p>
+            <p className="ant-upload-text">Kéo thả hoặc chọn file CSV để tải lên</p>
             <p className="ant-upload-hint">
-              Import {title} từ CSV. Hỗ trợ ký tự Unicode (UTF-8).
+              Nhập {title} từ CSV. Hỗ trợ ký tự Unicode (UTF-8).
             </p>
           </Dragger>
 
@@ -358,7 +358,7 @@ export default function SimpleImportContent({
               icon={<ThunderboltOutlined />}
               onClick={handleQuickImport}
             >
-              Import nhanh
+              Nhập nhanh
             </Button>
             <Button
               disabled={!fileList.length}
@@ -379,7 +379,7 @@ export default function SimpleImportContent({
                 });
               }}
             >
-              Wizard ánh xạ cột
+              Ánh xạ cột thủ công
             </Button>
           </Space>
         </div>
@@ -473,7 +473,7 @@ export default function SimpleImportContent({
               disabled={!preview.valid}
               onClick={handleExecute}
             >
-              Import {preview.valid} dòng hợp lệ
+              Nhập {preview.valid} dòng hợp lệ
             </Button>
           </Space>
         </div>
@@ -485,13 +485,13 @@ export default function SimpleImportContent({
           status={result.summary.failed > 0 ? 'warning' : 'success'}
           title={
             result.summary.failed > 0
-              ? `Import hoàn thành với ${result.summary.failed} lỗi`
-              : 'Import thành công!'
+              ? `Nhập hoàn thành với ${result.summary.failed} lỗi`
+              : 'Nhập thành công!'
           }
           subTitle={`${result.summary.succeeded} / ${result.summary.total} bản ghi đã được lưu`}
           extra={[
             <Button key="again" type="primary" onClick={handleReset}>
-              Import thêm
+              Nhập thêm
             </Button>,
           ]}
         >

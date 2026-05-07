@@ -31,7 +31,6 @@ import {
   ThunderboltOutlined,
 } from '@ant-design/icons';
 import Papa from 'papaparse';
-import PageHeader from '../../components/common/PageHeader';
 import apiClient from '../../api/client';
 import ColumnMapper, {
   autoDetect,
@@ -432,15 +431,9 @@ export default function ServerUploadPage() {
   const hasErrors = (serverPreview?.invalid ?? 0) > 0;
 
   return (
-    <div className="p-6">
+    <>
       <style>{`.preview-row-error td { background: #fff2f0 !important; } .preview-row-error:hover td { background: #ffe7e0 !important; }`}</style>
-      <PageHeader
-        title="Import Server từ CSV"
-        subtitle="Khai báo hàng loạt server, hệ thống hạ tầng và phần cứng"
-        helpKey="server-import"
-      />
-
-      <Card>
+      <Card variant="borderless" style={{ background: 'transparent' }}>
         <Steps
           current={step}
           style={{ marginBottom: 24 }}
@@ -455,18 +448,6 @@ export default function ServerUploadPage() {
         {/* Step 0 — Upload */}
         {step === 0 && (
           <Space direction="vertical" style={{ width: '100%' }} size={16}>
-            <Alert
-              type="info"
-              showIcon
-              message="Cột bắt buộc cho Server"
-              description={
-                <span>
-                  Bắt buộc: <b>IP</b> và <b>Tên Server</b>. Tùy chọn: hostname, hệ điều hành (OS), CPU cores, RAM (GB), storage (GB), environment, site, system, purpose.
-                  Dữ liệu được <b>Upsert</b> theo mã Server hoặc IP Address.
-                </span>
-              }
-            />
-
             <Dragger
               accept=".csv"
               maxCount={1}
@@ -478,17 +459,30 @@ export default function ServerUploadPage() {
                 setAllRows([]);
                 setCsvColumns([]);
               }}
+              style={{ marginBottom: 16 }}
             >
               <p className="ant-upload-drag-icon">
                 <InboxOutlined />
               </p>
               <p className="ant-upload-text">
-                Nhấn hoặc kéo thả file CSV vào đây
+                Kéo thả hoặc chọn file CSV để tải lên
               </p>
               <p className="ant-upload-hint">
                 Dòng đầu tiên phải là tiêu đề cột. Dung lượng tối đa: 20MB.
               </p>
             </Dragger>
+
+            <Alert
+              type="info"
+              showIcon
+              message="Cột bắt buộc cho Server"
+              description={
+                <span>
+                  Bắt buộc: <b>IP</b> và <b>Tên Server</b>. Tùy chọn: hostname, hệ điều hành (OS), CPU cores, RAM (GB), storage (GB), environment, site, system, purpose.
+                  Dữ liệu được <b>Upsert</b> theo mã Server hoặc IP Address.
+                </span>
+              }
+            />
 
             <Space style={{ justifyContent: 'flex-end', width: '100%' }}>
               <Button
@@ -849,7 +843,7 @@ export default function ServerUploadPage() {
           );
         })()}
       </Card>
-    </div>
+    </>
   );
 }
 
