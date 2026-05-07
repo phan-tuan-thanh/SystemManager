@@ -6,7 +6,7 @@ This document consolidates all past implementation plans and detailed technical 
 
 ## Connectivity Model — Two-Layer Design (2026-05-08)
 
-**Status:** 📋 Design Decision (pending implementation)
+**Status:** 📋 Design Decision — Sprint 25 scheduled
 **Context:** Sau Sprint 23 (FirewallRule), hệ thống có 2 entity đều liên quan đến kết nối: AppConnection (app→app) và FirewallRule (server→server). Cần làm rõ ranh giới và quan hệ để tránh chồng chéo, xác định khi nào dùng entity nào, và tạo ra giá trị cross-validation.
 
 **Decision — Mô hình 2 lớp:**
@@ -34,16 +34,23 @@ This document consolidates all past implementation plans and detailed technical 
 - Không thay đổi về data source (REST từ `/api/v1/firewall-rules`)
 - Bổ sung: badge trên mỗi ALLOW edge hiển thị số AppConnection dùng đường dẫn này; edge với badge "0" = connectivity chưa được tài liệu hoá ở tầng app
 
-**Files cần cập nhật (future sprint):**
-- `packages/backend/src/modules/connection/connection.service.ts` — thêm `getFirewallCoverageStatus(connectionId)` method
-- `packages/backend/src/modules/topology/topology.resolver.ts` — thêm implied connections vào topology query (từ FirewallRule ALLOW active)
-- `packages/frontend/src/pages/topology/` — render implied edges (dashed) + coverage badge
-- `packages/frontend/src/pages/application/` — hiển thị coverage badge trên upstream/downstream list
+**Files cần cập nhật (Sprint 25):**
+- `packages/backend/src/modules/connection/connection.service.ts` — `getFirewallCoverageStatus()` + `getFirewallCoverageStatusBatch()`
+- `packages/backend/src/modules/connection/connection.controller.ts` — 2 endpoints mới: `GET /firewall-coverage` + `/:id/firewall-coverage`
+- `packages/backend/src/modules/topology/topology.service.ts` — `getImpliedConnections()` + cập nhật `getTopology()`
+- `packages/backend/src/modules/topology/topology.resolver.ts` — thêm `impliedConnections` vào topology query
+- `packages/backend/src/modules/topology/topology.types.ts` — `ImpliedConnectionEdge` type
+- `packages/frontend/src/pages/connection/` — coverage badge column
+- `packages/frontend/src/pages/topology/` — implied edges + coverage badge + toggle
+- `packages/frontend/src/pages/firewall-rule/` — section AppConnections cross-reference
+- `packages/frontend/src/pages/topology/components/FirewallTopologyView.tsx` — badge count
+- `packages/frontend/src/pages/application/` — coverage badge trên upstream/downstream list
 
 **Trade-offs:**
 - Implied edges có thể gây noise nếu nhiều FirewallRule. Cần toggle ẩn/hiện.
 - Cross-validation là computed (không lưu vào DB) để tránh stale data. Tính real-time mỗi lần query.
 - Không thay đổi schema AppConnection (giữ `target_port_id` optional) — backward compatible.
+**Sprint plan ref:** `docs/plans/sprint-25-connectivity-model.md`
 
 ---
 

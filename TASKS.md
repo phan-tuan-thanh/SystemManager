@@ -1,6 +1,6 @@
 # SystemManager — Agile Task List & Sprint Plan
 
-> **Trạng thái hiện tại:** Sprint 23 ✅ DONE — Network Zone & Firewall Rule Management
+> **Trạng thái hiện tại:** Sprint 25 🔄 IN PROGRESS — Two-Layer Connectivity Model: Firewall Coverage & Implied Connections
 
 ---
 
@@ -655,6 +655,29 @@
 
 ---
 
+
+## Sprint 25 — Two-Layer Connectivity Model: Firewall Coverage & Implied Connections 🔄 IN PROGRESS
+
+**Mục tiêu:** Triển khai mô hình kết nối 2 lớp: cross-validate AppConnection vs FirewallRule (badge ✅/⚠️), hiển thị implied connections từ FirewallRule ALLOW trong App Topology.
+**Thời gian:** 2026-05-08 → (Dự kiến)
+**Branch:** `feat/sprint-25-connectivity-model`
+**Plan:** [docs/plans/sprint-25-connectivity-model.md](docs/plans/sprint-25-connectivity-model.md)
+
+| # | Task | Points | Status | SRS Ref |
+|---|------|--------|--------|---------|
+| S25-01 | `[BE]` `ConnectionService.getFirewallCoverageStatus()` — cross-validate AppConnection vs FirewallRule ALLOW active | 3 | ⬜ | 4.5.1 |
+| S25-02 | `[BE]` Endpoints: `GET /api/v1/connections/firewall-coverage` (batch) + `/:id/firewall-coverage` | 2 | ⬜ | 4.5.1 |
+| S25-03 | `[BE]` `TopologyService.getImpliedConnections()` — suy ra connections từ FirewallRule ALLOW; cập nhật `getTopology()` + GraphQL resolver | 5 | ⬜ | 4.5.1 |
+| S25-04 | `[FE]` Hook `useConnectionFirewallCoverage` — fetch batch coverage | 1 | ⬜ | 4.5.1 |
+| S25-05 | `[FE]` AppConnection list: thêm column "Firewall Coverage" với badge ✅/⚠️/— | 2 | ⬜ | 4.5.1 |
+| S25-06 | `[FE]` App Topology: implied edges (nét đứt, màu nhạt) + coverage badge ✅/⚠️ + toggle hiện/ẩn implied | 5 | ⬜ | 4.5.1 |
+| S25-07 | `[FE]` FirewallRule detail: section liệt kê AppConnections dùng rule này | 3 | ⬜ | 4.9.2 |
+| S25-08 | `[FE]` Firewall Topology: badge count AppConnections trên mỗi ALLOW edge | 2 | ⬜ | 4.9.3 |
+| S25-09 | `[FE]` App detail page: coverage badge ✅/⚠️ trên upstream/downstream connection list | 2 | ⬜ | 4.5.1 |
+
+**Sprint 25 Total: 25 points**
+
+---
 
 ## Backlog — Chưa lên sprint
 
