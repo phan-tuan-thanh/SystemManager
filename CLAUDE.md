@@ -310,7 +310,9 @@ main          ← stable, production-ready — NEVER commit directly
 
 #### Rules for Sprint branches
 
-1. **Always create a sprint branch before starting any sprint work**:
+1. **Always read [CLAUDE.md](CLAUDE.md) and [docs/SRS.md](docs/SRS.md) before starting any work** — ensure you are aligned with current project rules and requirements.
+
+2. **Always create a sprint branch before starting any sprint work**:
    ```bash
    git checkout main
    git pull origin main
@@ -318,15 +320,15 @@ main          ← stable, production-ready — NEVER commit directly
    git push -u origin sprint/2
    ```
 
-2. **Sprint branch is the integration target** — all feature/fix branches for that sprint branch off `sprint/N` and PR back into `sprint/N`, NOT into `main`
+3. **Sprint branch is the integration target** — all feature/fix branches for that sprint branch off `sprint/N` and PR back into `sprint/N`, NOT into `main`
 
-3. **Feature branches are short-lived** — one branch per module or logical unit; merge back to `sprint/N` as soon as it is working and reviewed
+4. **Feature branches are short-lived** — one branch per module or logical unit; merge back to `sprint/N` as soon as it is working and reviewed
 
-4. **`main` is only updated via Sprint PR** — when a sprint is complete and tested, open one PR: `sprint/N → main`. Squash-merge or rebase to keep `main` history clean
+5. **`main` is only updated via Sprint PR** — when a sprint is complete and tested, open one PR: `sprint/N → main`. Squash-merge or rebase to keep `main` history clean
 
-5. **Never push directly to `main`** — all changes to `main` must go through a `sprint/N` PR
+6. **Never push directly to `main`** — all changes to `main` must go through a `sprint/N` PR
 
-6. **Hotfixes** (urgent production bugs) branch off `main` directly: `fix/hotfix-<description>`, then PR into both `main` and the active `sprint/N`
+7. **Hotfixes** (urgent production bugs) branch off `main` directly: `fix/hotfix-<description>`, then PR into both `main` and the active `sprint/N`
 
 #### Naming conventions
 

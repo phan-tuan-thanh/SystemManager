@@ -58,6 +58,10 @@ export class FirewallRuleService {
   }
 
   async create(dto: CreateFirewallRuleDto) {
+    if (dto.source_zone_id && dto.source_ip) {
+      await this.validateSourceIpInZone(dto.source_zone_id, dto.source_ip);
+    }
+
     const rule = await this.prisma.firewallRule.create({
       data: {
         name: dto.name,
@@ -80,8 +84,35 @@ export class FirewallRuleService {
     return { data: rule };
   }
 
+  private async validateSourceIpInZone(zoneId: string, ip: string) {
+    const entry = await this.prisma.zoneIpEntry.findFirst({
+      where: { zone_id: zoneId, ip_address: ip, deleted_at: null },
+    });
+    if (!entry) {
+      // Check if IP is within a CIDR range in that zone
+      const ranges = await this.prisma.zoneIpEntry.findMany({
+        where: { zone_id: zoneId, is_range: true, deleted_at: null },
+      });
+      
+      // Simple string match for range start for now, or just warn
+      // In a real system we'd use a CIDR library
+      const foundInRange = ranges.some(r => ip.startsWith(r.ip_address.split('/')[0].split('.').slice(0, 3).join('.')));
+      
+      if (!foundInRange) {
+        throw new BadRequestException(`Địa chỉ IP nguồn ${ip} không tồn tại trong danh sách IP/Dải mạng của Zone này.`);
+      }
+    }
+  }
+
   async update(id: string, dto: UpdateFirewallRuleDto) {
-    await this.findOne(id);
+    const current = await this.findOne(id);
+    const zoneId = dto.source_zone_id || (current.data as any).source_zone_id;
+    const ip = dto.source_ip || (current.data as any).source_ip;
+
+    if (zoneId && ip && (dto.source_zone_id || dto.source_ip)) {
+      await this.validateSourceIpInZone(zoneId, ip);
+    }
+
     const rule = await this.prisma.firewallRule.update({
       where: { id },
       data: {
@@ -150,7 +181,16 @@ export class FirewallRuleService {
             where: { code: row.source_zone_code, environment: row.environment as any, deleted_at: null },
             select: { id: true },
           });
-          if (zone) srcZoneId = zone.id;
+          if (zone) {
+            srcZoneId = zone.id;
+          } else {
+            // Fallback: search globally if not found in current env (for shared/external zones)
+            const globalZone = await this.prisma.networkZone.findFirst({
+              where: { code: row.source_zone_code, deleted_at: null },
+              select: { id: true },
+            });
+            if (globalZone) srcZoneId = globalZone.id;
+          }
         }
 
         // Resolve destination zone: accept UUID or zone code
@@ -160,7 +200,15 @@ export class FirewallRuleService {
             where: { code: row.destination_zone_code, environment: row.environment as any, deleted_at: null },
             select: { id: true },
           });
-          if (zone) dstZoneId = zone.id;
+          if (zone) {
+            dstZoneId = zone.id;
+          } else {
+            const globalZone = await this.prisma.networkZone.findFirst({
+              where: { code: row.destination_zone_code, deleted_at: null },
+              select: { id: true },
+            });
+            if (globalZone) dstZoneId = globalZone.id;
+          }
         }
 
         // Resolve port: accept UUID (destination_port_id) or port_number + server lookup

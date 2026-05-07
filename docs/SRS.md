@@ -839,6 +839,8 @@ Hệ thống hỗ trợ phân quyền truy cập theo từng InfraSystem:
 - AC4: Tooltip/hover trên edge hiển thị chi tiết rule: IP nguồn, port đích, giao thức, trạng thái.
 - AC5: Filter theo environment, action (ALLOW/DENY), status (ACTIVE/PENDING_APPROVAL).
 - AC6: Dữ liệu lấy từ API `/api/v1/firewall-rules` — không cần thay đổi topology backend hiện tại.
+- AC7: Hỗ trợ render sơ đồ Topology thông qua engine `vis-network` (tương tự App Topology) để đảm bảo trải nghiệm tương tác đồng nhất.
+- AC8: Cung cấp tính năng Export đồ thị Firewall Topology hiện tại ra định dạng văn bản `Mermaid`, hỗ trợ người dùng copy nhúng thẳng vào các tài liệu Confluence/Markdown.
 **Added:** 2026-04-30
 
 ---

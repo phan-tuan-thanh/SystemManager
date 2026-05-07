@@ -99,6 +99,7 @@ Tài liệu này dịch các đặc tả kỹ thuật từ `docs/SRS.md` thành 
 - **Acceptance Criteria:**
   - AC1: Tạo luật kết nối từ Source (Zone/IP) đến Target (Zone/IP) trên một Port/Protocol cụ thể.
   - AC2: Trực quan hóa các luật này qua giao diện "Firewall Topology" dưới dạng sơ đồ đồ thị.
+  - AC3: Giao diện "Firewall Topology" ưu tiên sử dụng `vis-network` engine để render và cung cấp nút bấm xuất (Export) đồ thị dưới dạng mã `Mermaid`.
 
 ---
 
