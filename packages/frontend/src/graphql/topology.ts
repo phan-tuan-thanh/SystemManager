@@ -70,7 +70,7 @@ export const TOPOLOGY_QUERY = gql`
         firewallRuleName
         targetPort {
           id
-          portNumber
+          port_number
           protocol
         }
       }
