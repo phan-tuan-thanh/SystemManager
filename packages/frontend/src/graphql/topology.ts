@@ -68,6 +68,7 @@ export const TOPOLOGY_QUERY = gql`
         environment
         firewallRuleId
         firewallRuleName
+        action
         targetPort {
           id
           port_number

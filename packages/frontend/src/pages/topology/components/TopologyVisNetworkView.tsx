@@ -1,7 +1,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import { Network, type Options } from 'vis-network';
 import { DataSet } from 'vis-data';
-import type { ServerNode, ConnectionEdge } from '../hooks/useTopology';
+import type { ServerNode, ConnectionEdge, ImpliedConnectionEdge } from '../hooks/useTopology';
 
 export interface TopologyVisNetworkHandle {
   /** Re-stabilize physics (or re-layout hierarchical) and fit viewport. */
@@ -103,16 +103,21 @@ const SERVER_ICONS: Record<string, string> = {
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
+const FW_ACTION_COLOR = { ALLOW: '#389e0d', DENY: '#cf1322' };
+
 interface Props {
   servers: ServerNode[];
   connections: ConnectionEdge[];
+  impliedConnections?: ImpliedConnectionEdge[];
+  showImplied?: boolean;
+  nodeType?: 'all' | 'server' | 'app';
   onNodeClick?: (payload: { type: 'server' | 'app'; id: string; name: string }) => void;
   onEdgeClick?: (connection: ConnectionEdge) => void;
   layout?: 'hierarchical' | 'physics';
 }
 
 const TopologyVisNetworkView = forwardRef<TopologyVisNetworkHandle, Props>(function TopologyVisNetworkView(
-  { servers, connections, onNodeClick, onEdgeClick, layout = 'physics' },
+  { servers, connections, impliedConnections = [], showImplied = true, nodeType = 'all', onNodeClick, onEdgeClick, layout = 'physics' },
   ref,
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -168,71 +173,141 @@ const TopologyVisNetworkView = forwardRef<TopologyVisNetworkHandle, Props>(funct
       });
       rawLookup[id] = { type: 'server', id: server.id, name: server.name };
 
-      // B — app deployment nodes (smaller image icons)
-      server.deployments.forEach((dep) => {
-        const appId = `app-${dep.application.id}-${server.id}`;
-        nodes.push({
-          id: appId,
-          label: dep.application.name,
-          shape: 'image',
-          image: ICON_APP,
-          brokenImage: ICON_OTHER,
-          size: 22,
-          font: { color: '#333', size: 10, face: 'sans-serif', vadjust: 4 },
-          title: `<div style="padding:8px 10px;min-width:120px">
-            <b>${dep.application.name}</b><br/>
-            <span style="color:#888;font-size:11px">on ${server.name}</span>
-          </div>`,
-        });
-        rawLookup[appId] = { type: 'app', id: dep.application.id, name: dep.application.name };
+      if (nodeType !== 'server') {
+        // B — app deployment nodes (smaller image icons)
+        server.deployments.forEach((dep) => {
+          const appId = `app-${dep.application.id}-${server.id}`;
+          nodes.push({
+            id: appId,
+            label: dep.application.name,
+            shape: 'image',
+            image: ICON_APP,
+            brokenImage: ICON_OTHER,
+            size: 22,
+            font: { color: '#333', size: 10, face: 'sans-serif', vadjust: 4 },
+            title: `<div style="padding:8px 10px;min-width:120px">
+              <b>${dep.application.name}</b><br/>
+              <span style="color:#888;font-size:11px">on ${server.name}</span>
+            </div>`,
+          });
+          rawLookup[appId] = { type: 'app', id: dep.application.id, name: dep.application.name };
 
-        // Dashed containment edge: server → app
-        edges.push({
-          id: `contain-${appId}`,
-          from: id,
-          to: appId,
-          color: { color: 'rgba(0,0,0,0.08)', highlight: 'rgba(0,0,0,0.2)' },
-          width: 1,
-          dashes: [4, 4],
-          arrows: { to: { enabled: false } },
-          smooth: { enabled: true, type: 'curvedCW', roundness: 0.2 } as any,
-          selectionWidth: 0,
+          // Dashed containment edge: server → app
+          edges.push({
+            id: `contain-${appId}`,
+            from: id,
+            to: appId,
+            color: { color: 'rgba(0,0,0,0.08)', highlight: 'rgba(0,0,0,0.2)' },
+            width: 1,
+            dashes: [4, 4],
+            arrows: { to: { enabled: false } },
+            smooth: { enabled: true, type: 'curvedCW', roundness: 0.2 } as any,
+            selectionWidth: 0,
+          });
         });
-      });
-    });
-
-    // C — application-to-application connections
-    const appIdToNodeId = (appId: string) =>
-      Object.keys(rawLookup).find((nodeId) => nodeId.startsWith(`app-${appId}-`));
-
-    connections.forEach((conn) => {
-      const src = appIdToNodeId(conn.sourceAppId);
-      const tgt = appIdToNodeId(conn.targetAppId);
-      if (src && tgt) {
-        const color = PROTOCOL_COLOR[conn.connectionType] ?? '#8c8c8c';
-        const portLabel = conn.targetPort ? `:${conn.targetPort.port_number}` : '';
-        const label = `${conn.connectionType}${portLabel}`;
-        const edgeId = `conn-${conn.id}`;
-        edges.push({
-          id: edgeId,
-          from: src,
-          to: tgt,
-          label,
-          color: { color, highlight: color, hover: color },
-          width: 2,
-          font: { color: '#fff', size: 10, background: color, strokeWidth: 0, align: 'middle' } as any,
-          arrows: { to: { enabled: true, scaleFactor: 0.6 } },
-          smooth: { enabled: true, type: 'continuous', roundness: 0.3 } as any,
-          title: `<div style="padding:6px 10px">
-            <b>${conn.connectionType}${portLabel}</b>
-          </div>`,
-        });
-        rawLookup[edgeId] = conn;
       }
     });
 
+    if (nodeType === 'server') {
+      // Build app→server lookup once, shared by AppConnection + implied edges
+      const appToServer = new Map<string, string>();
+      servers.forEach((s) =>
+        s.deployments.forEach((d) => appToServer.set(d.application.id, s.id)),
+      );
+
+      // C1 — AppConnection server-to-server edges (gray, no label)
+      const addedConnPairs = new Set<string>();
+      connections.forEach((conn) => {
+        const srcServerId = appToServer.get(conn.sourceAppId);
+        const tgtServerId = appToServer.get(conn.targetAppId);
+        if (!srcServerId || !tgtServerId || srcServerId === tgtServerId) return;
+        const pairKey = [srcServerId, tgtServerId].sort().join('||');
+        if (addedConnPairs.has(pairKey)) return;
+        addedConnPairs.add(pairKey);
+        const portLabel = conn.targetPort ? `:${conn.targetPort.port_number}` : '';
+        const edgeId = `srv-conn-${srcServerId}-${tgtServerId}`;
+        edges.push({
+          id: edgeId,
+          from: `server-${srcServerId}`,
+          to: `server-${tgtServerId}`,
+          color: { color: '#bfbfbf', highlight: '#8c8c8c', hover: '#8c8c8c' },
+          width: 1.5,
+          dashes: false,
+          arrows: { to: { enabled: true, scaleFactor: 0.5 } },
+          smooth: { enabled: true, type: 'continuous', roundness: 0.25 } as any,
+          title: `<div style="padding:6px 10px"><b>${conn.connectionType}${portLabel}</b><br/><span style="color:#aaa;font-size:11px">App Connection</span></div>`,
+        });
+        rawLookup[edgeId] = conn;
+      });
+
+      // C2 — Implied edges from FirewallRule: line color = action (ALLOW green / DENY red), no label
+      if (showImplied) {
+        const addedImpliedPairs = new Map<string, Set<string>>();
+        impliedConnections.forEach((ic) => {
+          const action = ic.action ?? 'ALLOW';
+          const color = FW_ACTION_COLOR[action as keyof typeof FW_ACTION_COLOR] ?? FW_ACTION_COLOR.ALLOW;
+          const isDeny = action === 'DENY';
+          const srcServerId = appToServer.get(ic.sourceAppId);
+          const tgtServerId = appToServer.get(ic.targetAppId);
+          if (!srcServerId || !tgtServerId || srcServerId === tgtServerId) return;
+          const pairKey = `${action}::${srcServerId}::${tgtServerId}`;
+          if (!addedImpliedPairs.has(action)) addedImpliedPairs.set(action, new Set());
+          if (addedImpliedPairs.get(action)!.has(pairKey)) return;
+          addedImpliedPairs.get(action)!.add(pairKey);
+          const portNum = (ic.targetPort as any)?.port_number ?? ic.targetPort?.portNumber;
+          const portLabel = portNum ? `:${portNum}` : '';
+          const edgeId = `srv-implied-${action}-${srcServerId}-${tgtServerId}`;
+          edges.push({
+            id: edgeId,
+            from: `server-${srcServerId}`,
+            to: `server-${tgtServerId}`,
+            color: { color, highlight: color, hover: color },
+            width: isDeny ? 2 : 2.5,
+            dashes: isDeny ? [7, 4] : false,
+            arrows: { to: { enabled: true, scaleFactor: 0.7 } },
+            smooth: { enabled: true, type: 'curvedCW', roundness: 0.35 } as any,
+            title: `<div style="padding:6px 10px;min-width:140px">
+              <b style="color:${color}">${action}</b>${portLabel}<br/>
+              <span style="color:#555;font-size:11px">${ic.firewallRuleName}</span>
+            </div>`,
+          });
+          rawLookup[edgeId] = ic;
+        });
+      }
+    } else {
+      // C (app/all mode) — application-to-application connections
+      const appIdToNodeId = (appId: string) =>
+        Object.keys(rawLookup).find((nodeId) => nodeId.startsWith(`app-${appId}-`));
+
+      connections.forEach((conn) => {
+        const src = appIdToNodeId(conn.sourceAppId);
+        const tgt = appIdToNodeId(conn.targetAppId);
+        if (src && tgt) {
+          const color = PROTOCOL_COLOR[conn.connectionType] ?? '#8c8c8c';
+          const portLabel = conn.targetPort ? `:${conn.targetPort.port_number}` : '';
+          const label = `${conn.connectionType}${portLabel}`;
+          const edgeId = `conn-${conn.id}`;
+          edges.push({
+            id: edgeId,
+            from: src,
+            to: tgt,
+            label,
+            color: { color, highlight: color, hover: color },
+            width: 2,
+            font: { color: '#fff', size: 10, background: color, strokeWidth: 0, align: 'middle' } as any,
+            arrows: { to: { enabled: true, scaleFactor: 0.6 } },
+            smooth: { enabled: true, type: 'continuous', roundness: 0.3 } as any,
+            title: `<div style="padding:6px 10px">
+              <b>${conn.connectionType}${portLabel}</b>
+            </div>`,
+          });
+          rawLookup[edgeId] = conn;
+        }
+      });
+    }
+
     return { nodes, edges, rawLookup };
-  }, [servers, connections]);
+  }, [servers, connections, impliedConnections, showImplied, nodeType]);
 
   // Store callbacks in refs so the network never rebuilds when click handlers change
   const onNodeClickRef = useRef(onNodeClick);

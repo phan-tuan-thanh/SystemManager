@@ -120,10 +120,10 @@ export class TopologyService {
   }
 
   async getImpliedConnections(environment: string): Promise<ImpliedConnectionEdge[]> {
-    // Step 1: get all active ALLOW rules for the environment
+    // Step 1: get all active ALLOW and DENY rules for the environment
     const rules = await this.prisma.firewallRule.findMany({
       where: {
-        action: 'ALLOW',
+        action: { in: ['ALLOW', 'DENY'] },
         status: 'ACTIVE',
         environment: environment as any,
         deleted_at: null,
@@ -169,8 +169,9 @@ export class TopologyService {
     });
 
     const implied: ImpliedConnectionEdge[] = [];
-    // dedup by sourceAppId + targetAppId
-    const seenPairs = new Set<string>();
+    // deduplicate per action separately — ALLOW and DENY are distinct
+    const seenAllow = new Set<string>();
+    const seenDeny = new Set<string>();
 
     for (const rule of rules) {
       // Step 3a: identify target app from destination_port
@@ -225,13 +226,15 @@ export class TopologyService {
           if (sourceAppId === targetAppId) continue;
 
           const pairKey = `${sourceAppId}::${targetAppId}`;
+          const seen = rule.action === 'DENY' ? seenDeny : seenAllow;
 
-          // Skip if already explicit or already added as implied
-          if (explicitSet.has(pairKey) || seenPairs.has(pairKey)) continue;
-          seenPairs.add(pairKey);
+          // ALLOW: skip if explicit AppConnection already exists (redundant)
+          if (rule.action === 'ALLOW' && explicitSet.has(pairKey)) continue;
+          if (seen.has(pairKey)) continue;
+          seen.add(pairKey);
 
           implied.push({
-            id: `implied-${rule.id}-${sourceAppId}-${targetAppId}`,
+            id: `implied-${rule.action}-${rule.id}-${sourceAppId}-${targetAppId}`,
             sourceAppId,
             targetAppId,
             sourceAppName,
@@ -239,6 +242,7 @@ export class TopologyService {
             environment,
             firewallRuleId: rule.id,
             firewallRuleName: rule.name,
+            action: rule.action,
             targetPort: rule.destination_port
               ? {
                   id: rule.destination_port.id,

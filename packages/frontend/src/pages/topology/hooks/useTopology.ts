@@ -80,6 +80,7 @@ export interface ImpliedConnectionEdge {
   environment: string;
   firewallRuleId: string;
   firewallRuleName: string;
+  action: 'ALLOW' | 'DENY';
   targetPort?: {
     id: string;
     portNumber: number;

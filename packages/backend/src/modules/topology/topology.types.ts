@@ -175,6 +175,9 @@ export class ImpliedConnectionEdge {
 
   @Field(() => PortNode, { nullable: true })
   targetPort?: PortNode;
+
+  @Field()
+  action: string; // 'ALLOW' | 'DENY'
 }
 
 @ObjectType()

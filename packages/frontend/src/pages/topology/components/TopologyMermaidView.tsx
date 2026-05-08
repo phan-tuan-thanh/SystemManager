@@ -8,7 +8,50 @@ mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose
 
 let renderCounter = 0;
 
-function buildMermaidSource(servers: ServerNode[], connections: ConnectionEdge[]): string {
+function buildMermaidSource(
+  servers: ServerNode[],
+  connections: ConnectionEdge[],
+  nodeType: 'all' | 'server' | 'app' = 'all',
+): string {
+  const safeId = (s: string) => s.replace(/[^a-zA-Z0-9_]/g, '_');
+
+  if (nodeType === 'server') {
+    // Build app→server lookup then emit server-to-server edges
+    const appToServer = new Map<string, { id: string; code: string; name: string }>();
+    servers.forEach((s) =>
+      s.deployments.forEach((d) => appToServer.set(d.application.id, s)),
+    );
+
+    const usedServerIds = new Set<string>();
+    const serverEdges: string[] = [];
+    const addedPairs = new Set<string>();
+
+    connections.forEach((c) => {
+      const src = appToServer.get(c.sourceAppId);
+      const tgt = appToServer.get(c.targetAppId);
+      if (!src || !tgt || src.id === tgt.id) return;
+      const pairKey = [src.id, tgt.id].sort().join('||');
+      if (addedPairs.has(pairKey)) return;
+      addedPairs.add(pairKey);
+      usedServerIds.add(src.id);
+      usedServerIds.add(tgt.id);
+      const label = c.targetPort
+        ? `${c.connectionType}:${c.targetPort.port_number}`
+        : c.connectionType;
+      serverEdges.push(`  ${safeId(src.code)} -->|"${label}"| ${safeId(tgt.code)}`);
+    });
+
+    if (usedServerIds.size === 0) return '';
+
+    const lines: string[] = ['graph LR'];
+    servers
+      .filter((s) => usedServerIds.has(s.id))
+      .forEach((s) => lines.push(`  ${safeId(s.code)}["🖥 ${s.name}"]`));
+    lines.push(...serverEdges);
+    return lines.join('\n');
+  }
+
+  // App / All mode — original logic
   const appMap = new Map<string, { code: string; name: string }>();
   servers.forEach((s) =>
     s.deployments.forEach((d) => {
@@ -26,8 +69,6 @@ function buildMermaidSource(servers: ServerNode[], connections: ConnectionEdge[]
   });
 
   if (usedIds.size === 0) return '';
-
-  const safeId = (code: string) => code.replace(/[^a-zA-Z0-9_]/g, '_');
 
   const lines: string[] = ['graph LR'];
 
@@ -52,6 +93,7 @@ function buildMermaidSource(servers: ServerNode[], connections: ConnectionEdge[]
 interface Props {
   servers: ServerNode[];
   connections: ConnectionEdge[];
+  nodeType?: 'all' | 'server' | 'app';
   environment?: string;
 }
 
@@ -63,7 +105,7 @@ function clampZoom(z: number) {
   return Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, z));
 }
 
-export default function TopologyMermaidView({ servers, connections, environment }: Props) {
+export default function TopologyMermaidView({ servers, connections, nodeType = 'all', environment }: Props) {
   const [svg, setSvg] = useState('');
   const [rendering, setRendering] = useState(false);
   const [error, setError] = useState('');
@@ -78,7 +120,7 @@ export default function TopologyMermaidView({ servers, connections, environment 
   // Reset zoom whenever the diagram changes
   useEffect(() => { setZoom(1); }, [svg]);
 
-  const source = buildMermaidSource(servers, connections);
+  const source = buildMermaidSource(servers, connections, nodeType);
 
   useEffect(() => {
     if (!source) {
