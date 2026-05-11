@@ -1,57 +1,55 @@
-# SystemManager — Kilo Agent Instructions
+# Workspace AI Operating System
 
-This project uses Kilo CLI with custom commands. All commands are in `.kilo/command/*.md`.
+Every agent must follow the loading order below.
 
-## Available Commands
+## Mandatory loading order
 
-| Command                       | Description                        |
-| ----------------------------- | ---------------------------------- |
-| `/add-feature <description>`  | **Full pipeline**: docs → tasks → branch → implement → test → fix → report → push |
-| `/build-sprint <N>`           | Implement all tasks for a sprint   |
-| `/new-module <name>`          | Scaffold new NestJS backend module |
-| `/gen-migration <desc>`       | Generate Prisma database migration |
-| `/new-page <name>`            | Scaffold new React frontend page   |
-| `/gen-test <target>`          | Generate unit/integration tests    |
-| `/check-module-deps [module]` | Verify module dependency integrity |
-| `/init-project`               | Bootstrap full project structure   |
-| `/review-pr <pr>`             | Code review for pull request       |
-| `/review-security <target>`   | Security audit                     |
-| `/audit-check [module]`       | Audit log compliance check         |
-| `/update-docs <description>`  | **Sync docs**: SRS, tasks, progress, status |
-| `/add-demo-ui <description>`  | **Design UI**: Create/update UI mockups for sprint |
+1. `.ai/rules/global/*`           — universal rules
+2. `.ai/stack/profile.md`         — what this repo is
+3. `.ai/stack/conventions.md`     — repo-specific layout & policy
+4. `.ai/stack/commands.md`        — exact build/test/run commands
+5. `.ai/contracts/*`              — output guarantees
+6. `.ai/rules/domain/<relevant>`  — only if touching that domain
+7. `.ai/workflows/<type>.md`      — the workflow you're running
+8. `.ai/memory/*`                 — only the relevant entries
+9. `.ai/agents/<your-role>.md`    — your lane
 
-## Usage
+## Core rules (never break these)
 
-Invoke commands by typing `/command-name` or `/command-name arg` in Kilo CLI.
+- Never modify unrelated files (no opportunistic refactors).
+- Never invent commands; use `stack/commands.md`.
+- Update memory whenever architecture, decisions, or open issues change.
+- Follow contracts strictly.
+- Check `active-tasks.md` first to avoid duplicate work.
 
-Example:
+## Workflow selection
 
-- `/new-module server` - creates server module
-- `/gen-migration add servers table` - creates migration
-- `/new-page server` - creates frontend page
-- `/check-module-deps all` - validates all dependencies
+| Task type            | Workflow                | Who starts it |
+|----------------------|-------------------------|---------------|
+| New feature          | `workflows/feature.md`  | Planner       |
+| Bug fix              | `workflows/bugfix.md`   | Planner       |
+| Code review          | `workflows/review.md`   | Reviewer      |
+| Refactor             | `workflows/refactor.md` | Architect     |
+| Schema/data change   | `workflows/migration.md`| Architect     |
+| Emergency fix        | `workflows/hotfix.md`   | Anyone + approval |
+| Release              | `workflows/release.md`  | Release lead  |
 
-## Project Context
+## Agent lane assignment (enterprise SDLC)
 
-Read `CLAUDE.md` and `docs/SRS.md` before working on any module.
+| Lane         | File                          | Owns                                                                |
+|--------------|-------------------------------|---------------------------------------------------------------------|
+| BA           | `.ai/agents/ba.md`            | Stage 2–3: clarification, BRD, functional spec                      |
+| PO           | `.ai/agents/po.md`            | Stage 3: epic, user story, AC, prioritisation                       |
+| Tech Lead    | `.ai/agents/tech-lead.md`     | Stage 4, 7: technical analysis, task breakdown, estimates           |
+| Architect    | `.ai/agents/architect.md`     | Stage 5–6: design, API contract, ADRs, risk                         |
+| Senior Dev   | `.ai/agents/senior-dev.md`    | Stage 9–10: code, unit tests                                        |
+| QA           | `.ai/agents/qa.md`            | Stage 11: test cases, regression, automation, defects               |
+| DevOps       | `.ai/agents/devops.md`        | Stage 13–14: deployment, rollback, runbook, prod-readiness          |
+| Scrum Master | `.ai/agents/scrum-master.md`  | Stage 8: sprint plan, blockers, ceremonies-as-doc, traceability     |
+| Orchestrator | `.ai/agents/orchestrator.md`  | Sequencing, handoff validation, conflict resolution                 |
 
-## Key Conventions
+Lanes are **roles**, not models. One model can play every lane (announce role at start of each response). For larger work, fan out to specialised agents — see `ENTERPRISE_SDLC_ORCHESTRATOR.md` Section 11.
 
-- Backend modules: `packages/backend/src/modules/<name>/`
-- Frontend pages: `packages/frontend/src/pages/<name>/`
-- Always use soft delete (set deleted_at, never hard delete)
-- All endpoints require auth + role + module guard
-- Follow naming conventions from CLAUDE.md
+## Enterprise mode
 
-## Project Status
-
-Check `deployment-status.json` for current project status. This file is updated by agents to track progress and is shared across all AI agents for consistency.
-
-## Current Status Summary
-
-- **Overall**: IN PROGRESS - Phase 1 (Core Modules)
-- **Completion**: ~35%
-- **Backend**: 5/16 modules implemented (auth, user, module-config, audit, system)
-- **Frontend**: 3/13 pages implemented (auth/login, dashboard, setup)
-- **Database**: Schema defined (20 models) but no migrations run yet
-- **Next**: Guards, decorators, interceptors, then remaining modules
+Paste `SYSTEM_PROMPT.md` (at repo root) as the model's system message to enable the full 15-stage SDLC pipeline (`.ai/workflows/sdlc-pipeline.md`), clarification gate (`.ai/workflows/clarification-gate.md`), production-readiness checklist (`.ai/contracts/production-readiness.md`), artifact catalogue (`.ai/contracts/artifacts/`), and command system (`.ai/commands.md`).
