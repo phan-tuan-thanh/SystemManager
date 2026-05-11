@@ -33,40 +33,115 @@ Source code được volume-mount (src/, prisma/) nên thay đổi code trên m�
 
 ```
 SystemManager/
-├── CLAUDE.md                              # Rules chính — Claude Agent đọc file này đầu tiên
-├── docs/
-│   ├── SRS.md                             # (đã có) Yêu cầu hệ thống
-│   └── CONVENTIONS.md                     # Quy chuẩn coding chi tiết + patterns mẫu
-└── .claude/
-    ├── settings.json                      # Hooks tự động (lint khi edit, cảnh báo security)
-    └── commands/                           # Custom slash commands (skills)
-        ├── init-project.md                # /init-project — Bootstrap toàn bộ project
-        ├── new-module.md                  # /new-module <name> — Scaffold NestJS module
-        ├── new-page.md                    # /new-page <name> — Scaffold React page
-        ├── gen-migration.md               # /gen-migration <desc> — Tạo DB migration
-        ├── gen-test.md                    # /gen-test <target> — Generate unit/integration tests
-        ├── gen-api-docs.md                # /gen-api-docs <module> — Swagger docs
-        ├── review-pr.md                   # /review-pr <PR> — Code review toàn diện
-        ├── review-security.md             # /review-security <target> — Audit bảo mật
-        ├── check-module-deps.md           # /check-module-deps — Kiểm tra dependency graph
-        └── audit-check.md                # /audit-check <module> — Kiểm tra audit log compliance
+├── CLAUDE.md                              # Instructions for Claude — đọc trước khi làm task
+├── AGENTS.md                              # Agent-based workflow & loading order
+├── README.md                              # (file này) Project overview & quick start
+├── docs/                                  # Core documentation
+│   ├── SRS.md                             # Yêu cầu hệ thống (System Requirements)
+│   ├── CONVENTIONS.md                     # Quy chuẩn coding + patterns mẫu
+│   ├── GUIDES.md                          # Dev guides & workflow
+│   ├── IMPLEMENTATION_DETAILS.md          # Technical deep dives
+│   ├── PROGRESS_LOG.md                    # Chronological project history
+│   ├── plans/                             # Active sprint plans
+│   └── reports/                           # Completed sprint reports
+├── .ai/                                   # Agent template system (mandatory)
+│   ├── agents/                            # Lane-specific rules (ba, po, tech-lead, architect, etc.)
+│   ├── workflows/                         # Workflow templates (feature, bugfix, review, release, etc.)
+│   ├── contracts/                         # Output guarantees & standards
+│   ├── memory/                            # Shared agent knowledge (architecture, decisions, tasks)
+│   ├── rules/                             # Domain-specific rules
+│   ├── stack/                             # Stack definition & commands
+│   └── commands.md                        # Build, test, run commands
+└── .claude/                               # Claude Code IDE settings
+    ├── settings.json                      # Hooks, permissions, features
+    ├── settings.local.json                # Local overrides
+    ├── commands/                          # Custom slash commands (skills)
+    │   ├── init-project.md
+    │   ├── new-module.md
+    │   ├── new-page.md
+    │   ├── gen-migration.md
+    │   ├── gen-test.md
+    │   ├── gen-api-docs.md
+    │   ├── review-pr.md
+    │   └── review-security.md
+    └── hooks/                             # Event hooks (lint, test, security checks)
 ```
 
-## Chức năng từng file
+## Hệ thống Agent & Workflows
 
-| File                                                                                                              | Mục đích                                                                                                                                                                                            |
-| ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| [CLAUDE.md](vscode-webview://1pc95ij2j36v761gr126akhdj4dvikcpvqfhg76up4tbc0k4fsil/CLAUDE.md)                         | **Rules chính** — tech stack, project structure, module architecture, DB/API conventions, security rules, testing strategy, git workflow. Claude Agent tự động đọc file này mỗi session |
-| [.claude/settings.json](vscode-webview://1pc95ij2j36v761gr126akhdj4dvikcpvqfhg76up4tbc0k4fsil/.claude/settings.json) | **Hooks** — tự động nhắc security khi edit code, auto-lint TypeScript, reminder chạy test sau commit                                                                                       |
-| [docs/CONVENTIONS.md](vscode-webview://1pc95ij2j36v761gr126akhdj4dvikcpvqfhg76up4tbc0k4fsil/docs/CONVENTIONS.md)     | **Coding patterns** — naming convention bảng tham chiếu, code mẫu cho Controller/Service/DTO/Hook/Component                                                                                  |
-| `/init-project`                                                                                                 | Bootstrap monorepo từ đầu (NestJS + React + Docker + Prisma)                                                                                                                                        |
-| `/new-module`                                                                                                   | Tạo NestJS module mới đầy đủ cấu trúc (controller, service, dto, entity, tests)                                                                                                                |
-| `/new-page`                                                                                                     | Tạo React page mới (list, detail, form, filter, API hooks)                                                                                                                                           |
-| `/gen-migration`                                                                                                | Tạo Prisma migration theo đúng conventions                                                                                                                                                          |
-| `/gen-test`                                                                                                     | Generate tests cho backend service/controller hoặc frontend component                                                                                                                                 |
-| `/review-security`                                                                                              | Audit bảo mật theo OWASP Top 10                                                                                                                                                                      |
-| `/review-pr`                                                                                                    | Review PR toàn diện (architecture, code quality, security, testing)                                                                                                                                  |
-| `/check-module-deps`                                                                                            | Kiểm tra dependency graph module theo SRS                                                                                                                                                             |
-| `/audit-check`                                                                                                  | Verify audit log coverage cho từng module                                                                                                                                                             |
+Để hỗ trợ collaborative work, project sử dụng **agent-based template system** (`.ai/`):
 
-Khi bắt đầu dev, chạy `/init-project` để scaffold toàn bộ project, sau đó dùng `/new-module server` và `/new-page server` để tạo từng module theo Phase 1.
+### Agent Lanes (Roles)
+
+| Lane | File | Trách nhiệm |
+|------|------|------------|
+| **BA** | `.ai/agents/ba.md` | Clarification, BRD, functional spec |
+| **PO** | `.ai/agents/po.md` | Epic, user story, acceptance criteria |
+| **Tech Lead** | `.ai/agents/tech-lead.md` | Technical analysis, task breakdown, estimates |
+| **Architect** | `.ai/agents/architect.md` | Design, API contracts, ADRs, risk assessment |
+| **Senior Dev** | `.ai/agents/senior-dev.md` | Implementation, unit tests, code quality |
+| **QA** | `.ai/agents/qa.md` | Test cases, regression, automation |
+| **DevOps** | `.ai/agents/devops.md` | Deployment, rollback, runbooks |
+| **Scrum Master** | `.ai/agents/scrum-master.md` | Sprint planning, blockers, ceremonies |
+| **Orchestrator** | `.ai/agents/orchestrator.md` | Sequencing, handoffs, conflict resolution |
+
+### Workflow Templates
+
+| Workflow | File | Tối ưu cho |
+|----------|------|-----------|
+| Feature | `.ai/workflows/feature.md` | New feature implementation |
+| Bugfix | `.ai/workflows/bugfix.md` | Bug fixes & patches |
+| Review | `.ai/workflows/review.md` | Code reviews |
+| Refactor | `.ai/workflows/refactor.md` | Refactoring & tech debt |
+| Migration | `.ai/workflows/migration.md` | Database schema changes |
+| Hotfix | `.ai/workflows/hotfix.md` | Production emergency fixes |
+| Release | `.ai/workflows/release.md` | Release preparation & deployment |
+
+### Mandatory Loading Order for Agents
+
+Khi bắt đầu task, agent PHẢI load theo thứ tự này:
+
+1. `.ai/rules/global/*` — Universal rules
+2. `.ai/stack/profile.md` — What this repo is
+3. `.ai/stack/conventions.md` — Repo-specific layout
+4. `.ai/stack/commands.md` — Build/test/run commands
+5. `.ai/contracts/*` — Output guarantees
+6. `.ai/rules/domain/<relevant>` — Domain-specific rules
+7. `.ai/workflows/<type>.md` — The workflow being executed
+8. `.ai/memory/*` — Relevant knowledge entries
+9. `.ai/agents/<role>.md` — Your lane assignment
+
+**Không bao giờ bỏ qua loading order** — nó đảm bảo consistency giữa agents.
+
+## Khởi động nhanh cho Developers
+
+### Lần đầu tiên
+
+1. Clone repo & cd vào thư mục
+2. Chạy `docker compose up -d` để start backend/frontend/database
+3. Chạy `npm install` trong `backend/` và `frontend/` nếu cần
+4. Đọc [CLAUDE.md](CLAUDE.md) để hiểu project rules
+
+### Workflow phát triển
+
+| Task | Cách làm |
+|------|---------|
+| **Thêm feature mới** | 1. Read [AGENTS.md](AGENTS.md) & [.ai/workflows/feature.md](.ai/workflows/feature.md)<br>2. Chạy `/add-feature <name>`<br>3. Follow workflow steps |
+| **Fix bug** | 1. Read [.ai/workflows/bugfix.md](.ai/workflows/bugfix.md)<br>2. Chạy `/fix/<module>-<desc>`<br>3. Create PR to sprint branch |
+| **Review code** | 1. Read [.ai/workflows/review.md](.ai/workflows/review.md)<br>2. Chạy `/review-pr <PR#>`<br>3. Post review comments |
+| **Scaffold module** | Chạy `/new-module <name>` — auto-creates controller, service, DTOs, tests |
+| **Scaffold page** | Chạy `/new-page <name>` — auto-creates list, detail, form pages |
+| **Tạo migration** | Chạy `/gen-migration <desc>` — creates & runs Prisma migration |
+| **Generate tests** | Chạy `/gen-test <target>` — creates unit/integration/E2E tests |
+| **Check module deps** | Chạy `/check-module-deps` — verifies dependency graph |
+
+## Chức năng từng file chính
+
+| File | Mục đích |
+|------|---------|
+| [CLAUDE.md](CLAUDE.md) | **Instructions cho Claude** — tech stack, project structure, security rules, conventions |
+| [AGENTS.md](AGENTS.md) | **Agent system & workflows** — loading order, lanes, when to use each workflow |
+| [docs/SRS.md](docs/SRS.md) | **System Requirements** — functional & non-functional requirements |
+| [docs/CONVENTIONS.md](docs/CONVENTIONS.md) | **Coding patterns** — naming, structure, code samples |
+| [.ai/commands.md](.ai/commands.md) | **Build/test/run commands** — exact commands for each operation |
+| [.claude/settings.json](.claude/settings.json) | **IDE hooks & permissions** — auto-checks, linting, security |
