@@ -23,12 +23,12 @@ DevOps operators need a centralized way to manage firewall rules across DEV/UAT/
 
 | Role | Name / Team | Decision Power | Concerns |
 |------|-------------|---|----------|
-| **Product Manager** | DevOps team lead | High | Feature prioritization, release timing |
-| **DevOps Operator** | 3x operators (Alice, Bob, Carol) | High | Usability, performance, safety |
-| **Platform Engineer** | Infrastructure team | Medium | API design, integration with topology/audit |
-| **Compliance Officer** | InfoSec team | Medium | Audit trail completeness, access control |
-| **Tech Lead** | SystemManager tech lead | High | Technical feasibility, architecture alignment |
-| **Frontend Lead** | React team | Medium | UI/UX consistency, accessibility |
+| Product Manager | DevOps team lead | High | Feature prioritization, release timing |
+| DevOps Operator | 3x operators (Alice, Bob, Carol) | High | Usability, performance, safety |
+| Platform Engineer | Infrastructure team | Medium | API design, integration with topology/audit |
+| Compliance Officer | InfoSec team | Medium | Audit trail completeness, access control |
+| Tech Lead | SystemManager tech lead | High | Technical feasibility, architecture alignment |
+| Frontend Lead | React team | Medium | UI/UX consistency, accessibility |
 
 ## Scope
 
@@ -61,27 +61,27 @@ DevOps operators need a centralized way to manage firewall rules across DEV/UAT/
 
 | ID | Statement | Priority | Source | Acceptance Criteria |
 |----|-----------|----------|--------|---------------------|
-| **FR-1** | System shall allow operators to create firewall rules via REST API | MUST | Operator feedback | POST /api/v1/firewall-rules returns 201, rule saved to DB |
-| **FR-2** | System shall allow operators to create rules via React UI form | MUST | Operator feedback, Phase 4 goal | Form available at /firewall-rules/create, validates inputs, submits to API |
-| **FR-3** | System shall list all firewall rules in selected environment | MUST | MVP requirement | GET /api/v1/firewall-rules returns paginated list, filter by environment works |
-| **FR-4** | System shall display single rule details | MUST | User journey requirement | GET /api/v1/firewall-rules/:id returns rule data, detail page loads |
-| **FR-5** | System shall allow operators to update rule properties | SHOULD | Enhancement (lower priority than CRUD) | PATCH endpoint works, updates name/port/protocol, audit logged |
-| **FR-6** | System shall allow soft deletion of rules | MUST | Compliance requirement (never hard delete) | DELETE sets deleted_at, list filters deleted rules |
-| **FR-7** | System shall validate port range (1-65535) | MUST | Technical requirement | Invalid port rejected with 400 Bad Request |
-| **FR-8** | System shall validate protocol enum (tcp/udp) | MUST | Business requirement | Invalid protocol rejected with error |
-| **FR-9** | System shall validate environment enum (DEV/UAT/PROD) | MUST | Architecture requirement | Invalid environment rejected |
-| **FR-10** | System shall detect port conflicts within same environment | MUST | Safety requirement (prevent duplicate rules) | Duplicate port returns 409 Conflict |
-| **FR-11** | System shall support environment isolation (DEV rules don't conflict with PROD) | MUST | Technical architecture | Port 22 in DEV and PROD can both exist |
-| **FR-12** | System shall log every rule change to audit_logs table | MUST | Compliance requirement | audit_logs shows create/update/delete for each mutation |
-| **NR-1** | API response latency shall be < 200ms p95 | MUST | SLO requirement | Load test with 1000 rules, measure latency |
-| **NR-2** | List endpoint shall handle 10,000+ rules efficiently | SHOULD | Scalability requirement | Pagination prevents N+1 queries, index on (environment, deleted_at) |
-| **NR-3** | System shall support 100+ concurrent operators | SHOULD | Capacity requirement | No race conditions in conflict detection |
-| **SEC-1** | All endpoints shall require JWT authentication | MUST | Security requirement (OWASP Top 10) | Requests without auth token return 401 Unauthorized |
-| **SEC-2** | Users shall need firewall:read role to list rules | MUST | Role-based access control | Non-operator user cannot list rules (403 Forbidden) |
-| **SEC-3** | Users shall need firewall:write role to create/modify rules | MUST | Authorization requirement | Only operators can modify rules |
-| **SEC-4** | All input shall be validated before processing | MUST | OWASP Top 10 (injection prevention) | DTO validation in backend, form validation in frontend |
-| **USAB-1** | Form shall show clear validation error messages | SHOULD | UX requirement | Invalid port shows "Port must be 1-65535" (inline error) |
-| **USAB-2** | Operators shall be able to filter rules by environment | SHOULD | UX workflow | Dropdown or tabs to filter DEV/UAT/PROD separately |
+| FR-1 | System shall allow operators to create firewall rules via REST API | MUST | Operator feedback | POST /api/v1/firewall-rules returns 201, rule saved to DB |
+| FR-2 | System shall allow operators to create rules via React UI form | MUST | Operator feedback, Phase 4 goal | Form available at /firewall-rules/create, validates inputs, submits to API |
+| FR-3 | System shall list all firewall rules in selected environment | MUST | MVP requirement | GET /api/v1/firewall-rules returns paginated list, filter by environment works |
+| FR-4 | System shall display single rule details | MUST | User journey requirement | GET /api/v1/firewall-rules/:id returns rule data, detail page loads |
+| FR-5 | System shall allow operators to update rule properties | SHOULD | Enhancement (lower priority than CRUD) | PATCH endpoint works, updates name/port/protocol, audit logged |
+| FR-6 | System shall allow soft deletion of rules | MUST | Compliance requirement (never hard delete) | DELETE sets deleted_at, list filters deleted rules |
+| FR-7 | System shall validate port range (1-65535) | MUST | Technical requirement | Invalid port rejected with 400 Bad Request |
+| FR-8 | System shall validate protocol enum (tcp/udp) | MUST | Business requirement | Invalid protocol rejected with error |
+| FR-9 | System shall validate environment enum (DEV/UAT/PROD) | MUST | Architecture requirement | Invalid environment rejected |
+| FR-10 | System shall detect port conflicts within same environment | MUST | Safety requirement (prevent duplicate rules) | Duplicate port returns 409 Conflict |
+| FR-11 | System shall support environment isolation (DEV rules don't conflict with PROD) | MUST | Technical architecture | Port 22 in DEV and PROD can both exist |
+| FR-12 | System shall log every rule change to audit_logs table | MUST | Compliance requirement | audit_logs shows create/update/delete for each mutation |
+| NR-1 | API response latency shall be < 200ms p95 | MUST | SLO requirement | Load test with 1000 rules, measure latency |
+| NR-2 | List endpoint shall handle 10,000+ rules efficiently | SHOULD | Scalability requirement | Pagination prevents N+1 queries, index on (environment, deleted_at) |
+| NR-3 | System shall support 100+ concurrent operators | SHOULD | Capacity requirement | No race conditions in conflict detection |
+| SEC-1 | All endpoints shall require JWT authentication | MUST | Security requirement (OWASP Top 10) | Requests without auth token return 401 Unauthorized |
+| SEC-2 | Users shall need firewall:read role to list rules | MUST | Role-based access control | Non-operator user cannot list rules (403 Forbidden) |
+| SEC-3 | Users shall need firewall:write role to create/modify rules | MUST | Authorization requirement | Only operators can modify rules |
+| SEC-4 | All input shall be validated before processing | MUST | OWASP Top 10 (injection prevention) | DTO validation in backend, form validation in frontend |
+| USAB-1 | Form shall show clear validation error messages | SHOULD | UX requirement | Invalid port shows "Port must be 1-65535" (inline error) |
+| USAB-2 | Operators shall be able to filter rules by environment | SHOULD | UX workflow | Dropdown or tabs to filter DEV/UAT/PROD separately |
 
 ## Assumptions
 
@@ -117,24 +117,24 @@ DevOps operators need a centralized way to manage firewall rules across DEV/UAT/
 
 | Metric | Target | Measurement | Owner |
 |--------|--------|-------------|-------|
-| **Feature adoption** | 80% of operators use API/UI within 3 months | Usage analytics (API call count, UI page views) | DevOps team |
-| **Error reduction** | 50% fewer firewall misconfiguration incidents | Compare pre/post incident metrics | DevOps team |
-| **Operator time saved** | 2 hours/week per operator (vs. manual rule config) | Survey operators post-launch | Product manager |
-| **API performance** | List endpoint p95 latency < 200ms | Continuous monitoring (Grafana) | DevOps team |
-| **Test coverage** | 80%+ code coverage for new code | Code coverage report in CI/CD | Tech lead |
-| **Audit compliance** | 100% of rule changes logged | Audit log completeness check | Compliance officer |
-| **Zero data loss** | No rules lost due to feature (even in rollback) | Soft delete verification, backup tests | DevOps team |
+| Feature adoption | 80% of operators use API/UI within 3 months | Usage analytics (API call count, UI page views) | DevOps team |
+| Error reduction | 50% fewer firewall misconfiguration incidents | Compare pre/post incident metrics | DevOps team |
+| Operator time saved | 2 hours/week per operator (vs. manual rule config) | Survey operators post-launch | Product manager |
+| API performance | List endpoint p95 latency < 200ms | Continuous monitoring (Grafana) | DevOps team |
+| Test coverage | 80%+ code coverage for new code | Code coverage report in CI/CD | Tech lead |
+| Audit compliance | 100% of rule changes logged | Audit log completeness check | Compliance officer |
+| Zero data loss | No rules lost due to feature (even in rollback) | Soft delete verification, backup tests | DevOps team |
 
 ## Risks (High-Level)
 
 | Risk | Probability | Impact | Mitigation |
-|------|-----------|--------|-----------|
-| **Port conflict detection incomplete** | Medium | Rules conflict, break deployments | Topology integration tested thoroughly, conflict detection verified in test suite |
-| **Audit log bottleneck** | Low | Logging slows down mutations | Async audit logging, index on audit_logs table, monitor write latency |
-| **Operator confusion (UI hard to use)** | Medium | Low adoption despite launch | Design review with operators, usability testing on staging, clear error messages |
-| **Role check bypass** | Low | Unauthorized access to PROD rules | Middleware enforces role check, security tests verify access denied for non-operators |
-| **Data loss in rollback** | Low | Operators lose rules if deploy fails | Soft delete strategy (data retained), tested rollback procedure |
-| **Performance degradation at scale** | Low | API slow with 10k+ rules | Index strategy, pagination, load testing with large dataset |
+|--------|-----------|-----------|-----------|
+| Port conflict detection incomplete | Medium | Rules conflict, break deployments | Topology integration tested thoroughly, conflict detection verified in test suite |
+| Audit log bottleneck | Low | Logging slows down mutations | Async audit logging, index on audit_logs table, monitor write latency |
+| Operator confusion (UI hard to use) | Medium | Low adoption despite launch | Design review with operators, usability testing on staging, clear error messages |
+| Role check bypass | Low | Unauthorized access to PROD rules | Middleware enforces role check, security tests verify access denied for non-operators |
+| Data loss in rollback | Low | Operators lose rules if deploy fails | Soft delete strategy (data retained), tested rollback procedure |
+| Performance degradation at scale | Low | API slow with 10k+ rules | Index strategy, pagination, load testing with large dataset |
 
 ## Tests / Validation
 
