@@ -651,15 +651,19 @@ export function reflowZoneLanes(
         maxX = Math.max(maxX, k.position.x + w);
         maxY = Math.max(maxY, k.position.y + h);
       }
-      // Shift the whole content block so its top-left lands on the padded
-      // origin (drag-left makes shift positive → everything slides right and
-      // the lane grows; mirror of drag-right).
-      shiftById.set(lane.id, { x: ORIGIN_X - minX, y: ORIGIN_Y - minY });
-      const contentW = Math.max(maxX - minX, ZONE_MIN_CONTENT_W);
-      const contentH = Math.max(maxY - minY, ZONE_MIN_CONTENT_H);
+      // Grow-only shift: when content crosses left/top of the padded origin,
+      // slide the whole block back in by exactly that overflow so the zone
+      // grows left/top (mirror of how max edge grows right/bottom). Never
+      // negative — dragging right/bottom keeps shift 0 so that path stays
+      // pixel-smooth and the dragged node never fights the pointer.
+      const shiftX = Math.max(0, ORIGIN_X - minX);
+      const shiftY = Math.max(0, ORIGIN_Y - minY);
+      shiftById.set(lane.id, { x: shiftX, y: shiftY });
+      const right = Math.max(maxX + shiftX, ORIGIN_X + ZONE_MIN_CONTENT_W);
+      const bottom = Math.max(maxY + shiftY, ORIGIN_Y + ZONE_MIN_CONTENT_H);
       sizeById.set(lane.id, {
-        w: ORIGIN_X + contentW + ZONE_PADDING_X,
-        h: ORIGIN_Y + contentH + ZONE_PADDING_Y,
+        w: right + ZONE_PADDING_X,
+        h: bottom + ZONE_PADDING_Y,
       });
     } else {
       // Grow-only: lane sizes to fit, children stay put.
