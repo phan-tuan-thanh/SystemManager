@@ -46,6 +46,34 @@ const { Text } = Typography;
 // Stable empty reference — avoids infinite re-render from inline `= []` default
 const EMPTY_NETWORK_ZONES: NetworkZone[] = [];
 
+// ─── Per-snapshot canvas layout (positions + structural filters) ──
+// Snapshots only store logical servers/connections; the visual arrangement
+// is captured client-side keyed by snapshot id so loading a snapshot
+// re-presents exactly what the user saw when they saved it.
+interface SnapshotLayout {
+  positions: Record<string, { x: number; y: number }>;
+  zones: Record<string, { x: number; y: number; width: number; height: number }>;
+  nodeType: 'all' | 'server' | 'app';
+  showZones: boolean;
+  layoutDirection: 'TB' | 'BT' | 'LR' | 'RL';
+}
+const SNAP_LAYOUT_KEY = 'topology.snapshotLayouts.v1';
+function loadSnapshotLayouts(): Record<string, SnapshotLayout> {
+  try {
+    const raw = localStorage.getItem(SNAP_LAYOUT_KEY);
+    return raw ? (JSON.parse(raw) as Record<string, SnapshotLayout>) : {};
+  } catch {
+    return {};
+  }
+}
+function saveSnapshotLayout(id: string, layout: SnapshotLayout) {
+  try {
+    const all = loadSnapshotLayouts();
+    all[id] = layout;
+    localStorage.setItem(SNAP_LAYOUT_KEY, JSON.stringify(all));
+  } catch { /* ignore */ }
+}
+
 // ─── Main Component ───────────────────────────────────────────────
 
 function TopologyPageInner() {
@@ -669,7 +697,30 @@ function TopologyPageInner() {
 
   const handleSaveSnapshot = async () => {
     try {
-      await createSnapshot.mutateAsync({ label: snapshotLabel || undefined, environment: filters.environment });
+      const res: any = await createSnapshot.mutateAsync({ label: snapshotLabel || undefined, environment: filters.environment });
+      const newId: string | undefined = res?.data?.id ?? res?.id;
+      // Capture the current canvas arrangement so loading this snapshot later
+      // re-presents the exact layout (snapshots themselves are logical-only).
+      if (newId) {
+        const positions: Record<string, { x: number; y: number }> = {};
+        const zones: Record<string, { x: number; y: number; width: number; height: number }> = {};
+        nodesRef.current.forEach((n) => {
+          if (n.type === 'zoneLane') {
+            zones[n.id] = {
+              x: n.position.x, y: n.position.y,
+              width: (n.style?.width as number) ?? 0, height: (n.style?.height as number) ?? 0,
+            };
+          } else {
+            positions[n.id] = { x: n.position.x, y: n.position.y };
+          }
+        });
+        saveSnapshotLayout(newId, {
+          positions, zones,
+          nodeType: filters.nodeType,
+          showZones: filters.showZones,
+          layoutDirection: filters.layoutDirection,
+        });
+      }
       message.success('Snapshot saved');
       setSaveModalOpen(false);
       setSnapshotLabel('');
@@ -876,14 +927,37 @@ function TopologyPageInner() {
         onClose={() => setShowSnapshots(false)}
         currentEnvironment={filters.environment}
         onLoad={(payload, meta) => {
-          userPositionsRef.current = {};
-          zoneLayoutRef.current = {};
           setSnapshotView({ payload, meta });
           setSelectedNode(null);
           setSelectedConnection(null);
           setSelectedImplied(null);
           setFocusedNodeId(null);
-          setLayoutRevision((r) => r + 1);
+
+          const saved = loadSnapshotLayouts()[meta.id];
+          if (saved) {
+            // Re-present the exact saved arrangement: align structural filters,
+            // prime the position refs, and stop the merge-pass from wiping them.
+            setFilters((f) => ({
+              ...f,
+              nodeType: saved.nodeType ?? f.nodeType,
+              showZones: saved.showZones ?? f.showZones,
+              layoutDirection: saved.layoutDirection ?? f.layoutDirection,
+            }));
+            userPositionsRef.current = { ...saved.positions };
+            zoneLayoutRef.current = { ...saved.zones };
+            positionsModeRef.current = (saved.nodeType ?? filters.nodeType) + (saved.showZones ? ':zone' : '');
+            appliedRevisionRef.current = layoutRevision;
+          } else {
+            // Older snapshot without a saved layout → lay out fresh.
+            userPositionsRef.current = {};
+            zoneLayoutRef.current = {};
+            setLayoutRevision((r) => r + 1);
+          }
+
+          // Visible confirmation: re-fit the canvas once nodes have settled.
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            reactFlowRef.current?.fitView({ padding: 0.2, duration: 500, minZoom: 0.15, maxZoom: 1.5 });
+          }));
         }}
       />
 
