@@ -32,13 +32,14 @@ import { nodeTypes, edgeTypes } from './components/edges';
 import { computeLayout, applyDagreLayout, applyElkLayout, computeZoneLaneLayout, getBackwardRoute, reflowZoneLanes } from './utils/topologyLayout';
 import { useTopologyFilters } from './hooks/useTopologyFilters';
 import { useTopologyExport } from './hooks/useTopologyExport';
-import { useTopologyQuery, useCreateSnapshot, type ServerNode, type ConnectionEdge, type ImpliedConnectionEdge } from './hooks/useTopology';
+import { useTopologyQuery, useCreateSnapshot, type ServerNode, type ConnectionEdge, type ImpliedConnectionEdge, type TopologyData, type Snapshot } from './hooks/useTopology';
 import { useTopologySubscription } from './hooks/useTopologySubscription';
 import { useNetworkZonesWithIps, useTopologyZones } from './hooks/useTopologyZones';
 import type { NetworkZone } from '../../types/network-zone';
 import ZoneConfigPanel from './components/ZoneConfigPanel';
 import { useCreateConnection, useDeleteConnection } from '../../hooks/useConnections';
 import PageHeader from '../../components/common/PageHeader';
+import dayjs from 'dayjs';
 
 const { Text } = Typography;
 
@@ -88,6 +89,8 @@ function TopologyPageInner() {
   const [selectedImplied, setSelectedImplied] = useState<ImpliedConnectionEdge | null>(null);
   const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null);
   const [showSnapshots, setShowSnapshots] = useState(false);
+  // When set, the topology renders from this saved snapshot instead of live data
+  const [snapshotView, setSnapshotView] = useState<{ payload: TopologyData; meta: Snapshot } | null>(null);
   const [saveModalOpen, setSaveModalOpen] = useState(false);
   const [snapshotLabel, setSnapshotLabel] = useState('');
   const [realtimeEvents, setRealtimeEvents] = useState<string[]>([]);
@@ -121,9 +124,13 @@ function TopologyPageInner() {
   const deleteConnection = useDeleteConnection();
   const { message, modal } = App.useApp();
 
+  // When viewing a saved snapshot, the whole page renders from its payload
+  // instead of the live query result.
+  const effectiveTopology = snapshotView?.payload ?? data?.topology;
+
   // ─── Filters & computed options ──────────────────────────────────
   const { filteredData, dropdownOptions, cascadeMaps, healthIssueCount } = useTopologyFilters(
-    data?.topology, filters,
+    effectiveTopology, filters,
   );
   const { groupOptions, serverOptions, appOptions } = dropdownOptions;
   const { serverGroupsMap, serverAppsMap } = cascadeMaps;
@@ -154,7 +161,7 @@ function TopologyPageInner() {
 
   // ─── ReactFlow layout + implied edges ───────────────────────────
   const { nodes: computedNodes, edges: computedEdges } = useMemo(() => {
-    if (!data?.topology) return { nodes: [], edges: [] };
+    if (!effectiveTopology) return { nodes: [], edges: [] };
 
     const layoutServers = filters.nodeType === 'server' ? filteredData.serversForEdgeResolution : filteredData.servers;
     const layoutConnections = filters.nodeType === 'server' ? filteredData.connectionsForEdgeResolution : filteredData.connections;
@@ -174,7 +181,7 @@ function TopologyPageInner() {
 
       // Implied connections in zone mode
       const zoneImpliedEdges: Edge[] = [];
-      if (showImplied && data.topology.impliedConnections) {
+      if (showImplied && effectiveTopology.impliedConnections) {
         const FW_ACTION: Record<string, { color: string }> = {
           ALLOW: { color: '#389e0d' },
           DENY:  { color: '#cf1322' },
@@ -182,7 +189,7 @@ function TopologyPageInner() {
         const allZoneNodes = result.nodes;
         const zoneNodeMap = new Map(allZoneNodes.map((n) => [n.id, n]));
         const addedServerPairs = new Map<string, Set<string>>();
-        data.topology.impliedConnections.forEach((ic: ImpliedConnectionEdge) => {
+        effectiveTopology.impliedConnections.forEach((ic: ImpliedConnectionEdge) => {
           const action = ic.action ?? 'ALLOW';
           const cfg = FW_ACTION[action] ?? FW_ACTION.ALLOW;
           const portNum = ic.targetPort?.portNumber ?? (ic.targetPort as any)?.port_number;
@@ -238,12 +245,12 @@ function TopologyPageInner() {
     };
     const impliedEdges: Edge[] = [];
 
-    if (showImplied && data.topology.impliedConnections) {
+    if (showImplied && effectiveTopology.impliedConnections) {
       const allNodes = result.nodes;
       const nodeMap = new Map(allNodes.map((n) => [n.id, n]));
       const addedServerPairs = new Map<string, Set<string>>();
 
-      data.topology.impliedConnections.forEach((ic: ImpliedConnectionEdge) => {
+      effectiveTopology.impliedConnections.forEach((ic: ImpliedConnectionEdge) => {
         const action = ic.action ?? 'ALLOW';
         const cfg = FW_ACTION[action] ?? FW_ACTION.ALLOW;
         const portNum = ic.targetPort?.portNumber ?? (ic.targetPort as any)?.port_number;
@@ -287,7 +294,7 @@ function TopologyPageInner() {
     }
 
     return { nodes: result.nodes, edges: [...edgesWithCallback, ...impliedEdges] };
-  }, [filteredData, filters.nodeType, filters.layoutDirection, filters.edgeStyle, filters.showZones, activeZones, serversByZone, stableUpdateEdgeLabel, showImplied, data?.topology?.impliedConnections]);
+  }, [filteredData, filters.nodeType, filters.layoutDirection, filters.edgeStyle, filters.showZones, activeZones, serversByZone, stableUpdateEdgeLabel, showImplied, effectiveTopology]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(computedNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(computedEdges);
@@ -654,7 +661,7 @@ function TopologyPageInner() {
 
   // ─── Export helpers ───────────────────────────────────────────
   const { exportAsJSON, exportAsMermaid, exportAsPNG, exportAsSVG } = useTopologyExport(
-    data?.topology,
+    effectiveTopology,
     filters.environment,
     (msg) => message.error(msg),
     (msg) => message.success(msg),
@@ -675,8 +682,8 @@ function TopologyPageInner() {
     else document.exitFullscreen().catch(() => {});
   }, []);
 
-  const serverCount = data?.topology?.servers?.length ?? 0;
-  const connectionCount = data?.topology?.connections?.length ?? 0;
+  const serverCount = effectiveTopology?.servers?.length ?? 0;
+  const connectionCount = effectiveTopology?.connections?.length ?? 0;
   const CANVAS_H = 'calc(100vh - 64px - 48px - 48px - 72px - 48px)';
 
   return (
@@ -723,6 +730,29 @@ function TopologyPageInner() {
       />
 
       {error && <Alert type="error" message="Không thể tải sơ đồ" description={error.message} style={{ margin: '0 24px 8px' }} showIcon />}
+
+      {snapshotView && (
+        <Alert
+          type="warning"
+          showIcon
+          icon={<HistoryOutlined />}
+          style={{ margin: '0 24px 8px' }}
+          message={
+            <span>
+              Đang xem bản chụp{' '}
+              <Text strong>{snapshotView.meta.label ?? snapshotView.meta.id.slice(0, 8)}</Text>
+              {' · '}
+              {dayjs(snapshotView.meta.created_at).format('YYYY-MM-DD HH:mm')}
+              {' '}(chỉ đọc, không phản ánh dữ liệu hiện tại)
+            </span>
+          }
+          action={
+            <Button size="small" onClick={() => { setSnapshotView(null); setLayoutRevision((r) => r + 1); }}>
+              Thoát xem bản chụp
+            </Button>
+          }
+        />
+      )}
 
       <TopologyFilterPanel
         filters={filters}
@@ -791,23 +821,23 @@ function TopologyPageInner() {
         )}
 
         {/* ── VisNetwork ── */}
-        {viewMode === '2D' && renderEngine === 'visnetwork' && data?.topology && (
+        {viewMode === '2D' && renderEngine === 'visnetwork' && effectiveTopology && (
           <>
             <TopologyVisNetworkView
               ref={visNetworkViewRef}
               servers={filteredData.serversForEdgeResolution}
               connections={filteredData.connectionsForEdgeResolution}
-              impliedConnections={data.topology.impliedConnections ?? []}
+              impliedConnections={effectiveTopology.impliedConnections ?? []}
               showImplied={showImplied}
               nodeType={filters.nodeType}
               layout={filters.layout === 'hierarchical' ? 'hierarchical' : 'physics'}
               onNodeClick={(payload) => {
                 setSelectedConnection(null);
                 if (payload.type === 'server') {
-                  const s = data.topology.servers.find((x) => x.id === payload.id);
+                  const s = effectiveTopology?.servers.find((x) => x.id === payload.id);
                   if (s) setSelectedNode({ type: 'server', ...s });
                 } else {
-                  const dep = data.topology.servers.flatMap((s) => s.deployments.map((d) => ({ d, s }))).find(({ d }) => d.application.id === payload.id);
+                  const dep = (effectiveTopology?.servers ?? []).flatMap((s) => s.deployments.map((d) => ({ d, s }))).find(({ d }) => d.application.id === payload.id);
                   if (dep) setSelectedNode({ type: 'app', id: dep.d.application.id, name: dep.d.application.name, code: dep.d.application.code, deploymentStatus: dep.d.status, environment: dep.d.environment, serverName: dep.s.name });
                 }
               }}
@@ -826,7 +856,7 @@ function TopologyPageInner() {
         )}
 
         {/* ── 3D ── */}
-        {viewMode === '3D' && data?.topology && (
+        {viewMode === '3D' && effectiveTopology && (
           <Topology3DView servers={filteredData.servers} connections={filteredData.connections} onNodeSelect={(node) => { if (!node) { setSelectedNode(null); return; } setSelectedNode({ type: node.type, ...node.data }); }} />
         )}
         {viewMode === '3D' && selectedNode && <NodeDetailPanel node={selectedNode} onClose={() => setSelectedNode(null)} />}
@@ -841,11 +871,25 @@ function TopologyPageInner() {
 
       <CreateConnectionModal open={createConnModalVisible} sourceApp={connectionDraft?.sourceApp} targetApp={connectionDraft?.targetApp} onCancel={() => { setCreateConnModalVisible(false); setConnectionDraft(null); }} onSubmit={handleCreateConnectionSubmit} />
 
-      <SnapshotBrowser open={showSnapshots} onClose={() => setShowSnapshots(false)} currentEnvironment={filters.environment} />
+      <SnapshotBrowser
+        open={showSnapshots}
+        onClose={() => setShowSnapshots(false)}
+        currentEnvironment={filters.environment}
+        onLoad={(payload, meta) => {
+          userPositionsRef.current = {};
+          zoneLayoutRef.current = {};
+          setSnapshotView({ payload, meta });
+          setSelectedNode(null);
+          setSelectedConnection(null);
+          setSelectedImplied(null);
+          setFocusedNodeId(null);
+          setLayoutRevision((r) => r + 1);
+        }}
+      />
 
       <ConnectionHealthDrawer
         open={healthDrawerOpen} onClose={() => setHealthDrawerOpen(false)}
-        servers={data?.topology?.servers ?? []} connections={data?.topology?.connections ?? []}
+        servers={effectiveTopology?.servers ?? []} connections={effectiveTopology?.connections ?? []}
         onFocusNode={(nodeId) => { setFocusedNodeId(nodeId); if (renderEngine !== 'reactflow') setRenderEngine('reactflow'); }}
       />
     </div>
