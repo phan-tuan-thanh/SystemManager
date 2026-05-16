@@ -65,6 +65,8 @@ export const TOPOLOGY_QUERY = gql`
         targetAppId
         sourceAppName
         targetAppName
+        sourceServerId
+        targetServerId
         environment
         firewallRuleId
         firewallRuleName

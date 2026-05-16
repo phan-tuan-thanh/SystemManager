@@ -120,11 +120,10 @@ export class TopologyService {
   }
 
   async getImpliedConnections(environment: string): Promise<ImpliedConnectionEdge[]> {
-    // Step 1: get all active ALLOW and DENY rules for the environment
     const rules = await this.prisma.firewallRule.findMany({
       where: {
         action: { in: ['ALLOW', 'DENY'] },
-        status: 'ACTIVE',
+        status: { notIn: ['INACTIVE', 'REJECTED'] as any[] },
         environment: environment as any,
         deleted_at: null,
       },
@@ -135,7 +134,6 @@ export class TopologyService {
               where: { deleted_at: null, environment: environment as any },
               include: { application: { select: { id: true, name: true } } },
             },
-            network_configs: { where: { deleted_at: null } },
           },
         },
         destination_port: {
@@ -147,7 +145,6 @@ export class TopologyService {
       },
     });
 
-    // Load all explicit AppConnections for dedup check later
     const explicitConns = await this.prisma.appConnection.findMany({
       where: { environment: environment as any, deleted_at: null },
       select: { source_app_id: true, target_app_id: true },
@@ -156,7 +153,7 @@ export class TopologyService {
       explicitConns.map((c) => `${c.source_app_id}::${c.target_app_id}`),
     );
 
-    // Load all servers with network configs for source resolution
+    // All servers with IPs + their env deployments (for source resolution)
     const allServers = await this.prisma.server.findMany({
       where: { deleted_at: null },
       include: {
@@ -169,28 +166,32 @@ export class TopologyService {
     });
 
     const implied: ImpliedConnectionEdge[] = [];
-    // deduplicate per action separately — ALLOW and DENY are distinct
     const seenAllow = new Set<string>();
     const seenDeny = new Set<string>();
 
     for (const rule of rules) {
-      // Step 3a: identify target app from destination_port
-      if (!rule.destination_port || !rule.destination_port.application_id) continue;
+      // Determine target apps:
+      // - If destination_port is set → use port's application as the sole target
+      // - If destination_port is null → use ALL apps deployed on destination_server in this env
+      const targetApps: Array<{ appId: string; appName: string }> = [];
 
-      const targetAppId = rule.destination_port.application_id;
-      const targetAppName = rule.destination_port.application.name;
+      if (rule.destination_port?.application) {
+        targetApps.push({
+          appId: rule.destination_port.application.id,
+          appName: rule.destination_port.application.name,
+        });
+      } else {
+        for (const dep of rule.destination_server.app_deployments) {
+          targetApps.push({ appId: dep.application_id, appName: dep.application.name });
+        }
+      }
 
-      // Step 3c: verify target app is deployed on destination_server in env
-      const targetDeployedOnServer = rule.destination_server.app_deployments.some(
-        (d) => d.application_id === targetAppId,
-      );
-      if (!targetDeployedOnServer) continue;
+      if (targetApps.length === 0) continue;
 
-      // Step 3d: find source servers
+      // Find source servers by IP or zone
       const sourceServers: typeof allServers = [];
 
       if (rule.source_ip) {
-        // Match by direct IP
         for (const srv of allServers) {
           const matches = srv.network_configs.some(
             (nc) =>
@@ -200,7 +201,6 @@ export class TopologyService {
           if (matches) sourceServers.push(srv);
         }
       } else if (rule.source_zone) {
-        // Match by zone IP entries
         const zoneIps = rule.source_zone.ip_entries.map((e) => e.ip_address);
         for (const srv of allServers) {
           const serverIps = srv.network_configs.flatMap((nc) => {
@@ -216,42 +216,47 @@ export class TopologyService {
         }
       }
 
-      // Step 3e-3f: for each source server, get its apps and create implied edges
+      if (sourceServers.length === 0) continue;
+
+      // Generate one implied edge per (sourceApp × targetApp) pair
       for (const srcSrv of sourceServers) {
-        for (const dep of srcSrv.app_deployments) {
-          const sourceAppId = dep.application_id;
-          const sourceAppName = dep.application.name;
+        for (const srcDep of srcSrv.app_deployments) {
+          for (const tgt of targetApps) {
+            const sourceAppId = srcDep.application_id;
+            const targetAppId = tgt.appId;
 
-          // Skip self-loops
-          if (sourceAppId === targetAppId) continue;
+            if (sourceAppId === targetAppId) continue;
 
-          const pairKey = `${sourceAppId}::${targetAppId}`;
-          const seen = rule.action === 'DENY' ? seenDeny : seenAllow;
+            const pairKey = `${sourceAppId}::${targetAppId}`;
+            const seen = rule.action === 'DENY' ? seenDeny : seenAllow;
 
-          // ALLOW: skip if explicit AppConnection already exists (redundant)
-          if (rule.action === 'ALLOW' && explicitSet.has(pairKey)) continue;
-          if (seen.has(pairKey)) continue;
-          seen.add(pairKey);
+            // ALLOW: omit if an explicit AppConnection already covers this pair
+            if (rule.action === 'ALLOW' && explicitSet.has(pairKey)) continue;
+            if (seen.has(pairKey)) continue;
+            seen.add(pairKey);
 
-          implied.push({
-            id: `implied-${rule.action}-${rule.id}-${sourceAppId}-${targetAppId}`,
-            sourceAppId,
-            targetAppId,
-            sourceAppName,
-            targetAppName,
-            environment,
-            firewallRuleId: rule.id,
-            firewallRuleName: rule.name,
-            action: rule.action,
-            targetPort: rule.destination_port
-              ? {
-                  id: rule.destination_port.id,
-                  port_number: rule.destination_port.port_number,
-                  protocol: rule.destination_port.protocol,
-                  service_name: rule.destination_port.service_name ?? undefined,
-                }
-              : undefined,
-          });
+            implied.push({
+              id: `implied-${rule.action}-${rule.id}-${sourceAppId}-${targetAppId}`,
+              sourceAppId,
+              targetAppId,
+              sourceAppName: srcDep.application.name,
+              targetAppName: tgt.appName,
+              sourceServerId: srcSrv.id,
+              targetServerId: rule.destination_server_id,
+              environment,
+              firewallRuleId: rule.id,
+              firewallRuleName: rule.name,
+              action: rule.action,
+              targetPort: rule.destination_port
+                ? {
+                    id: rule.destination_port.id,
+                    port_number: rule.destination_port.port_number,
+                    protocol: rule.destination_port.protocol,
+                    service_name: rule.destination_port.service_name ?? undefined,
+                  }
+                : undefined,
+            });
+          }
         }
       }
     }
