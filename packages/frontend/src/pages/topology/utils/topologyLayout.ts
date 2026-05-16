@@ -414,7 +414,7 @@ export function computeLayout(
 
 // ─── Zone lane layout ─────────────────────────────────────────────
 
-const ZONE_HEADER_H = 32;
+export const ZONE_HEADER_H = 32;
 const ZONE_PADDING_X = 28;
 const ZONE_PADDING_Y = 20;
 const ZONE_GAP = 48;
@@ -625,13 +625,18 @@ export function reflowZoneLanes(nodes: Node[], stackHorizontally: boolean): Node
   const sizeById = new Map<string, { w: number; h: number }>();
   for (const lane of ordered) {
     const kids = childrenByParent.get(lane.id) ?? [];
-    let maxX = ZONE_CONTENT_ORIGIN.x + ZONE_MIN_CONTENT_W;
-    let maxY = ZONE_CONTENT_ORIGIN.y + ZONE_MIN_CONTENT_H;
+    // Minimum zone size: wide/tall enough to show at least one node below the header.
+    // No left/top padding requirement — nodes can sit at x=0 or y=ZONE_HEADER_H.
+    let maxX = ZONE_MIN_CONTENT_W;
+    let maxY = ZONE_HEADER_H + ZONE_MIN_CONTENT_H;
     for (const k of kids) {
       const w = (k.style?.width as number) ?? k.width ?? SERVER_NODE_W;
       const h = (k.style?.height as number) ?? k.height ?? SERVER_NODE_H;
-      maxX = Math.max(maxX, k.position.x + w);
-      maxY = Math.max(maxY, k.position.y + h);
+      // clamp child's left/top to valid area so negative-drag doesn't shrink the zone
+      const kx = Math.max(k.position.x, 0);
+      const ky = Math.max(k.position.y, ZONE_HEADER_H);
+      maxX = Math.max(maxX, kx + w);
+      maxY = Math.max(maxY, ky + h);
     }
     sizeById.set(lane.id, { w: maxX + ZONE_PADDING_X, h: maxY + ZONE_PADDING_Y });
   }

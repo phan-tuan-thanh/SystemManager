@@ -29,7 +29,7 @@ import { CreateConnectionModal } from './components/CreateConnectionModal';
 import ConnectionHealthDrawer from './components/ConnectionHealthDrawer';
 import FirewallTopologyView from './components/FirewallTopologyView';
 import { nodeTypes, edgeTypes } from './components/edges';
-import { computeLayout, applyDagreLayout, applyElkLayout, computeZoneLaneLayout, getBackwardRoute, reflowZoneLanes, ZONE_CONTENT_ORIGIN } from './utils/topologyLayout';
+import { computeLayout, applyDagreLayout, applyElkLayout, computeZoneLaneLayout, getBackwardRoute, reflowZoneLanes, ZONE_HEADER_H } from './utils/topologyLayout';
 import { useTopologyFilters } from './hooks/useTopologyFilters';
 import { useTopologyExport } from './hooks/useTopologyExport';
 import { useTopologyQuery, useCreateSnapshot, type ServerNode, type ConnectionEdge, type ImpliedConnectionEdge } from './hooks/useTopology';
@@ -405,9 +405,10 @@ function TopologyPageInner() {
       const parent = nodesRef.current.find((n) => n.id === parentId);
       if (parent?.type === 'zoneLane') {
         const stackH = filters.layoutDirection === 'LR' || filters.layoutDirection === 'RL';
+        // Allow dragging left (x ≥ 0) and top (y just below header), zone resizes to fit.
         const clamped = {
-          x: Math.max(node.position.x, ZONE_CONTENT_ORIGIN.x),
-          y: Math.max(node.position.y, ZONE_CONTENT_ORIGIN.y),
+          x: Math.max(node.position.x, 0),
+          y: Math.max(node.position.y, ZONE_HEADER_H),
         };
         userPositionsRef.current[node.id] = clamped;
         setNodes((nds) => {
