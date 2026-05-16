@@ -601,11 +601,21 @@ const ZONE_MIN_CONTENT_H = SERVER_NODE_H;
 
 // Recompute every zone lane's size from the bounding box of its child nodes,
 // then re-stack the lanes along the active axis so they keep ZONE_GAP spacing.
-// Pure: returns a new node array with only the zoneLane nodes' position/size
-// changed (children are relative to their parent, so they move with the lane).
-// Called live while a server is dragged so the zone grows to fit and the other
-// zones shift to preserve spacing.
-export function reflowZoneLanes(nodes: Node[], stackHorizontally: boolean): Node[] {
+//
+// `normalize` (drag-stop): pin the content's top-left to a fixed padded origin
+// and shift every child by the same delta. This makes the zone grow
+// symmetrically — dragging a node left/top expands the zone exactly like
+// dragging it right/bottom, instead of the node just sliding under the header
+// or off the left edge. Returns child nodes with shifted positions too.
+//
+// Default (live drag): grow-only — children stay put, the lane just sizes to
+// fit; the left/top expansion is finalized once on drag stop so the live drag
+// stays jitter-free.
+export function reflowZoneLanes(
+  nodes: Node[],
+  stackHorizontally: boolean,
+  normalize = false,
+): Node[] {
   const lanes = nodes.filter((n) => n.type === 'zoneLane');
   if (lanes.length === 0) return nodes;
 
@@ -622,23 +632,49 @@ export function reflowZoneLanes(nodes: Node[], stackHorizontally: boolean): Node
     stackHorizontally ? a.position.x - b.position.x : a.position.y - b.position.y,
   );
 
+  const ORIGIN_X = ZONE_PADDING_X;
+  const ORIGIN_Y = ZONE_HEADER_H + ZONE_PADDING_Y;
+
   const sizeById = new Map<string, { w: number; h: number }>();
+  const shiftById = new Map<string, { x: number; y: number }>();
+
   for (const lane of ordered) {
     const kids = childrenByParent.get(lane.id) ?? [];
-    // Minimum zone size: wide/tall enough to show at least one node below the header.
-    // No left/top padding requirement — nodes can sit at x=0 or y=ZONE_HEADER_H.
-    let maxX = ZONE_MIN_CONTENT_W;
-    let maxY = ZONE_HEADER_H + ZONE_MIN_CONTENT_H;
-    for (const k of kids) {
-      const w = (k.style?.width as number) ?? k.width ?? SERVER_NODE_W;
-      const h = (k.style?.height as number) ?? k.height ?? SERVER_NODE_H;
-      // clamp child's left/top to valid area so negative-drag doesn't shrink the zone
-      const kx = Math.max(k.position.x, 0);
-      const ky = Math.max(k.position.y, ZONE_HEADER_H);
-      maxX = Math.max(maxX, kx + w);
-      maxY = Math.max(maxY, ky + h);
+
+    if (normalize && kids.length > 0) {
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      for (const k of kids) {
+        const w = (k.style?.width as number) ?? k.width ?? SERVER_NODE_W;
+        const h = (k.style?.height as number) ?? k.height ?? SERVER_NODE_H;
+        minX = Math.min(minX, k.position.x);
+        minY = Math.min(minY, k.position.y);
+        maxX = Math.max(maxX, k.position.x + w);
+        maxY = Math.max(maxY, k.position.y + h);
+      }
+      // Shift the whole content block so its top-left lands on the padded
+      // origin (drag-left makes shift positive → everything slides right and
+      // the lane grows; mirror of drag-right).
+      shiftById.set(lane.id, { x: ORIGIN_X - minX, y: ORIGIN_Y - minY });
+      const contentW = Math.max(maxX - minX, ZONE_MIN_CONTENT_W);
+      const contentH = Math.max(maxY - minY, ZONE_MIN_CONTENT_H);
+      sizeById.set(lane.id, {
+        w: ORIGIN_X + contentW + ZONE_PADDING_X,
+        h: ORIGIN_Y + contentH + ZONE_PADDING_Y,
+      });
+    } else {
+      // Grow-only: lane sizes to fit, children stay put.
+      let maxX = ZONE_MIN_CONTENT_W;
+      let maxY = ZONE_HEADER_H + ZONE_MIN_CONTENT_H;
+      for (const k of kids) {
+        const w = (k.style?.width as number) ?? k.width ?? SERVER_NODE_W;
+        const h = (k.style?.height as number) ?? k.height ?? SERVER_NODE_H;
+        const kx = Math.max(k.position.x, 0);
+        const ky = Math.max(k.position.y, ZONE_HEADER_H);
+        maxX = Math.max(maxX, kx + w);
+        maxY = Math.max(maxY, ky + h);
+      }
+      sizeById.set(lane.id, { w: maxX + ZONE_PADDING_X, h: maxY + ZONE_PADDING_Y });
     }
-    sizeById.set(lane.id, { w: maxX + ZONE_PADDING_X, h: maxY + ZONE_PADDING_Y });
   }
 
   let offset = 0;
@@ -650,10 +686,18 @@ export function reflowZoneLanes(nodes: Node[], stackHorizontally: boolean): Node
   }
 
   return nodes.map((n) => {
-    if (n.type !== 'zoneLane') return n;
-    const sz = sizeById.get(n.id);
-    const p = posById.get(n.id);
-    if (!sz || !p) return n;
-    return { ...n, position: p, style: { ...n.style, width: sz.w, height: sz.h } };
+    if (n.type === 'zoneLane') {
+      const sz = sizeById.get(n.id);
+      const p = posById.get(n.id);
+      if (!sz || !p) return n;
+      return { ...n, position: p, style: { ...n.style, width: sz.w, height: sz.h } };
+    }
+    if (normalize && n.parentId) {
+      const s = shiftById.get(n.parentId);
+      if (s && (s.x !== 0 || s.y !== 0)) {
+        return { ...n, position: { x: n.position.x + s.x, y: n.position.y + s.y } };
+      }
+    }
+    return n;
   });
 }

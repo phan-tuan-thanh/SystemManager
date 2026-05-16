@@ -29,7 +29,7 @@ import { CreateConnectionModal } from './components/CreateConnectionModal';
 import ConnectionHealthDrawer from './components/ConnectionHealthDrawer';
 import FirewallTopologyView from './components/FirewallTopologyView';
 import { nodeTypes, edgeTypes } from './components/edges';
-import { computeLayout, applyDagreLayout, applyElkLayout, computeZoneLaneLayout, getBackwardRoute, reflowZoneLanes, ZONE_HEADER_H } from './utils/topologyLayout';
+import { computeLayout, applyDagreLayout, applyElkLayout, computeZoneLaneLayout, getBackwardRoute, reflowZoneLanes } from './utils/topologyLayout';
 import { useTopologyFilters } from './hooks/useTopologyFilters';
 import { useTopologyExport } from './hooks/useTopologyExport';
 import { useTopologyQuery, useCreateSnapshot, type ServerNode, type ConnectionEdge, type ImpliedConnectionEdge } from './hooks/useTopology';
@@ -399,27 +399,27 @@ function TopologyPageInner() {
       return;
     }
 
-    // Server node dragged inside a zone lane → clamp into the content area,
-    // grow the zone to fit, and re-stack the other zones to keep spacing.
+    // Server node dragged inside a zone lane → normalize the content block to a
+    // padded origin so the zone grows symmetrically in every direction
+    // (drag left/top resizes the zone just like drag right/bottom), then
+    // re-stack the other zones to keep spacing.
     if (parentId && filters.showZones) {
       const parent = nodesRef.current.find((n) => n.id === parentId);
       if (parent?.type === 'zoneLane') {
         const stackH = filters.layoutDirection === 'LR' || filters.layoutDirection === 'RL';
-        // Allow dragging left (x ≥ 0) and top (y just below header), zone resizes to fit.
-        const clamped = {
-          x: Math.max(node.position.x, 0),
-          y: Math.max(node.position.y, ZONE_HEADER_H),
-        };
-        userPositionsRef.current[node.id] = clamped;
         setNodes((nds) => {
-          const withClamp = nds.map((n) => (n.id === node.id ? { ...n, position: clamped } : n));
-          const reflowed = reflowZoneLanes(withClamp, stackH);
+          const moved = nds.map((n) => (n.id === node.id ? { ...n, position: node.position } : n));
+          const reflowed = reflowZoneLanes(moved, stackH, true);
+          // Persist post-normalization geometry: lane size/pos AND every child's
+          // shifted position, so the merge-useMemo doesn't revert them.
           reflowed.forEach((n) => {
             if (n.type === 'zoneLane') {
               zoneLayoutRef.current[n.id] = {
                 x: n.position.x, y: n.position.y,
                 width: n.style?.width as number, height: n.style?.height as number,
               };
+            } else if (n.parentId) {
+              userPositionsRef.current[n.id] = { x: n.position.x, y: n.position.y };
             }
           });
           return reflowed;
