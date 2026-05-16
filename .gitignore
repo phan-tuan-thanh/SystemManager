@@ -42,3 +42,8 @@ pgdata/
 .secrects/
 .claude/settings.local.json
 packages/backend/scratch/
+
+# AI tool config (local only)
+.ai/
+GEMINI.md
+SYSTEM_PROMPT.md
