@@ -1,59 +1,21 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import ReactFlow, {
-  Node,
-  Edge,
-  Controls,
-  MiniMap,
-  Background,
-  BackgroundVariant,
-  useNodesState,
-  useEdgesState,
-  MarkerType,
-  NodeTypes,
-  EdgeTypes,
-  EdgeLabelRenderer,
-  getBezierPath,
-  getSmoothStepPath,
-  EdgeProps,
-  ReactFlowInstance,
-  NodeChange,
+  type Node, type Edge,
+  Controls, MiniMap, Background, BackgroundVariant,
+  useNodesState, useEdgesState,
+  MarkerType, type ReactFlowInstance, type NodeChange,
 } from 'reactflow';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-expect-error dagre has no bundled types
-import dagre from 'dagre';
-import ELK from 'elkjs/lib/elk.bundled.js';
 import 'reactflow/dist/style.css';
-
-import {
-  Button,
-  Space,
-  Spin,
-  Alert,
-  Typography,
-  Dropdown,
-  Input,
-  Modal,
-  Badge,
-  App,
-  Tag,
-  Tabs,
-  Tooltip,
-} from 'antd';
 import { useState as useTabState } from 'react';
 import {
-  DownloadOutlined,
-  ReloadOutlined,
-  HistoryOutlined,
-  SaveOutlined,
-  ThunderboltOutlined,
-  FullscreenOutlined,
-  FullscreenExitOutlined,
-  MedicineBoxOutlined,
-  ApiOutlined,
+  Button, Space, Spin, Alert, Typography, Dropdown, Input, Modal, Badge, App, Tag, Tabs, Tooltip,
+} from 'antd';
+import {
+  DownloadOutlined, ReloadOutlined, HistoryOutlined, SaveOutlined,
+  ThunderboltOutlined, FullscreenOutlined, FullscreenExitOutlined,
+  MedicineBoxOutlined, ApiOutlined,
 } from '@ant-design/icons';
 
-import ServerFlowNode from './components/ServerFlowNode';
-import AppFlowNode from './components/AppFlowNode';
 import NodeDetailPanel from './components/NodeDetailPanel';
 import ConnectionDetailPanel from './components/ConnectionDetailPanel';
 import ImpliedConnectionDetailPanel from './components/ImpliedConnectionDetailPanel';
@@ -62,608 +24,20 @@ import SnapshotBrowser from './components/SnapshotBrowser';
 import Topology3DView from './components/Topology3DView';
 import TopologyVisNetworkView, { type TopologyVisNetworkHandle } from './components/TopologyVisNetworkView';
 import TopologyMermaidView from './components/TopologyMermaidView';
+import TopologyLegend from './components/TopologyLegend';
 import { CreateConnectionModal } from './components/CreateConnectionModal';
-import ConnectionHealthDrawer, { analyzeTopologyHealth } from './components/ConnectionHealthDrawer';
+import ConnectionHealthDrawer from './components/ConnectionHealthDrawer';
 import FirewallTopologyView from './components/FirewallTopologyView';
-import { useTopologyQuery, ServerNode, ConnectionEdge, ImpliedConnectionEdge } from './hooks/useTopology';
-import { useCreateSnapshot } from './hooks/useTopology';
+import { nodeTypes, edgeTypes } from './components/edges';
+import { computeLayout, applyDagreLayout, applyElkLayout } from './utils/topologyLayout';
+import { useTopologyFilters } from './hooks/useTopologyFilters';
+import { useTopologyExport } from './hooks/useTopologyExport';
+import { useTopologyQuery, useCreateSnapshot, type ServerNode, type ConnectionEdge, type ImpliedConnectionEdge } from './hooks/useTopology';
 import { useTopologySubscription } from './hooks/useTopologySubscription';
 import { useCreateConnection, useDeleteConnection } from '../../hooks/useConnections';
 import PageHeader from '../../components/common/PageHeader';
 
 const { Text } = Typography;
-
-// ─── Custom edge with protocol label ─────────────────────────────
-
-const protocolColors: Record<string, string> = {
-  HTTP: '#1677ff',
-  HTTPS: '#52c41a',
-  TCP: '#fa8c16',
-  GRPC: '#722ed1',
-  AMQP: '#eb2f96',
-  KAFKA: '#13c2c2',
-  DATABASE: '#ff4d4f',
-};
-
-function ProtocolEdge({
-  id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, data, markerEnd, style, selected,
-}: EdgeProps) {
-  const pIdx = data?.parallelIndex ?? 0;
-  const pCount = data?.parallelCount ?? 1;
-  const protocolColor = protocolColors[data?.protocol] ?? '#8c8c8c';
-  const edgeStyle: 'bezier' | 'step' = data?.edgeStyle ?? 'bezier';
-
-  // Perpendicular unit vector — used to spread bezier labels sideways off the midpoint
-  const dx = targetX - sourceX;
-  const dy = targetY - sourceY;
-  const len = Math.sqrt(dx * dx + dy * dy) || 1;
-  const perpX = -dy / len;
-  const perpY = dx / len;
-
-  let edgePath: string;
-  let labelX: number;
-  let labelY: number;
-  let spread: number;
-
-  if (edgeStyle === 'step') {
-    // Orthogonal mode: spread parallel edges via offset (24 px per edge from center)
-    const offsetStep = pCount <= 1 ? 0 : (pIdx - (pCount - 1) / 2) * 24;
-    [edgePath, labelX, labelY] = getSmoothStepPath({
-      sourceX, sourceY, sourcePosition,
-      targetX, targetY, targetPosition,
-      borderRadius: 8,
-      offset: offsetStep !== 0 ? offsetStep : undefined,
-    });
-    spread = 0; // offset handles the separation, no perpendicular spread needed
-  } else {
-    // Bezier mode: curvature-based spread for parallel edges
-    const curvature = pCount <= 1
-      ? 0.25
-      : 0.08 + (pIdx / Math.max(1, pCount - 1)) * 0.72;
-    [edgePath, labelX, labelY] = getBezierPath({
-      sourceX, sourceY, sourcePosition,
-      targetX, targetY, targetPosition,
-      curvature,
-    });
-    spread = pCount <= 1 ? 0 : (pIdx - (pCount - 1) / 2) * 22;
-  }
-
-  const [isDragging, setIsDragging] = useState(false);
-  const dragStart = useRef({ x: 0, y: 0 });
-  // Manual offset stored in edge.data (draggable label from previous sprint)
-  const manualOffsetX = data?.labelOffsetX ?? 0;
-  const manualOffsetY = data?.labelOffsetY ?? 0;
-
-  const handleLabelMouseDown = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
-    setIsDragging(true);
-    dragStart.current = { x: e.clientX, y: e.clientY };
-  }, []);
-
-  useEffect(() => {
-    if (!isDragging) return;
-    const onMove = (e: MouseEvent) => {
-      const ddx = e.clientX - dragStart.current.x;
-      const ddy = e.clientY - dragStart.current.y;
-      dragStart.current = { x: e.clientX, y: e.clientY };
-      data?.onLabelMove?.(ddx, ddy);
-    };
-    const onUp = () => setIsDragging(false);
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
-    return () => {
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onUp);
-    };
-  }, [isDragging, data]);
-
-  const finalLabelX = labelX + perpX * spread + manualOffsetX;
-  const finalLabelY = labelY + perpY * spread + manualOffsetY;
-
-  // Selected edge: thicker stroke, glow, and emphasised label
-  const pathStyle: React.CSSProperties = selected
-    ? { ...style, stroke: protocolColor, strokeWidth: 4, filter: `drop-shadow(0 0 6px ${protocolColor})` }
-    : (style as React.CSSProperties);
-
-  const portLabel = data?.targetPort
-    ? `:${data.targetPort.port_number}`
-    : '';
-
-  // Flow particle config: 3 dots staggered evenly, fade in/out at endpoints
-  const flowDur = selected ? 1.0 : 1.6;
-  const dotR = selected ? 3.5 : 2.5;
-  const PARTICLE_COUNT = 3;
-
-  return (
-    <>
-      {/* Invisible wider hit-area for easier clicking/hovering */}
-      <path d={edgePath} fill="none" stroke="transparent" strokeWidth={18} style={{ cursor: 'pointer' }} />
-      {/* Glow trail under the edge when selected */}
-      {selected && (
-        <path
-          d={edgePath}
-          fill="none"
-          stroke={protocolColor}
-          strokeWidth={8}
-          strokeOpacity={0.18}
-          style={{ filter: `blur(4px)` }}
-          pointerEvents="none"
-        />
-      )}
-      <path id={id} className="react-flow__edge-path" d={edgePath} markerEnd={markerEnd} style={pathStyle} />
-      {/* Flowing water particles — animateMotion along the bezier/step path */}
-      {Array.from({ length: PARTICLE_COUNT }, (_, i) => {
-        const beginOffset = `-${((i / PARTICLE_COUNT) * flowDur).toFixed(2)}s`;
-        return (
-          <circle key={i} r={dotR} fill={protocolColor} opacity={0} pointerEvents="none">
-            <animateMotion
-              dur={`${flowDur}s`}
-              begin={beginOffset}
-              repeatCount="indefinite"
-              path={edgePath}
-            />
-            <animate
-              attributeName="opacity"
-              values="0;0.9;0.9;0"
-              keyTimes="0;0.08;0.88;1"
-              dur={`${flowDur}s`}
-              begin={beginOffset}
-              repeatCount="indefinite"
-            />
-            {selected && (
-              <animate
-                attributeName="r"
-                values={`${dotR};${dotR + 1.5};${dotR}`}
-                dur={`${flowDur * 0.5}s`}
-                begin={beginOffset}
-                repeatCount="indefinite"
-              />
-            )}
-          </circle>
-        );
-      })}
-      <EdgeLabelRenderer>
-        <div
-          style={{
-            position: 'absolute',
-            transform: `translate(-50%, -50%) translate(${finalLabelX}px,${finalLabelY}px)`,
-            background: protocolColor,
-            color: '#fff',
-            padding: selected ? '2px 7px' : '1px 5px',
-            borderRadius: 3,
-            fontSize: selected ? 10 : 9,
-            fontWeight: 700,
-            pointerEvents: 'all',
-            whiteSpace: 'nowrap',
-            lineHeight: '14px',
-            boxShadow: selected
-              ? `0 0 0 2px #fff, 0 0 0 4px ${protocolColor}, 0 2px 8px rgba(0,0,0,0.35)`
-              : '0 1px 4px rgba(0,0,0,0.3)',
-            border: '1px solid rgba(255,255,255,0.2)',
-            letterSpacing: '0.3px',
-            cursor: isDragging ? 'grabbing' : 'grab',
-            userSelect: 'none',
-            transition: 'all 0.15s ease',
-          }}
-          className="nodrag nopan"
-          onMouseDown={handleLabelMouseDown}
-          title="Kéo để di chuyển nhãn"
-        >
-          {data?.protocol}{portLabel}
-        </div>
-      </EdgeLabelRenderer>
-    </>
-  );
-}
-
-// ─── Firewall implied edge (ALLOW = green flow, DENY = red pulse) ─
-
-function FwEdge({
-  id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, data, markerEnd, selected,
-}: EdgeProps) {
-  const action = data?.action ?? 'ALLOW';
-  const isAllow = action === 'ALLOW';
-  const actionColor = isAllow ? '#389e0d' : '#cf1322';
-  const flowDur = selected ? 0.9 : 1.5;
-  const dotR = selected ? 3.5 : 2.5;
-  const PARTICLE_COUNT = 3;
-
-  const [edgePath, labelX, labelY] = getBezierPath({ sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition });
-
-  const pathStyle: React.CSSProperties = {
-    stroke: actionColor,
-    strokeWidth: selected ? 3 : 2,
-    strokeDasharray: isAllow ? undefined : '7,4',
-    opacity: 0.9,
-    filter: selected ? `drop-shadow(0 0 5px ${actionColor})` : undefined,
-  };
-
-  const portNum = data?.portNum;
-  const labelText = portNum ? `${isAllow ? 'ALLOW' : 'DENY'} :${portNum}` : (isAllow ? 'ALLOW' : 'DENY');
-
-  return (
-    <>
-      <path d={edgePath} fill="none" stroke="transparent" strokeWidth={18} style={{ cursor: 'pointer' }} />
-      {selected && (
-        <path d={edgePath} fill="none" stroke={actionColor} strokeWidth={8}
-          strokeOpacity={0.15} style={{ filter: 'blur(4px)' }} pointerEvents="none" />
-      )}
-      <path id={id} className="react-flow__edge-path" d={edgePath} markerEnd={markerEnd} style={pathStyle} />
-      {/* ALLOW: water-flow particles */}
-      {isAllow && Array.from({ length: PARTICLE_COUNT }, (_, i) => {
-        const begin = `-${((i / PARTICLE_COUNT) * flowDur).toFixed(2)}s`;
-        return (
-          <circle key={i} r={dotR} fill={actionColor} opacity={0} pointerEvents="none">
-            <animateMotion dur={`${flowDur}s`} begin={begin} repeatCount="indefinite" path={edgePath} />
-            <animate attributeName="opacity" values="0;0.9;0.9;0"
-              keyTimes="0;0.08;0.88;1" dur={`${flowDur}s`} begin={begin} repeatCount="indefinite" />
-          </circle>
-        );
-      })}
-      {/* DENY: pulsing opacity on the whole path — more browser-compatible than stroke-opacity */}
-      {!isAllow && (
-        <path d={edgePath} fill="none" stroke={actionColor} strokeWidth={selected ? 4 : 2.5}
-          strokeDasharray="7,4" pointerEvents="none">
-          <animate attributeName="opacity" values="0.85;0.2;0.85"
-            keyTimes="0;0.5;1" dur="1.8s" repeatCount="indefinite" />
-        </path>
-      )}
-      <EdgeLabelRenderer>
-        <div
-          style={{
-            position: 'absolute',
-            transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
-            background: actionColor,
-            color: '#fff',
-            padding: '1px 5px',
-            borderRadius: 3,
-            fontSize: 9,
-            fontWeight: 700,
-            pointerEvents: 'none',
-            whiteSpace: 'nowrap',
-            lineHeight: '14px',
-            boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
-            opacity: 0.92,
-          }}
-        >
-          {labelText}
-        </div>
-      </EdgeLabelRenderer>
-    </>
-  );
-}
-
-// ─── Node types ───────────────────────────────────────────────────
-
-const nodeTypes: NodeTypes = {
-  serverNode: ServerFlowNode,
-  appNode: AppFlowNode,
-};
-
-const edgeTypes: EdgeTypes = {
-  protocolEdge: ProtocolEdge,
-  fwEdge: FwEdge,
-};
-
-// ─── Layout helpers ───────────────────────────────────────────────
-
-const SERVER_NODE_W = 220;
-const SERVER_NODE_H = 150;
-const APP_NODE_W = 180;
-const APP_NODE_H = 92;
-
-function buildGraph(
-  servers: ServerNode[],
-  connections: ConnectionEdge[],
-  nodeType: 'all' | 'server' | 'app',
-  edgeStyle: 'bezier' | 'step' = 'bezier',
-): { nodes: Node[]; edges: Edge[] } {
-  const nodes: Node[] = [];
-  const edges: Edge[] = [];
-
-  servers.forEach((server) => {
-    if (nodeType !== 'app') {
-      const apps = server.deployments;
-
-      const paddingY = 48; // matches compact header height
-      const isContainer = nodeType === 'all' && apps.length > 0;
-
-      // Stack layout constants (1 col, compact rows)
-      const STACK_W = 224;
-      const STACK_APP_H = 30;
-      const STACK_GAP = 4;
-
-      const serverW = !isContainer ? SERVER_NODE_W : STACK_W;
-      const serverH = !isContainer ? SERVER_NODE_H
-        : paddingY + apps.length * STACK_APP_H + Math.max(0, apps.length - 1) * STACK_GAP + 12;
-
-      const primaryIp = server.networkConfigs[0]?.private_ip;
-      nodes.push({
-        id: `server-${server.id}`,
-        type: 'serverNode',
-        position: { x: 0, y: 0 },
-        style: { width: serverW, height: serverH },
-        data: {
-          label: server.name,
-          code: server.code,
-          hostname: server.hostname,
-          purpose: server.purpose,
-          status: server.status,
-          environment: server.environment,
-          site: server.site,
-          infra_type: server.infra_type,
-          deploymentCount: server.deployments.length,
-          privateIp: primaryIp,
-          isContainer,
-          _server: server,
-        },
-      });
-    }
-
-    if (nodeType !== 'server') {
-      const apps = server.deployments;
-      const paddingX = 14;
-      const paddingY = 48;
-      const STACK_W = 224;
-      const STACK_APP_H = 30;
-      const STACK_GAP = 4;
-
-      apps.forEach((dep, idx) => {
-        const inContainer = nodeType === 'all';
-        const childX = inContainer ? paddingX : 0;
-        const childY = inContainer ? paddingY + idx * (STACK_APP_H + STACK_GAP) : 0;
-
-        nodes.push({
-          id: `app-${dep.application.id}-${server.id}`,
-          type: 'appNode',
-          position: { x: childX, y: childY },
-          ...(inContainer ? { style: { width: STACK_W - paddingX * 2, height: STACK_APP_H } } : {}),
-          parentNode: inContainer ? `server-${server.id}` : undefined,
-          extent: inContainer ? 'parent' : undefined,
-          data: {
-            label: dep.application.name,
-            code: dep.application.code,
-            groupName: dep.application.groupName,
-            deploymentStatus: dep.status,
-            environment: dep.environment,
-            version: dep.application.version,
-            serverName: server.name,
-            deploymentId: dep.id,
-            application_type: dep.application.application_type,
-            ports: dep.application.ports,
-            compact: inContainer,
-            _app: { ...dep.application, deploymentStatus: dep.status, environment: dep.environment, serverName: server.name, deploymentId: dep.id },
-          },
-        });
-      });
-    }
-  });
-
-  connections.forEach((conn) => {
-    const sourceNodes = nodes.filter((n) => n.id.startsWith(`app-${conn.sourceAppId}-`));
-    const targetNodes = nodes.filter((n) => n.id.startsWith(`app-${conn.targetAppId}-`));
-
-    if (sourceNodes.length && targetNodes.length) {
-      const color = protocolColors[conn.connectionType] ?? '#8c8c8c';
-      edges.push({
-        id: `conn-${conn.id}`,
-        source: sourceNodes[0].id,
-        target: targetNodes[0].id,
-        type: 'protocolEdge',
-        animated: true,
-        data: {
-          protocol: conn.connectionType,
-          description: conn.description,
-          targetPort: conn.targetPort,
-          edgeStyle,
-          _connection: conn,
-        },
-        style: { stroke: color, strokeWidth: 2 },
-        markerEnd: { type: MarkerType.ArrowClosed, color },
-      });
-    } else if (nodeType === 'server') {
-      // Gray background edges — always visible so user sees server connectivity.
-      // ALLOW (green) / DENY (red) implied edges layer on top when environment is selected.
-      const srcServer = servers.find((s) => s.deployments.some((d) => d.application.id === conn.sourceAppId));
-      const tgtServer = servers.find((s) => s.deployments.some((d) => d.application.id === conn.targetAppId));
-      if (srcServer && tgtServer && srcServer.id !== tgtServer.id) {
-        const edgeId = `conn-srv-${srcServer.id}-${tgtServer.id}`;
-        if (!edges.some((e) => e.id === edgeId)) {
-          edges.push({
-            id: edgeId,
-            source: `server-${srcServer.id}`,
-            target: `server-${tgtServer.id}`,
-            type: 'default',
-            animated: false,
-            zIndex: 0,
-            style: { stroke: '#d9d9d9', strokeWidth: 1.5, strokeDasharray: '4,3', opacity: 0.6 },
-            markerEnd: { type: MarkerType.ArrowClosed, color: '#d9d9d9' },
-            data: { type: 'APP_CONN', _connection: conn },
-          });
-        }
-      }
-    }
-  });
-
-  // Tag parallel edges (same node-pair) with index/count so ProtocolEdge can spread them
-  const parallelGroups = new Map<string, string[]>();
-  edges.forEach((edge) => {
-    const srcTop = nodes.find((n) => n.id === edge.source)?.parentNode ?? edge.source;
-    const tgtTop = nodes.find((n) => n.id === edge.target)?.parentNode ?? edge.target;
-    if (srcTop === tgtTop) return;
-    const key = [srcTop, tgtTop].sort().join('||');
-    if (!parallelGroups.has(key)) parallelGroups.set(key, []);
-    parallelGroups.get(key)!.push(edge.id);
-  });
-  parallelGroups.forEach((edgeIds) => {
-    const n = edgeIds.length;
-    edgeIds.forEach((edgeId, i) => {
-      const edge = edges.find((e) => e.id === edgeId);
-      if (!edge) return;
-      edge.data = { ...edge.data, parallelIndex: i, parallelCount: n };
-    });
-  });
-
-  return { nodes, edges };
-}
-
-function applyDagreLayout(nodes: Node[], edges: Edge[], direction: 'TB' | 'BT' | 'LR' | 'RL'): Node[] {
-  const g = new dagre.graphlib.Graph();
-  g.setDefaultEdgeLabel(() => ({}));
-  g.setGraph({ rankdir: direction, nodesep: 140, ranksep: 200, edgesep: 40, marginx: 60, marginy: 60 });
-
-  const topNodes = nodes.filter(n => !n.parentNode);
-  const nodeIdsWithEdges = new Set<string>();
-  edges.forEach(e => {
-    nodeIdsWithEdges.add(e.source);
-    nodeIdsWithEdges.add(e.target);
-  });
-
-  const connectedNodes = topNodes.filter(n => nodeIdsWithEdges.has(n.id));
-  const isolatedNodes = topNodes.filter(n => !nodeIdsWithEdges.has(n.id));
-
-  connectedNodes.forEach((node) => {
-    const w = node.style?.width as number ?? (node.type === 'serverNode' ? SERVER_NODE_W : APP_NODE_W);
-    const h = node.style?.height as number ?? (node.type === 'serverNode' ? SERVER_NODE_H : APP_NODE_H);
-    g.setNode(node.id, { width: w, height: h });
-  });
-
-  edges.forEach((edge) => {
-    const srcNode = nodes.find(n => n.id === edge.source);
-    const tgtNode = nodes.find(n => n.id === edge.target);
-    const srcParent = srcNode?.parentNode ?? edge.source;
-    const tgtParent = tgtNode?.parentNode ?? edge.target;
-    
-    if (srcParent !== tgtParent && g.hasNode(srcParent) && g.hasNode(tgtParent)) {
-      g.setEdge(srcParent, tgtParent);
-    }
-  });
-
-  dagre.layout(g);
-
-  let maxBottom = 0;
-  const laidOutNodes = nodes.map((node) => {
-    if (node.parentNode) return node;
-
-    const pos = g.node(node.id);
-    if (!pos) return node; // Isolated nodes handled later
-    
-    const w = node.style?.width as number ?? (node.type === 'serverNode' ? SERVER_NODE_W : APP_NODE_W);
-    const h = node.style?.height as number ?? (node.type === 'serverNode' ? SERVER_NODE_H : APP_NODE_H);
-    const newY = pos.y - h / 2;
-    maxBottom = Math.max(maxBottom, newY + h);
-    return { ...node, position: { x: pos.x - w / 2, y: newY } };
-  });
-
-  // Layout isolated nodes in a compact grid below the main graph
-  if (isolatedNodes.length > 0) {
-    const COLS = Math.ceil(Math.sqrt(isolatedNodes.length * 1.5));
-    const GRID_GAP = 40;
-    const START_Y = maxBottom + 120;
-    
-    isolatedNodes.forEach((node, idx) => {
-      const col = idx % COLS;
-      const row = Math.floor(idx / COLS);
-      const nodeW = (node.style?.width as number) ?? (node.type === 'serverNode' ? SERVER_NODE_W : APP_NODE_W);
-      const nodeH = (node.style?.height as number) ?? (node.type === 'serverNode' ? SERVER_NODE_H : APP_NODE_H);
-      const targetNode = laidOutNodes.find(n => n.id === node.id);
-      if (targetNode) {
-        targetNode.position = {
-          x: col * (nodeW + GRID_GAP),
-          y: START_Y + row * (nodeH + GRID_GAP),
-        };
-      }
-    });
-  }
-
-  return laidOutNodes;
-}
-
-const _elkInstance = new ELK();
-
-const ELK_ALGO_MAP: Record<string, string> = {
-  'elk-layered': 'org.eclipse.elk.layered',
-  'elk-force':   'org.eclipse.elk.force',
-  'elk-tree':    'org.eclipse.elk.mrtree',
-  'elk-radial':  'org.eclipse.elk.radial',
-};
-
-const ELK_DIR_MAP: Record<string, string> = {
-  TB: 'DOWN',
-  BT: 'UP',
-  LR: 'RIGHT',
-  RL: 'LEFT',
-};
-
-async function applyElkLayout(
-  nodes: Node[],
-  edges: Edge[],
-  algorithm: 'elk-layered' | 'elk-force' | 'elk-tree' | 'elk-radial',
-  direction: 'TB' | 'BT' | 'LR' | 'RL',
-): Promise<Node[]> {
-  const topNodes = nodes.filter((n) => !n.parentNode);
-  const elkChildren = topNodes.map((n) => ({
-    id: n.id,
-    width: (n.style?.width as number) ?? (n.type === 'serverNode' ? SERVER_NODE_W : APP_NODE_W),
-    height: (n.style?.height as number) ?? (n.type === 'serverNode' ? SERVER_NODE_H : APP_NODE_H),
-  }));
-
-  // Deduplicate edges between top-level parent nodes
-  const seen = new Set<string>();
-  const elkEdges: { id: string; sources: string[]; targets: string[] }[] = [];
-  edges.forEach((e) => {
-    const src = nodes.find((n) => n.id === e.source)?.parentNode ?? e.source;
-    const tgt = nodes.find((n) => n.id === e.target)?.parentNode ?? e.target;
-    if (src === tgt) return;
-    const key = `${src}||${tgt}`;
-    if (seen.has(key)) return;
-    seen.add(key);
-    elkEdges.push({ id: `${src}-${tgt}`, sources: [src], targets: [tgt] });
-  });
-
-  const elkAlgo = ELK_ALGO_MAP[algorithm] ?? 'org.eclipse.elk.layered';
-  const elkDir  = ELK_DIR_MAP[direction]   ?? 'DOWN';
-
-  const graph = {
-    id: 'root',
-    layoutOptions: {
-      'algorithm': elkAlgo,
-      'elk.direction': elkDir,
-      'spacing.nodeNode': '80',
-      'spacing.edgeNode': '40',
-      'spacing.edgeEdge': '20',
-      'org.eclipse.elk.layered.spacing.nodeNodeBetweenLayers': '140',
-    },
-    children: elkChildren,
-    edges: elkEdges,
-  };
-
-  const result = await _elkInstance.layout(graph);
-
-  const posMap = new Map<string, { x: number; y: number }>();
-  result.children?.forEach((n) => {
-    if (n.x !== undefined && n.y !== undefined) posMap.set(n.id, { x: n.x, y: n.y });
-  });
-
-  return nodes.map((node) => {
-    if (node.parentNode) return node;
-    const pos = posMap.get(node.id);
-    return pos ? { ...node, position: pos } : node;
-  });
-}
-
-function computeLayout(
-  servers: ServerNode[],
-  connections: ConnectionEdge[],
-  nodeType: 'all' | 'server' | 'app',
-  direction: 'TB' | 'BT' | 'LR' | 'RL',
-  edgeStyle: 'bezier' | 'step' = 'bezier',
-): { nodes: Node[]; edges: Edge[] } {
-  const { nodes, edges } = buildGraph(servers, connections, nodeType, edgeStyle);
-  const layoutNodes = applyDagreLayout(nodes, edges, direction);
-  return { nodes: layoutNodes, edges };
-}
 
 // ─── Main Component ───────────────────────────────────────────────
 
@@ -673,11 +47,10 @@ function TopologyPageInner() {
     try {
       const saved = localStorage.getItem('topology.renderEngine');
       if (saved === 'visnetwork' || saved === 'reactflow' || saved === 'mermaid') return saved;
-    } catch {
-      /* ignore */
-    }
+    } catch { /* ignore */ }
     return 'visnetwork';
   });
+
   const handleViewModeChange = useCallback((v: '2D' | '3D') => {
     setViewMode(v);
     if (v === '3D') setFilters((f) => f.connectionMode ? { ...f, connectionMode: false } : f);
@@ -711,35 +84,23 @@ function TopologyPageInner() {
   const [saveModalOpen, setSaveModalOpen] = useState(false);
   const [snapshotLabel, setSnapshotLabel] = useState('');
   const [realtimeEvents, setRealtimeEvents] = useState<string[]>([]);
-  
   const [createConnModalVisible, setCreateConnModalVisible] = useState(false);
   const [connectionDraft, setConnectionDraft] = useState<any>(null);
   const [healthDrawerOpen, setHealthDrawerOpen] = useState(false);
   const [showImplied, setShowImplied] = useState(true);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const reactFlowRef = useRef<ReactFlowInstance | null>(null);
   const visNetworkViewRef = useRef<TopologyVisNetworkHandle>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-
-  // Track user-dragged node positions — persisted across refetches, cleared on Auto Arrange or when nodeType changes
   const userPositionsRef = useRef<Record<string, { x: number; y: number }>>({});
-  // Remember the mode these positions belong to — positions from one mode are meaningless in another
   const positionsModeRef = useRef<string>(filters.nodeType);
-
-  // Stable ref to setEdges for use inside edge label drag callbacks
   const setEdgesRef = useRef<((updater: (edges: Edge[]) => Edge[]) => void) | null>(null);
+
   const stableUpdateEdgeLabel = useCallback((edgeId: string, dx: number, dy: number) => {
     setEdgesRef.current?.((prev: Edge[]) => prev.map((e: Edge) => {
       if (e.id !== edgeId) return e;
-      return {
-        ...e,
-        data: {
-          ...e.data,
-          labelOffsetX: (e.data?.labelOffsetX ?? 0) + dx,
-          labelOffsetY: (e.data?.labelOffsetY ?? 0) + dy,
-        },
-      };
+      return { ...e, data: { ...e.data, labelOffsetX: (e.data?.labelOffsetX ?? 0) + dx, labelOffsetY: (e.data?.labelOffsetY ?? 0) + dy } };
     }));
   }, []);
 
@@ -748,6 +109,13 @@ function TopologyPageInner() {
   const createConnection = useCreateConnection();
   const deleteConnection = useDeleteConnection();
   const { message, modal } = App.useApp();
+
+  // ─── Filters & computed options ──────────────────────────────────
+  const { filteredData, dropdownOptions, cascadeMaps, healthIssueCount } = useTopologyFilters(
+    data?.topology, filters,
+  );
+  const { groupOptions, serverOptions, appOptions } = dropdownOptions;
+  const { serverGroupsMap, serverAppsMap } = cascadeMaps;
 
   // ─── Realtime subscriptions ───────────────────────────────────
   useTopologySubscription({
@@ -760,169 +128,35 @@ function TopologyPageInner() {
       setRealtimeEvents((prev: string[]) => [`Connection ${event.sourceAppName}→${event.targetAppName}: ${event.status}`, ...prev.slice(0, 4)]);
       refetch();
     },
-    onTopologyChanged: () => {
-      refetch();
-    },
+    onTopologyChanged: () => { refetch(); },
   });
 
-  // ─── Computed options for visibility filter dropdowns ────────────
-  // Options are scoped to the current environment filter so dropdowns only
-  // show items that exist in the selected environment.
-  const { groupOptions, serverOptions, appOptions } = useMemo(() => {
-    let servers = data?.topology?.servers ?? [];
-
-    if (filters.environment) {
-      servers = servers
-        .filter((s) => s.environment === filters.environment)
-        .map((s) => ({
-          ...s,
-          deployments: s.deployments.filter((d) => d.environment === filters.environment),
-        }));
-    }
-
-    const groupSet = new Set<string>();
-    const appMap = new Map<string, string>();
-
-    servers.forEach((s) => {
-      s.deployments.forEach((d) => {
-        if (d.application.groupName) groupSet.add(d.application.groupName);
-        appMap.set(d.application.id, d.application.name);
-      });
-    });
-
-    return {
-      groupOptions: [...groupSet].sort().map((g) => ({ label: g, value: g })),
-      serverOptions: servers.map((s) => {
-        const net = s.networkConfigs[0];
-        const ip = net?.private_ip || net?.public_ip || net?.domain || '';
-        return { label: s.name, value: s.id, description: ip };
-      }),
-      appOptions: [...appMap.entries()]
-        .sort((a, b) => a[1].localeCompare(b[1]))
-        .map(([id, name]) => ({ label: name, value: id })),
-    };
-  }, [data?.topology?.servers, filters.environment]);
-
-  // Cascade maps for FilterPanel: serverId → groupNames[], serverId → appIds[]
-  const { serverGroupsMap, serverAppsMap } = useMemo(() => {
-    const groups: Record<string, string[]> = {};
-    const apps: Record<string, string[]> = {};
-    (data?.topology?.servers ?? []).forEach((s) => {
-      groups[s.id] = s.deployments
-        .map((d) => d.application.groupName)
-        .filter((g): g is string => Boolean(g));
-      apps[s.id] = s.deployments.map((d) => d.application.id);
-    });
-    return { serverGroupsMap: groups, serverAppsMap: apps };
-  }, [data?.topology?.servers]);
-
-  const healthIssueCount = useMemo(() => {
-    if (!data?.topology) return 0;
-    const issues = analyzeTopologyHealth(data.topology.servers, data.topology.connections);
-    return issues.filter((i) => i.severity === 'ERROR' || i.severity === 'WARNING').length;
-  }, [data?.topology]);
-
-  const filteredData = useMemo(() => {
-    if (!data?.topology) return { servers: [], connections: [], serversForEdgeResolution: [], connectionsForEdgeResolution: [] };
-
-    let servers = [...data.topology.servers];
-    let connections = [...data.topology.connections];
-
-    // 1. Filter by environment
-    if (filters.environment) {
-      servers = servers
-        .filter((s) => s.environment === filters.environment)
-        .map((s) => ({
-          ...s,
-          deployments: s.deployments.filter((d) => d.environment === filters.environment),
-        }));
-
-      const validAppIds = new Set<string>();
-      servers.forEach(s => s.deployments.forEach(d => validAppIds.add(d.application.id)));
-      connections = connections.filter(c => validAppIds.has(c.sourceAppId) && validAppIds.has(c.targetAppId));
-    }
-
-    // 2. Visibility filters (server / app-group / app)
-    const hasServerFilter = filters.visibleServerIds.length > 0;
-    const hasGroupFilter = filters.visibleGroupNames.length > 0;
-    const hasAppFilter = filters.visibleAppIds.length > 0;
-
-    if (hasServerFilter) {
-      servers = servers.filter((s) => filters.visibleServerIds.includes(s.id));
-    }
-
-    if (hasGroupFilter || hasAppFilter) {
-      servers = servers.map((s) => {
-        let deps = s.deployments;
-        if (hasGroupFilter) {
-          deps = deps.filter((d) => filters.visibleGroupNames.includes(d.application.groupName ?? ''));
-        }
-        if (hasAppFilter) {
-          deps = deps.filter((d) => filters.visibleAppIds.includes(d.application.id));
-        }
-        return { ...s, deployments: deps };
-      });
-      // Drop servers that have no remaining apps when app-level filters are active
-      servers = servers.filter((s) => s.deployments.length > 0);
-    }
-
-    // Rebuild valid app ID set and drop orphaned connections
-    if (hasServerFilter || hasGroupFilter || hasAppFilter) {
-      const visibleAppIds = new Set<string>();
-      servers.forEach(s => s.deployments.forEach(d => visibleAppIds.add(d.application.id)));
-      connections = connections.filter(c => visibleAppIds.has(c.sourceAppId) && visibleAppIds.has(c.targetAppId));
-    }
-
-    // Save pre-server-mode data so ReactFlow buildGraph can resolve server↔app mappings for edges
-    const serversForEdgeResolution = servers;
-    const connectionsForEdgeResolution = connections;
-
-    // 3. Filter by node type (for Vis/Cytoscape: collapse servers to icons, hide app-level connections)
-    if (filters.nodeType === 'server') {
-      servers = servers.map(s => ({ ...s, deployments: [] }));
-      connections = [];
-    }
-
-    return { servers, connections, serversForEdgeResolution, connectionsForEdgeResolution };
-  }, [data, filters.environment, filters.nodeType, filters.visibleServerIds, filters.visibleGroupNames, filters.visibleAppIds]);
-
-  // ─── 2D layout ───────────────────────────────────────────────
+  // ─── ReactFlow layout + implied edges ───────────────────────────
   const { nodes: computedNodes, edges: computedEdges } = useMemo(() => {
     if (!data?.topology) return { nodes: [], edges: [] };
-    // Server mode: pass servers-with-deployments so buildGraph can resolve app→server mappings.
-    // buildGraph draws gray background edges in server mode; ALLOW/DENY implied edges layer on top.
-    const layoutServers = filters.nodeType === 'server'
-      ? filteredData.serversForEdgeResolution
-      : filteredData.servers;
-    const layoutConnections = filters.nodeType === 'server'
-      ? filteredData.connectionsForEdgeResolution
-      : filteredData.connections;
+
+    const layoutServers = filters.nodeType === 'server' ? filteredData.serversForEdgeResolution : filteredData.servers;
+    const layoutConnections = filters.nodeType === 'server' ? filteredData.connectionsForEdgeResolution : filteredData.connections;
     const result = computeLayout(layoutServers, layoutConnections, filters.nodeType, filters.layoutDirection, filters.edgeStyle);
-    // Attach stable onLabelMove callback to each edge for draggable labels
+
     const edgesWithCallback = result.edges.map((e) => ({
       ...e,
-      data: {
-        ...e.data,
-        onLabelMove: (dx: number, dy: number) => stableUpdateEdgeLabel(e.id, dx, dy),
-      },
+      data: { ...e.data, onLabelMove: (dx: number, dy: number) => stableUpdateEdgeLabel(e.id, dx, dy) },
     }));
 
-    // ── Implied connection edges from FirewallRule (ALLOW / DENY) ───────
-    // Color is the primary indicator: green = ALLOW, red = DENY.
-    // Label shows only the port number; the rule name lives in data for detail panels.
-    const FW_ACTION: Record<string, { color: string; dash: string; width: number }> = {
-      ALLOW: { color: '#389e0d', dash: '0',   width: 2 },
-      DENY:  { color: '#cf1322', dash: '7,4', width: 2 },
+    const FW_ACTION: Record<string, { color: string }> = {
+      ALLOW: { color: '#389e0d' },
+      DENY:  { color: '#cf1322' },
     };
     const impliedEdges: Edge[] = [];
-    if (showImplied && data?.topology?.impliedConnections) {
+
+    if (showImplied && data.topology.impliedConnections) {
       const allNodes = result.nodes;
       const addedServerPairs = new Map<string, Set<string>>();
 
       data.topology.impliedConnections.forEach((ic: ImpliedConnectionEdge) => {
         const action = ic.action ?? 'ALLOW';
         const cfg = FW_ACTION[action] ?? FW_ACTION.ALLOW;
-
         const portNum = ic.targetPort?.portNumber ?? (ic.targetPort as any)?.port_number;
 
         const commonEdgeProps = {
@@ -933,73 +167,24 @@ function TopologyPageInner() {
           data: { type: 'IMPLIED', action, firewallRuleId: ic.firewallRuleId, firewallRuleName: ic.firewallRuleName, portNum, _implied: ic },
         };
 
-        if (filters.nodeType === 'server') {
-          const srcServer = ic.sourceServerId
-            ? filteredData.serversForEdgeResolution.find((s) => s.id === ic.sourceServerId)
-            : filteredData.serversForEdgeResolution.find((s) =>
-                s.deployments.some((d) => d.application.id === ic.sourceAppId),
-              );
-          const tgtServer = ic.targetServerId
-            ? filteredData.serversForEdgeResolution.find((s) => s.id === ic.targetServerId)
-            : filteredData.serversForEdgeResolution.find((s) =>
-                s.deployments.some((d) => d.application.id === ic.targetAppId),
-              );
-          if (srcServer && tgtServer && srcServer.id !== tgtServer.id) {
-            const pairKey = `${action}::${srcServer.id}::${tgtServer.id}`;
-            if (!addedServerPairs.has(action)) addedServerPairs.set(action, new Set());
-            if (!addedServerPairs.get(action)!.has(pairKey)) {
-              addedServerPairs.get(action)!.add(pairKey);
-              impliedEdges.push({
-                id: `implied-srv-${action}-${srcServer.id}-${tgtServer.id}`,
-                source: `server-${srcServer.id}`,
-                target: `server-${tgtServer.id}`,
-                ...commonEdgeProps,
-              });
-            }
-          }
+        const pushServerPair = (srcId: string, tgtId: string) => {
+          if (srcId === tgtId) return;
+          const srcNodeId = `server-${srcId}`;
+          const tgtNodeId = `server-${tgtId}`;
+          if (!allNodes.some((n) => n.id === srcNodeId) || !allNodes.some((n) => n.id === tgtNodeId)) return;
+          const pairKey = `${action}::${srcId}::${tgtId}`;
+          if (!addedServerPairs.has(action)) addedServerPairs.set(action, new Set());
+          if (addedServerPairs.get(action)!.has(pairKey)) return;
+          addedServerPairs.get(action)!.add(pairKey);
+          impliedEdges.push({ id: `implied-srv-${action}-${srcId}-${tgtId}`, source: srcNodeId, target: tgtNodeId, ...commonEdgeProps });
+        };
+
+        if (ic.sourceServerId && ic.targetServerId) {
+          pushServerPair(ic.sourceServerId, ic.targetServerId);
         } else {
-          // In 'all'/'app' mode: draw server-to-server implied edges (firewall rules are network-level)
-          if (ic.sourceServerId && ic.targetServerId && ic.sourceServerId !== ic.targetServerId) {
-            const srcServerNodeId = `server-${ic.sourceServerId}`;
-            const tgtServerNodeId = `server-${ic.targetServerId}`;
-            if (
-              allNodes.some((n) => n.id === srcServerNodeId) &&
-              allNodes.some((n) => n.id === tgtServerNodeId)
-            ) {
-              const pairKey = `${action}::${ic.sourceServerId}::${ic.targetServerId}`;
-              if (!addedServerPairs.has(action)) addedServerPairs.set(action, new Set());
-              if (!addedServerPairs.get(action)!.has(pairKey)) {
-                addedServerPairs.get(action)!.add(pairKey);
-                impliedEdges.push({
-                  id: `implied-srv-${action}-${ic.sourceServerId}-${ic.targetServerId}`,
-                  source: srcServerNodeId,
-                  target: tgtServerNodeId,
-                  ...commonEdgeProps,
-                });
-              }
-            }
-          } else {
-            // Fallback: resolve via app→server lookup
-            const srcServer = filteredData.serversForEdgeResolution.find((s) =>
-              s.deployments.some((d) => d.application.id === ic.sourceAppId),
-            );
-            const tgtServer = filteredData.serversForEdgeResolution.find((s) =>
-              s.deployments.some((d) => d.application.id === ic.targetAppId),
-            );
-            if (srcServer && tgtServer && srcServer.id !== tgtServer.id) {
-              const pairKey = `${action}::${srcServer.id}::${tgtServer.id}`;
-              if (!addedServerPairs.has(action)) addedServerPairs.set(action, new Set());
-              if (!addedServerPairs.get(action)!.has(pairKey)) {
-                addedServerPairs.get(action)!.add(pairKey);
-                impliedEdges.push({
-                  id: `implied-srv-${action}-${srcServer.id}-${tgtServer.id}`,
-                  source: `server-${srcServer.id}`,
-                  target: `server-${tgtServer.id}`,
-                  ...commonEdgeProps,
-                });
-              }
-            }
-          }
+          const srcSrv = filteredData.serversForEdgeResolution.find((s) => s.deployments.some((d) => d.application.id === ic.sourceAppId));
+          const tgtSrv = filteredData.serversForEdgeResolution.find((s) => s.deployments.some((d) => d.application.id === ic.targetAppId));
+          if (srcSrv && tgtSrv) pushServerPair(srcSrv.id, tgtSrv.id);
         }
       });
     }
@@ -1010,10 +195,8 @@ function TopologyPageInner() {
   const [nodes, setNodes, onNodesChange] = useNodesState(computedNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(computedEdges);
 
-  // Keep setEdgesRef in sync so stableUpdateEdgeLabel always uses the latest setter
   useEffect(() => { setEdgesRef.current = setEdges; }, [setEdges]);
 
-  // Fullscreen change listener
   useEffect(() => {
     const handler = () => setIsFullscreen(!!document.fullscreenElement);
     document.addEventListener('fullscreenchange', handler);
@@ -1021,12 +204,10 @@ function TopologyPageInner() {
   }, []);
 
   useMemo(() => {
-    // If view mode changed since positions were saved, drop them — node sizes/ids are mode-specific
     if (positionsModeRef.current !== filters.nodeType) {
       userPositionsRef.current = {};
       positionsModeRef.current = filters.nodeType;
     }
-    // Merge user-dragged positions back so refetch doesn't reset manually moved nodes
     const mergedNodes = computedNodes.map((node) => {
       const savedPos = userPositionsRef.current[node.id];
       return savedPos ? { ...node, position: savedPos } : node;
@@ -1035,98 +216,55 @@ function TopologyPageInner() {
     setEdges(computedEdges);
   }, [computedNodes, computedEdges, filters.nodeType]);
 
-  // Re-fit the viewport whenever the view mode changes so the new layout is centered
   useEffect(() => {
-    const id = requestAnimationFrame(() => {
-      reactFlowRef.current?.fitView({ padding: 0.2, duration: 300 });
-    });
+    const id = requestAnimationFrame(() => { reactFlowRef.current?.fitView({ padding: 0.2, duration: 300 }); });
     return () => cancelAnimationFrame(id);
   }, [filters.nodeType]);
 
-  // Keep a ref to current nodes so handleNodesChange can read them without stale closure
   const nodesRef = useRef(nodes);
   useEffect(() => { nodesRef.current = nodes; }, [nodes]);
   const edgesRef = useRef(edges);
   useEffect(() => { edgesRef.current = edges; }, [edges]);
 
   // ─── Focus highlight ────────────────────────────────────────────
-  // When a node is focused, dim everything not connected to it.
   const displayNodes = useMemo(() => {
     if (!focusedNodeId) return nodes;
-
     const highlighted = new Set<string>([focusedNodeId]);
-    // Include children of the focused container (server → its apps)
     nodes.forEach((n) => { if (n.parentNode === focusedNodeId) highlighted.add(n.id); });
-    // Include edge endpoints connected to highlighted nodes
     edges.forEach((e) => {
-      if (highlighted.has(e.source) || highlighted.has(e.target)) {
-        highlighted.add(e.source);
-        highlighted.add(e.target);
-      }
+      if (highlighted.has(e.source) || highlighted.has(e.target)) { highlighted.add(e.source); highlighted.add(e.target); }
     });
-    // Include parent containers of highlighted apps
     nodes.forEach((n) => { if (n.parentNode && highlighted.has(n.id)) highlighted.add(n.parentNode); });
-    // Include all children of highlighted containers
     nodes.forEach((n) => { if (n.parentNode && highlighted.has(n.parentNode)) highlighted.add(n.id); });
-
-    return nodes.map((n) => ({
-      ...n,
-      style: { ...n.style, opacity: highlighted.has(n.id) ? 1 : 0.12, transition: 'opacity 0.2s ease' },
-    }));
+    return nodes.map((n) => ({ ...n, style: { ...n.style, opacity: highlighted.has(n.id) ? 1 : 0.12, transition: 'opacity 0.2s ease' } }));
   }, [nodes, edges, focusedNodeId]);
 
   const displayEdges = useMemo(() => {
     if (!focusedNodeId) return edges;
-
-    const childIds = new Set(
-      nodes.filter((n) => n.parentNode === focusedNodeId).map((n) => n.id),
-    );
+    const childIds = new Set(nodes.filter((n) => n.parentNode === focusedNodeId).map((n) => n.id));
     childIds.add(focusedNodeId);
-
     return edges.map((e) => {
       const isHighlighted = childIds.has(e.source) || childIds.has(e.target);
-      return {
-        ...e,
-        style: { ...e.style, opacity: isHighlighted ? 1 : 0.08, strokeWidth: isHighlighted ? 3 : (e.style?.strokeWidth ?? 2) },
-        zIndex: isHighlighted ? 10 : 0,
-      };
+      return { ...e, style: { ...e.style, opacity: isHighlighted ? 1 : 0.08, strokeWidth: isHighlighted ? 3 : (e.style?.strokeWidth ?? 2) }, zIndex: isHighlighted ? 10 : 0 };
     });
   }, [edges, nodes, focusedNodeId]);
 
-  // Fit view to the focused node and its direct connections
   useEffect(() => {
     if (!focusedNodeId || renderEngine !== 'reactflow') return;
-    const currentNodes = nodesRef.current;
-    const currentEdges = edgesRef.current;
-
     const highlighted = new Set<string>([focusedNodeId]);
-    currentNodes.forEach((n) => { if (n.parentNode === focusedNodeId) highlighted.add(n.id); });
-    currentEdges.forEach((e) => {
-      if (highlighted.has(e.source) || highlighted.has(e.target)) {
-        highlighted.add(e.source);
-        highlighted.add(e.target);
-      }
+    nodesRef.current.forEach((n) => { if (n.parentNode === focusedNodeId) highlighted.add(n.id); });
+    edgesRef.current.forEach((e) => {
+      if (highlighted.has(e.source) || highlighted.has(e.target)) { highlighted.add(e.source); highlighted.add(e.target); }
     });
-    currentNodes.forEach((n) => { if (n.parentNode && highlighted.has(n.id)) highlighted.add(n.parentNode); });
-
+    nodesRef.current.forEach((n) => { if (n.parentNode && highlighted.has(n.id)) highlighted.add(n.parentNode); });
     requestAnimationFrame(() => {
-      reactFlowRef.current?.fitView({
-        nodes: [...highlighted].map((id) => ({ id })),
-        duration: 500,
-        padding: 0.3,
-        minZoom: 0.2,
-        maxZoom: 1.5,
-      });
+      reactFlowRef.current?.fitView({ nodes: [...highlighted].map((id) => ({ id })), duration: 500, padding: 0.3, minZoom: 0.2, maxZoom: 1.5 });
     });
   }, [focusedNodeId, renderEngine]);
 
-  // Drag stop handler:
-  //   • Child app inside a server → reorder as a vertical list (drop-between behaviour)
-  //   • Top-level node → collision push (snapping is handled in handleNodesChange)
+  // ─── Drag & snap handlers ─────────────────────────────────────
   const handleNodeDragStop = useCallback((_evt: React.MouseEvent, node: Node) => {
     const parentId = node.parentNode;
-
-    // ── CHILD APP INSIDE SERVER: list reorder ────────────────────────
     if (parentId) {
       const STACK_PADDING_X = 14;
       const STACK_PADDING_Y = 48;
@@ -1140,23 +278,18 @@ function TopologyPageInner() {
       });
       const updates: Record<string, { x: number; y: number }> = {};
       sorted.forEach((n, idx) => {
-        updates[n.id] = {
-          x: STACK_PADDING_X,
-          y: STACK_PADDING_Y + idx * (STACK_APP_H + STACK_GAP),
-        };
+        updates[n.id] = { x: STACK_PADDING_X, y: STACK_PADDING_Y + idx * (STACK_APP_H + STACK_GAP) };
         userPositionsRef.current[n.id] = updates[n.id];
       });
       setNodes((nds) => nds.map((n) => updates[n.id] ? { ...n, position: updates[n.id] } : n));
       return;
     }
 
-    // ── TOP-LEVEL NODE: 8-direction collision push ───────────────────
     const GAP = 8;
     const { x, y } = node.position;
     const nW = node.width ?? 160;
     const nH = node.height ?? 44;
     const topSiblings = nodesRef.current.filter((other) => other.id !== node.id && !other.parentNode);
-
     const collidesAt = (tx: number, ty: number) => topSiblings.some((other) => {
       const oW = other.width ?? 160;
       const oH = other.height ?? 44;
@@ -1164,12 +297,8 @@ function TopologyPageInner() {
              ty < other.position.y + oH - 2 && ty + nH > other.position.y + 2;
     });
 
-    if (!collidesAt(x, y)) {
-      userPositionsRef.current[node.id] = { x, y };
-      return;
-    }
+    if (!collidesAt(x, y)) { userPositionsRef.current[node.id] = { x, y }; return; }
 
-    // Try 8 compass directions, expanding outward ring by ring
     const step = Math.max(nW, nH) + GAP;
     const DIRS = [
       { dx: 0, dy: -1 }, { dx: 1, dy: -1 }, { dx: 1, dy: 0 }, { dx: 1, dy: 1 },
@@ -1194,39 +323,21 @@ function TopologyPageInner() {
     }
   }, [setNodes]);
 
-  // Magnetic alignment snap: modify position INSIDE the change before React Flow sees it
   const handleNodesChange = useCallback((changes: NodeChange[]) => {
     const ALIGN_THRESHOLD = 14;
     const alignedChanges = changes.map((change) => {
-      // Only process drag-end events that carry a final position
-      if (change.type !== 'position' || change.dragging !== false || !change.position) {
-        return change;
-      }
-
-      // Determine whether this is a child node (app inside a server box)
+      if (change.type !== 'position' || change.dragging !== false || !change.position) return change;
       const draggedNode = nodesRef.current.find((n) => n.id === change.id);
-      const parentId = draggedNode?.parentNode; // defined → child node, undefined → top-level
+      const parentId = draggedNode?.parentNode;
       let { x, y } = change.position;
       let snappedX = false;
       let snappedY = false;
       for (const other of nodesRef.current) {
         if (other.id === change.id) continue;
-
-        // Child node: only align against siblings (same parentNode).
-        // Top-level node: only align against other top-level nodes.
-        const isSibling = parentId
-          ? other.parentNode === parentId
-          : !other.parentNode;
+        const isSibling = parentId ? other.parentNode === parentId : !other.parentNode;
         if (!isSibling) continue;
-
-        if (!snappedX && Math.abs(other.position.x - x) <= ALIGN_THRESHOLD) {
-          x = other.position.x;
-          snappedX = true;
-        }
-        if (!snappedY && Math.abs(other.position.y - y) <= ALIGN_THRESHOLD) {
-          y = other.position.y;
-          snappedY = true;
-        }
+        if (!snappedX && Math.abs(other.position.x - x) <= ALIGN_THRESHOLD) { x = other.position.x; snappedX = true; }
+        if (!snappedY && Math.abs(other.position.y - y) <= ALIGN_THRESHOLD) { y = other.position.y; snappedY = true; }
         if (snappedX && snappedY) break;
       }
       userPositionsRef.current[change.id] = { x, y };
@@ -1235,46 +346,29 @@ function TopologyPageInner() {
     onNodesChange(alignedChanges);
   }, [onNodesChange]);
 
+  // ─── Auto-arrange ─────────────────────────────────────────────
   const handleAutoArrange = useCallback(async () => {
-    if (renderEngine === 'visnetwork') {
-      visNetworkViewRef.current?.autoArrange();
-      return;
-    }
+    if (renderEngine === 'visnetwork') { visNetworkViewRef.current?.autoArrange(); return; }
     userPositionsRef.current = {};
     let arranged: Node[];
     if (filters.layoutAlgorithm !== 'dagre') {
       try {
-        arranged = await applyElkLayout(
-          nodes, edges,
-          filters.layoutAlgorithm as 'elk-layered' | 'elk-force' | 'elk-tree' | 'elk-radial',
-          filters.layoutDirection,
-        );
+        arranged = await applyElkLayout(nodes, edges, filters.layoutAlgorithm as 'elk-layered' | 'elk-force' | 'elk-tree' | 'elk-radial', filters.layoutDirection);
       } catch {
-        // Fall back to dagre if ELK fails
         arranged = applyDagreLayout(nodes, edges, filters.layoutDirection);
       }
     } else {
       arranged = applyDagreLayout(nodes, edges, filters.layoutDirection);
     }
     setNodes(arranged);
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        reactFlowRef.current?.fitView({
-          padding: 0.2,
-          duration: 500,
-          minZoom: 0.25,
-          maxZoom: 1.5,
-          includeHiddenNodes: false,
-        });
-      });
-    });
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      reactFlowRef.current?.fitView({ padding: 0.2, duration: 500, minZoom: 0.25, maxZoom: 1.5, includeHiddenNodes: false });
+    }));
   }, [renderEngine, nodes, edges, filters.layoutAlgorithm, filters.layoutDirection, setNodes]);
 
-  // Stable ref so the auto-arrange effect always calls the latest version without becoming a dependency
   const handleAutoArrangeRef = useRef(handleAutoArrange);
   useEffect(() => { handleAutoArrangeRef.current = handleAutoArrange; }, [handleAutoArrange]);
 
-  // Skip triggering on the initial mount
   const isFirstRenderRef = useRef(true);
   useEffect(() => {
     if (isFirstRenderRef.current) { isFirstRenderRef.current = false; return; }
@@ -1283,6 +377,7 @@ function TopologyPageInner() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters.layoutAlgorithm, filters.layoutDirection]);
 
+  // ─── Connection handlers ──────────────────────────────────────
   const onConnect = useCallback(async (params: any) => {
     if (!filters.connectionMode) return;
     const sourceNode = nodes.find((n) => n.id === params.source);
@@ -1294,22 +389,14 @@ function TopologyPageInner() {
       message.warning('Chỉ có thể tạo kết nối giữa các app cùng môi trường');
       return;
     }
-
     if (targetApp.ports?.length === 1) {
       modal.confirm({
         title: 'Tạo kết nối?',
         content: `${sourceApp.name} → ${targetApp.name} (Port ${targetApp.ports[0].port_number})`,
-        okText: 'Tạo',
-        cancelText: 'Huỷ',
+        okText: 'Tạo', cancelText: 'Huỷ',
         onOk: async () => {
           try {
-            await createConnection.mutateAsync({
-              source_app_id: sourceApp.id,
-              target_app_id: targetApp.id,
-              environment: sourceApp.environment,
-              connection_type: 'HTTP',
-              target_port_id: targetApp.ports[0].id,
-            } as any);
+            await createConnection.mutateAsync({ source_app_id: sourceApp.id, target_app_id: targetApp.id, environment: sourceApp.environment, connection_type: 'HTTP', target_port_id: targetApp.ports[0].id } as any);
             message.success('Tạo kết nối thành công');
             refetch();
           } catch (e: any) {
@@ -1326,19 +413,12 @@ function TopologyPageInner() {
   const handleCreateConnectionSubmit = async (values: any) => {
     if (!connectionDraft) return;
     try {
-      await createConnection.mutateAsync({
-        source_app_id: connectionDraft.sourceApp.id,
-        target_app_id: connectionDraft.targetApp.id,
-        environment: connectionDraft.sourceApp.environment,
-        ...values,
-      });
+      await createConnection.mutateAsync({ source_app_id: connectionDraft.sourceApp.id, target_app_id: connectionDraft.targetApp.id, environment: connectionDraft.sourceApp.environment, ...values });
       message.success('Tạo kết nối thành công');
       setCreateConnModalVisible(false);
       setConnectionDraft(null);
       refetch();
-    } catch (e: any) {
-      throw e; // Modal handles error display if needed
-    }
+    } catch (e: any) { throw e; }
   };
 
   const onEdgeClick = useCallback((_: any, edge: Edge) => {
@@ -1346,13 +426,8 @@ function TopologyPageInner() {
     const implied = edge.data?._implied as ImpliedConnectionEdge | undefined;
     setSelectedNode(null);
     setFocusedNodeId(null);
-    if (conn) {
-      setSelectedConnection(conn);
-      setSelectedImplied(null);
-    } else if (implied) {
-      setSelectedImplied(implied);
-      setSelectedConnection(null);
-    }
+    if (conn) { setSelectedConnection(conn); setSelectedImplied(null); }
+    else if (implied) { setSelectedImplied(implied); setSelectedConnection(null); }
   }, []);
 
   const handleDeleteConnection = useCallback(async (conn: ConnectionEdge) => {
@@ -1380,76 +455,12 @@ function TopologyPageInner() {
   }, []);
 
   // ─── Export helpers ───────────────────────────────────────────
-
-  const exportAsJSON = useCallback(() => {
-    if (!data?.topology) return;
-    const blob = new Blob([JSON.stringify(data.topology, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `topology-${filters.environment ?? 'all'}-${Date.now()}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }, [data, filters.environment]);
-
-  const exportAsMermaid = useCallback(() => {
-    if (!data?.topology) return;
-    const lines = ['graph LR'];
-    data.topology.servers.forEach((s: ServerNode) => lines.push(`  ${s.code}["${s.name}"]`));
-    data.topology.connections.forEach((c: ConnectionEdge) => {
-      const srcCode = data.topology.servers.flatMap((s: ServerNode) => s.deployments.map((d) => ({ sCode: s.code, appId: d.application.id }))).find((x: { sCode: string; appId: string }) => x.appId === c.sourceAppId)?.sCode ?? c.sourceAppId;
-      const tgtCode = data.topology.servers.flatMap((s: ServerNode) => s.deployments.map((d) => ({ sCode: s.code, appId: d.application.id }))).find((x: { sCode: string; appId: string }) => x.appId === c.targetAppId)?.sCode ?? c.targetAppId;
-      lines.push(`  ${srcCode} -->|${c.connectionType}| ${tgtCode}`);
-    });
-    const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `topology-${filters.environment ?? 'all'}-${Date.now()}.mmd`;
-    a.click();
-    URL.revokeObjectURL(url);
-    message.success('Mermaid diagram exported');
-  }, [data, filters.environment, message]);
-
-  const exportAsPNG = useCallback(() => {
-    const svgEl = document.querySelector('.react-flow__renderer svg') as SVGElement;
-    if (!svgEl) { message.error('Cannot capture topology'); return; }
-    const serializer = new XMLSerializer();
-    const svgStr = serializer.serializeToString(svgEl);
-    const img = new Image();
-    const svgBlob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
-    const url = URL.createObjectURL(svgBlob);
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const { width, height } = svgEl.getBoundingClientRect();
-      canvas.width = width * 2; canvas.height = height * 2;
-      const ctx = canvas.getContext('2d')!;
-      ctx.scale(2, 2); ctx.drawImage(img, 0, 0);
-      URL.revokeObjectURL(url);
-      canvas.toBlob((blob) => {
-        if (!blob) return;
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `topology-${filters.environment ?? 'all'}-${Date.now()}.png`;
-        a.click();
-      }, 'image/png');
-    };
-    img.src = url;
-  }, [filters.environment, message]);
-
-  const exportAsSVG = useCallback(() => {
-    const svgEl = document.querySelector('.react-flow__renderer svg') as SVGElement;
-    if (!svgEl) { message.error('Cannot capture topology'); return; }
-    const serializer = new XMLSerializer();
-    const blob = new Blob([serializer.serializeToString(svgEl)], { type: 'image/svg+xml' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `topology-${filters.environment ?? 'all'}-${Date.now()}.svg`;
-    a.click();
-    URL.revokeObjectURL(url);
-    message.success('SVG exported');
-  }, [filters.environment, message]);
+  const { exportAsJSON, exportAsMermaid, exportAsPNG, exportAsSVG } = useTopologyExport(
+    data?.topology,
+    filters.environment,
+    (msg) => message.error(msg),
+    (msg) => message.success(msg),
+  );
 
   const handleSaveSnapshot = async () => {
     try {
@@ -1457,24 +468,17 @@ function TopologyPageInner() {
       message.success('Snapshot saved');
       setSaveModalOpen(false);
       setSnapshotLabel('');
-    } catch {
-      message.error('Failed to save snapshot');
-    }
+    } catch { message.error('Failed to save snapshot'); }
   };
 
   const toggleFullscreen = useCallback(() => {
     if (!containerRef.current) return;
-    if (!document.fullscreenElement) {
-      containerRef.current.requestFullscreen().catch(() => {});
-    } else {
-      document.exitFullscreen().catch(() => {});
-    }
+    if (!document.fullscreenElement) containerRef.current.requestFullscreen().catch(() => {});
+    else document.exitFullscreen().catch(() => {});
   }, []);
 
   const serverCount = data?.topology?.servers?.length ?? 0;
   const connectionCount = data?.topology?.connections?.length ?? 0;
-
-  // global header(64) + content margins(48) + content padding(48) + PageHeader(72) + filter bar(48)
   const CANVAS_H = 'calc(100vh - 64px - 48px - 48px - 72px - 48px)';
 
   return (
@@ -1482,11 +486,7 @@ function TopologyPageInner() {
       <PageHeader
         title="Topology"
         helpKey="topology"
-        subtitle={
-          !loading && data
-            ? `${serverCount} server${serverCount !== 1 ? 's' : ''} · ${connectionCount} connection${connectionCount !== 1 ? 's' : ''}`
-            : 'Loading...'
-        }
+        subtitle={!loading && data ? `${serverCount} server${serverCount !== 1 ? 's' : ''} · ${connectionCount} connection${connectionCount !== 1 ? 's' : ''}` : 'Loading...'}
         extra={
           <Space>
             {realtimeEvents.length > 0 && (
@@ -1495,65 +495,36 @@ function TopologyPageInner() {
               </Tag>
             )}
             <Badge count={healthIssueCount} size="small" offset={[-3, 3]}>
-              <Button
-                icon={<MedicineBoxOutlined />}
-                onClick={() => setHealthDrawerOpen(true)}
-                type={healthIssueCount > 0 ? 'default' : 'default'}
-                danger={healthIssueCount > 0}
-              >
+              <Button icon={<MedicineBoxOutlined />} onClick={() => setHealthDrawerOpen(true)} danger={healthIssueCount > 0}>
                 Kiểm tra kết nối
               </Button>
             </Badge>
             <Tooltip title="Hiện/ẩn kết nối ngầm định từ FirewallRule ALLOW">
-              <Button
-                size="small"
-                type={showImplied ? 'primary' : 'default'}
-                ghost={showImplied}
-                onClick={() => setShowImplied((v) => !v)}
-                icon={<ApiOutlined />}
-              >
+              <Button size="small" type={showImplied ? 'primary' : 'default'} ghost={showImplied} onClick={() => setShowImplied((v) => !v)} icon={<ApiOutlined />}>
                 Implied
               </Button>
             </Tooltip>
-            <Button icon={<ReloadOutlined />} onClick={() => refetch()} loading={loading}>
-              Làm mới
-            </Button>
-            <Button icon={<SaveOutlined />} onClick={() => setSaveModalOpen(true)}>
-              Lưu bản chụp
-            </Button>
+            <Button icon={<ReloadOutlined />} onClick={() => refetch()} loading={loading}>Làm mới</Button>
+            <Button icon={<SaveOutlined />} onClick={() => setSaveModalOpen(true)}>Lưu bản chụp</Button>
             <Badge count={0} showZero={false}>
-              <Button icon={<HistoryOutlined />} onClick={() => setShowSnapshots(true)}>
-                Bản chụp
-              </Button>
+              <Button icon={<HistoryOutlined />} onClick={() => setShowSnapshots(true)}>Bản chụp</Button>
             </Badge>
-            <Dropdown
-              menu={{
-                items: [
-                  ...(viewMode === '2D' && renderEngine === 'reactflow'
-                    ? [
-                        { key: 'png', label: 'Xuất ảnh PNG', icon: <DownloadOutlined />, onClick: exportAsPNG },
-                        { key: 'svg', label: 'Xuất ảnh SVG', icon: <DownloadOutlined />, onClick: exportAsSVG },
-                      ]
-                    : []),
-                  { key: 'json', label: 'Xuất file JSON', icon: <DownloadOutlined />, onClick: exportAsJSON },
-                  { key: 'mermaid', label: 'Xuất file Mermaid', icon: <DownloadOutlined />, onClick: exportAsMermaid },
-                ],
-              }}
-            >
+            <Dropdown menu={{ items: [
+              ...(viewMode === '2D' && renderEngine === 'reactflow' ? [
+                { key: 'png', label: 'Xuất ảnh PNG', icon: <DownloadOutlined />, onClick: exportAsPNG },
+                { key: 'svg', label: 'Xuất ảnh SVG', icon: <DownloadOutlined />, onClick: exportAsSVG },
+              ] : []),
+              { key: 'json', label: 'Xuất file JSON', icon: <DownloadOutlined />, onClick: exportAsJSON },
+              { key: 'mermaid', label: 'Xuất file Mermaid', icon: <DownloadOutlined />, onClick: exportAsMermaid },
+            ] }}>
               <Button icon={<DownloadOutlined />}>Xuất file</Button>
             </Dropdown>
-            <Button
-              icon={isFullscreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
-              onClick={toggleFullscreen}
-              title={isFullscreen ? 'Thoát toàn màn hình (Esc)' : 'Toàn màn hình'}
-            />
+            <Button icon={isFullscreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />} onClick={toggleFullscreen} title={isFullscreen ? 'Thoát toàn màn hình (Esc)' : 'Toàn màn hình'} />
           </Space>
         }
       />
 
-      {error && (
-        <Alert type="error" message="Không thể tải sơ đồ" description={error.message} style={{ margin: '0 24px 8px' }} showIcon />
-      )}
+      {error && <Alert type="error" message="Không thể tải sơ đồ" description={error.message} style={{ margin: '0 24px 8px' }} showIcon />}
 
       <TopologyFilterPanel
         filters={filters}
@@ -1570,10 +541,7 @@ function TopologyPageInner() {
         serverAppsMap={serverAppsMap}
       />
 
-      <div
-        ref={containerRef}
-        style={{ position: 'relative', height: isFullscreen ? '100vh' : CANVAS_H, minHeight: 400 }}
-      >
+      <div ref={containerRef} style={{ position: 'relative', height: isFullscreen ? '100vh' : CANVAS_H, minHeight: 400 }}>
         {loading && !data && (
           <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 20, background: 'rgba(255,255,255,0.7)' }}>
             <Spin size="large" />
@@ -1581,24 +549,17 @@ function TopologyPageInner() {
           </div>
         )}
 
-        {/* ── 2D VIEW — React Flow (full editor) ── */}
+        {/* ── ReactFlow ── */}
         {viewMode === '2D' && renderEngine === 'reactflow' && (
           <>
             <ReactFlow
-              nodes={displayNodes}
-              edges={displayEdges}
-              onNodesChange={handleNodesChange}
-              onEdgesChange={onEdgesChange}
-              onConnect={onConnect}
-              onNodeClick={onNodeClick}
-              onEdgeClick={onEdgeClick}
+              nodes={displayNodes} edges={displayEdges}
+              onNodesChange={handleNodesChange} onEdgesChange={onEdgesChange}
+              onConnect={onConnect} onNodeClick={onNodeClick} onEdgeClick={onEdgeClick}
               onPaneClick={() => { setSelectedNode(null); setSelectedConnection(null); setSelectedImplied(null); setFocusedNodeId(null); }}
               onNodeDragStop={handleNodeDragStop}
-              nodeTypes={nodeTypes}
-              edgeTypes={edgeTypes}
-              fitView
-              fitViewOptions={{ padding: 0.25 }}
-              elevateEdgesOnSelect
+              nodeTypes={nodeTypes} edgeTypes={edgeTypes}
+              fitView fitViewOptions={{ padding: 0.25 }} elevateEdgesOnSelect
               onInit={(instance) => { reactFlowRef.current = instance; }}
               style={{ background: '#f0f2f5' }}
             >
@@ -1617,52 +578,14 @@ function TopologyPageInner() {
               )}
               <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="#e0e0e0" />
             </ReactFlow>
-            {filters.nodeType === 'server' && (
-              <div style={{
-                position: 'absolute', bottom: 16, left: '50%', transform: 'translateX(-50%)',
-                borderRadius: 6, padding: '5px 14px', fontSize: 11, fontWeight: 600,
-                pointerEvents: 'none', boxShadow: '0 2px 8px rgba(0,0,0,0.18)', zIndex: 10,
-                display: 'flex', alignItems: 'center', gap: 12, whiteSpace: 'nowrap',
-                ...(!filters.environment
-                  ? { background: 'rgba(250,173,20,0.95)', color: '#000' }
-                  : { background: 'rgba(30,30,30,0.82)', color: '#fff' }),
-              }}>
-                {!filters.environment ? (
-                  <>⚠ Chọn môi trường để xem kết nối FirewallRule (ALLOW / DENY)</>
-                ) : (
-                  <>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                      <span style={{ display: 'inline-block', width: 22, height: 2, background: '#389e0d', borderRadius: 1 }} />
-                      ALLOW
-                    </span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                      <span style={{ display: 'inline-block', width: 22, height: 2, background: '#cf1322', borderRadius: 1, borderTop: '2px dashed #cf1322' }} />
-                      DENY
-                    </span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                      <span style={{ display: 'inline-block', width: 22, height: 2, background: '#d9d9d9', borderRadius: 1 }} />
-                      App Connection
-                    </span>
-                  </>
-                )}
-              </div>
-            )}
+            {filters.nodeType === 'server' && <TopologyLegend hasEnvironment={!!filters.environment} />}
             <NodeDetailPanel node={selectedNode} onClose={() => setSelectedNode(null)} />
-            <ConnectionDetailPanel
-              connection={selectedConnection}
-              onClose={() => setSelectedConnection(null)}
-              onDelete={handleDeleteConnection}
-              deleting={deleteConnection.isPending}
-            />
-            <ImpliedConnectionDetailPanel
-              connection={selectedImplied}
-              servers={filteredData.serversForEdgeResolution}
-              onClose={() => setSelectedImplied(null)}
-            />
+            <ConnectionDetailPanel connection={selectedConnection} onClose={() => setSelectedConnection(null)} onDelete={handleDeleteConnection} deleting={deleteConnection.isPending} />
+            <ImpliedConnectionDetailPanel connection={selectedImplied} servers={filteredData.serversForEdgeResolution} onClose={() => setSelectedImplied(null)} />
           </>
         )}
 
-        {/* ── 2D VIEW — vis-network ── */}
+        {/* ── VisNetwork ── */}
         {viewMode === '2D' && renderEngine === 'visnetwork' && data?.topology && (
           <>
             <TopologyVisNetworkView
@@ -1679,108 +602,46 @@ function TopologyPageInner() {
                   const s = data.topology.servers.find((x) => x.id === payload.id);
                   if (s) setSelectedNode({ type: 'server', ...s });
                 } else {
-                  const dep = data.topology.servers
-                    .flatMap((s) => s.deployments.map((d) => ({ d, s })))
-                    .find(({ d }) => d.application.id === payload.id);
-                  if (dep) {
-                    setSelectedNode({
-                      type: 'app',
-                      id: dep.d.application.id,
-                      name: dep.d.application.name,
-                      code: dep.d.application.code,
-                      deploymentStatus: dep.d.status,
-                      environment: dep.d.environment,
-                      serverName: dep.s.name,
-                    });
-                  }
+                  const dep = data.topology.servers.flatMap((s) => s.deployments.map((d) => ({ d, s }))).find(({ d }) => d.application.id === payload.id);
+                  if (dep) setSelectedNode({ type: 'app', id: dep.d.application.id, name: dep.d.application.name, code: dep.d.application.code, deploymentStatus: dep.d.status, environment: dep.d.environment, serverName: dep.s.name });
                 }
               }}
-              onEdgeClick={(conn) => {
-                setSelectedNode(null);
-                setSelectedConnection(conn);
-              }}
+              onEdgeClick={(conn) => { setSelectedNode(null); setSelectedConnection(conn); }}
             />
             <NodeDetailPanel node={selectedNode} onClose={() => setSelectedNode(null)} />
-            <ConnectionDetailPanel
-              connection={selectedConnection}
-              onClose={() => setSelectedConnection(null)}
-              onDelete={handleDeleteConnection}
-              deleting={deleteConnection.isPending}
-            />
+            <ConnectionDetailPanel connection={selectedConnection} onClose={() => setSelectedConnection(null)} onDelete={handleDeleteConnection} deleting={deleteConnection.isPending} />
           </>
         )}
 
-        {/* ── 2D VIEW — Mermaid ── */}
+        {/* ── Mermaid ── */}
         {viewMode === '2D' && renderEngine === 'mermaid' && (
           <div style={{ position: 'absolute', inset: 0, overflow: 'auto', background: '#f0f2f5', padding: 16 }}>
-            <TopologyMermaidView
-              servers={filteredData.serversForEdgeResolution}
-              connections={filteredData.connectionsForEdgeResolution}
-              nodeType={filters.nodeType}
-              environment={filters.environment}
-            />
+            <TopologyMermaidView servers={filteredData.serversForEdgeResolution} connections={filteredData.connectionsForEdgeResolution} nodeType={filters.nodeType} environment={filters.environment} />
           </div>
         )}
 
-        {/* ── 3D VIEW ── */}
+        {/* ── 3D ── */}
         {viewMode === '3D' && data?.topology && (
-          <Topology3DView
-            servers={filteredData.servers}
-            connections={filteredData.connections}
-            onNodeSelect={(node) => {
-              if (!node) { setSelectedNode(null); return; }
-              setSelectedNode({ type: node.type, ...node.data });
-            }}
-          />
+          <Topology3DView servers={filteredData.servers} connections={filteredData.connections} onNodeSelect={(node) => { if (!node) { setSelectedNode(null); return; } setSelectedNode({ type: node.type, ...node.data }); }} />
         )}
-
-        {viewMode === '3D' && selectedNode && (
-          <NodeDetailPanel node={selectedNode} onClose={() => setSelectedNode(null)} />
-        )}
+        {viewMode === '3D' && selectedNode && <NodeDetailPanel node={selectedNode} onClose={() => setSelectedNode(null)} />}
       </div>
 
-      {/* Save Snapshot Modal */}
-      <Modal
-        title="Save Topology Snapshot"
-        open={saveModalOpen}
-        onOk={handleSaveSnapshot}
-        onCancel={() => setSaveModalOpen(false)}
-        confirmLoading={createSnapshot.isPending}
-        okText="Save"
-      >
+      <Modal title="Save Topology Snapshot" open={saveModalOpen} onOk={handleSaveSnapshot} onCancel={() => setSaveModalOpen(false)} confirmLoading={createSnapshot.isPending} okText="Save">
         <Space direction="vertical" style={{ width: '100%' }}>
-          <div>
-            <Text>Environment: </Text>
-            <Text strong>{filters.environment ?? 'All'}</Text>
-          </div>
+          <div><Text>Environment: </Text><Text strong>{filters.environment ?? 'All'}</Text></div>
           <Input placeholder="Label (optional)" value={snapshotLabel} onChange={(e) => setSnapshotLabel(e.target.value)} />
         </Space>
       </Modal>
 
-      <CreateConnectionModal
-        open={createConnModalVisible}
-        sourceApp={connectionDraft?.sourceApp}
-        targetApp={connectionDraft?.targetApp}
-        onCancel={() => {
-          setCreateConnModalVisible(false);
-          setConnectionDraft(null);
-        }}
-        onSubmit={handleCreateConnectionSubmit}
-      />
+      <CreateConnectionModal open={createConnModalVisible} sourceApp={connectionDraft?.sourceApp} targetApp={connectionDraft?.targetApp} onCancel={() => { setCreateConnModalVisible(false); setConnectionDraft(null); }} onSubmit={handleCreateConnectionSubmit} />
 
-      {/* Snapshot Browser Drawer */}
       <SnapshotBrowser open={showSnapshots} onClose={() => setShowSnapshots(false)} currentEnvironment={filters.environment} />
 
-      {/* Connection Health Drawer */}
       <ConnectionHealthDrawer
-        open={healthDrawerOpen}
-        onClose={() => setHealthDrawerOpen(false)}
-        servers={data?.topology?.servers ?? []}
-        connections={data?.topology?.connections ?? []}
-        onFocusNode={(nodeId) => {
-          setFocusedNodeId(nodeId);
-          if (renderEngine !== 'reactflow') setRenderEngine('reactflow');
-        }}
+        open={healthDrawerOpen} onClose={() => setHealthDrawerOpen(false)}
+        servers={data?.topology?.servers ?? []} connections={data?.topology?.connections ?? []}
+        onFocusNode={(nodeId) => { setFocusedNodeId(nodeId); if (renderEngine !== 'reactflow') setRenderEngine('reactflow'); }}
       />
     </div>
   );
@@ -1790,14 +651,8 @@ export default function TopologyPage() {
   const [activeTab, setActiveTab] = useTabState<'app' | 'firewall'>('app');
   return (
     <App>
-      <Tabs
-        activeKey={activeTab}
-        onChange={(k) => setActiveTab(k as 'app' | 'firewall')}
-        style={{ padding: '0 24px' }}
-        items={[
-          { key: 'app', label: 'Sơ đồ ứng dụng' },
-          { key: 'firewall', label: '🔒 Firewall Topology' },
-        ]}
+      <Tabs activeKey={activeTab} onChange={(k) => setActiveTab(k as 'app' | 'firewall')} style={{ padding: '0 24px' }}
+        items={[{ key: 'app', label: 'Sơ đồ ứng dụng' }, { key: 'firewall', label: '🔒 Firewall Topology' }]}
       />
       {activeTab === 'app' ? <TopologyPageInner /> : <FirewallTopologyView />}
     </App>
