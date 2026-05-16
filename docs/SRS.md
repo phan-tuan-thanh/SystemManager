@@ -47,8 +47,10 @@ Entity chính:
 * **DeploymentHistory** — lịch sử thay đổi phiên bản/trạng thái của Deployment (Change Management)
 * **DeploymentDocType** — loại tài liệu triển khai, cấu hình tập trung 
 * **DeploymentDoc** — tài liệu thực tế của 1 AppDeployment (preview + final file) 
-* **AppConnection** — kết nối giữa 2 application (upstream/downstream)
-* **Port Mapping** — port listen của application trên server
+* **Port** — port mà application lắng nghe trên server (port_number, protocol, service_name); gắn với AppDeployment; dùng để phát hiện port conflict và làm đầu nối cho FirewallRule
+* **AppConnection** — khai báo phụ thuộc ứng dụng: App A cần gọi App B qua port cụ thể; cross-validated với FirewallRule để cảnh báo thiếu phủ sóng mạng
+* **NetworkZone** — phân vùng mạng (LOCAL, DMZ, DB, DEV, INTERNET...) chứa danh sách IP/CIDR; gắn với environment
+* **FirewallRule** — quy tắc cấp phép mạng: Zone/IP nguồn → Server đích + Port đích; authority duy nhất về quyền kết nối mạng (ALLOW/DENY); khi ACTIVE thì apps trên server nguồn có thể reach port đó mà không cần khai báo riêng
 * **TopologySnapshot** — bản chụp toàn bộ topology tại 1 thời điểm
 * **ChangeSet** — tập hợp thay đổi đang ở trạng thái Draft, chưa apply
 * **ChangeItem** — 1 thay đổi đơn lẻ trong ChangeSet
@@ -69,14 +71,20 @@ ApplicationGroup    1──* SystemSoftware
 Server              1──* Hardware Component
 Server              1──* Network Configuration
 Server              1──* AppDeployment
+Server              1──* FirewallRule (as destination_server)
 Application         1──* AppDeployment
-Application         1──* Port Mapping
-Application         1──* AppConnection (as source or target)
+Application         1──* Port              (port listen của app, gắn với deployment)
+Application         1──* AppConnection     (as source or target)
+Port                1──* FirewallRule      (as destination_port)
+AppConnection       *──1 Port             (target_port: port của app đích, để cross-validate)
 AppDeployment       *──1 DeploymentHistory
 AppDeployment       *──1 Environment
 AppDeployment       1──* DeploymentDoc
 DeploymentDoc       *──1 DeploymentDocType
 DeploymentDocType   —— (global config, no parent)
+NetworkZone         1──* FirewallRule      (as source_zone hoặc destination_zone)
+FirewallRule        *──1 Server            (destination_server)
+FirewallRule        *──1 Port             (destination_port — port mà rule cho phép vào)
 TopologySnapshot    *──1 Environment
 TopologySnapshot    *──1 AuditLog
 ChangeSet           1──* ChangeItem
@@ -87,6 +95,8 @@ InfraSystem         1──* Server (qua InfraSystemServer)
 InfraSystem         1──* InfraSystemAccess
 InfraSystemAccess   *──1 [User | UserGroup]
 ```
+
+> **Mô hình 2 lớp kết nối** — xem chi tiết tại mục 4.5.1
 
 ---
 
@@ -451,14 +461,42 @@ Khi tạo 1 AppDeployment mới, hệ thống tự động sinh danh sách tài 
 ### 4.4.3. Quản lý Port
 
 * Port number, Protocol (`TCP` | `UDP`), Service name
-* Gắn với Application × Server
+* Gắn với Application × AppDeployment (Application trên 1 server cụ thể)
 * **Phát hiện port conflict** trên cùng 1 server
+* Là điểm neo để FirewallRule tham chiếu (`destination_port_id`) — quy tắc mạng cấp phép vào đúng port này
+* Là điểm neo để AppConnection tham chiếu (`target_port_id`) — kết nối ứng dụng khai báo cần đến port này
 
 ---
 
 ## 4.5. Topology & Kết nối ứng dụng
 
-### AppConnection — kết nối giữa các ứng dụng
+### 4.5.1. Mô hình Kết nối 2 Lớp
+
+Hệ thống quản lý connectivity theo **2 lớp độc lập, bổ sung cho nhau**:
+
+| | Lớp 1 — Network Permission | Lớp 2 — Application Dependency |
+|---|---|---|
+| **Entity** | `FirewallRule` | `AppConnection` |
+| **Phạm vi** | Server → Server + Port | App → App + Port |
+| **Mục đích** | Cấp phép mạng (ALLOW/DENY) | Khai báo phụ thuộc ứng dụng |
+| **Bắt buộc** | Có (với kết nối xuyên server) | Khuyến khích (để tài liệu hoá) |
+| **Topology** | Firewall Topology tab | App Topology tab |
+
+**Nguyên tắc quan trọng:**
+
+1. **FirewallRule là authority về network access.** Khi một FirewallRule ALLOW active tồn tại cho Zone/IP → Server B, Port P thì mọi ứng dụng trên server thuộc zone nguồn đều có thể reach Port P của Server B ở tầng mạng — không cần khai báo AppConnection để "mở" kết nối.
+
+2. **AppConnection là khai báo phụ thuộc ứng dụng.** Khai báo rằng App A *cần* gọi App B qua `target_port_id`. Đây là tầng semantic/architecture, không phải tầng network policy.
+
+3. **Cross-validation: AppConnection → FirewallRule.** Hệ thống kiểm tra mỗi AppConnection có FirewallRule ALLOW active phủ đường dẫn `(source_server_ip → target_server, target_port)` không:
+   - ✅ **Covered** — có FirewallRule phủ: kết nối được mạng cho phép
+   - ⚠️ **Uncovered** — thiếu FirewallRule: cảnh báo, cần xin cấp firewall rule
+
+4. **Implied connectivity từ FirewallRule.** App Topology hiển thị cả:
+   - **Explicit edges** (solid): từ AppConnection được khai báo
+   - **Implied edges** (dashed/nhạt): suy ra từ FirewallRule ALLOW active — hiển thị rằng network đã cho phép dù chưa có AppConnection khai báo
+
+### AppConnection — khai báo phụ thuộc ứng dụng
 
 Mỗi kết nối là 1 record:
 
@@ -467,15 +505,17 @@ Mỗi kết nối là 1 record:
 | Source App | Ứng dụng gọi đến |
 | Target App | Ứng dụng được gọi |
 | Protocol | `HTTP` / `HTTPS` / `gRPC` / `TCP` / `MQ` / `DB` |
-| Port | Port kết nối |
+| Target Port | Port của Target App cần kết nối đến (tham chiếu Port record; dùng để cross-validate FirewallRule) |
 | Môi trường | DEV / UAT / PROD |
 | Mô tả | Mục đích kết nối |
+| Firewall Status | (computed) `COVERED` / `UNCOVERED` — kết quả cross-validate với FirewallRule |
 
 ### Chức năng xem kết nối hiện tại
 
 * CRUD AppConnection
 * **Xem toàn bộ dependency của 1 ứng dụng** — upstream (ai gọi nó) và downstream (nó gọi đến đâu)
 * **Xem kết nối qua server** — application A (server X) → application B (server Y)
+* **Firewall coverage badge** trên mỗi kết nối: ✅ Covered / ⚠️ Uncovered (chưa có FirewallRule ALLOW phủ)
 * **Topology diagram** — sơ đồ kết nối dạng graph, filter theo môi trường
 * Filter topology theo: môi trường, site (DC/DR), ứng dụng cụ thể, server cụ thể
 
@@ -487,7 +527,10 @@ Người dùng có thể chuyển đổi giữa 2 chế độ hiển thị:
 
 * Graph layout tự động (force-directed): node là server/app, edge là kết nối
 * Node hiển thị: tên, loại (icon), trạng thái (màu sắc)
-* Edge hiển thị: protocol, port, trạng thái kết nối realtime
+* Edge có 2 loại (xem mục 4.5.1):
+  * **Explicit edge** (nét liền, màu đậm): từ AppConnection đã khai báo; tooltip hiển thị protocol, port, firewall coverage status
+  * **Implied edge** (nét đứt, màu nhạt): suy ra từ FirewallRule ALLOW active — mạng đã cho phép dù chưa có AppConnection; tooltip hiển thị thông tin rule
+* Edge coverage badge: ✅ (có FirewallRule phủ) hoặc ⚠️ (thiếu FirewallRule — cần xin cấp)
 * Zoom / pan, click node để xem chi tiết (side panel)
 * Mini-map điều hướng khi graph lớn
 * Các layout tuỳ chọn: force-directed, hierarchical, circular
@@ -819,7 +862,7 @@ Hệ thống hỗ trợ phân quyền truy cập theo từng InfraSystem:
 **Added:** 2026-04-30
 
 ### 4.9.2 Firewall Rule Management — Quản lý quy tắc firewall
-**Mô tả:** Quản lý danh sách firewall rule: cho phép/từ chối kết nối từ IP nguồn (trong zone) đến server đích tại cổng đang lắng nghe. Hỗ trợ import từ CSV/XLSX và xuất tài liệu XLSX để trình cấp phê duyệt.
+**Mô tả:** Quản lý danh sách firewall rule: cho phép/từ chối kết nối từ IP nguồn (trong zone) đến server đích tại cổng đang lắng nghe. FirewallRule là **tầng Network Permission** — khi ACTIVE + ALLOW, mọi ứng dụng trên server nguồn đều được mạng cho phép reach port đó; không cần khai báo AppConnection để "mở" kết nối. AppConnection chỉ cần để tài liệu hoá phụ thuộc ứng dụng và cross-validate coverage. Hỗ trợ import từ CSV/XLSX và xuất tài liệu XLSX để trình cấp phê duyệt.
 **Actor:** ADMIN | OPERATOR
 **Acceptance Criteria:**
 - AC1: Mỗi rule gồm: tên, môi trường, IP/zone nguồn, server đích, port đích, giao thức, hành động (ALLOW/DENY), trạng thái (ACTIVE/INACTIVE/PENDING_APPROVAL/REJECTED), ngày yêu cầu, người phê duyệt, ghi chú.
@@ -827,20 +870,22 @@ Hệ thống hỗ trợ phân quyền truy cập theo từng InfraSystem:
 - AC3: Export danh sách rule ra file XLSX định dạng tài liệu rule request (bảng chuẩn gồm STT, IP Nguồn, Zone Nguồn, Server Đích, IP Đích, Cổng, Giao thức, Hành động, Trạng thái, Ghi chú).
 - AC4: Filter rule theo: environment, action, status, source zone, server đích.
 - AC5: Soft delete — không xóa cứng record.
+- AC6: Trang chi tiết FirewallRule hiển thị danh sách AppConnection đang dùng đường dẫn này (cross-reference với AppConnection.target_port_id = rule.destination_port_id và source app trên server trong zone nguồn).
 **Added:** 2026-04-30
 
 ### 4.9.3 Firewall Topology — Topology phân vùng mạng
-**Mô tả:** Loại topology mới thể hiện kết nối từ các IP/zone nguồn đến các server đích theo port, biểu diễn trực quan các firewall rule đang ACTIVE/PENDING. Bổ sung vào trang Topology hiện có dưới dạng tab riêng.
+**Mô tả:** Loại topology thể hiện kết nối từ các IP/zone nguồn đến các server đích theo port, biểu diễn trực quan các firewall rule đang ACTIVE/PENDING. Tab riêng trong trang Topology; phản ánh **tầng Network Permission** (đối lập với App Topology phản ánh tầng Application Dependency — xem 4.5.1).
 **Actor:** ADMIN | OPERATOR | VIEWER
 **Acceptance Criteria:**
 - AC1: Tab "Firewall" trong trang Topology, hiển thị graph riêng biệt với tab App Topology.
 - AC2: Node types: Zone (hình chữ nhật màu zone), Server (hình vuông), Port (badge trên server node).
 - AC3: Edge từ Zone/IP → Server thể hiện rule ALLOW (xanh) hoặc DENY (đỏ).
-- AC4: Tooltip/hover trên edge hiển thị chi tiết rule: IP nguồn, port đích, giao thức, trạng thái.
+- AC4: Tooltip/hover trên edge hiển thị chi tiết rule: IP nguồn, port đích, giao thức, trạng thái; kèm danh sách AppConnection đang dùng đường dẫn này (nếu có).
 - AC5: Filter theo environment, action (ALLOW/DENY), status (ACTIVE/PENDING_APPROVAL).
 - AC6: Dữ liệu lấy từ API `/api/v1/firewall-rules` — không cần thay đổi topology backend hiện tại.
 - AC7: Hỗ trợ render sơ đồ Topology thông qua engine `vis-network` (tương tự App Topology) để đảm bảo trải nghiệm tương tác đồng nhất.
 - AC8: Cung cấp tính năng Export đồ thị Firewall Topology hiện tại ra định dạng văn bản `Mermaid`, hỗ trợ người dùng copy nhúng thẳng vào các tài liệu Confluence/Markdown.
+- AC9: Badge trên mỗi edge ALLOW: số lượng AppConnection khai báo dùng đường dẫn này; badge "0" = implied connectivity nhưng chưa có AppConnection tài liệu hoá.
 **Added:** 2026-04-30
 
 ---
@@ -886,13 +931,14 @@ Hệ thống hỗ trợ phân quyền truy cập theo từng InfraSystem:
 * **Trang Module Management** (`/admin/modules`, ADMIN only): bảng phân nhóm Core/Extended, toggle bật/tắt với kiểm tra dependency, timeline thay đổi
 * **Dashboard tổng quan**: số server theo môi trường, trạng thái, cảnh báo (OS hết support, port conflict, thay đổi gần đây), ChangeSet đang Draft
 * **Trang chi tiết server** (tab-based): Hardware / Network / Applications / Change History
-* **Trang ứng dụng**: thông tin deploy (theo nhóm ứng dụng), upstream/downstream connections, port đang dùng
+* **Trang ứng dụng**: thông tin deploy (theo nhóm ứng dụng), upstream/downstream connections với firewall coverage badge (✅/⚠️), port đang dùng
 * **Trang deployment record**: thông tin quản lý (tiêu đề, CMC, người trình, ngày dự kiến/thực tế), checklist tài liệu với progress bar (X/Y loại COMPLETE), upload/preview file inline từng loại tài liệu
 * **Topology view** (current):
   * Toggle chuyển đổi chế độ **2D / 3D** không mất trạng thái filter
   * 2D: force-directed graph, hỗ trợ layout tùy chọn, mini-map
   * 3D: xoay/zoom bằng chuột, nhóm node theo tầng, explode view theo môi trường/site
-  * Edge màu theo trạng thái realtime (xanh/vàng/đỏ/xám), cập nhật qua GraphQL subscription
+  * Edge màu: explicit AppConnection (nét liền xanh/vàng/đỏ theo realtime status) + implied FirewallRule (nét đứt xanh nhạt); cập nhật qua GraphQL subscription
+  * Coverage badge trên AppConnection edge: ✅ Covered / ⚠️ Uncovered (thiếu FirewallRule)
   * Node màu theo trạng thái server, pulse animation khi có thay đổi mới
   * Nút Export (PNG/SVG, Mermaid, JSON)
   * Nút "Tạo snapshot" và shortcut "So sánh với snapshot..."

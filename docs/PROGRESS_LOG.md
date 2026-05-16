@@ -5,6 +5,48 @@ A chronological record of project milestones, updates, and sprint summaries.
 
 ---
 
+## 2026-05-08 — Sprint 25: Two-Layer Connectivity Model ✅ Hoàn thành
+
+- ✅ S25-01 [BE] `ConnectionService.getFirewallCoverageStatus()` + `getFirewallCoverageStatusBatch()` với CIDR matching
+- ✅ S25-02 [BE] `GET /api/v1/connections/firewall-coverage` (batch) + `/:id/firewall-coverage`
+- ✅ S25-03 [BE] `TopologyService.getImpliedConnections()` + `impliedConnections` trong GraphQL topology query
+- ✅ S25-04 [FE] Hook `useConnectionFirewallCoverage`
+- ✅ S25-05 [FE] AppConnection list: column "Firewall Coverage" badge ✅/⚠️/—
+- ✅ S25-06 [FE] App Topology: implied edges (nét đứt, màu nhạt) + toggle "Implied"
+- ✅ S25-07 [FE] FirewallRule detail drawer: section "Kết nối ứng dụng dùng rule này"
+- ✅ S25-08 [FE] Firewall Topology: badge "N app / no app" trên ALLOW edges
+- ✅ S25-09 [FE] DependencyTree (upstream/downstream): coverage badge ✅/⚠️ mỗi connection
+- Branch: `feat/sprint-25-connectivity-model` — Docker build pass, 0 lỗi TS mới
+
+---
+
+## 2026-05-08 — Sprint 25: Bắt đầu kế hoạch Two-Layer Connectivity Model 🔄
+
+- Yêu cầu ghi nhận vào SRS.md section 4.5.1 (Mô hình Kết nối 2 Lớp), 4.9.2 AC6, 4.9.3 AC9
+- Sprint plan tạo mới: `docs/plans/sprint-25-connectivity-model.md` (25 points, 9 tasks)
+- Kế hoạch kỹ thuật: `docs/IMPLEMENTATION_DETAILS.md` (entry Connectivity Model cập nhật files + sprint ref)
+- Tasks mới: S25-01 đến S25-09
+- Branch mục tiêu: `feat/sprint-25-connectivity-model`
+
+---
+
+## 2026-05-08 — Connectivity Model Design: Two-Layer FirewallRule + AppConnection 📋
+
+- **Mục tiêu**: Làm rõ ranh giới và quan hệ giữa `FirewallRule` (Network Permission) và `AppConnection` (Application Dependency) để tránh chồng chéo, xác định cross-validation workflow.
+- **Tài liệu cập nhật**:
+  - `docs/SRS.md` — Thêm Section 4.5.1 "Mô hình Kết nối 2 Lớp"; cập nhật domain model (Section 3) bổ sung NetworkZone/FirewallRule vào ERD; cập nhật AppConnection schema (firewall_status computed field); cập nhật Firewall Topology AC9; cập nhật Topology Visualization (implied edges, coverage badge)
+  - `docs/IMPLEMENTATION_DETAILS.md` — Thêm entry "Connectivity Model — Two-Layer Design" với cross-validation logic, rendering spec, và files cần cập nhật
+- **Quyết định thiết kế**:
+  - FirewallRule = tầng Network Permission (authority về quyền kết nối mạng)
+  - AppConnection = tầng Application Dependency (khai báo phụ thuộc ứng dụng, cross-validate với FirewallRule)
+  - Port record là điểm neo chung cho cả 2 tầng
+  - App Topology: hiển thị explicit edges (AppConnection) + implied edges (FirewallRule ALLOW active)
+  - Cross-validation: mỗi AppConnection có `COVERED`/`UNCOVERED` status dựa trên FirewallRule active
+
+**Trạng thái**: Design hoàn chỉnh, implementation dự kiến trong sprint tiếp theo.
+
+---
+
 ## 2026-05-02 — Documentation Standardization Phase ✅ Hoàn thành
 
 - **Mục tiêu**: Nâng cấp toàn bộ hệ thống tài liệu dự án thành "Single Source of Truth" đạt chuẩn PROD.

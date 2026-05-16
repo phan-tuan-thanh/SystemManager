@@ -1,13 +1,22 @@
-import { Modal, Skeleton, Tag, Typography, Divider, Empty } from 'antd';
+import { Modal, Skeleton, Tag, Typography, Divider, Empty, Tooltip } from 'antd';
 import { ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
-import { useAppDependencies } from '../../../hooks/useConnections';
-import type { DependencyItem } from '../../../types/connection';
+import { useAppDependencies, useConnectionFirewallCoverage } from '../../../hooks/useConnections';
+import type { DependencyItem, FirewallCoverageResult } from '../../../types/connection';
 
 const { Text } = Typography;
 
 const ENV_COLOR: Record<string, string> = { DEV: 'green', UAT: 'blue', PROD: 'red' };
 
-function DependencyRow({ item }: { item: DependencyItem }) {
+function CoverageBadge({ coverage }: { coverage: FirewallCoverageResult | undefined }) {
+  if (!coverage) return null;
+  if (coverage.status === 'COVERED')
+    return <Tooltip title="Có FirewallRule ALLOW phủ"><Tag color="success" style={{ fontSize: 11 }}>✅ FW</Tag></Tooltip>;
+  if (coverage.status === 'UNCOVERED')
+    return <Tooltip title="Thiếu FirewallRule ALLOW — cần xin cấp quyền mạng"><Tag color="warning" style={{ fontSize: 11 }}>⚠️ No FW</Tag></Tooltip>;
+  return null;
+}
+
+function DependencyRow({ item, coverage }: { item: DependencyItem; coverage?: FirewallCoverageResult }) {
   return (
     <div
       style={{
@@ -24,6 +33,7 @@ function DependencyRow({ item }: { item: DependencyItem }) {
       <Text type="secondary" style={{ fontSize: 12 }}>
         ({item.app.code})
       </Text>
+      <CoverageBadge coverage={coverage} />
       {item.description && (
         <Text type="secondary" style={{ fontSize: 12, marginLeft: 'auto' }}>
           {item.description}
@@ -52,6 +62,7 @@ export default function DependencyTree({
     open ? applicationId : null,
     environment,
   );
+  const { data: coverageData } = useConnectionFirewallCoverage(open ? environment : undefined);
 
   return (
     <Modal
@@ -72,7 +83,7 @@ export default function DependencyTree({
             <Empty description="Không có upstream" image={Empty.PRESENTED_IMAGE_SIMPLE} />
           ) : (
             data.upstream.map((item) => (
-              <DependencyRow key={item.connection_id} item={item} />
+              <DependencyRow key={item.connection_id} item={item} coverage={coverageData?.[item.connection_id]} />
             ))
           )}
 
@@ -83,7 +94,7 @@ export default function DependencyTree({
             <Empty description="Không có downstream" image={Empty.PRESENTED_IMAGE_SIMPLE} />
           ) : (
             data.downstream.map((item) => (
-              <DependencyRow key={item.connection_id} item={item} />
+              <DependencyRow key={item.connection_id} item={item} coverage={coverageData?.[item.connection_id]} />
             ))
           )}
         </>

@@ -37,6 +37,7 @@ import {
   App,
   Tag,
   Tabs,
+  Tooltip,
 } from 'antd';
 import { useState as useTabState } from 'react';
 import {
@@ -48,6 +49,7 @@ import {
   FullscreenOutlined,
   FullscreenExitOutlined,
   MedicineBoxOutlined,
+  ApiOutlined,
 } from '@ant-design/icons';
 
 import ServerFlowNode from './components/ServerFlowNode';
@@ -62,7 +64,7 @@ import TopologyMermaidView from './components/TopologyMermaidView';
 import { CreateConnectionModal } from './components/CreateConnectionModal';
 import ConnectionHealthDrawer, { analyzeTopologyHealth } from './components/ConnectionHealthDrawer';
 import FirewallTopologyView from './components/FirewallTopologyView';
-import { useTopologyQuery, ServerNode, ConnectionEdge } from './hooks/useTopology';
+import { useTopologyQuery, ServerNode, ConnectionEdge, ImpliedConnectionEdge } from './hooks/useTopology';
 import { useCreateSnapshot } from './hooks/useTopology';
 import { useTopologySubscription } from './hooks/useTopologySubscription';
 import { useCreateConnection, useDeleteConnection } from '../../hooks/useConnections';
@@ -333,28 +335,23 @@ function buildGraph(
         markerEnd: { type: MarkerType.ArrowClosed, color },
       });
     } else if (nodeType === 'server') {
+      // Gray background edges — always visible so user sees server connectivity.
+      // ALLOW (green) / DENY (red) implied edges layer on top when environment is selected.
       const srcServer = servers.find((s) => s.deployments.some((d) => d.application.id === conn.sourceAppId));
       const tgtServer = servers.find((s) => s.deployments.some((d) => d.application.id === conn.targetAppId));
       if (srcServer && tgtServer && srcServer.id !== tgtServer.id) {
-        const color = protocolColors[conn.connectionType] ?? '#8c8c8c';
-        const existingEdge = edges.find(
-          (e) => e.source === `server-${srcServer.id}` && e.target === `server-${tgtServer.id}`,
-        );
-        if (!existingEdge) {
+        const edgeId = `conn-srv-${srcServer.id}-${tgtServer.id}`;
+        if (!edges.some((e) => e.id === edgeId)) {
           edges.push({
-            id: `conn-srv-${conn.id}`,
+            id: edgeId,
             source: `server-${srcServer.id}`,
             target: `server-${tgtServer.id}`,
-            type: 'protocolEdge',
-            animated: true,
-            data: {
-              protocol: conn.connectionType,
-              targetPort: conn.targetPort,
-              edgeStyle,
-              _connection: conn,
-            },
-            style: { stroke: color, strokeWidth: 2 },
-            markerEnd: { type: MarkerType.ArrowClosed, color },
+            type: 'default',
+            animated: false,
+            zIndex: 0,
+            style: { stroke: '#d9d9d9', strokeWidth: 1.5, strokeDasharray: '4,3', opacity: 0.6 },
+            markerEnd: { type: MarkerType.ArrowClosed, color: '#d9d9d9' },
+            data: { type: 'APP_CONN', _connection: conn },
           });
         }
       }
@@ -576,7 +573,7 @@ function TopologyPageInner() {
     visibleGroupNames: string[];
     visibleServerIds: string[];
     visibleAppIds: string[];
-  }>({ nodeType: 'all', showMiniMap: true, layout: 'force', layoutAlgorithm: 'dagre', layoutDirection: 'LR', connectionMode: false, edgeStyle: 'bezier', visibleGroupNames: [], visibleServerIds: [], visibleAppIds: [] });
+  }>({ nodeType: 'server', showMiniMap: true, layout: 'force', layoutAlgorithm: 'elk-layered', layoutDirection: 'LR', connectionMode: false, edgeStyle: 'bezier', visibleGroupNames: [], visibleServerIds: [], visibleAppIds: [] });
 
   const [selectedNode, setSelectedNode] = useState<any>(null);
   const [selectedConnection, setSelectedConnection] = useState<ConnectionEdge | null>(null);
@@ -589,6 +586,7 @@ function TopologyPageInner() {
   const [createConnModalVisible, setCreateConnModalVisible] = useState(false);
   const [connectionDraft, setConnectionDraft] = useState<any>(null);
   const [healthDrawerOpen, setHealthDrawerOpen] = useState(false);
+  const [showImplied, setShowImplied] = useState(true);
 
   const reactFlowRef = useRef<ReactFlowInstance | null>(null);
   const visNetworkViewRef = useRef<TopologyVisNetworkHandle>(null);
@@ -696,7 +694,7 @@ function TopologyPageInner() {
   }, [data?.topology]);
 
   const filteredData = useMemo(() => {
-    if (!data?.topology) return { servers: [], connections: [] };
+    if (!data?.topology) return { servers: [], connections: [], serversForEdgeResolution: [], connectionsForEdgeResolution: [] };
 
     let servers = [...data.topology.servers];
     let connections = [...data.topology.connections];
@@ -746,20 +744,31 @@ function TopologyPageInner() {
       connections = connections.filter(c => visibleAppIds.has(c.sourceAppId) && visibleAppIds.has(c.targetAppId));
     }
 
-    // 3. Filter by node type (for Vis/Cytoscape mostly, as ReactFlow handles it in buildGraph)
+    // Save pre-server-mode data so ReactFlow buildGraph can resolve server↔app mappings for edges
+    const serversForEdgeResolution = servers;
+    const connectionsForEdgeResolution = connections;
+
+    // 3. Filter by node type (for Vis/Cytoscape: collapse servers to icons, hide app-level connections)
     if (filters.nodeType === 'server') {
       servers = servers.map(s => ({ ...s, deployments: [] }));
       connections = [];
     }
 
-    return { servers, connections };
+    return { servers, connections, serversForEdgeResolution, connectionsForEdgeResolution };
   }, [data, filters.environment, filters.nodeType, filters.visibleServerIds, filters.visibleGroupNames, filters.visibleAppIds]);
 
   // ─── 2D layout ───────────────────────────────────────────────
   const { nodes: computedNodes, edges: computedEdges } = useMemo(() => {
     if (!data?.topology) return { nodes: [], edges: [] };
-    // Use filtered data for React Flow too
-    const result = computeLayout(filteredData.servers, filteredData.connections, filters.nodeType, filters.layoutDirection, filters.edgeStyle);
+    // Server mode: pass servers-with-deployments so buildGraph can resolve app→server mappings.
+    // buildGraph draws gray background edges in server mode; ALLOW/DENY implied edges layer on top.
+    const layoutServers = filters.nodeType === 'server'
+      ? filteredData.serversForEdgeResolution
+      : filteredData.servers;
+    const layoutConnections = filters.nodeType === 'server'
+      ? filteredData.connectionsForEdgeResolution
+      : filteredData.connections;
+    const result = computeLayout(layoutServers, layoutConnections, filters.nodeType, filters.layoutDirection, filters.edgeStyle);
     // Attach stable onLabelMove callback to each edge for draggable labels
     const edgesWithCallback = result.edges.map((e) => ({
       ...e,
@@ -768,8 +777,75 @@ function TopologyPageInner() {
         onLabelMove: (dx: number, dy: number) => stableUpdateEdgeLabel(e.id, dx, dy),
       },
     }));
-    return { nodes: result.nodes, edges: edgesWithCallback };
-  }, [filteredData, filters.nodeType, filters.layoutDirection, filters.edgeStyle, stableUpdateEdgeLabel]);
+
+    // ── Implied connection edges from FirewallRule (ALLOW / DENY) ───────
+    // Color is the primary indicator: green = ALLOW, red = DENY.
+    // Label shows only the port number; the rule name lives in data for detail panels.
+    const FW_ACTION: Record<string, { color: string; dash: string; width: number }> = {
+      ALLOW: { color: '#389e0d', dash: '0',   width: 2 },
+      DENY:  { color: '#cf1322', dash: '7,4', width: 2 },
+    };
+    const impliedEdges: Edge[] = [];
+    if (showImplied && data?.topology?.impliedConnections) {
+      const allNodes = result.nodes;
+      const addedServerPairs = new Map<string, Set<string>>();
+
+      data.topology.impliedConnections.forEach((ic: ImpliedConnectionEdge) => {
+        const action = ic.action ?? 'ALLOW';
+        const cfg = FW_ACTION[action] ?? FW_ACTION.ALLOW;
+        const isDeny = action === 'DENY';
+        const portNum = ic.targetPort?.portNumber ?? (ic.targetPort as any)?.port_number;
+
+        const commonEdgeProps = {
+          type: 'default' as const,
+          animated: !isDeny,
+          style: {
+            stroke: cfg.color,
+            strokeWidth: cfg.width,
+            strokeDasharray: cfg.dash,
+            opacity: 0.9,
+          },
+          markerEnd: { type: MarkerType.ArrowClosed, color: cfg.color },
+          data: { type: 'IMPLIED', action, firewallRuleId: ic.firewallRuleId, firewallRuleName: ic.firewallRuleName, portNum },
+        };
+
+        if (filters.nodeType === 'server') {
+          const srcServer = filteredData.serversForEdgeResolution.find(
+            (s) => s.deployments.some((d) => d.application.id === ic.sourceAppId),
+          );
+          const tgtServer = filteredData.serversForEdgeResolution.find(
+            (s) => s.deployments.some((d) => d.application.id === ic.targetAppId),
+          );
+          if (srcServer && tgtServer && srcServer.id !== tgtServer.id) {
+            const pairKey = `${action}::${srcServer.id}::${tgtServer.id}`;
+            if (!addedServerPairs.has(action)) addedServerPairs.set(action, new Set());
+            if (!addedServerPairs.get(action)!.has(pairKey)) {
+              addedServerPairs.get(action)!.add(pairKey);
+              impliedEdges.push({
+                id: `implied-srv-${action}-${srcServer.id}-${tgtServer.id}`,
+                source: `server-${srcServer.id}`,
+                target: `server-${tgtServer.id}`,
+                ...commonEdgeProps,
+              });
+            }
+          }
+        } else {
+          const sourceNodes = allNodes.filter((n) => n.id.startsWith(`app-${ic.sourceAppId}-`));
+          const targetNodes = allNodes.filter((n) => n.id.startsWith(`app-${ic.targetAppId}-`));
+          if (sourceNodes.length && targetNodes.length) {
+            impliedEdges.push({
+              id: `${ic.id}-${action}`,
+              source: sourceNodes[0].id,
+              target: targetNodes[0].id,
+              ...commonEdgeProps,
+            });
+          }
+        }
+      });
+    }
+
+    return { nodes: result.nodes, edges: [...edgesWithCallback, ...impliedEdges] };
+  }, [filteredData, filters.nodeType, filters.layoutDirection, filters.edgeStyle, stableUpdateEdgeLabel, showImplied, data?.topology?.impliedConnections]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(computedNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(computedEdges);
@@ -1262,6 +1338,17 @@ function TopologyPageInner() {
                 Kiểm tra kết nối
               </Button>
             </Badge>
+            <Tooltip title="Hiện/ẩn kết nối ngầm định từ FirewallRule ALLOW">
+              <Button
+                size="small"
+                type={showImplied ? 'primary' : 'default'}
+                ghost={showImplied}
+                onClick={() => setShowImplied((v) => !v)}
+                icon={<ApiOutlined />}
+              >
+                Implied
+              </Button>
+            </Tooltip>
             <Button icon={<ReloadOutlined />} onClick={() => refetch()} loading={loading}>
               Làm mới
             </Button>
@@ -1364,6 +1451,36 @@ function TopologyPageInner() {
               )}
               <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="#e0e0e0" />
             </ReactFlow>
+            {filters.nodeType === 'server' && (
+              <div style={{
+                position: 'absolute', bottom: 16, left: '50%', transform: 'translateX(-50%)',
+                borderRadius: 6, padding: '5px 14px', fontSize: 11, fontWeight: 600,
+                pointerEvents: 'none', boxShadow: '0 2px 8px rgba(0,0,0,0.18)', zIndex: 10,
+                display: 'flex', alignItems: 'center', gap: 12, whiteSpace: 'nowrap',
+                ...(!filters.environment
+                  ? { background: 'rgba(250,173,20,0.95)', color: '#000' }
+                  : { background: 'rgba(30,30,30,0.82)', color: '#fff' }),
+              }}>
+                {!filters.environment ? (
+                  <>⚠ Chọn môi trường để xem kết nối FirewallRule (ALLOW / DENY)</>
+                ) : (
+                  <>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                      <span style={{ display: 'inline-block', width: 22, height: 2, background: '#389e0d', borderRadius: 1 }} />
+                      ALLOW
+                    </span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                      <span style={{ display: 'inline-block', width: 22, height: 2, background: '#cf1322', borderRadius: 1, borderTop: '2px dashed #cf1322' }} />
+                      DENY
+                    </span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                      <span style={{ display: 'inline-block', width: 22, height: 2, background: '#d9d9d9', borderRadius: 1 }} />
+                      App Connection
+                    </span>
+                  </>
+                )}
+              </div>
+            )}
             <NodeDetailPanel node={selectedNode} onClose={() => setSelectedNode(null)} />
             <ConnectionDetailPanel
               connection={selectedConnection}
@@ -1379,8 +1496,11 @@ function TopologyPageInner() {
           <>
             <TopologyVisNetworkView
               ref={visNetworkViewRef}
-              servers={filteredData.servers}
-              connections={filteredData.connections}
+              servers={filteredData.serversForEdgeResolution}
+              connections={filteredData.connectionsForEdgeResolution}
+              impliedConnections={data.topology.impliedConnections ?? []}
+              showImplied={showImplied}
+              nodeType={filters.nodeType}
               layout={filters.layout === 'hierarchical' ? 'hierarchical' : 'physics'}
               onNodeClick={(payload) => {
                 setSelectedConnection(null);
@@ -1423,8 +1543,9 @@ function TopologyPageInner() {
         {viewMode === '2D' && renderEngine === 'mermaid' && (
           <div style={{ position: 'absolute', inset: 0, overflow: 'auto', background: '#f0f2f5', padding: 16 }}>
             <TopologyMermaidView
-              servers={filteredData.servers}
-              connections={filteredData.connections}
+              servers={filteredData.serversForEdgeResolution}
+              connections={filteredData.connectionsForEdgeResolution}
+              nodeType={filters.nodeType}
               environment={filters.environment}
             />
           </div>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, Input, Select, Space, App, Popconfirm, Tag } from 'antd';
+import { Button, Input, Select, Space, App, Popconfirm, Tag, Tooltip } from 'antd';
 import {
   PlusOutlined, SearchOutlined, EditOutlined, DeleteOutlined, ApartmentOutlined,
 } from '@ant-design/icons';
@@ -13,6 +13,7 @@ import {
   useCreateConnection,
   useUpdateConnection,
   useDeleteConnection,
+  useConnectionFirewallCoverage,
 } from '../../hooks/useConnections';
 import { useApplicationList } from '../../hooks/useApplications';
 import type { AppConnection } from '../../types/connection';
@@ -46,6 +47,8 @@ export default function ConnectionListPage() {
     environment: envFilter as any,
     connection_type: typeFilter as any,
   });
+
+  const { data: coverageData } = useConnectionFirewallCoverage(envFilter);
 
   const { data: appsData } = useApplicationList({ limit: 200 });
   const applications = appsData?.items ?? [];
@@ -146,6 +149,38 @@ export default function ConnectionListPage() {
       key: 'description',
       ellipsis: true,
       render: (d: string) => d ?? '—',
+    },
+    {
+      title: 'Firewall',
+      key: 'firewall_coverage',
+      width: 100,
+      render: (_: unknown, r: AppConnection) => {
+        if (!envFilter || !coverageData) return <Tag color="default">—</Tag>;
+        const cov = coverageData[r.id];
+        if (!cov) return <Tag color="default">—</Tag>;
+        if (cov.status === 'COVERED') {
+          return (
+            <Tooltip title="Có FirewallRule ALLOW phủ">
+              <Tag color="success">Covered</Tag>
+            </Tooltip>
+          );
+        }
+        if (cov.status === 'UNCOVERED') {
+          return (
+            <Tooltip title="Thiếu FirewallRule ALLOW — cần xin cấp quyền mạng">
+              <Tag color="warning">Uncovered</Tag>
+            </Tooltip>
+          );
+        }
+        if (cov.status === 'NO_PORT') {
+          return (
+            <Tooltip title="Chưa khai báo target port — không thể validate">
+              <Tag color="default">No port</Tag>
+            </Tooltip>
+          );
+        }
+        return <Tag color="default">?</Tag>;
+      },
     },
     {
       title: 'Hành động',

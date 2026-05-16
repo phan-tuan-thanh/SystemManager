@@ -185,10 +185,13 @@ function ServerFlowNode({ data, selected }: NodeProps<ServerNodeData>) {
       </div>
 
       <div style={{ padding: '8px 12px 10px' }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 6 }}>
-          <span style={{ fontSize: 10, color: '#888', fontWeight: 600 }}>{data.code}</span>
-          <span style={{ color: '#ddd' }}>|</span>
-          <span style={{ fontFamily: 'monospace', fontSize: 10, color: '#555' }}>{data.hostname}</span>
+        <div style={{ marginBottom: 6 }}>
+          <div style={{ fontSize: 10, color: '#888', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {data.code}
+          </div>
+          <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#555', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: 1 }}>
+            {data.hostname}
+          </div>
         </div>
 
         {data.privateIp && (

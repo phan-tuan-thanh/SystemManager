@@ -71,9 +71,27 @@ export interface ConnectionEdge {
   };
 }
 
+export interface ImpliedConnectionEdge {
+  id: string;
+  sourceAppId: string;
+  targetAppId: string;
+  sourceAppName: string;
+  targetAppName: string;
+  environment: string;
+  firewallRuleId: string;
+  firewallRuleName: string;
+  action: 'ALLOW' | 'DENY';
+  targetPort?: {
+    id: string;
+    portNumber: number;
+    protocol: string;
+  };
+}
+
 export interface TopologyData {
   servers: ServerNode[];
   connections: ConnectionEdge[];
+  impliedConnections?: ImpliedConnectionEdge[];
 }
 
 export function useTopologyQuery(environment?: string) {

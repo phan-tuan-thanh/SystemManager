@@ -4,6 +4,58 @@ This document consolidates all past implementation plans and detailed technical 
 
 ---
 
+## Connectivity Model — Two-Layer Design (2026-05-08)
+
+**Status:** ✅ Completed
+**Context:** Sau Sprint 23 (FirewallRule), hệ thống có 2 entity đều liên quan đến kết nối: AppConnection (app→app) và FirewallRule (server→server). Cần làm rõ ranh giới và quan hệ để tránh chồng chéo, xác định khi nào dùng entity nào, và tạo ra giá trị cross-validation.
+
+**Decision — Mô hình 2 lớp:**
+- **Layer 1 — Network Permission** (`FirewallRule`): Khai báo quyền truy cập mạng cấp server. `source_zone/source_ip → destination_server + destination_port`. Khi ACTIVE + ALLOW, mọi app trên server thuộc zone nguồn đều được mạng cho phép reach port đó — không cần AppConnection để "mở" kết nối mạng.
+- **Layer 2 — Application Dependency** (`AppConnection`): Khai báo phụ thuộc ứng dụng. Ghi nhận App A cần gọi App B qua `target_port_id`. Mục đích: tài liệu hoá kiến trúc + cross-validate FirewallRule coverage.
+
+**Vai trò của `Port` record:**
+- Là điểm neo chung cho cả 2 lớp: `FirewallRule.destination_port_id → Port` (mạng cho phép vào cổng này) và `AppConnection.target_port_id → Port` (app cần gọi đến cổng này).
+- Phát hiện port conflict trong phạm vi server.
+- Giúp cross-validate: khi AppConnection khai báo target_port, hệ thống kiểm tra có FirewallRule ALLOW active phủ đường dẫn source_server → target_server trên port đó không.
+
+**Cross-validation logic (AppConnection → FirewallRule):**
+- Với mỗi AppConnection `(source_app, target_app, target_port_id, environment)`:
+  - Tìm servers chạy source_app (qua AppDeployment, cùng environment)
+  - Tìm server chạy target_app + target_port_id
+  - Kiểm tra có FirewallRule ALLOW active với `destination_server = target_server` AND `destination_port_id = target_port_id` AND source phủ source_server IP
+  - Kết quả: `COVERED` hoặc `UNCOVERED` (badge cảnh báo ⚠️)
+
+**Topology rendering — App Topology tab:**
+- **Explicit edges** (nét liền, màu đậm theo realtime status): AppConnection đã khai báo
+- **Implied edges** (nét đứt, màu xanh nhạt): từ FirewallRule ALLOW active — mạng cho phép nhưng chưa có AppConnection tài liệu hoá
+- Toggle để ẩn/hiện implied edges
+
+**Firewall Topology tab:**
+- Không thay đổi về data source (REST từ `/api/v1/firewall-rules`)
+- Bổ sung: badge trên mỗi ALLOW edge hiển thị số AppConnection dùng đường dẫn này; edge với badge "0" = connectivity chưa được tài liệu hoá ở tầng app
+
+**Files cần cập nhật (Sprint 25):**
+- `packages/backend/src/modules/connection/connection.service.ts` — `getFirewallCoverageStatus()` + `getFirewallCoverageStatusBatch()`
+- `packages/backend/src/modules/connection/connection.controller.ts` — 2 endpoints mới: `GET /firewall-coverage` + `/:id/firewall-coverage`
+- `packages/backend/src/modules/topology/topology.service.ts` — `getImpliedConnections()` + cập nhật `getTopology()`
+- `packages/backend/src/modules/topology/topology.resolver.ts` — thêm `impliedConnections` vào topology query
+- `packages/backend/src/modules/topology/topology.types.ts` — `ImpliedConnectionEdge` type
+- `packages/frontend/src/pages/connection/` — coverage badge column
+- `packages/frontend/src/pages/topology/` — implied edges + coverage badge + toggle
+- `packages/frontend/src/pages/firewall-rule/` — section AppConnections cross-reference
+- `packages/frontend/src/pages/topology/components/FirewallTopologyView.tsx` — badge count
+- `packages/frontend/src/pages/application/` — coverage badge trên upstream/downstream list
+
+**Trade-offs:**
+- Implied edges có thể gây noise nếu nhiều FirewallRule. Cần toggle ẩn/hiện.
+- Cross-validation là computed (không lưu vào DB) để tránh stale data. Tính real-time mỗi lần query.
+- Không thay đổi schema AppConnection (giữ `target_port_id` optional) — backward compatible.
+**Outcome:** S25-01~09 hoàn thành đầy đủ. BE: `getFirewallCoverageStatus()` + batch endpoint + `getImpliedConnections()` in TopologyService + `impliedConnections` field in GraphQL. FE: coverage badge column in AppConnection list, implied dashed edges in App Topology with toggle, AppConnections section in FirewallRule detail drawer, badge count "N app" on Firewall Topology ALLOW edges, coverage badge in DependencyTree upstream/downstream.
+**Completed:** 2026-05-08
+**Sprint plan ref:** `docs/plans/sprint-25-connectivity-model.md`
+
+---
+
 ## Sprint 23 Network Zone & Firewall Rule Management (2026-04-30)
 
 **Status:** ✅ Completed

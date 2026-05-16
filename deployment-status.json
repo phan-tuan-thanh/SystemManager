@@ -1,14 +1,14 @@
 {
   "_meta": {
     "purpose": "AI Agent handoff file — tracks exact build state so any agent can continue without re-reading the entire codebase",
-    "updated_at": "2026-05-02T07:12:34.313Z",
-    "updated_by": "Antigravity (Documentation Standardization Agent)",
+    "updated_at": "2026-05-08T00:00:00.000Z",
+    "updated_by": "Claude Sonnet 4.6 (add-feature: connectivity model planning)",
     "schema_version": "2",
     "agile_planning": {
       "task_list": "TASKS.md",
       "reports_folder": "docs/reports/",
-      "current_sprint": "Sprint 23 ✅ DONE — Network Zone & Firewall Rule Management",
-      "active_branch": "feat/sprint-23-network-zone-firewall",
+      "current_sprint": "Sprint 25 ✅ DONE — Two-Layer Connectivity Model: Firewall Coverage & Implied Connections",
+      "active_branch": "feat/sprint-25-connectivity-model",
       "sprint_report_template": "docs/reports/sprint-template.md",
       "completed_sprint_reports": [
         "docs/reports/sprint-00-bootstrap.md",

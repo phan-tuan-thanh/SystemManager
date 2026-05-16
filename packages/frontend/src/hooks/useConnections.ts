@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '../api/client';
 import type { ApiResponse } from '../types/auth';
-import type { AppConnection, AppDependencies, ConnectionFilter } from '../types/connection';
+import type { AppConnection, AppDependencies, ConnectionFilter, FirewallCoverageResult } from '../types/connection';
 
 interface ConnectionListData {
   items: AppConnection[];
@@ -68,6 +68,21 @@ export function useDeleteConnection() {
       await apiClient.delete(`/connections/${id}`);
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['connections'] }),
+  });
+}
+
+export function useConnectionFirewallCoverage(environment: string | undefined) {
+  return useQuery<Record<string, FirewallCoverageResult>>({
+    queryKey: ['connections', 'firewall-coverage', environment],
+    queryFn: async () => {
+      if (!environment) return {};
+      const { data } = await apiClient.get<{ data: Record<string, FirewallCoverageResult> }>(
+        `/connections/firewall-coverage?environment=${environment}`,
+      );
+      return data.data;
+    },
+    enabled: !!environment,
+    staleTime: 30_000,
   });
 }
 
