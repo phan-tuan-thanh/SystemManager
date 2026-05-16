@@ -399,6 +399,32 @@ function TopologyPageInner() {
       return;
     }
 
+    // Zone lane dragged → reorder zones by drop position along the stacking
+    // axis, re-stack them to clean offsets, and persist the new order so it
+    // survives recompute. Children move with the lane (React Flow parent drag).
+    if (node.type === 'zoneLane' && filters.showZones) {
+      const stackH = filters.layoutDirection === 'LR' || filters.layoutDirection === 'RL';
+      setNodes((nds) => {
+        const moved = nds.map((n) => (n.id === node.id ? { ...n, position: node.position } : n));
+        const reflowed = reflowZoneLanes(moved, stackH);
+        const orderedZoneIds = reflowed
+          .filter((n) => n.type === 'zoneLane')
+          .sort((a, b) => (stackH ? a.position.x - b.position.x : a.position.y - b.position.y))
+          .map((n) => n.id.replace(/^zone-/, ''));
+        reorderZones(orderedZoneIds);
+        reflowed.forEach((n) => {
+          if (n.type === 'zoneLane') {
+            zoneLayoutRef.current[n.id] = {
+              x: n.position.x, y: n.position.y,
+              width: n.style?.width as number, height: n.style?.height as number,
+            };
+          }
+        });
+        return reflowed;
+      });
+      return;
+    }
+
     // Server node dragged inside a zone lane → normalize the content block to a
     // padded origin so the zone grows symmetrically in every direction
     // (drag left/top resizes the zone just like drag right/bottom), then
@@ -467,7 +493,7 @@ function TopologyPageInner() {
       setNodes((nds) => nds.map((n) => n.id === node.id ? { ...n, position: bestPos! } : n));
       userPositionsRef.current[node.id] = bestPos;
     }
-  }, [setNodes, filters.showZones, filters.layoutDirection]);
+  }, [setNodes, filters.showZones, filters.layoutDirection, reorderZones]);
 
   // Live: while a server is dragged inside a zone, grow the zone right/bottom
   // only (grow-only path) and re-stack the sibling zones to keep spacing.

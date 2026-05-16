@@ -473,7 +473,7 @@ export function computeZoneLaneLayout(
         serverCount: zoneServers.length,
       },
       selectable: false,
-      draggable: false,
+      draggable: true,
       zIndex: -1,
     });
 

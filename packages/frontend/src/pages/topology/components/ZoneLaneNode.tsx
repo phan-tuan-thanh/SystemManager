@@ -24,6 +24,7 @@ function ZoneLaneNode({ data }: NodeProps<ZoneLaneData>) {
       }}
     >
       <div
+        title="Kéo để sắp xếp lại vị trí zone"
         style={{
           background: data.headerBg,
           padding: '5px 12px',
@@ -31,6 +32,8 @@ function ZoneLaneNode({ data }: NodeProps<ZoneLaneData>) {
           alignItems: 'center',
           gap: 8,
           userSelect: 'none',
+          pointerEvents: 'all',
+          cursor: 'grab',
         }}
       >
         <span
