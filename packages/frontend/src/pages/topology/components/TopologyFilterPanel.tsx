@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Select, Switch, Button, Segmented, Typography, Space, Modal, Input, Checkbox, Badge, Divider, Tag } from 'antd';
-import { PartitionOutlined, LinkOutlined, FilterOutlined, SearchOutlined } from '@ant-design/icons';
+import { PartitionOutlined, LinkOutlined, FilterOutlined, SearchOutlined, TableOutlined } from '@ant-design/icons';
 
 const { Text } = Typography;
 
@@ -16,6 +16,7 @@ interface FilterState {
   visibleGroupNames: string[];
   visibleServerIds: string[];
   visibleAppIds: string[];
+  showZones: boolean;
 }
 
 interface SelectOption {
@@ -38,6 +39,7 @@ interface Props {
   // Cascade filter maps: serverId → groupNames[], serverId → appIds[]
   serverGroupsMap?: Record<string, string[]>;
   serverAppsMap?: Record<string, string[]>;
+  zoneConfigNode?: React.ReactNode;
 }
 
 // ─── Filter section inside modal ──────────────────────────────────
@@ -160,6 +162,7 @@ export default function TopologyFilterPanel({
   appOptions = [],
   serverGroupsMap = {},
   serverAppsMap = {},
+  zoneConfigNode,
 }: Props) {
   const [modalOpen, setModalOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -342,6 +345,22 @@ export default function TopologyFilterPanel({
           >
             Kết nối
           </Button>
+        )}
+
+        {/* ── Zone mode (ReactFlow + server/all view only) ── */}
+        {isReactFlow && filters.nodeType !== 'app' && (
+          <>
+            <Button
+              size="small"
+              type={filters.showZones ? 'primary' : 'default'}
+              icon={<TableOutlined />}
+              onClick={() => onChange({ ...filters, showZones: !filters.showZones, connectionMode: false })}
+              title={filters.showZones ? 'Tắt zone lane' : 'Bật hiển thị zone lane (swimlane)'}
+            >
+              Zone
+            </Button>
+            {filters.showZones && zoneConfigNode}
+          </>
         )}
 
         {/* ── Auto Arrange (ReactFlow + vis) ── */}

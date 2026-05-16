@@ -53,6 +53,7 @@ function ServerFlowNode({ data, selected }: NodeProps<ServerNodeData>) {
       <Handle type="source" position={Position.Right} style={{ background: purposeColor, width: 9, height: 9, border: '2px solid #fff', boxShadow: `0 0 3px ${purposeColor}60` }} />
       <Handle type="target" id="top-t" position={Position.Top} style={{ background: purposeColor, width: 9, height: 9, border: '2px solid #fff' }} />
       <Handle type="source" id="bot-s" position={Position.Bottom} style={{ background: purposeColor, width: 9, height: 9, border: '2px solid #fff' }} />
+      <Handle type="target" id="bot-t" position={Position.Bottom} style={{ background: purposeColor, width: 9, height: 9, border: '2px solid #fff', left: '60%' }} />
     </>
   );
 
@@ -140,6 +141,7 @@ function ServerFlowNode({ data, selected }: NodeProps<ServerNodeData>) {
             </Tooltip>
           </div>
         </Tooltip>
+        {handles}
       </div>
     );
   }
