@@ -469,10 +469,11 @@ function TopologyPageInner() {
     }
   }, [setNodes, filters.showZones, filters.layoutDirection]);
 
-  // Live: while a server is dragged inside a zone, normalize the content block
-  // every frame so the zone tightly fits the nodes in ALL directions — drag
-  // left/top resizes the zone just as smoothly as drag right/bottom — and the
-  // sibling zones re-stack to keep their spacing.
+  // Live: while a server is dragged inside a zone, grow the zone right/bottom
+  // only (grow-only path) and re-stack the sibling zones to keep spacing.
+  // Left/top fitting is intentionally NOT done live — it is finalized once on
+  // drag stop (handleNodeDragStop normalizes) to avoid the dragged node
+  // shifting against the pointer.
   const handleNodeDrag = useCallback((_evt: React.MouseEvent, node: Node) => {
     if (!filters.showZones || !node.parentId) return;
     const parent = nodesRef.current.find((n) => n.id === node.parentId);
@@ -480,7 +481,7 @@ function TopologyPageInner() {
     const stackH = filters.layoutDirection === 'LR' || filters.layoutDirection === 'RL';
     setNodes((nds) => {
       const live = nds.map((n) => (n.id === node.id ? { ...n, position: node.position } : n));
-      return reflowZoneLanes(live, stackH, true);
+      return reflowZoneLanes(live, stackH);
     });
   }, [setNodes, filters.showZones, filters.layoutDirection]);
 
