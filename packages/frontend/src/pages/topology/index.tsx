@@ -56,6 +56,7 @@ import ServerFlowNode from './components/ServerFlowNode';
 import AppFlowNode from './components/AppFlowNode';
 import NodeDetailPanel from './components/NodeDetailPanel';
 import ConnectionDetailPanel from './components/ConnectionDetailPanel';
+import ImpliedConnectionDetailPanel from './components/ImpliedConnectionDetailPanel';
 import TopologyFilterPanel from './components/TopologyFilterPanel';
 import SnapshotBrowser from './components/SnapshotBrowser';
 import Topology3DView from './components/Topology3DView';
@@ -168,11 +169,60 @@ function ProtocolEdge({
   const portLabel = data?.targetPort
     ? `:${data.targetPort.port_number}`
     : '';
+
+  // Flow particle config: 3 dots staggered evenly, fade in/out at endpoints
+  const flowDur = selected ? 1.0 : 1.6;
+  const dotR = selected ? 3.5 : 2.5;
+  const PARTICLE_COUNT = 3;
+
   return (
     <>
       {/* Invisible wider hit-area for easier clicking/hovering */}
       <path d={edgePath} fill="none" stroke="transparent" strokeWidth={18} style={{ cursor: 'pointer' }} />
+      {/* Glow trail under the edge when selected */}
+      {selected && (
+        <path
+          d={edgePath}
+          fill="none"
+          stroke={protocolColor}
+          strokeWidth={8}
+          strokeOpacity={0.18}
+          style={{ filter: `blur(4px)` }}
+          pointerEvents="none"
+        />
+      )}
       <path id={id} className="react-flow__edge-path" d={edgePath} markerEnd={markerEnd} style={pathStyle} />
+      {/* Flowing water particles — animateMotion along the bezier/step path */}
+      {Array.from({ length: PARTICLE_COUNT }, (_, i) => {
+        const beginOffset = `-${((i / PARTICLE_COUNT) * flowDur).toFixed(2)}s`;
+        return (
+          <circle key={i} r={dotR} fill={protocolColor} opacity={0} pointerEvents="none">
+            <animateMotion
+              dur={`${flowDur}s`}
+              begin={beginOffset}
+              repeatCount="indefinite"
+              path={edgePath}
+            />
+            <animate
+              attributeName="opacity"
+              values="0;0.9;0.9;0"
+              keyTimes="0;0.08;0.88;1"
+              dur={`${flowDur}s`}
+              begin={beginOffset}
+              repeatCount="indefinite"
+            />
+            {selected && (
+              <animate
+                attributeName="r"
+                values={`${dotR};${dotR + 1.5};${dotR}`}
+                dur={`${flowDur * 0.5}s`}
+                begin={beginOffset}
+                repeatCount="indefinite"
+              />
+            )}
+          </circle>
+        );
+      })}
       <EdgeLabelRenderer>
         <div
           style={{
@@ -207,6 +257,83 @@ function ProtocolEdge({
   );
 }
 
+// ─── Firewall implied edge (ALLOW = green flow, DENY = red pulse) ─
+
+function FwEdge({
+  id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, data, markerEnd, selected,
+}: EdgeProps) {
+  const action = data?.action ?? 'ALLOW';
+  const isAllow = action === 'ALLOW';
+  const actionColor = isAllow ? '#389e0d' : '#cf1322';
+  const flowDur = selected ? 0.9 : 1.5;
+  const dotR = selected ? 3.5 : 2.5;
+  const PARTICLE_COUNT = 3;
+
+  const [edgePath, labelX, labelY] = getBezierPath({ sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition });
+
+  const pathStyle: React.CSSProperties = {
+    stroke: actionColor,
+    strokeWidth: selected ? 3 : 2,
+    strokeDasharray: isAllow ? undefined : '7,4',
+    opacity: 0.9,
+    filter: selected ? `drop-shadow(0 0 5px ${actionColor})` : undefined,
+  };
+
+  const portNum = data?.portNum;
+  const labelText = portNum ? `${isAllow ? 'ALLOW' : 'DENY'} :${portNum}` : (isAllow ? 'ALLOW' : 'DENY');
+
+  return (
+    <>
+      <path d={edgePath} fill="none" stroke="transparent" strokeWidth={18} style={{ cursor: 'pointer' }} />
+      {selected && (
+        <path d={edgePath} fill="none" stroke={actionColor} strokeWidth={8}
+          strokeOpacity={0.15} style={{ filter: 'blur(4px)' }} pointerEvents="none" />
+      )}
+      <path id={id} className="react-flow__edge-path" d={edgePath} markerEnd={markerEnd} style={pathStyle} />
+      {/* ALLOW: water-flow particles */}
+      {isAllow && Array.from({ length: PARTICLE_COUNT }, (_, i) => {
+        const begin = `-${((i / PARTICLE_COUNT) * flowDur).toFixed(2)}s`;
+        return (
+          <circle key={i} r={dotR} fill={actionColor} opacity={0} pointerEvents="none">
+            <animateMotion dur={`${flowDur}s`} begin={begin} repeatCount="indefinite" path={edgePath} />
+            <animate attributeName="opacity" values="0;0.9;0.9;0"
+              keyTimes="0;0.08;0.88;1" dur={`${flowDur}s`} begin={begin} repeatCount="indefinite" />
+          </circle>
+        );
+      })}
+      {/* DENY: pulsing opacity on the whole path — more browser-compatible than stroke-opacity */}
+      {!isAllow && (
+        <path d={edgePath} fill="none" stroke={actionColor} strokeWidth={selected ? 4 : 2.5}
+          strokeDasharray="7,4" pointerEvents="none">
+          <animate attributeName="opacity" values="0.85;0.2;0.85"
+            keyTimes="0;0.5;1" dur="1.8s" repeatCount="indefinite" />
+        </path>
+      )}
+      <EdgeLabelRenderer>
+        <div
+          style={{
+            position: 'absolute',
+            transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
+            background: actionColor,
+            color: '#fff',
+            padding: '1px 5px',
+            borderRadius: 3,
+            fontSize: 9,
+            fontWeight: 700,
+            pointerEvents: 'none',
+            whiteSpace: 'nowrap',
+            lineHeight: '14px',
+            boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
+            opacity: 0.92,
+          }}
+        >
+          {labelText}
+        </div>
+      </EdgeLabelRenderer>
+    </>
+  );
+}
+
 // ─── Node types ───────────────────────────────────────────────────
 
 const nodeTypes: NodeTypes = {
@@ -216,6 +343,7 @@ const nodeTypes: NodeTypes = {
 
 const edgeTypes: EdgeTypes = {
   protocolEdge: ProtocolEdge,
+  fwEdge: FwEdge,
 };
 
 // ─── Layout helpers ───────────────────────────────────────────────
@@ -577,6 +705,7 @@ function TopologyPageInner() {
 
   const [selectedNode, setSelectedNode] = useState<any>(null);
   const [selectedConnection, setSelectedConnection] = useState<ConnectionEdge | null>(null);
+  const [selectedImplied, setSelectedImplied] = useState<ImpliedConnectionEdge | null>(null);
   const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null);
   const [showSnapshots, setShowSnapshots] = useState(false);
   const [saveModalOpen, setSaveModalOpen] = useState(false);
@@ -793,29 +922,28 @@ function TopologyPageInner() {
       data.topology.impliedConnections.forEach((ic: ImpliedConnectionEdge) => {
         const action = ic.action ?? 'ALLOW';
         const cfg = FW_ACTION[action] ?? FW_ACTION.ALLOW;
-        const isDeny = action === 'DENY';
+
         const portNum = ic.targetPort?.portNumber ?? (ic.targetPort as any)?.port_number;
 
         const commonEdgeProps = {
-          type: 'default' as const,
-          animated: !isDeny,
-          style: {
-            stroke: cfg.color,
-            strokeWidth: cfg.width,
-            strokeDasharray: cfg.dash,
-            opacity: 0.9,
-          },
+          type: 'fwEdge' as const,
+          animated: false,
+          zIndex: 10,
           markerEnd: { type: MarkerType.ArrowClosed, color: cfg.color },
-          data: { type: 'IMPLIED', action, firewallRuleId: ic.firewallRuleId, firewallRuleName: ic.firewallRuleName, portNum },
+          data: { type: 'IMPLIED', action, firewallRuleId: ic.firewallRuleId, firewallRuleName: ic.firewallRuleName, portNum, _implied: ic },
         };
 
         if (filters.nodeType === 'server') {
-          const srcServer = filteredData.serversForEdgeResolution.find(
-            (s) => s.deployments.some((d) => d.application.id === ic.sourceAppId),
-          );
-          const tgtServer = filteredData.serversForEdgeResolution.find(
-            (s) => s.deployments.some((d) => d.application.id === ic.targetAppId),
-          );
+          const srcServer = ic.sourceServerId
+            ? filteredData.serversForEdgeResolution.find((s) => s.id === ic.sourceServerId)
+            : filteredData.serversForEdgeResolution.find((s) =>
+                s.deployments.some((d) => d.application.id === ic.sourceAppId),
+              );
+          const tgtServer = ic.targetServerId
+            ? filteredData.serversForEdgeResolution.find((s) => s.id === ic.targetServerId)
+            : filteredData.serversForEdgeResolution.find((s) =>
+                s.deployments.some((d) => d.application.id === ic.targetAppId),
+              );
           if (srcServer && tgtServer && srcServer.id !== tgtServer.id) {
             const pairKey = `${action}::${srcServer.id}::${tgtServer.id}`;
             if (!addedServerPairs.has(action)) addedServerPairs.set(action, new Set());
@@ -830,15 +958,47 @@ function TopologyPageInner() {
             }
           }
         } else {
-          const sourceNodes = allNodes.filter((n) => n.id.startsWith(`app-${ic.sourceAppId}-`));
-          const targetNodes = allNodes.filter((n) => n.id.startsWith(`app-${ic.targetAppId}-`));
-          if (sourceNodes.length && targetNodes.length) {
-            impliedEdges.push({
-              id: `${ic.id}-${action}`,
-              source: sourceNodes[0].id,
-              target: targetNodes[0].id,
-              ...commonEdgeProps,
-            });
+          // In 'all'/'app' mode: draw server-to-server implied edges (firewall rules are network-level)
+          if (ic.sourceServerId && ic.targetServerId && ic.sourceServerId !== ic.targetServerId) {
+            const srcServerNodeId = `server-${ic.sourceServerId}`;
+            const tgtServerNodeId = `server-${ic.targetServerId}`;
+            if (
+              allNodes.some((n) => n.id === srcServerNodeId) &&
+              allNodes.some((n) => n.id === tgtServerNodeId)
+            ) {
+              const pairKey = `${action}::${ic.sourceServerId}::${ic.targetServerId}`;
+              if (!addedServerPairs.has(action)) addedServerPairs.set(action, new Set());
+              if (!addedServerPairs.get(action)!.has(pairKey)) {
+                addedServerPairs.get(action)!.add(pairKey);
+                impliedEdges.push({
+                  id: `implied-srv-${action}-${ic.sourceServerId}-${ic.targetServerId}`,
+                  source: srcServerNodeId,
+                  target: tgtServerNodeId,
+                  ...commonEdgeProps,
+                });
+              }
+            }
+          } else {
+            // Fallback: resolve via app→server lookup
+            const srcServer = filteredData.serversForEdgeResolution.find((s) =>
+              s.deployments.some((d) => d.application.id === ic.sourceAppId),
+            );
+            const tgtServer = filteredData.serversForEdgeResolution.find((s) =>
+              s.deployments.some((d) => d.application.id === ic.targetAppId),
+            );
+            if (srcServer && tgtServer && srcServer.id !== tgtServer.id) {
+              const pairKey = `${action}::${srcServer.id}::${tgtServer.id}`;
+              if (!addedServerPairs.has(action)) addedServerPairs.set(action, new Set());
+              if (!addedServerPairs.get(action)!.has(pairKey)) {
+                addedServerPairs.get(action)!.add(pairKey);
+                impliedEdges.push({
+                  id: `implied-srv-${action}-${srcServer.id}-${tgtServer.id}`,
+                  source: `server-${srcServer.id}`,
+                  target: `server-${tgtServer.id}`,
+                  ...commonEdgeProps,
+                });
+              }
+            }
           }
         }
       });
@@ -1183,10 +1343,15 @@ function TopologyPageInner() {
 
   const onEdgeClick = useCallback((_: any, edge: Edge) => {
     const conn = edge.data?._connection as ConnectionEdge | undefined;
+    const implied = edge.data?._implied as ImpliedConnectionEdge | undefined;
+    setSelectedNode(null);
+    setFocusedNodeId(null);
     if (conn) {
-      setSelectedNode(null);
-      setFocusedNodeId(null);
       setSelectedConnection(conn);
+      setSelectedImplied(null);
+    } else if (implied) {
+      setSelectedImplied(implied);
+      setSelectedConnection(null);
     }
   }, []);
 
@@ -1203,6 +1368,7 @@ function TopologyPageInner() {
 
   const onNodeClick = useCallback((_: any, node: Node) => {
     setSelectedConnection(null);
+    setSelectedImplied(null);
     setFocusedNodeId(node.id);
     if (node.data._server) {
       const server = node.data._server as ServerNode;
@@ -1426,7 +1592,7 @@ function TopologyPageInner() {
               onConnect={onConnect}
               onNodeClick={onNodeClick}
               onEdgeClick={onEdgeClick}
-              onPaneClick={() => { setSelectedNode(null); setSelectedConnection(null); setFocusedNodeId(null); }}
+              onPaneClick={() => { setSelectedNode(null); setSelectedConnection(null); setSelectedImplied(null); setFocusedNodeId(null); }}
               onNodeDragStop={handleNodeDragStop}
               nodeTypes={nodeTypes}
               edgeTypes={edgeTypes}
@@ -1487,6 +1653,11 @@ function TopologyPageInner() {
               onClose={() => setSelectedConnection(null)}
               onDelete={handleDeleteConnection}
               deleting={deleteConnection.isPending}
+            />
+            <ImpliedConnectionDetailPanel
+              connection={selectedImplied}
+              servers={filteredData.serversForEdgeResolution}
+              onClose={() => setSelectedImplied(null)}
             />
           </>
         )}

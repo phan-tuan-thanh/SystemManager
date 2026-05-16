@@ -247,8 +247,9 @@ const TopologyVisNetworkView = forwardRef<TopologyVisNetworkHandle, Props>(funct
           const action = ic.action ?? 'ALLOW';
           const color = FW_ACTION_COLOR[action as keyof typeof FW_ACTION_COLOR] ?? FW_ACTION_COLOR.ALLOW;
           const isDeny = action === 'DENY';
-          const srcServerId = appToServer.get(ic.sourceAppId);
-          const tgtServerId = appToServer.get(ic.targetAppId);
+          // Prefer direct server IDs from backend; fall back to app→server lookup
+          const srcServerId = ic.sourceServerId ?? appToServer.get(ic.sourceAppId);
+          const tgtServerId = ic.targetServerId ?? appToServer.get(ic.targetAppId);
           if (!srcServerId || !tgtServerId || srcServerId === tgtServerId) return;
           const pairKey = `${action}::${srcServerId}::${tgtServerId}`;
           if (!addedImpliedPairs.has(action)) addedImpliedPairs.set(action, new Set());
@@ -304,6 +305,43 @@ const TopologyVisNetworkView = forwardRef<TopologyVisNetworkHandle, Props>(funct
           rawLookup[edgeId] = conn;
         }
       });
+
+      // C2 (app/all mode) — implied firewall edges drawn as server-to-server
+      if (showImplied) {
+        const appToServerFallback = new Map<string, string>();
+        servers.forEach((s) => s.deployments.forEach((d) => appToServerFallback.set(d.application.id, s.id)));
+        const addedImpliedPairs = new Map<string, Set<string>>();
+        impliedConnections.forEach((ic) => {
+          const action = ic.action ?? 'ALLOW';
+          const color = FW_ACTION_COLOR[action as keyof typeof FW_ACTION_COLOR] ?? FW_ACTION_COLOR.ALLOW;
+          const isDeny = action === 'DENY';
+          const srcServerId = ic.sourceServerId ?? appToServerFallback.get(ic.sourceAppId);
+          const tgtServerId = ic.targetServerId ?? appToServerFallback.get(ic.targetAppId);
+          if (!srcServerId || !tgtServerId || srcServerId === tgtServerId) return;
+          const pairKey = `${action}::${srcServerId}::${tgtServerId}`;
+          if (!addedImpliedPairs.has(action)) addedImpliedPairs.set(action, new Set());
+          if (addedImpliedPairs.get(action)!.has(pairKey)) return;
+          addedImpliedPairs.get(action)!.add(pairKey);
+          const portNum = (ic.targetPort as any)?.port_number ?? ic.targetPort?.portNumber;
+          const portLabel = portNum ? `:${portNum}` : '';
+          const edgeId = `srv-implied-${action}-${srcServerId}-${tgtServerId}`;
+          edges.push({
+            id: edgeId,
+            from: `server-${srcServerId}`,
+            to: `server-${tgtServerId}`,
+            color: { color, highlight: color, hover: color },
+            width: isDeny ? 2 : 2.5,
+            dashes: isDeny ? [7, 4] : false,
+            arrows: { to: { enabled: true, scaleFactor: 0.7 } },
+            smooth: { enabled: true, type: 'curvedCW', roundness: 0.35 } as any,
+            title: `<div style="padding:6px 10px;min-width:140px">
+              <b style="color:${color}">${action}</b>${portLabel}<br/>
+              <span style="color:#555;font-size:11px">${ic.firewallRuleName}</span>
+            </div>`,
+          });
+          rawLookup[edgeId] = ic;
+        });
+      }
     }
 
     return { nodes, edges, rawLookup };

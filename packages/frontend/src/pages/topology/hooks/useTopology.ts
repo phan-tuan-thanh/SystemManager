@@ -77,6 +77,8 @@ export interface ImpliedConnectionEdge {
   targetAppId: string;
   sourceAppName: string;
   targetAppName: string;
+  sourceServerId?: string;
+  targetServerId?: string;
   environment: string;
   firewallRuleId: string;
   firewallRuleName: string;

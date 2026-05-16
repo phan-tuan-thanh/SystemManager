@@ -150,7 +150,7 @@ export class ConnectionEdge {
 @ObjectType()
 export class ImpliedConnectionEdge {
   @Field(() => ID)
-  id: string; // synthetic: `implied-${ruleId}-${sourceAppId}-${targetAppId}`
+  id: string; // synthetic: `implied-${action}-${ruleId}-${sourceAppId}-${targetAppId}`
 
   @Field()
   sourceAppId: string;
@@ -163,6 +163,12 @@ export class ImpliedConnectionEdge {
 
   @Field()
   targetAppName: string;
+
+  @Field({ nullable: true })
+  sourceServerId?: string;
+
+  @Field({ nullable: true })
+  targetServerId?: string;
 
   @Field()
   environment: string;
