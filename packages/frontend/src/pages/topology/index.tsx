@@ -177,6 +177,7 @@ function TopologyPageInner() {
     activeZones,
     serversByZone,
     reorderZones,
+    setZoneArrangement,
     resetZones,
   } = useTopologyZones(filteredData.serversForEdgeResolution, networkZones);
 
@@ -448,19 +449,55 @@ function TopologyPageInner() {
       return;
     }
 
-    // Zone lane dragged → reorder zones by drop position along the stacking
-    // axis, re-stack them to clean offsets, and persist the new order so it
-    // survives recompute. Children move with the lane (React Flow parent drag).
+    // Zone lane dragged → cluster zones into rows by vertical overlap (drop a
+    // zone so it overlaps a row → it joins that row; drop into empty space
+    // below → new row). Within a row, order left→right by x. Persist the
+    // grid (lane + order) and re-stack so each row gets equal width.
     if (node.type === 'zoneLane' && filters.showZones) {
-      const stackH = filters.layoutDirection === 'LR' || filters.layoutDirection === 'RL';
       setNodes((nds) => {
         const moved = nds.map((n) => (n.id === node.id ? { ...n, position: node.position } : n));
-        const reflowed = reflowZoneLanes(moved, stackH);
-        const orderedZoneIds = reflowed
-          .filter((n) => n.type === 'zoneLane')
-          .sort((a, b) => (stackH ? a.position.x - b.position.x : a.position.y - b.position.y))
-          .map((n) => n.id.replace(/^zone-/, ''));
-        reorderZones(orderedZoneIds);
+
+        const zoneNodes = moved.filter((n) => n.type === 'zoneLane');
+        const yBounds = (n: Node) => {
+          const h = (n.style?.height as number) ?? (n.height as number) ?? 200;
+          return { y0: n.position.y, y1: n.position.y + h };
+        };
+        // Greedy vertical-overlap clustering into rows.
+        const sorted = [...zoneNodes].sort((a, b) => a.position.y - b.position.y);
+        const rows: { top: number; bottom: number; nodes: Node[] }[] = [];
+        for (const z of sorted) {
+          const { y0, y1 } = yBounds(z);
+          const row = rows.find((r) => y0 < r.bottom && y1 > r.top);
+          if (row) {
+            row.nodes.push(z);
+            row.top = Math.min(row.top, y0);
+            row.bottom = Math.max(row.bottom, y1);
+          } else {
+            rows.push({ top: y0, bottom: y1, nodes: [z] });
+          }
+        }
+        rows.sort((a, b) => a.top - b.top);
+
+        // Flatten to (row asc, x asc) with lane index; tag nodes' data.lane.
+        const laneOf = new Map<string, number>();
+        const items: { id: string; lane: number }[] = [];
+        rows.forEach((r, laneIdx) => {
+          r.nodes
+            .slice()
+            .sort((a, b) => a.position.x - b.position.x)
+            .forEach((z) => {
+              laneOf.set(z.id, laneIdx);
+              items.push({ id: z.id.replace(/^zone-/, ''), lane: laneIdx });
+            });
+        });
+        setZoneArrangement(items);
+
+        const withLane = moved.map((n) =>
+          n.type === 'zoneLane' && laneOf.has(n.id)
+            ? { ...n, data: { ...n.data, lane: laneOf.get(n.id) } }
+            : n,
+        );
+        const reflowed = reflowZoneLanes(withLane, false);
         reflowed.forEach((n) => {
           if (n.type === 'zoneLane') {
             zoneLayoutRef.current[n.id] = {
@@ -542,7 +579,7 @@ function TopologyPageInner() {
       setNodes((nds) => nds.map((n) => n.id === node.id ? { ...n, position: bestPos! } : n));
       userPositionsRef.current[node.id] = bestPos;
     }
-  }, [setNodes, filters.showZones, filters.layoutDirection, reorderZones]);
+  }, [setNodes, filters.showZones, filters.layoutDirection, setZoneArrangement]);
 
   // Live: while a server is dragged inside a zone, grow the zone right/bottom
   // only (grow-only path) and re-stack the sibling zones to keep spacing.

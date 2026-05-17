@@ -95,10 +95,14 @@ export interface TopologyZone {
   borderColor: string;
   headerBg: string;
   order: number;
+  /** Row index — zones sharing a lane render side-by-side, equal width. */
+  lane: number;
 }
 
 interface ZoneStorage {
   zoneOrder: Record<string, number>;
+  /** zoneId → lane (row) index for the multi-lane stacking grid */
+  zoneLaneRow: Record<string, number>;
   serverZoneMap: Record<string, string>;
 }
 
@@ -107,9 +111,14 @@ const STORAGE_KEY = 'topology.zones.v2';
 function loadStorage(): ZoneStorage {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as ZoneStorage) : { zoneOrder: {}, serverZoneMap: {} };
+    const parsed = raw ? (JSON.parse(raw) as Partial<ZoneStorage>) : {};
+    return {
+      zoneOrder: parsed.zoneOrder ?? {},
+      zoneLaneRow: parsed.zoneLaneRow ?? {},
+      serverZoneMap: parsed.serverZoneMap ?? {},
+    };
   } catch {
-    return { zoneOrder: {}, serverZoneMap: {} };
+    return { zoneOrder: {}, zoneLaneRow: {}, serverZoneMap: {} };
   }
 }
 
@@ -157,6 +166,7 @@ export function useTopologyZones(servers: ServerNode[], networkZones: NetworkZon
       const style = (ZONE_TYPE_STYLE as Record<string, typeof ZONE_TYPE_STYLE['default']>)[nz.zone_type]
         ?? ZONE_TYPE_STYLE.default;
       const savedOrder = storage.zoneOrder[nz.id];
+      const order = savedOrder ?? idx;
       const baseColor = nz.color ?? style.borderColor;
       return {
         id: nz.id,
@@ -164,10 +174,13 @@ export function useTopologyZones(servers: ServerNode[], networkZones: NetworkZon
         color: nz.color ? hexToRgba(nz.color, 0.08) : style.color,
         borderColor: baseColor,
         headerBg: baseColor,
-        order: savedOrder ?? idx,
+        order,
+        // Default: each zone in its own lane (row). Users drag zones onto a
+        // shared row to pack them; the arrangement persists in zoneLaneRow.
+        lane: storage.zoneLaneRow[nz.id] ?? order,
       };
     });
-  }, [networkZones, storage.zoneOrder]);
+  }, [networkZones, storage.zoneOrder, storage.zoneLaneRow]);
 
   // Auto-assign server to the zone whose IP entry matches MOST specifically.
   // A broad catch-all (e.g. 0.0.0.0/0 on an INTERNET zone) must not swallow a
@@ -259,6 +272,27 @@ export function useTopologyZones(servers: ServerNode[], networkZones: NetworkZon
     });
   }, []);
 
+  // Persist a full grid arrangement: `items` is the flattened (row asc, then
+  // left→right) order, each tagged with its lane (row) index. Sets both
+  // zoneOrder (so within-lane order + activeZones sort stay consistent) and
+  // zoneLaneRow (which row each zone belongs to).
+  const setZoneArrangement = useCallback(
+    (items: { id: string; lane: number }[]) => {
+      setStorage((prev) => {
+        const zoneOrder = { ...prev.zoneOrder };
+        const zoneLaneRow = { ...prev.zoneLaneRow };
+        items.forEach((it, i) => {
+          zoneOrder[it.id] = i;
+          zoneLaneRow[it.id] = it.lane;
+        });
+        const updated = { ...prev, zoneOrder, zoneLaneRow };
+        persist(updated);
+        return updated;
+      });
+    },
+    [],
+  );
+
   const assignServer = useCallback((serverId: string, zoneId: string) => {
     setStorage((prev) => {
       const updated = { ...prev, serverZoneMap: { ...prev.serverZoneMap, [serverId]: zoneId } };
@@ -268,10 +302,10 @@ export function useTopologyZones(servers: ServerNode[], networkZones: NetworkZon
   }, []);
 
   const resetZones = useCallback(() => {
-    const empty = { zoneOrder: {}, serverZoneMap: {} };
+    const empty: ZoneStorage = { zoneOrder: {}, zoneLaneRow: {}, serverZoneMap: {} };
     setStorage(empty);
     try { localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
   }, []);
 
-  return { zones, activeZones, serversByZone, getServerZone, reorderZones, assignServer, resetZones };
+  return { zones, activeZones, serversByZone, getServerZone, reorderZones, setZoneArrangement, assignServer, resetZones };
 }

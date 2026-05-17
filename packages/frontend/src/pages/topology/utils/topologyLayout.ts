@@ -435,7 +435,15 @@ export function computeZoneLaneLayout(
   const stackHorizontally = direction === 'LR' || direction === 'RL';
   const innerDirection: 'LR' | 'TB' = stackHorizontally ? 'TB' : 'LR';
 
-  let offset = 0; // current X (LR) or Y (TB) for next lane
+  // ── Pass 1: build & size each zone's content ─────────────────────
+  type ZoneBuild = {
+    zone: TopologyZone;
+    laidSubNodes: Node[];
+    contentW: number;
+    contentH: number;
+    serverCount: number;
+  };
+  const builds: ZoneBuild[] = [];
 
   for (const zone of activeZones) {
     const zoneServers = serversByZone.get(zone.id) ?? [];
@@ -444,7 +452,6 @@ export function computeZoneLaneLayout(
     const { nodes: subNodes, edges: subEdges } = buildGraph(zoneServers, connections, nodeType, edgeStyle);
     const laidSubNodes = applyDagreLayout(subNodes, subEdges, innerDirection);
 
-    // Bounding box of top-level nodes in this zone
     let maxX = 0;
     let maxY = 0;
     laidSubNodes
@@ -456,47 +463,74 @@ export function computeZoneLaneLayout(
         maxY = Math.max(maxY, n.position.y + h);
       });
 
-    const laneW = maxX + ZONE_PADDING_X * 2;
-    const laneH = maxY + ZONE_HEADER_H + ZONE_PADDING_Y * 2;
-
-    const laneNodeId = `zone-${zone.id}`;
-    allNodes.push({
-      id: laneNodeId,
-      type: 'zoneLane',
-      position: stackHorizontally ? { x: offset, y: 0 } : { x: 0, y: offset },
-      style: { width: laneW, height: laneH },
-      data: {
-        label: zone.name,
-        color: zone.color,
-        borderColor: zone.borderColor,
-        headerBg: zone.headerBg,
-        serverCount: zoneServers.length,
-      },
-      selectable: false,
-      draggable: true,
-      zIndex: -1,
+    builds.push({
+      zone,
+      laidSubNodes,
+      contentW: maxX + ZONE_PADDING_X * 2,
+      contentH: maxY + ZONE_HEADER_H + ZONE_PADDING_Y * 2,
+      serverCount: zoneServers.length,
     });
+    subEdges.forEach((e) => allEdges.push(e));
+  }
 
-    // Translate server nodes to be relative to zone lane
-    laidSubNodes.forEach((n) => {
-      if (n.parentId) {
-        allNodes.push(n);
-        return;
-      }
+  // ── Pass 2: grid placement — group zones by lane (row); every zone in
+  // a row gets the same width (= widest zone in that row); rows stack
+  // top→bottom with ZONE_GAP. This packs many zones to optimise space.
+  const rowsMap = new Map<number, ZoneBuild[]>();
+  for (const b of builds) {
+    const arr = rowsMap.get(b.zone.lane);
+    if (arr) arr.push(b);
+    else rowsMap.set(b.zone.lane, [b]);
+  }
+  const rowKeys = [...rowsMap.keys()].sort((a, b) => a - b);
+
+  let rowY = 0;
+  for (const rk of rowKeys) {
+    const rowBuilds = (rowsMap.get(rk) ?? []).sort((a, b) => a.zone.order - b.zone.order);
+    const equalW = Math.max(...rowBuilds.map((b) => b.contentW));
+    const rowH = Math.max(...rowBuilds.map((b) => b.contentH));
+    let colX = 0;
+
+    for (const b of rowBuilds) {
+      const laneNodeId = `zone-${b.zone.id}`;
+      allNodes.push({
+        id: laneNodeId,
+        type: 'zoneLane',
+        position: { x: colX, y: rowY },
+        style: { width: equalW, height: rowH },
+        data: {
+          label: b.zone.name,
+          color: b.zone.color,
+          borderColor: b.zone.borderColor,
+          headerBg: b.zone.headerBg,
+          serverCount: b.serverCount,
+          lane: b.zone.lane,
+        },
+        selectable: false,
+        draggable: true,
+        zIndex: -1,
+      });
+
       // No `extent: 'parent'` — children can be dragged freely; the zone lane
       // grows to fit them (see reflowZoneLanes) instead of clamping the drag.
-      allNodes.push({
-        ...n,
-        position: {
-          x: n.position.x + ZONE_PADDING_X,
-          y: n.position.y + ZONE_HEADER_H + ZONE_PADDING_Y,
-        },
-        parentId: laneNodeId,
+      b.laidSubNodes.forEach((n) => {
+        if (n.parentId) {
+          allNodes.push(n);
+          return;
+        }
+        allNodes.push({
+          ...n,
+          position: {
+            x: n.position.x + ZONE_PADDING_X,
+            y: n.position.y + ZONE_HEADER_H + ZONE_PADDING_Y,
+          },
+          parentId: laneNodeId,
+        });
       });
-    });
 
-    subEdges.forEach((e) => allEdges.push(e));
-    offset += (stackHorizontally ? laneW : laneH) + ZONE_GAP;
+      colX += equalW + ZONE_GAP;
+    }
+    rowY += rowH + ZONE_GAP;
   }
 
   // Cross-zone edges (not already emitted by per-zone buildGraph)
@@ -599,21 +633,22 @@ export const ZONE_CONTENT_ORIGIN = {
 const ZONE_MIN_CONTENT_W = SERVER_NODE_W;
 const ZONE_MIN_CONTENT_H = SERVER_NODE_H;
 
-// Recompute every zone lane's size from the bounding box of its child nodes,
-// then re-stack the lanes along the active axis so they keep ZONE_GAP spacing.
+// Recompute every zone lane's size from its child nodes, then lay the lanes
+// out as a GRID: zones sharing a lane (row) sit side-by-side with EQUAL width
+// (= the widest zone in that row); rows stack top→bottom with ZONE_GAP. The
+// row each zone belongs to comes from its `data.lane`; order within a row is
+// the zones' current left→right x. This packs many zones to optimise space.
 //
-// `normalize` (drag-stop): pin the content's top-left to a fixed padded origin
-// and shift every child by the same delta. This makes the zone grow
-// symmetrically — dragging a node left/top expands the zone exactly like
-// dragging it right/bottom, instead of the node just sliding under the header
-// or off the left edge. Returns child nodes with shifted positions too.
+// `normalize` (drag-stop): pin each zone's content top-left to a fixed padded
+// origin and shift its children by the same delta, so dragging a node
+// left/top expands the zone exactly like dragging it right/bottom. Returns
+// child nodes with shifted positions too.
 //
 // Default (live drag): grow-only — children stay put, the lane just sizes to
-// fit; the left/top expansion is finalized once on drag stop so the live drag
-// stays jitter-free.
+// fit; the left/top expansion is finalized once on drag stop.
 export function reflowZoneLanes(
   nodes: Node[],
-  stackHorizontally: boolean,
+  _stackHorizontally: boolean,
   normalize = false,
 ): Node[] {
   const lanes = nodes.filter((n) => n.type === 'zoneLane');
@@ -627,18 +662,13 @@ export function reflowZoneLanes(
     else childrenByParent.set(n.parentId, [n]);
   }
 
-  // Preserve current visual order along the stacking axis
-  const ordered = [...lanes].sort((a, b) =>
-    stackHorizontally ? a.position.x - b.position.x : a.position.y - b.position.y,
-  );
-
   const ORIGIN_X = ZONE_PADDING_X;
   const ORIGIN_Y = ZONE_HEADER_H + ZONE_PADDING_Y;
 
   const sizeById = new Map<string, { w: number; h: number }>();
   const shiftById = new Map<string, { x: number; y: number }>();
 
-  for (const lane of ordered) {
+  for (const lane of lanes) {
     const kids = childrenByParent.get(lane.id) ?? [];
 
     if (normalize && kids.length > 0) {
@@ -681,12 +711,32 @@ export function reflowZoneLanes(
     }
   }
 
-  let offset = 0;
+  // Grid re-stack: group lanes into rows by data.lane; within a row order by
+  // current x. Every zone in a row is widened to the row's widest zone and
+  // heightened to its tallest; rows stack top→bottom with ZONE_GAP.
+  const rowOf = (n: Node): number => Number((n.data as { lane?: number } | undefined)?.lane ?? 0);
+  const rowsMap = new Map<number, Node[]>();
+  for (const lane of lanes) {
+    const r = rowOf(lane);
+    const arr = rowsMap.get(r);
+    if (arr) arr.push(lane);
+    else rowsMap.set(r, [lane]);
+  }
+  const rowKeys = [...rowsMap.keys()].sort((a, b) => a - b);
+
   const posById = new Map<string, { x: number; y: number }>();
-  for (const lane of ordered) {
-    const sz = sizeById.get(lane.id)!;
-    posById.set(lane.id, stackHorizontally ? { x: offset, y: 0 } : { x: 0, y: offset });
-    offset += (stackHorizontally ? sz.w : sz.h) + ZONE_GAP;
+  let rowY = 0;
+  for (const rk of rowKeys) {
+    const rowLanes = (rowsMap.get(rk) ?? []).slice().sort((a, b) => a.position.x - b.position.x);
+    const equalW = Math.max(...rowLanes.map((l) => sizeById.get(l.id)!.w));
+    const rowH = Math.max(...rowLanes.map((l) => sizeById.get(l.id)!.h));
+    let colX = 0;
+    for (const l of rowLanes) {
+      posById.set(l.id, { x: colX, y: rowY });
+      sizeById.set(l.id, { w: equalW, h: rowH });
+      colX += equalW + ZONE_GAP;
+    }
+    rowY += rowH + ZONE_GAP;
   }
 
   return nodes.map((n) => {
