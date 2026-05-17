@@ -24,3 +24,6 @@ HAPROXY_LB,HAProxy Load Balancer,INFRA_MIDDLEWARE,2.8.3,,SYSTEM,Load balancer ph
 POSTGRES_CORE,PostgreSQL Database - Core,INFRA_DATABASE,15.4,,SYSTEM,PostgreSQL primary database cho Core Banking
 POSTGRES_MB,PostgreSQL Database - Mobile,INFRA_DATABASE,15.4,,SYSTEM,PostgreSQL database riêng cho Mobile Banking
 ELASTICSEARCH,Elasticsearch Search Engine,INFRA_MIDDLEWARE,8.11.0,,SYSTEM,Full-text search và log aggregation
+CARD_SYSTEM,Card Management System,CARD_SYSTEM,2.1.0,Team Card,BUSINESS,Hệ thống quản lý phát hành và thanh toán thẻ
+KYC_SERVICE,eKYC Service,CORE_BANKING,1.2.0,Team Core Banking,BUSINESS,Dịch vụ định danh điện tử và xác thực khuôn mặt
+CMS_CONTENT,CMS Content Management,ADMIN_TOOLS,1.0.0,Team Digital,BUSINESS,Hệ thống quản lý nội dung cho Portal và App

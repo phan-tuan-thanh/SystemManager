@@ -129,8 +129,17 @@ const CONN_TYPE_ALIASES: Record<string, string> = {
 
 const NETWORK_ZONE_COLUMNS = ['code', 'name', 'zone_type', 'environment', 'color', 'description'];
 const ZONE_IP_COLUMNS = ['zone_code', 'environment', 'ip_address', 'label', 'description', 'is_range'];
+const APP_GROUP_COLUMNS = ['code', 'name', 'group_type', 'description'];
 
 const ZONE_TYPE_VALUES = ['LOCAL','DMZ','DB','DEV','UAT','PROD','INTERNET','MANAGEMENT','STORAGE','BACKUP','CUSTOM'];
+const GROUP_TYPE_VALUES = ['BUSINESS', 'INFRASTRUCTURE'];
+
+const APP_GROUP_ALIASES: Record<string, string> = {
+  group_code: 'code', ma_nhom: 'code', ma: 'code',
+  group_name: 'name', ten_nhom: 'name', ten: 'name',
+  type: 'group_type', loai: 'group_type', loai_nhom: 'group_type', grouptype: 'group_type',
+  desc: 'description', mo_ta: 'description', ghi_chu: 'description',
+};
 
 const NETWORK_ZONE_ALIASES: Record<string, string> = {
   zone_code: 'code', zone_name: 'name', type: 'zone_type',
@@ -225,7 +234,7 @@ export class ImportService {
     buffer: Buffer,
     mimetype: string,
     originalname: string,
-    type: 'server' | 'application' | 'deployment' | 'connection' | 'network_zone' | 'zone_ip',
+    type: 'server' | 'application' | 'deployment' | 'connection' | 'network_zone' | 'zone_ip' | 'app_group',
     environment?: string,
   ): Promise<ImportPreviewResult> {
     const rows = await this.parseFile(buffer, mimetype, originalname);
@@ -289,6 +298,9 @@ export class ImportService {
           breakdown.servers.created++;
         } else if (result.type === 'zone_ip') {
           await this.importZoneIp(row);
+          breakdown.servers.created++;
+        } else if (result.type === 'app_group') {
+          await this.importAppGroup(row);
           breakdown.servers.created++;
         }
       } catch (err) {
@@ -650,6 +662,20 @@ export class ImportService {
     });
   }
 
+  private async importAppGroup(row: ImportRow): Promise<void> {
+    const d = row.data;
+    const code = String(d['code']).toUpperCase().trim();
+    const name = String(d['name']).trim();
+    const group_type = (d['group_type'] ? String(d['group_type']).toUpperCase() : 'BUSINESS') as any;
+    const description = d['description'] ? String(d['description']).trim() : null;
+
+    await this.prisma.applicationGroup.upsert({
+      where: { code },
+      create: { code, name, group_type, description },
+      update: { name, group_type, description, deleted_at: null },
+    });
+  }
+
   private async importZoneIp(row: ImportRow): Promise<void> {
     const d = row.data;
     const zoneCode = String(d['zone_code']).toUpperCase().trim();
@@ -676,7 +702,7 @@ export class ImportService {
 
   private validateRows(
     rawRows: Record<string, string>[],
-    type: 'server' | 'application' | 'deployment' | 'connection' | 'network_zone' | 'zone_ip',
+    type: 'server' | 'application' | 'deployment' | 'connection' | 'network_zone' | 'zone_ip' | 'app_group',
     environment?: string,
   ): Omit<ImportPreviewResult, 'session_id'> {
     const columns = type === 'server' ? SERVER_COLUMNS
@@ -684,6 +710,7 @@ export class ImportService {
       : type === 'connection' ? CONNECTION_COLUMNS
       : type === 'network_zone' ? NETWORK_ZONE_COLUMNS
       : type === 'zone_ip' ? ZONE_IP_COLUMNS
+      : type === 'app_group' ? APP_GROUP_COLUMNS
       : DEPLOYMENT_COLUMNS;
 
     const requiredCols = type === 'server'
@@ -696,6 +723,8 @@ export class ImportService {
       ? ['code', 'name', 'environment']
       : type === 'zone_ip'
       ? ['zone_code', 'environment', 'ip_address']
+      : type === 'app_group'
+      ? ['code', 'name']
       : ['application_code', 'server_code', 'environment', 'version'];
 
     const rows: ImportRow[] = rawRows.map((raw, idx) => {
@@ -712,6 +741,7 @@ export class ImportService {
           : type === 'connection' ? (CONNECTION_HEADER_ALIASES[key] ?? key)
           : type === 'network_zone' ? (NETWORK_ZONE_ALIASES[key] ?? key)
           : type === 'zone_ip' ? (ZONE_IP_ALIASES[key] ?? key)
+          : type === 'app_group' ? (APP_GROUP_ALIASES[key] ?? key)
           : key;
         normalised[canonical] = typeof v === 'string' ? v.trim() : v;
       }
@@ -804,6 +834,20 @@ export class ImportService {
           if (normalised['is_range'] === undefined || normalised['is_range'] === '') {
             normalised['is_range'] = ip.includes('/') ? 'true' : 'false';
           }
+        }
+      }
+
+      // AppGroup: validate group_type (default BUSINESS)
+      if (type === 'app_group') {
+        if (normalised['group_type']) {
+          const gtUp = String(normalised['group_type']).toUpperCase();
+          if (!GROUP_TYPE_VALUES.includes(gtUp)) {
+            errors.push(`Invalid group_type '${gtUp}': must be one of ${GROUP_TYPE_VALUES.join(', ')}`);
+          } else {
+            normalised['group_type'] = gtUp;
+          }
+        } else {
+          normalised['group_type'] = 'BUSINESS';
         }
       }
 

@@ -34,33 +34,30 @@ import apiClient from '../../api/client';
 const { Dragger } = Upload;
 const { Text, Title } = Typography;
 
-type ImportType = 'app_group' | 'server' | 'network_zone' | 'zone_ip' | 'firewall';
+type ImportType = 'app_group' | 'application' | 'deployment' | 'connection';
 type FileStatus = 'idle' | 'processing' | 'done' | 'error';
 
 const IMPORT_TYPE_OPTIONS = [
   { label: 'Nhóm ứng dụng (App Group)', value: 'app_group' },
-  { label: 'Máy chủ (Server)', value: 'server' },
-  { label: 'Network Zone', value: 'network_zone' },
-  { label: 'Zone IP Entries', value: 'zone_ip' },
-  { label: 'Firewall Rules', value: 'firewall' },
+  { label: 'Ứng dụng (Application)', value: 'application' },
+  { label: 'Triển khai (Deployment)', value: 'deployment' },
+  { label: 'Kết nối (Connection)', value: 'connection' },
 ];
 
 const TYPE_COLORS: Record<ImportType, string> = {
   app_group: 'purple',
-  server: 'blue',
-  network_zone: 'green',
-  zone_ip: 'cyan',
-  firewall: 'orange',
+  application: 'blue',
+  deployment: 'geekblue',
+  connection: 'cyan',
 };
 
-// Dependency order: app groups & zones first (no deps), then zone IPs,
-// then server (may ref zones), then firewall (refs server + zones)
+// Dependency order: app groups first (no deps), then applications (ref group),
+// then deployments (ref application + server), then connections (ref apps)
 const IMPORT_ORDER: Record<ImportType, number> = {
   app_group: 0,
-  network_zone: 1,
-  zone_ip: 2,
-  server: 3,
-  firewall: 4,
+  application: 1,
+  deployment: 2,
+  connection: 3,
 };
 
 interface FileResult {
@@ -99,29 +96,12 @@ function reserializeCSV(file: File): Promise<File> {
 
 async function importFile(entry: FileEntry): Promise<FileResult> {
   // Re-serialize through Papa to normalize quoting, BOM, and line endings
-  // before sending to the backend. This prevents csv-parse from choking on
-  // fields containing commas that are not wrapped in double quotes.
+  // before sending to the backend.
   const cleanFile = await reserializeCSV(entry.file);
 
   const form = new FormData();
   form.append('file', cleanFile);
 
-  if (entry.importType === 'firewall') {
-    const { data } = await apiClient.post('/firewall-rules/import', form, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
-    const res = data.data ?? data;
-    const errList: string[] = res.errors ?? [];
-    return {
-      total: (res.created ?? 0) + (res.skipped ?? 0) + errList.length,
-      succeeded: res.created ?? 0,
-      skipped: res.skipped ?? 0,
-      failed: errList.length,
-      errors: errList,
-    };
-  }
-
-  // server / network_zone / zone_ip — preview then execute
   const { data: previewData } = await apiClient.post(
     `/import/preview?type=${entry.importType}`,
     form,
@@ -150,7 +130,7 @@ async function importFile(entry: FileEntry): Promise<FileResult> {
   };
 }
 
-export default function QuickImportContent() {
+export default function AppQuickImportContent() {
   const { message, modal } = App.useApp();
   const [entries, setEntries] = useState<FileEntry[]>([]);
   const [phase, setPhase] = useState<'setup' | 'importing' | 'report'>('setup');
@@ -164,6 +144,16 @@ export default function QuickImportContent() {
     setDoneCount(0);
   };
 
+  const guessType = (filename: string): ImportType | null => {
+    const lower = filename.toLowerCase();
+    if (lower.includes('connection') || lower.includes('conn') || lower.includes('ket_noi') || lower.includes('ketnoi')) return 'connection';
+    if (lower.includes('deployment') || lower.includes('deploy') || lower.includes('trien_khai') || lower.includes('trienkhai')) return 'deployment';
+    // app_group before application — "application_group" / "app-group" contain "app"
+    if (lower.includes('app_group') || lower.includes('appgroup') || lower.includes('app-group') || lower.includes('application_group') || lower.includes('nhom_ung_dung') || lower.includes('nhomungdung') || lower.includes('group')) return 'app_group';
+    if (lower.includes('application') || lower.includes('app') || lower.includes('ung_dung') || lower.includes('ungdung')) return 'application';
+    return null;
+  };
+
   const addFiles = (files: File[]) => {
     const newEntries: FileEntry[] = files.map((f) => ({
       uid: `${f.name}-${Date.now()}-${Math.random()}`,
@@ -172,17 +162,6 @@ export default function QuickImportContent() {
       status: 'idle',
     }));
     setEntries((prev) => [...prev, ...newEntries]);
-  };
-
-  const guessType = (filename: string): ImportType | null => {
-    const lower = filename.toLowerCase();
-    if (lower.includes('firewall') || lower.includes('fw_rule') || lower.includes('fwrule')) return 'firewall';
-    if (lower.includes('app_group') || lower.includes('appgroup') || lower.includes('app-group') || lower.includes('application_group') || lower.includes('nhom_ung_dung') || lower.includes('nhomungdung')) return 'app_group';
-    // Check zone_ip before network_zone — "zone-ips" contains "zone" so order matters
-    if (lower.includes('zone_ip') || lower.includes('zoneip') || lower.includes('zone-ip') || lower.includes('ip_entry') || lower.includes('zone-ips')) return 'zone_ip';
-    if (lower.includes('network_zone') || lower.includes('networkzone') || lower.includes('network-zone') || lower.includes('zone')) return 'network_zone';
-    if (lower.includes('server') || lower.includes('infra') || lower.includes('host')) return 'server';
-    return null;
   };
 
   const removeEntry = (uid: string) => {
@@ -268,10 +247,9 @@ export default function QuickImportContent() {
   const aggregate = (): AggregateByType => {
     const agg: AggregateByType = {
       app_group: { total: 0, succeeded: 0, failed: 0, skipped: 0 },
-      server: { total: 0, succeeded: 0, failed: 0, skipped: 0 },
-      network_zone: { total: 0, succeeded: 0, failed: 0, skipped: 0 },
-      zone_ip: { total: 0, succeeded: 0, failed: 0, skipped: 0 },
-      firewall: { total: 0, succeeded: 0, failed: 0, skipped: 0 },
+      application: { total: 0, succeeded: 0, failed: 0, skipped: 0 },
+      deployment: { total: 0, succeeded: 0, failed: 0, skipped: 0 },
+      connection: { total: 0, succeeded: 0, failed: 0, skipped: 0 },
     };
     for (const e of entries) {
       if (!e.importType || !e.result) continue;
@@ -316,10 +294,10 @@ export default function QuickImportContent() {
     {
       title: 'Loại import',
       key: 'type',
-      width: 240,
+      width: 260,
       render: (_: any, r: FileEntry) => (
         <Select
-          style={{ width: 220 }}
+          style={{ width: 240 }}
           placeholder="Chọn loại..."
           value={r.importType ?? undefined}
           onChange={(v) => setType(r.uid, v as ImportType)}
@@ -359,7 +337,7 @@ export default function QuickImportContent() {
     {
       title: 'Loại',
       key: 'type',
-      width: 160,
+      width: 200,
       render: (_: any, r: FileEntry) =>
         r.importType ? (
           <Tag color={TYPE_COLORS[r.importType]}>
@@ -445,7 +423,7 @@ export default function QuickImportContent() {
             icon={<ThunderboltOutlined />}
             style={{ marginBottom: 16 }}
             message="Nhập nhanh nhiều file cùng lúc"
-            description="Tải lên nhiều file CSV, chọn loại dữ liệu cho từng file, rồi bấm Bắt đầu nhập. Hệ thống tự động nhập theo thứ tự phụ thuộc: Nhóm ứng dụng → Network Zone → Zone IP → Server → Firewall Rules."
+            description="Tải lên nhiều file CSV, chọn loại dữ liệu cho từng file, rồi bấm Bắt đầu nhập. Hệ thống tự động nhập theo thứ tự phụ thuộc: Nhóm ứng dụng → Ứng dụng → Triển khai → Kết nối."
           />
 
           <Dragger
@@ -460,7 +438,7 @@ export default function QuickImportContent() {
           >
             <p className="ant-upload-drag-icon"><InboxOutlined /></p>
             <p className="ant-upload-text">Kéo thả hoặc click để chọn nhiều file CSV</p>
-            <p className="ant-upload-hint">Hỗ trợ: Nhóm ứng dụng, Server, Network Zone, Zone IP, Firewall Rules</p>
+            <p className="ant-upload-hint">Hỗ trợ: Nhóm ứng dụng, Ứng dụng, Triển khai, Kết nối</p>
           </Dragger>
 
           {entries.length > 0 && (

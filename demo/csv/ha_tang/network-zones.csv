@@ -1,16 +1,23 @@
 code,name,zone_type,environment,color,description
-DMZ_PROD,DMZ Zone PROD,DMZ,PROD,#FF6B6B,Vùng DMZ PROD DC — API Gateway (10.31) và Load Balancer (10.32): điểm vào duy nhất từ internet vào hệ thống ngân hàng
-APP_PROD,Application Zone PROD,LOCAL,PROD,#1890FF,Vùng ứng dụng nội bộ PROD DC — app servers (10.11-10.13): Core Banking & IB & Mobile Banking & Payment
-DB_PROD,Database Zone PROD,DB,PROD,#722ED1,Vùng cơ sở dữ liệu PROD DC — DB servers (10.21-10.23): PostgreSQL Core Banking & Mobile Banking
-INFRA_PROD,Infrastructure Zone PROD,MANAGEMENT,PROD,#13C2C2,Vùng hạ tầng nội bộ PROD DC — Redis Sentinel (10.41) và RabbitMQ (10.42): cache & message queue
-MGMT_PROD,Management Zone PROD,MANAGEMENT,PROD,#FF7A45,Vùng quản trị PROD — mạng nội bộ DevOps/DBA/Ops (10.200.0.0/24) và monitoring (10.200.1.0/24)
-INTERNET,Internet / External,INTERNET,PROD,#8C8C8C,Vùng internet — nguồn traffic từ bên ngoài: end-user internet banking và đối tác API bên thứ ba
-DMZ_DR,DMZ Zone DR,DMZ,PROD,#FF9C6E,Vùng DMZ DR site — API Gateway & PAY_GATEWAY dự phòng (192.168.20.31)
-APP_DR,Application Zone DR,LOCAL,PROD,#69C0FF,"Vùng ứng dụng DR site — Core Banking & IB_API standby (192.168.20.11), active-passive với PROD DC"
-DB_DR,Database Zone DR,DB,PROD,#B37FEB,Vùng cơ sở dữ liệu DR site — PostgreSQL streaming replica từ PROD DC (192.168.20.21)
-DMZ_UAT,DMZ Zone UAT,DMZ,UAT,#FF6B6B,Vùng DMZ UAT — Nginx gateway & PAY_GATEWAY cho kiểm thử end-to-end (192.168.30.31)
-APP_UAT,Application Zone UAT,UAT,UAT,#52C41A,Vùng ứng dụng UAT — server dùng chung toàn bộ service kiểm thử nghiệm thu (192.168.30.11)
-DB_UAT,Database Zone UAT,DB,UAT,#722ED1,Vùng cơ sở dữ liệu UAT — PostgreSQL dùng chung tất cả service UAT (192.168.30.21)
-APP_DEV,Application Zone DEV,DEV,DEV,#FAAD14,"Vùng ứng dụng DEV — DEV-APP-001 (Core Banking/IB, 40.11) và DEV-APP-002 (Mobile/Payment, 40.12)"
-DB_DEV,Database Zone DEV,DB,DEV,#722ED1,Vùng cơ sở dữ liệu DEV — PostgreSQL dùng chung toàn bộ team phát triển (192.168.40.21)
-INFRA_DEV,Infrastructure Zone DEV,MANAGEMENT,DEV,#13C2C2,Vùng hạ tầng DEV — Redis standalone (40.41) và Elasticsearch (trên DEV-APP-001)
+DMZ_PROD_DC,DMZ Zone PROD DC,DMZ,PROD,#FF4D4F,Vùng DMZ PROD DC — Public Load Balancer & WAF (10.10.10)
+PROXY_PROD_DC,Proxy Zone PROD DC,CUSTOM,PROD,#FF7A45,Vùng Proxy PROD DC — API Gateway & Reverse Proxy (10.10.20)
+APP_PROD_DC,Application Zone PROD DC,LOCAL,PROD,#1890FF,Vùng Ứng dụng PROD DC — Frontend Portal (10.10.30)
+SERVICE_PROD_DC,Service Zone PROD DC,LOCAL,PROD,#0050B3,Vùng Dịch vụ PROD DC — Core Banking & Microservices (10.10.40)
+DB_PROD_DC,Database Zone PROD DC,DB,PROD,#722ED1,Vùng Cơ sở dữ liệu PROD DC — DB Clusters (10.10.50)
+INFRA_PROD_DC,Infrastructure Zone PROD DC,MANAGEMENT,PROD,#13C2C2,Vùng Hạ tầng PROD DC — Redis, MQ, Elasticsearch (10.10.60)
+MGMT_PROD_DC,Management Zone PROD DC,MANAGEMENT,PROD,#595959,Vùng Quản trị PROD DC — Jumpbox, Monitoring (10.10.200)
+DMZ_PROD_DR,DMZ Zone PROD DR,DMZ,PROD,#FF7875,Vùng DMZ PROD DR — Disaster Recovery Site (10.20.10)
+PROXY_PROD_DR,Proxy Zone PROD DR,CUSTOM,PROD,#FF9C6E,Vùng Proxy PROD DR — Disaster Recovery Site (10.20.20)
+APP_PROD_DR,Application Zone PROD DR,LOCAL,PROD,#69C0FF,Vùng Ứng dụng PROD DR — Disaster Recovery Site (10.20.30)
+SERVICE_PROD_DR,Service Zone PROD DR,LOCAL,PROD,#40A9FF,Vùng Dịch vụ PROD DR — Disaster Recovery Site (10.20.40)
+DB_PROD_DR,Database Zone PROD DR,DB,PROD,#B37FEB,Vùng Cơ sở dữ liệu PROD DR — Disaster Recovery Site (10.20.50)
+DMZ_UAT,DMZ Zone UAT,DMZ,UAT,#FFBB96,Vùng DMZ UAT — Testing entry points (10.30.10)
+APP_UAT,Application Zone UAT,LOCAL,UAT,#95DE64,Vùng Ứng dụng UAT — Testing Apps (10.30.30)
+SERVICE_UAT,Service Zone UAT,LOCAL,UAT,#52C41A,Vùng Dịch vụ UAT — Testing Backend (10.30.40)
+DB_UAT,Database Zone UAT,DB,UAT,#B7EB8F,Vùng Cơ sở dữ liệu UAT — Testing DB (10.30.50)
+APP_DEV,Application Zone DEV,LOCAL,DEV,#FFD666,Vùng Ứng dụng DEV — Development Apps (10.40.30)
+SERVICE_DEV,Service Zone DEV,LOCAL,DEV,#FADB14,Vùng Dịch vụ DEV — Development Backend (10.40.40)
+DB_DEV,Database Zone DEV,DB,DEV,#FFF1B8,Vùng Cơ sở dữ liệu DEV — Development DB (10.40.50)
+INTERNAL_DEV,Internal Device Zone DEV,DEV,DEV,#D9D9D9,Vùng thiết bị nhân viên phát triển nội bộ (10.40.100)
+INTERNAL_UAT,Internal Device Zone UAT,UAT,UAT,#D9D9D9,Vùng thiết bị nhân viên kiểm thử nội bộ (10.30.100)
+INTERNET,Internet / External,INTERNET,PROD,#262626,Vùng Internet — Nguồn traffic từ bên ngoài hệ thống
