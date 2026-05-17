@@ -422,18 +422,20 @@ const ZONE_GAP = 48;
 const LANE_WRAP_PAD = 18;
 
 // Build the background wrapper panel that visually contains every zone in a
-// lane (row). It sits behind the zones (zIndex -2) and ignores pointer events.
+// lane. It sits behind the zones (zIndex -2) and ignores pointer events.
+// (x,y,w,h) is the lane's content box; the panel adds LANE_WRAP_PAD around it.
 function makeLaneWrapper(
   lane: number,
-  rowY: number,
-  rowTotalW: number,
-  rowMaxH: number,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
 ): Node {
   return {
     id: `lanewrap-${lane}`,
     type: 'laneWrapper',
-    position: { x: -LANE_WRAP_PAD, y: rowY - LANE_WRAP_PAD },
-    style: { width: rowTotalW + LANE_WRAP_PAD * 2, height: rowMaxH + LANE_WRAP_PAD * 2 },
+    position: { x: x - LANE_WRAP_PAD, y: y - LANE_WRAP_PAD },
+    style: { width: w + LANE_WRAP_PAD * 2, height: h + LANE_WRAP_PAD * 2 },
     data: { kind: 'wrapper', lane },
     selectable: false,
     draggable: false,
@@ -495,68 +497,86 @@ export function computeZoneLaneLayout(
     subEdges.forEach((e) => allEdges.push(e));
   }
 
-  // ── Pass 2: grid placement — group zones by lane (row); every zone in
-  // a row gets the same width (= widest zone in that row); rows stack
-  // top→bottom with ZONE_GAP. This packs many zones to optimise space.
-  const rowsMap = new Map<number, ZoneBuild[]>();
-  for (const b of builds) {
-    const arr = rowsMap.get(b.zone.lane);
-    if (arr) arr.push(b);
-    else rowsMap.set(b.zone.lane, [b]);
-  }
-  const rowKeys = [...rowsMap.keys()].sort((a, b) => a - b);
-
-  let rowY = 0;
-  for (const rk of rowKeys) {
-    const rowBuilds = (rowsMap.get(rk) ?? []).sort((a, b) => a.zone.order - b.zone.order);
-    // Equal WIDTH across the row; each zone keeps its own HEIGHT (fit to its
-    // inner nodes). The row advances by the tallest zone so rows never overlap.
-    const equalW = Math.max(...rowBuilds.map((b) => b.contentW));
-    const rowMaxH = Math.max(...rowBuilds.map((b) => b.contentH));
-    const rowTotalW = rowBuilds.length * equalW + (rowBuilds.length - 1) * ZONE_GAP;
-    allNodes.push(makeLaneWrapper(rk, rowY, rowTotalW, rowMaxH));
-    let colX = 0;
-
-    for (const b of rowBuilds) {
-      const laneNodeId = `zone-${b.zone.id}`;
+  // ── Pass 2: grid placement, orientation-aware.
+  //   LR/RL (stackHorizontally): a lane is a horizontal ROW — zones
+  //     side-by-side along X, equal width; rows stack top→bottom.
+  //   TB/BT: a lane is a vertical COLUMN — zones stacked along Y, equal
+  //     width; columns stack left→right.
+  // Either way zones in a lane share width (= widest in the lane) and keep
+  // their own height (fit to inner nodes).
+  const pushZone = (b: ZoneBuild, x: number, y: number, w: number) => {
+    const laneNodeId = `zone-${b.zone.id}`;
+    allNodes.push({
+      id: laneNodeId,
+      type: 'zoneLane',
+      position: { x, y },
+      style: { width: w, height: b.contentH },
+      data: {
+        label: b.zone.name,
+        color: b.zone.color,
+        borderColor: b.zone.borderColor,
+        headerBg: b.zone.headerBg,
+        serverCount: b.serverCount,
+        lane: b.zone.lane,
+      },
+      selectable: false,
+      draggable: true,
+      zIndex: -1,
+    });
+    // No `extent: 'parent'` — children can be dragged freely; the zone lane
+    // grows to fit them (see reflowZoneLanes) instead of clamping the drag.
+    b.laidSubNodes.forEach((n) => {
+      if (n.parentId) {
+        allNodes.push(n);
+        return;
+      }
       allNodes.push({
-        id: laneNodeId,
-        type: 'zoneLane',
-        position: { x: colX, y: rowY },
-        style: { width: equalW, height: b.contentH },
-        data: {
-          label: b.zone.name,
-          color: b.zone.color,
-          borderColor: b.zone.borderColor,
-          headerBg: b.zone.headerBg,
-          serverCount: b.serverCount,
-          lane: b.zone.lane,
+        ...n,
+        position: {
+          x: n.position.x + ZONE_PADDING_X,
+          y: n.position.y + ZONE_HEADER_H + ZONE_PADDING_Y,
         },
-        selectable: false,
-        draggable: true,
-        zIndex: -1,
+        parentId: laneNodeId,
       });
+    });
+  };
 
-      // No `extent: 'parent'` — children can be dragged freely; the zone lane
-      // grows to fit them (see reflowZoneLanes) instead of clamping the drag.
-      b.laidSubNodes.forEach((n) => {
-        if (n.parentId) {
-          allNodes.push(n);
-          return;
-        }
-        allNodes.push({
-          ...n,
-          position: {
-            x: n.position.x + ZONE_PADDING_X,
-            y: n.position.y + ZONE_HEADER_H + ZONE_PADDING_Y,
-          },
-          parentId: laneNodeId,
-        });
-      });
+  const groups = new Map<number, ZoneBuild[]>();
+  for (const b of builds) {
+    const arr = groups.get(b.zone.lane);
+    if (arr) arr.push(b);
+    else groups.set(b.zone.lane, [b]);
+  }
+  const laneKeys = [...groups.keys()].sort((a, b) => a - b);
 
-      colX += equalW + ZONE_GAP;
+  let cross = 0; // cross-axis offset for the next lane
+  for (const lk of laneKeys) {
+    const laneBuilds = (groups.get(lk) ?? []).sort((a, b) => a.zone.order - b.zone.order);
+    const equalW = Math.max(...laneBuilds.map((b) => b.contentW));
+
+    if (stackHorizontally) {
+      const laneMainW = laneBuilds.length * equalW + (laneBuilds.length - 1) * ZONE_GAP;
+      const laneCrossH = Math.max(...laneBuilds.map((b) => b.contentH));
+      allNodes.push(makeLaneWrapper(lk, 0, cross, laneMainW, laneCrossH));
+      let mainX = 0;
+      for (const b of laneBuilds) {
+        pushZone(b, mainX, cross, equalW);
+        mainX += equalW + ZONE_GAP;
+      }
+      cross += laneCrossH + ZONE_GAP;
+    } else {
+      const laneMainH = laneBuilds.reduce(
+        (s, b, i) => s + b.contentH + (i > 0 ? ZONE_GAP : 0),
+        0,
+      );
+      allNodes.push(makeLaneWrapper(lk, cross, 0, equalW, laneMainH));
+      let mainY = 0;
+      for (const b of laneBuilds) {
+        pushZone(b, cross, mainY, equalW);
+        mainY += b.contentH + ZONE_GAP;
+      }
+      cross += equalW + ZONE_GAP;
     }
-    rowY += rowMaxH + ZONE_GAP;
   }
 
   // Cross-zone edges (not already emitted by per-zone buildGraph)
@@ -674,7 +694,7 @@ const ZONE_MIN_CONTENT_H = SERVER_NODE_H;
 // fit; the left/top expansion is finalized once on drag stop.
 export function reflowZoneLanes(
   nodes: Node[],
-  _stackHorizontally: boolean,
+  stackHorizontally: boolean,
   normalize = false,
 ): Node[] {
   const lanes = nodes.filter((n) => n.type === 'zoneLane');
@@ -737,38 +757,53 @@ export function reflowZoneLanes(
     }
   }
 
-  // Grid re-stack: group lanes into rows by data.lane; within a row order by
-  // current x. Every zone in a row is widened to the row's widest zone and
-  // heightened to its tallest; rows stack top→bottom with ZONE_GAP.
-  const rowOf = (n: Node): number => Number((n.data as { lane?: number } | undefined)?.lane ?? 0);
-  const rowsMap = new Map<number, Node[]>();
+  // Grid re-stack, orientation-aware. Group lanes by data.lane.
+  //   LR/RL: lane = ROW (zones along X, equal width); rows stack down.
+  //   TB/BT: lane = COLUMN (zones along Y, equal width); columns stack right.
+  // Order within a lane follows the main axis (x for rows, y for columns).
+  const laneOf = (n: Node): number => Number((n.data as { lane?: number } | undefined)?.lane ?? 0);
+  const groups = new Map<number, Node[]>();
   for (const lane of lanes) {
-    const r = rowOf(lane);
-    const arr = rowsMap.get(r);
+    const r = laneOf(lane);
+    const arr = groups.get(r);
     if (arr) arr.push(lane);
-    else rowsMap.set(r, [lane]);
+    else groups.set(r, [lane]);
   }
-  const rowKeys = [...rowsMap.keys()].sort((a, b) => a - b);
+  const laneKeys = [...groups.keys()].sort((a, b) => a - b);
 
   const posById = new Map<string, { x: number; y: number }>();
   const wrappers: Node[] = [];
-  let rowY = 0;
-  for (const rk of rowKeys) {
-    const rowLanes = (rowsMap.get(rk) ?? []).slice().sort((a, b) => a.position.x - b.position.x);
-    // Equal WIDTH across the row; keep each zone's own HEIGHT (fit to its
-    // inner nodes). Row advances by the tallest zone so rows never overlap.
-    const equalW = Math.max(...rowLanes.map((l) => sizeById.get(l.id)!.w));
-    const rowMaxH = Math.max(...rowLanes.map((l) => sizeById.get(l.id)!.h));
-    let colX = 0;
-    for (const l of rowLanes) {
-      const ownH = sizeById.get(l.id)!.h;
-      posById.set(l.id, { x: colX, y: rowY });
-      sizeById.set(l.id, { w: equalW, h: ownH });
-      colX += equalW + ZONE_GAP;
+  let cross = 0;
+  for (const lk of laneKeys) {
+    const laneNodes = (groups.get(lk) ?? []).slice().sort((a, b) =>
+      stackHorizontally ? a.position.x - b.position.x : a.position.y - b.position.y,
+    );
+    const equalW = Math.max(...laneNodes.map((l) => sizeById.get(l.id)!.w));
+
+    if (stackHorizontally) {
+      const rowMaxH = Math.max(...laneNodes.map((l) => sizeById.get(l.id)!.h));
+      let mainX = 0;
+      for (const l of laneNodes) {
+        const ownH = sizeById.get(l.id)!.h;
+        posById.set(l.id, { x: mainX, y: cross });
+        sizeById.set(l.id, { w: equalW, h: ownH });
+        mainX += equalW + ZONE_GAP;
+      }
+      const laneMainW = laneNodes.length * equalW + (laneNodes.length - 1) * ZONE_GAP;
+      wrappers.push(makeLaneWrapper(lk, 0, cross, laneMainW, rowMaxH));
+      cross += rowMaxH + ZONE_GAP;
+    } else {
+      let mainY = 0;
+      for (const l of laneNodes) {
+        const ownH = sizeById.get(l.id)!.h;
+        posById.set(l.id, { x: cross, y: mainY });
+        sizeById.set(l.id, { w: equalW, h: ownH });
+        mainY += ownH + ZONE_GAP;
+      }
+      const laneMainH = Math.max(0, mainY - ZONE_GAP);
+      wrappers.push(makeLaneWrapper(lk, cross, 0, equalW, laneMainH));
+      cross += equalW + ZONE_GAP;
     }
-    const rowTotalW = rowLanes.length * equalW + (rowLanes.length - 1) * ZONE_GAP;
-    wrappers.push(makeLaneWrapper(rk, rowY, rowTotalW, rowMaxH));
-    rowY += rowMaxH + ZONE_GAP;
   }
 
   // Rebuild wrappers fresh every reflow (lane membership may have changed);
@@ -793,15 +828,16 @@ export function reflowZoneLanes(
   return [...wrappers, ...mapped];
 }
 
-// Auto-arrange: pick the number of columns (zones per row) that lets the whole
-// zone grid be zoomed largest to fit the viewport — i.e. best screen usage.
-// Returns the flattened (row asc, left→right) assignment with a lane index per
-// zone, ready for setZoneArrangement. Zone natural size is derived from each
-// lane's child nodes (same sizing as reflowZoneLanes' grow-only path).
+// Auto-arrange: pick the zones-per-lane count that lets the whole zone grid
+// be zoomed largest to fit the viewport — i.e. best screen usage. Returns the
+// flattened assignment with a lane index per zone, ready for
+// setZoneArrangement. Orientation-aware: LR/RL packs zones into horizontal
+// rows; TB/BT packs them into vertical columns.
 export function optimalZoneLaneArrangement(
   nodes: Node[],
   viewportW: number,
   viewportH: number,
+  stackHorizontally: boolean,
 ): { id: string; lane: number }[] {
   const lanes = nodes.filter((n) => n.type === 'zoneLane');
   if (lanes.length === 0) return [];
@@ -834,26 +870,38 @@ export function optimalZoneLaneArrangement(
     };
   });
 
-  // Stable partition order = current reading order (top→bottom, then left→right)
-  zs.sort((a, b) => a.oy - b.oy || a.ox - b.ox);
+  // Reading order matches the current orientation so the partition is stable:
+  // rows → top→bottom then left→right; columns → left→right then top→bottom.
+  zs.sort((a, b) =>
+    stackHorizontally ? a.oy - b.oy || a.ox - b.ox : a.ox - b.ox || a.oy - b.oy,
+  );
   const N = zs.length;
   const vw = viewportW || 1;
   const vh = viewportH || 1;
   const vAspect = vw / vh;
 
-  let best: { cols: number; scale: number; aspectGap: number } | null = null;
-  for (let cols = 1; cols <= N; cols++) {
-    const rows = Math.ceil(N / cols);
+  // `per` = zones per lane (per row for LR/RL, per column for TB/BT).
+  let best: { per: number; scale: number; aspectGap: number } | null = null;
+  for (let per = 1; per <= N; per++) {
+    const laneCount = Math.ceil(N / per);
     let totalW = 0;
     let totalH = 0;
-    for (let r = 0; r < rows; r++) {
-      const slice = zs.slice(r * cols, r * cols + cols);
+    for (let li = 0; li < laneCount; li++) {
+      const slice = zs.slice(li * per, li * per + per);
       if (slice.length === 0) continue;
       const eqW = Math.max(...slice.map((z) => z.w));
-      const rowW = slice.length * eqW + (slice.length - 1) * ZONE_GAP;
-      const rowH = Math.max(...slice.map((z) => z.h));
-      totalW = Math.max(totalW, rowW);
-      totalH += rowH + (r > 0 ? ZONE_GAP : 0);
+      if (stackHorizontally) {
+        // lane = row: zones along X (equal width), rows stack down
+        const rowW = slice.length * eqW + (slice.length - 1) * ZONE_GAP;
+        const rowH = Math.max(...slice.map((z) => z.h));
+        totalW = Math.max(totalW, rowW);
+        totalH += rowH + (li > 0 ? ZONE_GAP : 0);
+      } else {
+        // lane = column: zones along Y, columns stack right (equal width)
+        const colH = slice.reduce((s, z, i) => s + z.h + (i > 0 ? ZONE_GAP : 0), 0);
+        totalH = Math.max(totalH, colH);
+        totalW += eqW + (li > 0 ? ZONE_GAP : 0);
+      }
     }
     // Largest uniform zoom that still fits the viewport → screen utilisation.
     const scale = Math.min(vw / totalW, vh / totalH);
@@ -863,13 +911,13 @@ export function optimalZoneLaneArrangement(
       scale > best.scale + 1e-6 ||
       (Math.abs(scale - best.scale) <= 1e-6 && aspectGap < best.aspectGap)
     ) {
-      best = { cols, scale, aspectGap };
+      best = { per, scale, aspectGap };
     }
   }
 
-  const cols = best?.cols ?? 1;
+  const per = best?.per ?? 1;
   return zs.map((z, i) => ({
     id: z.id.replace(/^zone-/, ''),
-    lane: Math.floor(i / cols),
+    lane: Math.floor(i / per),
   }));
 }

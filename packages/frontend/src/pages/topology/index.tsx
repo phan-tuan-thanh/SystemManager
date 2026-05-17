@@ -451,42 +451,49 @@ function TopologyPageInner() {
       return;
     }
 
-    // Zone lane dragged → cluster zones into rows by vertical overlap (drop a
-    // zone so it overlaps a row → it joins that row; drop into empty space
-    // below → new row). Within a row, order left→right by x. Persist the
-    // grid (lane + order) and re-stack so each row gets equal width.
+    // Zone lane dragged → cluster zones into lanes by overlap on the CROSS
+    // axis (Y for LR/RL rows, X for TB/BT columns); within a lane order by
+    // the MAIN axis. Drop a zone so it overlaps a lane → it joins; drop into
+    // empty space → new lane. Persist grid (lane + order) and re-stack.
     if (node.type === 'zoneLane' && filters.showZones) {
+      const stackH = filters.layoutDirection === 'LR' || filters.layoutDirection === 'RL';
       setNodes((nds) => {
         const moved = nds.map((n) => (n.id === node.id ? { ...n, position: node.position } : n));
 
         const zoneNodes = moved.filter((n) => n.type === 'zoneLane');
-        const yBounds = (n: Node) => {
-          const h = (n.style?.height as number) ?? (n.height as number) ?? 200;
-          return { y0: n.position.y, y1: n.position.y + h };
+        // Cross-axis span used to cluster, main-axis position used to order.
+        const crossLo = (n: Node) => (stackH ? n.position.y : n.position.x);
+        const crossHi = (n: Node) => {
+          const sz = stackH
+            ? (n.style?.height as number) ?? (n.height as number) ?? 200
+            : (n.style?.width as number) ?? (n.width as number) ?? 200;
+          return crossLo(n) + sz;
         };
-        // Greedy vertical-overlap clustering into rows.
-        const sorted = [...zoneNodes].sort((a, b) => a.position.y - b.position.y);
-        const rows: { top: number; bottom: number; nodes: Node[] }[] = [];
+        const mainPos = (n: Node) => (stackH ? n.position.x : n.position.y);
+
+        const sorted = [...zoneNodes].sort((a, b) => crossLo(a) - crossLo(b));
+        const lanesAcc: { lo: number; hi: number; nodes: Node[] }[] = [];
         for (const z of sorted) {
-          const { y0, y1 } = yBounds(z);
-          const row = rows.find((r) => y0 < r.bottom && y1 > r.top);
-          if (row) {
-            row.nodes.push(z);
-            row.top = Math.min(row.top, y0);
-            row.bottom = Math.max(row.bottom, y1);
+          const lo = crossLo(z);
+          const hi = crossHi(z);
+          const lane = lanesAcc.find((r) => lo < r.hi && hi > r.lo);
+          if (lane) {
+            lane.nodes.push(z);
+            lane.lo = Math.min(lane.lo, lo);
+            lane.hi = Math.max(lane.hi, hi);
           } else {
-            rows.push({ top: y0, bottom: y1, nodes: [z] });
+            lanesAcc.push({ lo, hi, nodes: [z] });
           }
         }
-        rows.sort((a, b) => a.top - b.top);
+        lanesAcc.sort((a, b) => a.lo - b.lo);
 
-        // Flatten to (row asc, x asc) with lane index; tag nodes' data.lane.
+        // Flatten to (lane asc, main asc) with lane index; tag data.lane.
         const laneOf = new Map<string, number>();
         const items: { id: string; lane: number }[] = [];
-        rows.forEach((r, laneIdx) => {
+        lanesAcc.forEach((r, laneIdx) => {
           r.nodes
             .slice()
-            .sort((a, b) => a.position.x - b.position.x)
+            .sort((a, b) => mainPos(a) - mainPos(b))
             .forEach((z) => {
               laneOf.set(z.id, laneIdx);
               items.push({ id: z.id.replace(/^zone-/, ''), lane: laneIdx });
@@ -499,7 +506,7 @@ function TopologyPageInner() {
             ? { ...n, data: { ...n.data, lane: laneOf.get(n.id) } }
             : n,
         );
-        const reflowed = reflowZoneLanes(withLane, false);
+        const reflowed = reflowZoneLanes(withLane, stackH);
         reflowed.forEach((n) => {
           if (n.type === 'zoneLane') {
             zoneLayoutRef.current[n.id] = {
@@ -594,9 +601,11 @@ function TopologyPageInner() {
     // Dragging a whole zone → show a dashed wrapper where it will land:
     // over an existing lane it overlaps, or a new-lane band in empty space.
     if (node.type === 'zoneLane') {
+      const stackH = filters.layoutDirection === 'LR' || filters.layoutDirection === 'RL';
       const dh = (node.height as number) ?? (node.style?.height as number) ?? 200;
       const dw = (node.style?.width as number) ?? (node.width as number) ?? 200;
-      const cy = node.position.y + dh / 2;
+      // Cross-axis centre of the dragged zone (Y for rows, X for columns).
+      const cc = stackH ? node.position.y + dh / 2 : node.position.x + dw / 2;
 
       const bands = new Map<number, { minX: number; minY: number; maxX: number; maxY: number }>();
       for (const z of nodesRef.current) {
@@ -609,35 +618,43 @@ function TopologyPageInner() {
           ? { minX: Math.min(b.minX, z.position.x), minY: Math.min(b.minY, z.position.y), maxX: Math.max(b.maxX, z.position.x + zw), maxY: Math.max(b.maxY, z.position.y + zh) }
           : { minX: z.position.x, minY: z.position.y, maxX: z.position.x + zw, maxY: z.position.y + zh });
       }
-      const sorted = [...bands.values()].sort((a, b) => a.minY - b.minY);
+      const lo = (bb: { minX: number; minY: number }) => (stackH ? bb.minY : bb.minX);
+      const hi = (bb: { maxX: number; maxY: number }) => (stackH ? bb.maxY : bb.maxX);
+      const sorted = [...bands.values()].sort((a, b) => lo(a) - lo(b));
 
       const PAD = 18;
       let target: { minX: number; minY: number; maxX: number; maxY: number } | null = null;
       let displayIdx = 0;
       for (let i = 0; i < sorted.length; i++) {
         const band = sorted[i];
-        if (cy >= band.minY - 24 && cy <= band.maxY + 24) { target = band; displayIdx = i; break; }
-        if (cy > band.maxY + 24) displayIdx = i + 1;
+        if (cc >= lo(band) - 24 && cc <= hi(band) + 24) { target = band; displayIdx = i; break; }
+        if (cc > hi(band) + 24) displayIdx = i + 1;
       }
 
-      const hint: Node = target
-        ? {
-            id: 'lanewrap-drophint', type: 'laneWrapper',
-            position: { x: Math.min(target.minX, node.position.x) - PAD, y: target.minY - PAD },
-            style: {
-              width: (Math.max(target.maxX, node.position.x + dw) - Math.min(target.minX, node.position.x)) + PAD * 2,
-              height: (target.maxY - target.minY) + PAD * 2,
-            },
-            data: { kind: 'hint', lane: displayIdx, isNewLane: false },
-            selectable: false, draggable: false, zIndex: 50,
-          }
-        : {
-            id: 'lanewrap-drophint', type: 'laneWrapper',
-            position: { x: node.position.x - PAD, y: node.position.y - PAD },
-            style: { width: dw + PAD * 2, height: dh + PAD * 2 },
-            data: { kind: 'hint', lane: displayIdx, isNewLane: true },
-            selectable: false, draggable: false, zIndex: 50,
-          };
+      let hint: Node;
+      if (target) {
+        // Join an existing lane: extend the lane band along the MAIN axis to
+        // include the dragged zone (X for rows, Y for columns).
+        const x0 = stackH ? Math.min(target.minX, node.position.x) : target.minX;
+        const y0 = stackH ? target.minY : Math.min(target.minY, node.position.y);
+        const x1 = stackH ? Math.max(target.maxX, node.position.x + dw) : target.maxX;
+        const y1 = stackH ? target.maxY : Math.max(target.maxY, node.position.y + dh);
+        hint = {
+          id: 'lanewrap-drophint', type: 'laneWrapper',
+          position: { x: x0 - PAD, y: y0 - PAD },
+          style: { width: (x1 - x0) + PAD * 2, height: (y1 - y0) + PAD * 2 },
+          data: { kind: 'hint', lane: displayIdx, isNewLane: false },
+          selectable: false, draggable: false, zIndex: 50,
+        };
+      } else {
+        hint = {
+          id: 'lanewrap-drophint', type: 'laneWrapper',
+          position: { x: node.position.x - PAD, y: node.position.y - PAD },
+          style: { width: dw + PAD * 2, height: dh + PAD * 2 },
+          data: { kind: 'hint', lane: displayIdx, isNewLane: true },
+          selectable: false, draggable: false, zIndex: 50,
+        };
+      }
       setNodes((nds) => [...nds.filter((n) => n.id !== 'lanewrap-drophint'), hint]);
       return;
     }
@@ -685,10 +702,12 @@ function TopologyPageInner() {
     // re-applies the optimal grid.
     if (filters.showZones) {
       const vp = containerRef.current;
+      const stackH = filters.layoutDirection === 'LR' || filters.layoutDirection === 'RL';
       const arrangement = optimalZoneLaneArrangement(
         nodesRef.current,
         vp?.clientWidth ?? window.innerWidth,
         vp?.clientHeight ?? window.innerHeight,
+        stackH,
       );
       if (arrangement.length) setZoneArrangement(arrangement);
       setLayoutRevision((r) => r + 1);
