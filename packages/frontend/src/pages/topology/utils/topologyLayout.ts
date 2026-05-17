@@ -418,6 +418,28 @@ export const ZONE_HEADER_H = 32;
 const ZONE_PADDING_X = 28;
 const ZONE_PADDING_Y = 20;
 const ZONE_GAP = 48;
+// Padding of the lane wrapper panel around the zones it contains
+const LANE_WRAP_PAD = 18;
+
+// Build the background wrapper panel that visually contains every zone in a
+// lane (row). It sits behind the zones (zIndex -2) and ignores pointer events.
+function makeLaneWrapper(
+  lane: number,
+  rowY: number,
+  rowTotalW: number,
+  rowMaxH: number,
+): Node {
+  return {
+    id: `lanewrap-${lane}`,
+    type: 'laneWrapper',
+    position: { x: -LANE_WRAP_PAD, y: rowY - LANE_WRAP_PAD },
+    style: { width: rowTotalW + LANE_WRAP_PAD * 2, height: rowMaxH + LANE_WRAP_PAD * 2 },
+    data: { kind: 'wrapper', lane },
+    selectable: false,
+    draggable: false,
+    zIndex: -2,
+  };
+}
 
 export function computeZoneLaneLayout(
   serversByZone: Map<string, ServerNode[]>,
@@ -491,6 +513,8 @@ export function computeZoneLaneLayout(
     // inner nodes). The row advances by the tallest zone so rows never overlap.
     const equalW = Math.max(...rowBuilds.map((b) => b.contentW));
     const rowMaxH = Math.max(...rowBuilds.map((b) => b.contentH));
+    const rowTotalW = rowBuilds.length * equalW + (rowBuilds.length - 1) * ZONE_GAP;
+    allNodes.push(makeLaneWrapper(rk, rowY, rowTotalW, rowMaxH));
     let colX = 0;
 
     for (const b of rowBuilds) {
@@ -727,6 +751,7 @@ export function reflowZoneLanes(
   const rowKeys = [...rowsMap.keys()].sort((a, b) => a - b);
 
   const posById = new Map<string, { x: number; y: number }>();
+  const wrappers: Node[] = [];
   let rowY = 0;
   for (const rk of rowKeys) {
     const rowLanes = (rowsMap.get(rk) ?? []).slice().sort((a, b) => a.position.x - b.position.x);
@@ -741,24 +766,31 @@ export function reflowZoneLanes(
       sizeById.set(l.id, { w: equalW, h: ownH });
       colX += equalW + ZONE_GAP;
     }
+    const rowTotalW = rowLanes.length * equalW + (rowLanes.length - 1) * ZONE_GAP;
+    wrappers.push(makeLaneWrapper(rk, rowY, rowTotalW, rowMaxH));
     rowY += rowMaxH + ZONE_GAP;
   }
 
-  return nodes.map((n) => {
-    if (n.type === 'zoneLane') {
-      const sz = sizeById.get(n.id);
-      const p = posById.get(n.id);
-      if (!sz || !p) return n;
-      return { ...n, position: p, style: { ...n.style, width: sz.w, height: sz.h } };
-    }
-    if (normalize && n.parentId) {
-      const s = shiftById.get(n.parentId);
-      if (s && (s.x !== 0 || s.y !== 0)) {
-        return { ...n, position: { x: n.position.x + s.x, y: n.position.y + s.y } };
+  // Rebuild wrappers fresh every reflow (lane membership may have changed);
+  // drop stale laneWrapper nodes and re-append the recomputed ones.
+  const mapped = nodes
+    .filter((n) => n.type !== 'laneWrapper')
+    .map((n) => {
+      if (n.type === 'zoneLane') {
+        const sz = sizeById.get(n.id);
+        const p = posById.get(n.id);
+        if (!sz || !p) return n;
+        return { ...n, position: p, style: { ...n.style, width: sz.w, height: sz.h } };
       }
-    }
-    return n;
-  });
+      if (normalize && n.parentId) {
+        const s = shiftById.get(n.parentId);
+        if (s && (s.x !== 0 || s.y !== 0)) {
+          return { ...n, position: { x: n.position.x + s.x, y: n.position.y + s.y } };
+        }
+      }
+      return n;
+    });
+  return [...wrappers, ...mapped];
 }
 
 // Auto-arrange: pick the number of columns (zones per row) that lets the whole

@@ -357,6 +357,8 @@ function TopologyPageInner() {
       appliedRevisionRef.current = layoutRevision;
     }
     const mergedNodes = computedNodes.map((node) => {
+      // Lane wrappers are always recomputed by the layout — never pin them.
+      if (node.type === 'laneWrapper') return node;
       if (node.type === 'zoneLane') {
         const z = zoneLayoutRef.current[node.id];
         return z
@@ -587,7 +589,60 @@ function TopologyPageInner() {
   // drag stop (handleNodeDragStop normalizes) to avoid the dragged node
   // shifting against the pointer.
   const handleNodeDrag = useCallback((_evt: React.MouseEvent, node: Node) => {
-    if (!filters.showZones || !node.parentId) return;
+    if (!filters.showZones) return;
+
+    // Dragging a whole zone → show a dashed wrapper where it will land:
+    // over an existing lane it overlaps, or a new-lane band in empty space.
+    if (node.type === 'zoneLane') {
+      const dh = (node.height as number) ?? (node.style?.height as number) ?? 200;
+      const dw = (node.style?.width as number) ?? (node.width as number) ?? 200;
+      const cy = node.position.y + dh / 2;
+
+      const bands = new Map<number, { minX: number; minY: number; maxX: number; maxY: number }>();
+      for (const z of nodesRef.current) {
+        if (z.type !== 'zoneLane' || z.id === node.id) continue;
+        const lane = Number((z.data as { lane?: number } | undefined)?.lane ?? 0);
+        const zw = (z.style?.width as number) ?? (z.width as number) ?? 200;
+        const zh = (z.style?.height as number) ?? (z.height as number) ?? 200;
+        const b = bands.get(lane);
+        bands.set(lane, b
+          ? { minX: Math.min(b.minX, z.position.x), minY: Math.min(b.minY, z.position.y), maxX: Math.max(b.maxX, z.position.x + zw), maxY: Math.max(b.maxY, z.position.y + zh) }
+          : { minX: z.position.x, minY: z.position.y, maxX: z.position.x + zw, maxY: z.position.y + zh });
+      }
+      const sorted = [...bands.values()].sort((a, b) => a.minY - b.minY);
+
+      const PAD = 18;
+      let target: { minX: number; minY: number; maxX: number; maxY: number } | null = null;
+      let displayIdx = 0;
+      for (let i = 0; i < sorted.length; i++) {
+        const band = sorted[i];
+        if (cy >= band.minY - 24 && cy <= band.maxY + 24) { target = band; displayIdx = i; break; }
+        if (cy > band.maxY + 24) displayIdx = i + 1;
+      }
+
+      const hint: Node = target
+        ? {
+            id: 'lanewrap-drophint', type: 'laneWrapper',
+            position: { x: Math.min(target.minX, node.position.x) - PAD, y: target.minY - PAD },
+            style: {
+              width: (Math.max(target.maxX, node.position.x + dw) - Math.min(target.minX, node.position.x)) + PAD * 2,
+              height: (target.maxY - target.minY) + PAD * 2,
+            },
+            data: { kind: 'hint', lane: displayIdx, isNewLane: false },
+            selectable: false, draggable: false, zIndex: 50,
+          }
+        : {
+            id: 'lanewrap-drophint', type: 'laneWrapper',
+            position: { x: node.position.x - PAD, y: node.position.y - PAD },
+            style: { width: dw + PAD * 2, height: dh + PAD * 2 },
+            data: { kind: 'hint', lane: displayIdx, isNewLane: true },
+            selectable: false, draggable: false, zIndex: 50,
+          };
+      setNodes((nds) => [...nds.filter((n) => n.id !== 'lanewrap-drophint'), hint]);
+      return;
+    }
+
+    if (!node.parentId) return;
     const parent = nodesRef.current.find((n) => n.id === node.parentId);
     if (parent?.type !== 'zoneLane') return;
     const stackH = filters.layoutDirection === 'LR' || filters.layoutDirection === 'RL';
@@ -608,6 +663,7 @@ function TopologyPageInner() {
       let snappedY = false;
       for (const other of nodesRef.current) {
         if (other.id === change.id) continue;
+        if (other.type === 'laneWrapper') continue;
         const isSibling = parentId ? other.parentId === parentId : !other.parentId;
         if (!isSibling) continue;
         if (!snappedX && Math.abs(other.position.x - x) <= ALIGN_THRESHOLD) { x = other.position.x; snappedX = true; }
@@ -765,6 +821,10 @@ function TopologyPageInner() {
         const positions: Record<string, { x: number; y: number }> = {};
         const zones: Record<string, { x: number; y: number; width: number; height: number }> = {};
         nodesRef.current.forEach((n) => {
+          if (n.type === 'laneWrapper') {
+            // Wrappers are derived from the layout — not persisted.
+            return;
+          }
           if (n.type === 'zoneLane') {
             zones[n.id] = {
               x: n.position.x, y: n.position.y,
