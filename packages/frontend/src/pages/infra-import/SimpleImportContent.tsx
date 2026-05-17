@@ -60,7 +60,7 @@ interface ExecuteResult {
 }
 
 export interface SimpleImportContentProps {
-  type: 'network_zone' | 'zone_ip';
+  type: 'network_zone' | 'zone_ip' | 'app_group';
   title: string;
   targetFields: TargetField[];
   templateLink?: string;

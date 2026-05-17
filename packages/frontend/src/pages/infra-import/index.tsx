@@ -7,6 +7,7 @@ import {
   NodeIndexOutlined,
   SafetyCertificateOutlined,
   ThunderboltOutlined,
+  AppstoreOutlined,
 } from '@ant-design/icons';
 import PageHeader from '../../components/common/PageHeader';
 import { InfraUploadContent } from '../infra-upload/index';
@@ -15,7 +16,7 @@ import FirewallImportContent from './FirewallImportContent';
 import QuickImportContent from './QuickImportContent';
 import type { TargetField } from '../../components/common/ColumnMapper';
 
-const TAB_KEYS = ['quick', 'server', 'network_zone', 'zone_ip', 'firewall'] as const;
+const TAB_KEYS = ['quick', 'server', 'network_zone', 'zone_ip', 'app_group', 'firewall'] as const;
 type TabKey = typeof TAB_KEYS[number];
 
 const ZONE_TYPE_OPTIONS = [
@@ -117,6 +118,41 @@ const ZONE_IP_FIELDS: TargetField[] = [
   },
 ];
 
+const GROUP_TYPE_OPTIONS = [
+  { label: 'BUSINESS', value: 'BUSINESS' },
+  { label: 'INFRASTRUCTURE', value: 'INFRASTRUCTURE' },
+];
+
+const APP_GROUP_FIELDS: TargetField[] = [
+  {
+    key: 'code',
+    label: 'Mã nhóm (code)',
+    required: true,
+    aliases: ['group_code', 'ma_nhom', 'ma'],
+  },
+  {
+    key: 'name',
+    label: 'Tên nhóm (name)',
+    required: true,
+    aliases: ['group_name', 'ten_nhom', 'ten'],
+  },
+  {
+    key: 'group_type',
+    label: 'Loại nhóm (group_type)',
+    aliases: ['type', 'loai', 'loai_nhom'],
+    options: GROUP_TYPE_OPTIONS,
+    valueAliases: {
+      business: 'BUSINESS', nghiep_vu: 'BUSINESS',
+      infrastructure: 'INFRASTRUCTURE', infra: 'INFRASTRUCTURE', ha_tang: 'INFRASTRUCTURE',
+    },
+  },
+  {
+    key: 'description',
+    label: 'Mô tả (description)',
+    aliases: ['desc', 'mo_ta', 'ghi_chu'],
+  },
+];
+
 const TAB_ITEMS = [
   {
     key: 'quick' as TabKey,
@@ -163,6 +199,21 @@ const TAB_ITEMS = [
         type="zone_ip"
         title="Zone IPs (Zone IP Entries)"
         targetFields={ZONE_IP_FIELDS}
+      />
+    ),
+  },
+  {
+    key: 'app_group' as TabKey,
+    label: (
+      <span>
+        <AppstoreOutlined /> Nhóm ứng dụng (App Group)
+      </span>
+    ),
+    children: (
+      <SimpleImportContent
+        type="app_group"
+        title="Nhóm ứng dụng (App Group)"
+        targetFields={APP_GROUP_FIELDS}
       />
     ),
   },

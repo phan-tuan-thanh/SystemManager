@@ -1,31 +1,24 @@
 zone_code,environment,ip_address,label,description,is_range
-DMZ_PROD,PROD,192.168.10.31,SRV-PROD-GW-001,Nginx reverse proxy & Payment Gateway PROD — điểm vào API nội bộ,false
-DMZ_PROD,PROD,192.168.10.32,SRV-PROD-LB-001,HAProxy Load Balancer PROD — điểm vào internet duy nhất,false
-APP_PROD,PROD,192.168.10.11,SRV-PROD-APP-001,App Server PROD 01 — CBS / ACCT / IB_PORTAL / IB_AUTH / REPORT / PAY_SETTLEMENT / ADMIN_PORTAL,false
-APP_PROD,PROD,192.168.10.12,SRV-PROD-APP-002,App Server PROD 02 — CORE_TRAN / CORE_LOAN / IB_API / IB_NOTIFY / PAY_SWITCH / PAY_QR / AUDIT_SVC,false
-APP_PROD,PROD,192.168.10.13,SRV-PROD-APP-003,App Server PROD 03 — MB_APP / MB_BIOMETRIC / MB_PUSH (maintenance),false
-DB_PROD,PROD,192.168.10.21,SRV-PROD-DB-001,Primary PostgreSQL PROD — Core Banking (primary write node),false
-DB_PROD,PROD,192.168.10.22,SRV-PROD-DB-002,Standby PostgreSQL PROD — Hot Standby HA read replica,false
-DB_PROD,PROD,192.168.10.23,SRV-PROD-DB-003,PostgreSQL PROD — Mobile Banking (instance riêng),false
-INFRA_PROD,PROD,192.168.10.41,SRV-PROD-CACHE-001,Redis Sentinel Cluster PROD — session & hot data cache,false
-INFRA_PROD,PROD,192.168.10.42,SRV-PROD-MQ-001,RabbitMQ Cluster PROD — async messaging & event bus,false
-MGMT_PROD,PROD,10.200.0.0/24,MGMT-OPS-Network,Mạng quản trị DevOps/DBA/Ops — SSH và truy cập admin,true
-MGMT_PROD,PROD,10.200.1.0/24,MGMT-Monitor-Network,Mạng monitoring — Prometheus / Grafana / Zabbix scraping,true
-DMZ_DR,PROD,192.168.20.31,SRV-DR-GW-001,Nginx + PAY_GATEWAY DR site — gateway dự phòng active-passive,false
-APP_DR,PROD,192.168.20.11,SRV-DR-APP-001,App Server DR 01 — Core Banking & IB_API standby,false
-DB_DR,PROD,192.168.20.21,SRV-DR-DB-001,PostgreSQL DR — streaming replica từ db01.prod.internal,false
-DMZ_UAT,UAT,192.168.30.31,SRV-UAT-GW-001,Nginx + PAY_GATEWAY UAT,false
-APP_UAT,UAT,192.168.30.11,SRV-UAT-APP-001,App Server UAT — tất cả service kiểm thử trên 1 server,false
-DB_UAT,UAT,192.168.30.21,SRV-UAT-DB-001,PostgreSQL UAT — dùng chung cho mọi service,false
-APP_DEV,DEV,192.168.40.11,SRV-DEV-APP-001,App Server DEV 01 — Core Banking / IB / Admin / Elasticsearch,false
-APP_DEV,DEV,192.168.40.12,SRV-DEV-APP-002,App Server DEV 02 — Transaction / Mobile / Payment / RabbitMQ,false
-DB_DEV,DEV,192.168.40.21,SRV-DEV-DB-001,PostgreSQL DEV — dùng chung tất cả team,false
-INFRA_DEV,DEV,192.168.40.41,SRV-DEV-CACHE-001,Redis DEV — standalone mode,false
-APP_UAT,UAT,192.168.30.0/24,UAT-Network-Range,Toàn bộ dải mạng UAT,true
-APP_DEV,DEV,192.168.40.0/24,DEV-Network-Range,Toàn bộ dải mạng DEV,true
-INTERNET,PROD,203.113.44.0/27,Partner-Fintech,Dải IP đối tác Fintech gọi Payment API,true
-MGMT_PROD,PROD,10.100.5.0/28,BI-Analytics-Tool,Dải IP của hệ thống BI Analytics,true
-INTERNET,PROD,10.50.1.0/24,Legacy-System-Network,Mạng của các hệ thống cũ (Legacy),true
-INTERNET,PROD,203.162.0.0/16,VN-ISP-Range,Dải IP ISP Việt Nam — người dùng internet banking qua browser,true
-INTERNET,PROD,113.160.0.0/14,VN-Mobile-Range,Dải IP mạng di động Việt Nam — người dùng mobile banking,true
-INTERNET,PROD,14.160.0.0/11,VN-Broadband-Range,Dải IP broadband/cáp quang Việt Nam,true
+DMZ_PROD_DC,PROD,10.10.10.0/24,DMZ-DC-Range,Vùng DMZ chính tại Data Center,true
+PROXY_PROD_DC,PROD,10.10.20.0/24,PROXY-DC-Range,Vùng Proxy/Gateway chính tại Data Center,true
+APP_PROD_DC,PROD,10.10.30.0/24,APP-DC-Range,Vùng Application Frontend tại Data Center,true
+SERVICE_PROD_DC,PROD,10.10.40.0/24,SERVICE-DC-Range,Vùng Business Services tại Data Center,true
+DB_PROD_DC,PROD,10.10.50.0/24,DB-DC-Range,Vùng Database Clusters tại Data Center,true
+INFRA_PROD_DC,PROD,10.10.60.0/24,INFRA-DC-Range,Vùng hạ tầng (Redis/MQ/ELK) tại Data Center,true
+MGMT_PROD_DC,PROD,10.10.200.0/24,MGMT-DC-Range,Vùng quản trị nội bộ tại Data Center,true
+DMZ_PROD_DR,PROD,10.20.10.0/24,DMZ-DR-Range,Vùng DMZ dự phòng tại DR Site,true
+PROXY_PROD_DR,PROD,10.20.20.0/24,PROXY-DR-Range,Vùng Proxy dự phòng tại DR Site,true
+APP_PROD_DR,PROD,10.20.30.0/24,APP-DR-Range,Vùng Application dự phòng tại DR Site,true
+SERVICE_PROD_DR,PROD,10.20.40.0/24,SERVICE-DR-Range,Vùng Services dự phòng tại DR Site,true
+DB_PROD_DR,PROD,10.20.50.0/24,DB-DR-Range,Vùng Database dự phòng tại DR Site,true
+APP_UAT,UAT,10.30.30.0/24,UAT-APP-Range,Vùng Application môi trường UAT,true
+SERVICE_UAT,UAT,10.30.40.0/24,UAT-SVC-Range,Vùng Services môi trường UAT,true
+DB_UAT,UAT,10.30.50.0/24,UAT-DB-Range,Vùng Database môi trường UAT,true
+APP_DEV,DEV,10.40.30.0/24,DEV-APP-Range,Vùng Application môi trường DEV,true
+SERVICE_DEV,DEV,10.40.40.0/24,DEV-SVC-Range,Vùng Services môi trường DEV,true
+DB_DEV,DEV,10.40.50.0/24,DEV-DB-Range,Vùng Database môi trường DEV,true
+INTERNAL_DEV,DEV,10.40.100.0/24,STAFF-DEV-Range,Mạng thiết bị nhân viên phát triển nội bộ,true
+INTERNAL_UAT,UAT,10.30.100.0/24,STAFF-UAT-Range,Mạng thiết bị nhân viên kiểm thử nội bộ,true
+INTERNET,PROD,0.0.0.0/0,Any-Internet,Toàn bộ traffic từ internet công cộng,true
+INTERNET,PROD,203.113.44.0/27,NAPAS-IP,Kết nối từ cổng thanh toán NAPAS,true
+INTERNET,PROD,1.2.3.4/32,CONSULTANT-VPN,VPN truy cập tạm thời của đối tác tư vấn,true

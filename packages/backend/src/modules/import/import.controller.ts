@@ -29,7 +29,7 @@ export class ImportController {
       type: 'object',
       properties: {
         file: { type: 'string', format: 'binary' },
-        type: { type: 'string', enum: ['server', 'application', 'deployment', 'connection'] },
+        type: { type: 'string', enum: ['server', 'application', 'deployment', 'connection', 'network_zone', 'zone_ip', 'app_group'] },
         environment: { type: 'string', enum: ['DEV', 'UAT', 'PROD'] },
       },
       required: ['file', 'type'],
