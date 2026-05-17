@@ -40,19 +40,31 @@ function isIpInCidr(ip: string, cidr: string): boolean {
   }
 }
 
-function matchesEntry(ip: string, entry: ZoneIpEntry): boolean {
+// How specifically `ip` matches `entry`. Higher = narrower (more specific).
+// Returns -1 when it does not match at all. Exact IP and /32 are the most
+// specific (32); a catch-all 0.0.0.0/0 is the least specific (0) so it only
+// wins when no narrower zone entry matches.
+function entrySpecificity(ip: string, entry: ZoneIpEntry): number {
   try {
-    const addr = entry.ip_address;
+    const addr = (entry.ip_address ?? '').trim();
     if (entry.is_range) {
-      if (addr.includes('/')) return isIpInCidr(ip, addr);
+      if (addr.includes('/')) {
+        if (!isIpInCidr(ip, addr)) return -1;
+        const prefix = parseInt(addr.split('/')[1], 10);
+        return isNaN(prefix) ? -1 : Math.max(0, Math.min(32, prefix));
+      }
       if (addr.includes('-')) {
         const [start, end] = addr.split('-').map((s) => s.trim());
-        return ipToInt(ip) >= ipToInt(start) && ipToInt(ip) <= ipToInt(end);
+        const ipi = ipToInt(ip);
+        if (ipi < ipToInt(start) || ipi > ipToInt(end)) return -1;
+        const size = Math.max(1, ipToInt(end) - ipToInt(start) + 1);
+        return Math.max(0, Math.min(32, 32 - Math.ceil(Math.log2(size))));
       }
+      return -1;
     }
-    return ip === addr;
+    return ip === addr ? 32 : -1;
   } catch {
-    return false;
+    return -1;
   }
 }
 
@@ -157,23 +169,36 @@ export function useTopologyZones(servers: ServerNode[], networkZones: NetworkZon
     });
   }, [networkZones, storage.zoneOrder]);
 
-  // Auto-assign server to zone by matching IPs against ip_entries (sorted by current order)
+  // Auto-assign server to the zone whose IP entry matches MOST specifically.
+  // A broad catch-all (e.g. 0.0.0.0/0 on an INTERNET zone) must not swallow a
+  // server that also matches a narrower zone — so we score every entry by
+  // specificity and pick the best, breaking ties by saved zone order.
   const autoAssignZone = useCallback(
     (server: ServerNode): string | null => {
       const serverIps = getServerIps(server);
       if (serverIps.length === 0) return null;
 
-      const sortedZones = [...networkZones].sort((a, b) => {
-        const oa = storage.zoneOrder[a.id] ?? 0;
-        const ob = storage.zoneOrder[b.id] ?? 0;
-        return oa - ob;
-      });
-
-      for (const nz of sortedZones) {
+      let best: { zoneId: string; score: number; order: number } | null = null;
+      for (const nz of networkZones) {
         const entries = nz.ip_entries ?? [];
-        if (serverIps.some((ip) => entries.some((e) => matchesEntry(ip, e)))) return nz.id;
+        let zoneScore = -1;
+        for (const ip of serverIps) {
+          for (const e of entries) {
+            const s = entrySpecificity(ip, e);
+            if (s > zoneScore) zoneScore = s;
+          }
+        }
+        if (zoneScore < 0) continue;
+        const order = storage.zoneOrder[nz.id] ?? 0;
+        if (
+          !best ||
+          zoneScore > best.score ||
+          (zoneScore === best.score && order < best.order)
+        ) {
+          best = { zoneId: nz.id, score: zoneScore, order };
+        }
       }
-      return null;
+      return best?.zoneId ?? null;
     },
     [networkZones, storage.zoneOrder],
   );
@@ -198,14 +223,23 @@ export function useTopologyZones(servers: ServerNode[], networkZones: NetworkZon
       }
     });
 
-    // Unmatched servers fall into the first zone (by order) as fallback
+    // Servers whose IP matches no zone are genuinely "unknown/external" — put
+    // them in an INTERNET/EXTERNAL-typed zone if one exists, otherwise fall
+    // back to the first zone by order so nodes are never dropped.
     if (unmatched.length > 0 && zones.length > 0) {
-      const firstId = [...zones].sort((a, b) => a.order - b.order)[0].id;
-      map.set(firstId, [...(map.get(firstId) ?? []), ...unmatched]);
+      const internetNz = networkZones.find((nz) => {
+        const t = String(nz.zone_type ?? '').toUpperCase();
+        const n = String(nz.name ?? '').toUpperCase();
+        return t === 'INTERNET' || t === 'EXTERNAL' || n.includes('INTERNET') || n.includes('EXTERNAL');
+      });
+      const fallbackId = internetNz && map.has(internetNz.id)
+        ? internetNz.id
+        : [...zones].sort((a, b) => a.order - b.order)[0].id;
+      map.set(fallbackId, [...(map.get(fallbackId) ?? []), ...unmatched]);
     }
 
     return map;
-  }, [zones, servers, getServerZone]);
+  }, [zones, servers, getServerZone, networkZones]);
 
   const activeZones = useMemo(
     () =>
