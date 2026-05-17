@@ -178,6 +178,7 @@ function TopologyPageInner() {
     serversByZone,
     reorderZones,
     setZoneArrangement,
+    assignServer,
     resetZones,
   } = useTopologyZones(filteredData.serversForEdgeResolution, networkZones);
 
@@ -527,6 +528,29 @@ function TopologyPageInner() {
     if (parentId && filters.showZones) {
       const parent = nodesRef.current.find((n) => n.id === parentId);
       if (parent?.type === 'zoneLane') {
+        // Dropped over a DIFFERENT zone lane → reassign the server to that
+        // zone and persist it (otherwise the next recompute snaps it back to
+        // its IP-matched zone, so it appears to "jump" to another zone).
+        if (node.id.startsWith('server-')) {
+          const nW = (node.width as number) ?? (node.style?.width as number) ?? 200;
+          const nH = (node.height as number) ?? (node.style?.height as number) ?? 150;
+          const absX = parent.position.x + node.position.x + nW / 2;
+          const absY = parent.position.y + node.position.y + nH / 2;
+          const targetZone = nodesRef.current.find((n) =>
+            n.type === 'zoneLane' &&
+            n.id !== parentId &&
+            absX >= n.position.x &&
+            absX <= n.position.x + ((n.style?.width as number) ?? 0) &&
+            absY >= n.position.y &&
+            absY <= n.position.y + ((n.style?.height as number) ?? 0),
+          );
+          if (targetZone) {
+            delete userPositionsRef.current[node.id];
+            assignServer(node.id.replace(/^server-/, ''), targetZone.id.replace(/^zone-/, ''));
+            setLayoutRevision((r) => r + 1);
+            return;
+          }
+        }
         const stackH = filters.layoutDirection === 'LR' || filters.layoutDirection === 'RL';
         setNodes((nds) => {
           const moved = nds.map((n) => (n.id === node.id ? { ...n, position: node.position } : n));
@@ -588,7 +612,7 @@ function TopologyPageInner() {
       setNodes((nds) => nds.map((n) => n.id === node.id ? { ...n, position: bestPos! } : n));
       userPositionsRef.current[node.id] = bestPos;
     }
-  }, [setNodes, filters.showZones, filters.layoutDirection, setZoneArrangement]);
+  }, [setNodes, filters.showZones, filters.layoutDirection, setZoneArrangement, assignServer]);
 
   // Live: while a server is dragged inside a zone, grow the zone right/bottom
   // only (grow-only path) and re-stack the sibling zones to keep spacing.
