@@ -487,8 +487,10 @@ export function computeZoneLaneLayout(
   let rowY = 0;
   for (const rk of rowKeys) {
     const rowBuilds = (rowsMap.get(rk) ?? []).sort((a, b) => a.zone.order - b.zone.order);
+    // Equal WIDTH across the row; each zone keeps its own HEIGHT (fit to its
+    // inner nodes). The row advances by the tallest zone so rows never overlap.
     const equalW = Math.max(...rowBuilds.map((b) => b.contentW));
-    const rowH = Math.max(...rowBuilds.map((b) => b.contentH));
+    const rowMaxH = Math.max(...rowBuilds.map((b) => b.contentH));
     let colX = 0;
 
     for (const b of rowBuilds) {
@@ -497,7 +499,7 @@ export function computeZoneLaneLayout(
         id: laneNodeId,
         type: 'zoneLane',
         position: { x: colX, y: rowY },
-        style: { width: equalW, height: rowH },
+        style: { width: equalW, height: b.contentH },
         data: {
           label: b.zone.name,
           color: b.zone.color,
@@ -530,7 +532,7 @@ export function computeZoneLaneLayout(
 
       colX += equalW + ZONE_GAP;
     }
-    rowY += rowH + ZONE_GAP;
+    rowY += rowMaxH + ZONE_GAP;
   }
 
   // Cross-zone edges (not already emitted by per-zone buildGraph)
@@ -728,15 +730,18 @@ export function reflowZoneLanes(
   let rowY = 0;
   for (const rk of rowKeys) {
     const rowLanes = (rowsMap.get(rk) ?? []).slice().sort((a, b) => a.position.x - b.position.x);
+    // Equal WIDTH across the row; keep each zone's own HEIGHT (fit to its
+    // inner nodes). Row advances by the tallest zone so rows never overlap.
     const equalW = Math.max(...rowLanes.map((l) => sizeById.get(l.id)!.w));
-    const rowH = Math.max(...rowLanes.map((l) => sizeById.get(l.id)!.h));
+    const rowMaxH = Math.max(...rowLanes.map((l) => sizeById.get(l.id)!.h));
     let colX = 0;
     for (const l of rowLanes) {
+      const ownH = sizeById.get(l.id)!.h;
       posById.set(l.id, { x: colX, y: rowY });
-      sizeById.set(l.id, { w: equalW, h: rowH });
+      sizeById.set(l.id, { w: equalW, h: ownH });
       colX += equalW + ZONE_GAP;
     }
-    rowY += rowH + ZONE_GAP;
+    rowY += rowMaxH + ZONE_GAP;
   }
 
   return nodes.map((n) => {
@@ -754,4 +759,85 @@ export function reflowZoneLanes(
     }
     return n;
   });
+}
+
+// Auto-arrange: pick the number of columns (zones per row) that lets the whole
+// zone grid be zoomed largest to fit the viewport — i.e. best screen usage.
+// Returns the flattened (row asc, left→right) assignment with a lane index per
+// zone, ready for setZoneArrangement. Zone natural size is derived from each
+// lane's child nodes (same sizing as reflowZoneLanes' grow-only path).
+export function optimalZoneLaneArrangement(
+  nodes: Node[],
+  viewportW: number,
+  viewportH: number,
+): { id: string; lane: number }[] {
+  const lanes = nodes.filter((n) => n.type === 'zoneLane');
+  if (lanes.length === 0) return [];
+
+  const childrenByParent = new Map<string, Node[]>();
+  for (const n of nodes) {
+    if (!n.parentId) continue;
+    const arr = childrenByParent.get(n.parentId);
+    if (arr) arr.push(n);
+    else childrenByParent.set(n.parentId, [n]);
+  }
+
+  type ZSize = { id: string; w: number; h: number; ox: number; oy: number };
+  const zs: ZSize[] = lanes.map((l) => {
+    const kids = childrenByParent.get(l.id) ?? [];
+    let maxX = ZONE_MIN_CONTENT_W;
+    let maxY = ZONE_HEADER_H + ZONE_MIN_CONTENT_H;
+    for (const k of kids) {
+      const w = (k.style?.width as number) ?? k.width ?? SERVER_NODE_W;
+      const h = (k.style?.height as number) ?? k.height ?? SERVER_NODE_H;
+      maxX = Math.max(maxX, Math.max(k.position.x, 0) + w);
+      maxY = Math.max(maxY, Math.max(k.position.y, ZONE_HEADER_H) + h);
+    }
+    return {
+      id: l.id,
+      w: maxX + ZONE_PADDING_X,
+      h: maxY + ZONE_PADDING_Y,
+      ox: l.position.x,
+      oy: l.position.y,
+    };
+  });
+
+  // Stable partition order = current reading order (top→bottom, then left→right)
+  zs.sort((a, b) => a.oy - b.oy || a.ox - b.ox);
+  const N = zs.length;
+  const vw = viewportW || 1;
+  const vh = viewportH || 1;
+  const vAspect = vw / vh;
+
+  let best: { cols: number; scale: number; aspectGap: number } | null = null;
+  for (let cols = 1; cols <= N; cols++) {
+    const rows = Math.ceil(N / cols);
+    let totalW = 0;
+    let totalH = 0;
+    for (let r = 0; r < rows; r++) {
+      const slice = zs.slice(r * cols, r * cols + cols);
+      if (slice.length === 0) continue;
+      const eqW = Math.max(...slice.map((z) => z.w));
+      const rowW = slice.length * eqW + (slice.length - 1) * ZONE_GAP;
+      const rowH = Math.max(...slice.map((z) => z.h));
+      totalW = Math.max(totalW, rowW);
+      totalH += rowH + (r > 0 ? ZONE_GAP : 0);
+    }
+    // Largest uniform zoom that still fits the viewport → screen utilisation.
+    const scale = Math.min(vw / totalW, vh / totalH);
+    const aspectGap = Math.abs(Math.log(totalW / totalH / vAspect));
+    if (
+      !best ||
+      scale > best.scale + 1e-6 ||
+      (Math.abs(scale - best.scale) <= 1e-6 && aspectGap < best.aspectGap)
+    ) {
+      best = { cols, scale, aspectGap };
+    }
+  }
+
+  const cols = best?.cols ?? 1;
+  return zs.map((z, i) => ({
+    id: z.id.replace(/^zone-/, ''),
+    lane: Math.floor(i / cols),
+  }));
 }

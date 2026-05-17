@@ -29,7 +29,7 @@ import { CreateConnectionModal } from './components/CreateConnectionModal';
 import ConnectionHealthDrawer from './components/ConnectionHealthDrawer';
 import FirewallTopologyView from './components/FirewallTopologyView';
 import { nodeTypes, edgeTypes } from './components/edges';
-import { computeLayout, applyDagreLayout, applyElkLayout, computeZoneLaneLayout, getBackwardRoute, reflowZoneLanes } from './utils/topologyLayout';
+import { computeLayout, applyDagreLayout, applyElkLayout, computeZoneLaneLayout, getBackwardRoute, reflowZoneLanes, optimalZoneLaneArrangement } from './utils/topologyLayout';
 import { useTopologyFilters } from './hooks/useTopologyFilters';
 import { useTopologyExport } from './hooks/useTopologyExport';
 import { useTopologyQuery, useCreateSnapshot, type ServerNode, type ConnectionEdge, type ImpliedConnectionEdge, type TopologyData, type Snapshot } from './hooks/useTopology';
@@ -624,8 +624,17 @@ function TopologyPageInner() {
   const handleAutoArrange = useCallback(async () => {
     if (renderEngine === 'visnetwork') { visNetworkViewRef.current?.autoArrange(); return; }
 
-    // Zone mode: bump revision so the merge-useMemo re-applies fresh computed positions
+    // Zone mode: distribute zones into the column count that best fills the
+    // viewport, persist it, then bump revision so computeZoneLaneLayout
+    // re-applies the optimal grid.
     if (filters.showZones) {
+      const vp = containerRef.current;
+      const arrangement = optimalZoneLaneArrangement(
+        nodesRef.current,
+        vp?.clientWidth ?? window.innerWidth,
+        vp?.clientHeight ?? window.innerHeight,
+      );
+      if (arrangement.length) setZoneArrangement(arrangement);
       setLayoutRevision((r) => r + 1);
       requestAnimationFrame(() => requestAnimationFrame(() => {
         reactFlowRef.current?.fitView({ padding: 0.2, duration: 500, minZoom: 0.15, maxZoom: 1.5, includeHiddenNodes: false });
@@ -648,7 +657,7 @@ function TopologyPageInner() {
     requestAnimationFrame(() => requestAnimationFrame(() => {
       reactFlowRef.current?.fitView({ padding: 0.2, duration: 500, minZoom: 0.25, maxZoom: 1.5, includeHiddenNodes: false });
     }));
-  }, [renderEngine, filters.showZones, filters.layoutAlgorithm, filters.layoutDirection, nodes, edges, setNodes]);
+  }, [renderEngine, filters.showZones, filters.layoutAlgorithm, filters.layoutDirection, nodes, edges, setNodes, setZoneArrangement]);
 
   const handleAutoArrangeRef = useRef(handleAutoArrange);
   useEffect(() => { handleAutoArrangeRef.current = handleAutoArrange; }, [handleAutoArrange]);
