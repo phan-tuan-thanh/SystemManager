@@ -13,10 +13,12 @@ import {
   Empty,
   Divider,
   Select,
+  App,
 } from 'antd';
-import { EyeOutlined, DiffOutlined } from '@ant-design/icons';
+import { EyeOutlined, DiffOutlined, ImportOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { useSnapshotList, useSnapshotDetail, Snapshot } from '../hooks/useTopology';
+import { useSnapshotList, useSnapshotDetail, Snapshot, type TopologyData } from '../hooks/useTopology';
+import apiClient from '../../../api/client';
 
 const { Text } = Typography;
 
@@ -235,15 +237,37 @@ interface Props {
   open: boolean;
   onClose: () => void;
   currentEnvironment?: string;
+  onLoad?: (payload: TopologyData, snapshot: Snapshot) => void;
 }
 
-export default function SnapshotBrowser({ open, onClose, currentEnvironment }: Props) {
+export default function SnapshotBrowser({ open, onClose, currentEnvironment, onLoad }: Props) {
+  const { message } = App.useApp();
   const [envFilter, setEnvFilter] = useState<string | undefined>(currentEnvironment);
   const [page, setPage] = useState(1);
   const [detailId, setDetailId] = useState<string | null>(null);
+  const [loadingId, setLoadingId] = useState<string | null>(null);
   const [compareA, setCompareA] = useState<string | null>(null);
   const [compareB, setCompareB] = useState<string | null>(null);
   const [compareOpen, setCompareOpen] = useState(false);
+
+  const handleLoad = async (record: Snapshot) => {
+    setLoadingId(record.id);
+    try {
+      const res = await apiClient.get(`/api/v1/topology-snapshots/${record.id}`);
+      const snap = res.data.data as Snapshot & { payload: TopologyData };
+      if (!snap.payload?.servers) {
+        message.error('Bản chụp không có dữ liệu sơ đồ');
+        return;
+      }
+      onLoad?.(snap.payload, snap);
+      message.success(`Đã tải bản chụp ${snap.label ?? snap.id.slice(0, 8)}`);
+      onClose();
+    } catch {
+      message.error('Không thể tải bản chụp');
+    } finally {
+      setLoadingId(null);
+    }
+  };
 
   const { data, isLoading, error } = useSnapshotList(envFilter, page);
   const snapshots = data?.data ?? [];
@@ -277,15 +301,27 @@ export default function SnapshotBrowser({ open, onClose, currentEnvironment }: P
     },
     {
       title: '',
-      width: 80,
+      width: 160,
       render: (_: any, record: Snapshot) => (
-        <Button
-          size="small"
-          icon={<EyeOutlined />}
-          onClick={() => setDetailId(record.id)}
-        >
-          View
-        </Button>
+        <Space size={4}>
+          <Button
+            size="small"
+            icon={<EyeOutlined />}
+            onClick={() => setDetailId(record.id)}
+          >
+            View
+          </Button>
+          <Button
+            size="small"
+            type="primary"
+            ghost
+            icon={<ImportOutlined />}
+            loading={loadingId === record.id}
+            onClick={() => handleLoad(record)}
+          >
+            Load
+          </Button>
+        </Space>
       ),
     },
   ];

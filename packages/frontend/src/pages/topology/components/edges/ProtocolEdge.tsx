@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { EdgeLabelRenderer, getBezierPath, getSmoothStepPath, type EdgeProps } from 'reactflow';
+import { EdgeLabelRenderer, getBezierPath, getSmoothStepPath, Position, type EdgeProps } from 'reactflow';
 
 export const protocolColors: Record<string, string> = {
   HTTP: '#1677ff',
@@ -12,12 +12,26 @@ export const protocolColors: Record<string, string> = {
 };
 
 export function ProtocolEdge({
-  id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, data, markerEnd, style, selected,
+  id,
+  sourceX: propSourceX, sourceY: propSourceY,
+  targetX: propTargetX, targetY: propTargetY,
+  sourcePosition, targetPosition,
+  data, markerEnd, style, selected,
 }: EdgeProps) {
   const pIdx = data?.parallelIndex ?? 0;
   const pCount = data?.parallelCount ?? 1;
   const protocolColor = protocolColors[data?.protocol] ?? '#8c8c8c';
   const edgeStyle: 'bezier' | 'step' = data?.edgeStyle ?? 'bezier';
+
+  // When the edge routes backward (target left of source) it connects via the
+  // bot-s / bot-t handles. React Flow resolves those handles live and passes
+  // their current coordinates as sourceX/Y & targetX/Y, so the arc always
+  // stays glued to the nodes even after drag / re-layout.
+  const isBackward = !!(data?._isBackward);
+  const sourceX = propSourceX;
+  const sourceY = propSourceY;
+  const targetX = propTargetX;
+  const targetY = propTargetY;
 
   const dx = targetX - sourceX;
   const dy = targetY - sourceY;
@@ -30,7 +44,16 @@ export function ProtocolEdge({
   let labelY: number;
   let spread: number;
 
-  if (edgeStyle === 'step') {
+  if (isBackward) {
+    // Deeper offset than the faint gray APP_CONN smoothstep (offset 28) so the
+    // colored arc sits clearly apart; spread is ignored for backward edges.
+    [edgePath, labelX, labelY] = getSmoothStepPath({
+      sourceX, sourceY, sourcePosition: Position.Bottom,
+      targetX, targetY, targetPosition: Position.Bottom,
+      borderRadius: 12, offset: 58,
+    });
+    spread = 0;
+  } else if (edgeStyle === 'step') {
     const offsetStep = pCount <= 1 ? 0 : (pIdx - (pCount - 1) / 2) * 24;
     [edgePath, labelX, labelY] = getSmoothStepPath({
       sourceX, sourceY, sourcePosition,
@@ -90,7 +113,7 @@ export function ProtocolEdge({
   const portLabel = data?.targetPort ? `:${data.targetPort.port_number}` : '';
 
   const flowDur = selected ? 1.0 : 1.6;
-  const dotR = selected ? 3.5 : 2.5;
+  const dotR = selected ? 7 : 5;
   const PARTICLE_COUNT = 3;
 
   return (

@@ -29,15 +29,68 @@ import { CreateConnectionModal } from './components/CreateConnectionModal';
 import ConnectionHealthDrawer from './components/ConnectionHealthDrawer';
 import FirewallTopologyView from './components/FirewallTopologyView';
 import { nodeTypes, edgeTypes } from './components/edges';
-import { computeLayout, applyDagreLayout, applyElkLayout } from './utils/topologyLayout';
+import { computeLayout, applyDagreLayout, applyElkLayout, computeZoneLaneLayout, getBackwardRoute, reflowZoneLanes, optimalZoneLaneArrangement } from './utils/topologyLayout';
 import { useTopologyFilters } from './hooks/useTopologyFilters';
 import { useTopologyExport } from './hooks/useTopologyExport';
-import { useTopologyQuery, useCreateSnapshot, type ServerNode, type ConnectionEdge, type ImpliedConnectionEdge } from './hooks/useTopology';
+import { useTopologyQuery, useCreateSnapshot, type ServerNode, type ConnectionEdge, type ImpliedConnectionEdge, type TopologyData, type Snapshot } from './hooks/useTopology';
 import { useTopologySubscription } from './hooks/useTopologySubscription';
+import { useNetworkZonesWithIps, useTopologyZones } from './hooks/useTopologyZones';
+import type { NetworkZone } from '../../types/network-zone';
+import ZoneConfigPanel from './components/ZoneConfigPanel';
 import { useCreateConnection, useDeleteConnection } from '../../hooks/useConnections';
 import PageHeader from '../../components/common/PageHeader';
+import dayjs from 'dayjs';
 
 const { Text } = Typography;
+
+// Stable empty reference — avoids infinite re-render from inline `= []` default
+const EMPTY_NETWORK_ZONES: NetworkZone[] = [];
+
+interface TopologyFilters {
+  environment?: string;
+  nodeType: 'all' | 'server' | 'app';
+  showMiniMap: boolean;
+  layout: 'force' | 'hierarchical';
+  layoutAlgorithm: 'dagre' | 'elk-layered' | 'elk-force' | 'elk-tree' | 'elk-radial';
+  layoutDirection: 'TB' | 'BT' | 'LR' | 'RL';
+  connectionMode: boolean;
+  edgeStyle: 'bezier' | 'step';
+  visibleGroupNames: string[];
+  visibleServerIds: string[];
+  visibleAppIds: string[];
+  showZones: boolean;
+}
+
+// ─── Per-snapshot view state (every option + positions) ───────────
+// Snapshots only store logical servers/connections; the full view (all
+// filters/options, render engine, view mode, node positions, zone geometry
+// and dragged edge-label offsets) is captured client-side keyed by snapshot
+// id so loading re-presents exactly what the user saw when they saved it.
+interface SnapshotLayout {
+  filters: TopologyFilters;
+  viewMode: '2D' | '3D';
+  renderEngine: 'reactflow' | 'visnetwork' | 'mermaid';
+  showImplied: boolean;
+  positions: Record<string, { x: number; y: number }>;
+  zones: Record<string, { x: number; y: number; width: number; height: number }>;
+  edgeLabelOffsets: Record<string, { x: number; y: number }>;
+}
+const SNAP_LAYOUT_KEY = 'topology.snapshotLayouts.v1';
+function loadSnapshotLayouts(): Record<string, SnapshotLayout> {
+  try {
+    const raw = localStorage.getItem(SNAP_LAYOUT_KEY);
+    return raw ? (JSON.parse(raw) as Record<string, SnapshotLayout>) : {};
+  } catch {
+    return {};
+  }
+}
+function saveSnapshotLayout(id: string, layout: SnapshotLayout) {
+  try {
+    const all = loadSnapshotLayouts();
+    all[id] = layout;
+    localStorage.setItem(SNAP_LAYOUT_KEY, JSON.stringify(all));
+  } catch { /* ignore */ }
+}
 
 // ─── Main Component ───────────────────────────────────────────────
 
@@ -62,25 +115,15 @@ function TopologyPageInner() {
     if (v !== 'reactflow') setFilters((f) => f.connectionMode ? { ...f, connectionMode: false } : f);
   }, []);
 
-  const [filters, setFilters] = useState<{
-    environment?: string;
-    nodeType: 'all' | 'server' | 'app';
-    showMiniMap: boolean;
-    layout: 'force' | 'hierarchical';
-    layoutAlgorithm: 'dagre' | 'elk-layered' | 'elk-force' | 'elk-tree' | 'elk-radial';
-    layoutDirection: 'TB' | 'BT' | 'LR' | 'RL';
-    connectionMode: boolean;
-    edgeStyle: 'bezier' | 'step';
-    visibleGroupNames: string[];
-    visibleServerIds: string[];
-    visibleAppIds: string[];
-  }>({ nodeType: 'server', showMiniMap: true, layout: 'force', layoutAlgorithm: 'elk-layered', layoutDirection: 'LR', connectionMode: false, edgeStyle: 'bezier', visibleGroupNames: [], visibleServerIds: [], visibleAppIds: [] });
+  const [filters, setFilters] = useState<TopologyFilters>({ environment: 'PROD', nodeType: 'server', showMiniMap: true, layout: 'force', layoutAlgorithm: 'elk-layered', layoutDirection: 'TB', connectionMode: false, edgeStyle: 'bezier', visibleGroupNames: [], visibleServerIds: [], visibleAppIds: [], showZones: true });
 
   const [selectedNode, setSelectedNode] = useState<any>(null);
   const [selectedConnection, setSelectedConnection] = useState<ConnectionEdge | null>(null);
   const [selectedImplied, setSelectedImplied] = useState<ImpliedConnectionEdge | null>(null);
   const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null);
   const [showSnapshots, setShowSnapshots] = useState(false);
+  // When set, the topology renders from this saved snapshot instead of live data
+  const [snapshotView, setSnapshotView] = useState<{ payload: TopologyData; meta: Snapshot } | null>(null);
   const [saveModalOpen, setSaveModalOpen] = useState(false);
   const [snapshotLabel, setSnapshotLabel] = useState('');
   const [realtimeEvents, setRealtimeEvents] = useState<string[]>([]);
@@ -89,12 +132,18 @@ function TopologyPageInner() {
   const [healthDrawerOpen, setHealthDrawerOpen] = useState(false);
   const [showImplied, setShowImplied] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [layoutRevision, setLayoutRevision] = useState(0);
 
   const reactFlowRef = useRef<ReactFlowInstance | null>(null);
   const visNetworkViewRef = useRef<TopologyVisNetworkHandle>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const userPositionsRef = useRef<Record<string, { x: number; y: number }>>({});
+  // Persisted zone-lane geometry after drag-resize, restored on recompute
+  const zoneLayoutRef = useRef<Record<string, { x: number; y: number; width: number; height: number }>>({});
   const positionsModeRef = useRef<string>(filters.nodeType);
+  // Dragged edge-label offsets restored from a loaded snapshot
+  const edgeLabelOffsetsRef = useRef<Record<string, { x: number; y: number }>>({});
+  const appliedRevisionRef = useRef(0);
   const setEdgesRef = useRef<((updater: (edges: Edge[]) => Edge[]) => void) | null>(null);
 
   const stableUpdateEdgeLabel = useCallback((edgeId: string, dx: number, dy: number) => {
@@ -110,12 +159,28 @@ function TopologyPageInner() {
   const deleteConnection = useDeleteConnection();
   const { message, modal } = App.useApp();
 
+  // When viewing a saved snapshot, the whole page renders from its payload
+  // instead of the live query result.
+  const effectiveTopology = snapshotView?.payload ?? data?.topology;
+
   // ─── Filters & computed options ──────────────────────────────────
   const { filteredData, dropdownOptions, cascadeMaps, healthIssueCount } = useTopologyFilters(
-    data?.topology, filters,
+    effectiveTopology, filters,
   );
   const { groupOptions, serverOptions, appOptions } = dropdownOptions;
   const { serverGroupsMap, serverAppsMap } = cascadeMaps;
+
+  // ─── Zone mode ────────────────────────────────────────────────────
+  const { data: networkZones = EMPTY_NETWORK_ZONES } = useNetworkZonesWithIps(filters.environment);
+  const {
+    zones: allTopologyZones,
+    activeZones,
+    serversByZone,
+    reorderZones,
+    setZoneArrangement,
+    assignServer,
+    resetZones,
+  } = useTopologyZones(filteredData.serversForEdgeResolution, networkZones);
 
   // ─── Realtime subscriptions ───────────────────────────────────
   useTopologySubscription({
@@ -133,10 +198,77 @@ function TopologyPageInner() {
 
   // ─── ReactFlow layout + implied edges ───────────────────────────
   const { nodes: computedNodes, edges: computedEdges } = useMemo(() => {
-    if (!data?.topology) return { nodes: [], edges: [] };
+    if (!effectiveTopology) return { nodes: [], edges: [] };
 
     const layoutServers = filters.nodeType === 'server' ? filteredData.serversForEdgeResolution : filteredData.servers;
     const layoutConnections = filters.nodeType === 'server' ? filteredData.connectionsForEdgeResolution : filteredData.connections;
+
+    // Zone lane mode: stack servers in swimlane rows grouped by NetworkZone
+    if (filters.showZones && filters.nodeType !== 'app' && activeZones.length > 0) {
+      const result = computeZoneLaneLayout(
+        serversByZone, activeZones, layoutConnections, filters.nodeType, filters.layoutDirection, filters.edgeStyle,
+      );
+      // Elevate edges above zone lane background panels (edge SVG layer is behind nodes by default)
+      // and attach label-move callback for ProtocolEdge labels
+      const zoneEdges = result.edges.map((e) => ({
+        ...e,
+        zIndex: 5,
+        data: { ...e.data, onLabelMove: (dx: number, dy: number) => stableUpdateEdgeLabel(e.id, dx, dy) },
+      }));
+
+      // Implied connections in zone mode
+      const zoneImpliedEdges: Edge[] = [];
+      if (showImplied && effectiveTopology.impliedConnections) {
+        const FW_ACTION: Record<string, { color: string }> = {
+          ALLOW: { color: '#389e0d' },
+          DENY:  { color: '#cf1322' },
+        };
+        const allZoneNodes = result.nodes;
+        const zoneNodeMap = new Map(allZoneNodes.map((n) => [n.id, n]));
+        const addedServerPairs = new Map<string, Set<string>>();
+        effectiveTopology.impliedConnections.forEach((ic: ImpliedConnectionEdge) => {
+          const action = ic.action ?? 'ALLOW';
+          const cfg = FW_ACTION[action] ?? FW_ACTION.ALLOW;
+          const portNum = ic.targetPort?.portNumber ?? (ic.targetPort as any)?.port_number;
+          const commonEdgeProps = {
+            type: 'fwEdge' as const,
+            animated: false,
+            zIndex: 10,
+            markerEnd: { type: MarkerType.ArrowClosed, color: cfg.color },
+            data: { type: 'IMPLIED', action, firewallRuleId: ic.firewallRuleId, firewallRuleName: ic.firewallRuleName, portNum, _implied: ic },
+          };
+          const pushServerPair = (srcId: string, tgtId: string) => {
+            if (srcId === tgtId) return;
+            const srcNodeId = `server-${srcId}`;
+            const tgtNodeId = `server-${tgtId}`;
+            if (!allZoneNodes.some((n) => n.id === srcNodeId) || !allZoneNodes.some((n) => n.id === tgtNodeId)) return;
+            const pairKey = `${action}::${srcId}::${tgtId}`;
+            if (!addedServerPairs.has(action)) addedServerPairs.set(action, new Set());
+            if (addedServerPairs.get(action)!.has(pairKey)) return;
+            addedServerPairs.get(action)!.add(pairKey);
+            const route = getBackwardRoute(srcNodeId, tgtNodeId, zoneNodeMap);
+            zoneImpliedEdges.push({
+              id: `implied-srv-${action}-${srcId}-${tgtId}`,
+              source: srcNodeId,
+              target: tgtNodeId,
+              ...commonEdgeProps,
+              ...(route ? { sourceHandle: 'bot-s', targetHandle: 'bot-t' } : {}),
+              data: { ...commonEdgeProps.data, ...(route ?? {}) },
+            });
+          };
+          if (ic.sourceServerId && ic.targetServerId) {
+            pushServerPair(ic.sourceServerId, ic.targetServerId);
+          } else {
+            const srcSrv = filteredData.serversForEdgeResolution.find((s) => s.deployments.some((d) => d.application.id === ic.sourceAppId));
+            const tgtSrv = filteredData.serversForEdgeResolution.find((s) => s.deployments.some((d) => d.application.id === ic.targetAppId));
+            if (srcSrv && tgtSrv) pushServerPair(srcSrv.id, tgtSrv.id);
+          }
+        });
+      }
+
+      return { nodes: result.nodes, edges: [...zoneEdges, ...zoneImpliedEdges] };
+    }
+
     const result = computeLayout(layoutServers, layoutConnections, filters.nodeType, filters.layoutDirection, filters.edgeStyle);
 
     const edgesWithCallback = result.edges.map((e) => ({
@@ -150,11 +282,12 @@ function TopologyPageInner() {
     };
     const impliedEdges: Edge[] = [];
 
-    if (showImplied && data.topology.impliedConnections) {
+    if (showImplied && effectiveTopology.impliedConnections) {
       const allNodes = result.nodes;
+      const nodeMap = new Map(allNodes.map((n) => [n.id, n]));
       const addedServerPairs = new Map<string, Set<string>>();
 
-      data.topology.impliedConnections.forEach((ic: ImpliedConnectionEdge) => {
+      effectiveTopology.impliedConnections.forEach((ic: ImpliedConnectionEdge) => {
         const action = ic.action ?? 'ALLOW';
         const cfg = FW_ACTION[action] ?? FW_ACTION.ALLOW;
         const portNum = ic.targetPort?.portNumber ?? (ic.targetPort as any)?.port_number;
@@ -176,7 +309,15 @@ function TopologyPageInner() {
           if (!addedServerPairs.has(action)) addedServerPairs.set(action, new Set());
           if (addedServerPairs.get(action)!.has(pairKey)) return;
           addedServerPairs.get(action)!.add(pairKey);
-          impliedEdges.push({ id: `implied-srv-${action}-${srcId}-${tgtId}`, source: srcNodeId, target: tgtNodeId, ...commonEdgeProps });
+          const route = getBackwardRoute(srcNodeId, tgtNodeId, nodeMap);
+          impliedEdges.push({
+            id: `implied-srv-${action}-${srcId}-${tgtId}`,
+            source: srcNodeId,
+            target: tgtNodeId,
+            ...commonEdgeProps,
+            ...(route ? { sourceHandle: 'bot-s', targetHandle: 'bot-t' } : {}),
+            data: { ...commonEdgeProps.data, ...(route ?? {}) },
+          });
         };
 
         if (ic.sourceServerId && ic.targetServerId) {
@@ -190,7 +331,7 @@ function TopologyPageInner() {
     }
 
     return { nodes: result.nodes, edges: [...edgesWithCallback, ...impliedEdges] };
-  }, [filteredData, filters.nodeType, filters.layoutDirection, filters.edgeStyle, stableUpdateEdgeLabel, showImplied, data?.topology?.impliedConnections]);
+  }, [filteredData, filters.nodeType, filters.layoutDirection, filters.edgeStyle, filters.showZones, activeZones, serversByZone, stableUpdateEdgeLabel, showImplied, effectiveTopology]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(computedNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(computedEdges);
@@ -204,17 +345,41 @@ function TopologyPageInner() {
   }, []);
 
   useMemo(() => {
-    if (positionsModeRef.current !== filters.nodeType) {
+    const modeKey = filters.nodeType + (filters.showZones ? ':zone' : '');
+    if (positionsModeRef.current !== modeKey) {
       userPositionsRef.current = {};
-      positionsModeRef.current = filters.nodeType;
+      zoneLayoutRef.current = {};
+      positionsModeRef.current = modeKey;
+    }
+    // layoutRevision bump (from zone auto-arrange) forces fresh positions — only once per bump
+    if (layoutRevision > appliedRevisionRef.current) {
+      userPositionsRef.current = {};
+      zoneLayoutRef.current = {};
+      appliedRevisionRef.current = layoutRevision;
     }
     const mergedNodes = computedNodes.map((node) => {
+      // Lane wrappers are always recomputed by the layout — never pin them.
+      if (node.type === 'laneWrapper') return node;
+      if (node.type === 'zoneLane') {
+        const z = zoneLayoutRef.current[node.id];
+        return z
+          ? { ...node, position: { x: z.x, y: z.y }, style: { ...node.style, width: z.width, height: z.height } }
+          : node;
+      }
       const savedPos = userPositionsRef.current[node.id];
       return savedPos ? { ...node, position: savedPos } : node;
     });
     setNodes(mergedNodes);
-    setEdges(computedEdges);
-  }, [computedNodes, computedEdges, filters.nodeType]);
+    const offs = edgeLabelOffsetsRef.current;
+    const mergedEdges = Object.keys(offs).length === 0
+      ? computedEdges
+      : computedEdges.map((e) => {
+          const o = offs[e.id];
+          return o ? { ...e, data: { ...e.data, labelOffsetX: o.x, labelOffsetY: o.y } } : e;
+        });
+    setEdges(mergedEdges);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [computedNodes, computedEdges, filters.nodeType, filters.showZones, layoutRevision]);
 
   useEffect(() => {
     const id = requestAnimationFrame(() => { reactFlowRef.current?.fitView({ padding: 0.2, duration: 300 }); });
@@ -230,18 +395,18 @@ function TopologyPageInner() {
   const displayNodes = useMemo(() => {
     if (!focusedNodeId) return nodes;
     const highlighted = new Set<string>([focusedNodeId]);
-    nodes.forEach((n) => { if (n.parentNode === focusedNodeId) highlighted.add(n.id); });
+    nodes.forEach((n) => { if (n.parentId === focusedNodeId) highlighted.add(n.id); });
     edges.forEach((e) => {
       if (highlighted.has(e.source) || highlighted.has(e.target)) { highlighted.add(e.source); highlighted.add(e.target); }
     });
-    nodes.forEach((n) => { if (n.parentNode && highlighted.has(n.id)) highlighted.add(n.parentNode); });
-    nodes.forEach((n) => { if (n.parentNode && highlighted.has(n.parentNode)) highlighted.add(n.id); });
+    nodes.forEach((n) => { if (n.parentId && highlighted.has(n.id)) highlighted.add(n.parentId); });
+    nodes.forEach((n) => { if (n.parentId && highlighted.has(n.parentId)) highlighted.add(n.id); });
     return nodes.map((n) => ({ ...n, style: { ...n.style, opacity: highlighted.has(n.id) ? 1 : 0.12, transition: 'opacity 0.2s ease' } }));
   }, [nodes, edges, focusedNodeId]);
 
   const displayEdges = useMemo(() => {
     if (!focusedNodeId) return edges;
-    const childIds = new Set(nodes.filter((n) => n.parentNode === focusedNodeId).map((n) => n.id));
+    const childIds = new Set(nodes.filter((n) => n.parentId === focusedNodeId).map((n) => n.id));
     childIds.add(focusedNodeId);
     return edges.map((e) => {
       const isHighlighted = childIds.has(e.source) || childIds.has(e.target);
@@ -252,11 +417,11 @@ function TopologyPageInner() {
   useEffect(() => {
     if (!focusedNodeId || renderEngine !== 'reactflow') return;
     const highlighted = new Set<string>([focusedNodeId]);
-    nodesRef.current.forEach((n) => { if (n.parentNode === focusedNodeId) highlighted.add(n.id); });
+    nodesRef.current.forEach((n) => { if (n.parentId === focusedNodeId) highlighted.add(n.id); });
     edgesRef.current.forEach((e) => {
       if (highlighted.has(e.source) || highlighted.has(e.target)) { highlighted.add(e.source); highlighted.add(e.target); }
     });
-    nodesRef.current.forEach((n) => { if (n.parentNode && highlighted.has(n.id)) highlighted.add(n.parentNode); });
+    nodesRef.current.forEach((n) => { if (n.parentId && highlighted.has(n.id)) highlighted.add(n.parentId); });
     requestAnimationFrame(() => {
       reactFlowRef.current?.fitView({ nodes: [...highlighted].map((id) => ({ id })), duration: 500, padding: 0.3, minZoom: 0.2, maxZoom: 1.5 });
     });
@@ -264,13 +429,15 @@ function TopologyPageInner() {
 
   // ─── Drag & snap handlers ─────────────────────────────────────
   const handleNodeDragStop = useCallback((_evt: React.MouseEvent, node: Node) => {
-    const parentId = node.parentNode;
-    if (parentId) {
+    const parentId = node.parentId;
+
+    // App node inside server container → snap to vertical stack
+    if (parentId && node.type === 'appNode') {
       const STACK_PADDING_X = 14;
       const STACK_PADDING_Y = 48;
       const STACK_APP_H = 30;
       const STACK_GAP = 4;
-      const siblings = nodesRef.current.filter((n) => n.parentNode === parentId);
+      const siblings = nodesRef.current.filter((n) => n.parentId === parentId);
       const sorted = [...siblings].sort((a, b) => {
         const ay = a.id === node.id ? node.position.y : a.position.y;
         const by = b.id === node.id ? node.position.y : b.position.y;
@@ -285,11 +452,135 @@ function TopologyPageInner() {
       return;
     }
 
+    // Zone lane dragged → cluster zones into lanes by overlap on the CROSS
+    // axis (Y for LR/RL rows, X for TB/BT columns); within a lane order by
+    // the MAIN axis. Drop a zone so it overlaps a lane → it joins; drop into
+    // empty space → new lane. Persist grid (lane + order) and re-stack.
+    if (node.type === 'zoneLane' && filters.showZones) {
+      const stackH = filters.layoutDirection === 'LR' || filters.layoutDirection === 'RL';
+      setNodes((nds) => {
+        const moved = nds.map((n) => (n.id === node.id ? { ...n, position: node.position } : n));
+
+        const zoneNodes = moved.filter((n) => n.type === 'zoneLane');
+        // Cross-axis span used to cluster, main-axis position used to order.
+        const crossLo = (n: Node) => (stackH ? n.position.y : n.position.x);
+        const crossHi = (n: Node) => {
+          const sz = stackH
+            ? (n.style?.height as number) ?? (n.height as number) ?? 200
+            : (n.style?.width as number) ?? (n.width as number) ?? 200;
+          return crossLo(n) + sz;
+        };
+        const mainPos = (n: Node) => (stackH ? n.position.x : n.position.y);
+
+        const sorted = [...zoneNodes].sort((a, b) => crossLo(a) - crossLo(b));
+        const lanesAcc: { lo: number; hi: number; nodes: Node[] }[] = [];
+        for (const z of sorted) {
+          const lo = crossLo(z);
+          const hi = crossHi(z);
+          const lane = lanesAcc.find((r) => lo < r.hi && hi > r.lo);
+          if (lane) {
+            lane.nodes.push(z);
+            lane.lo = Math.min(lane.lo, lo);
+            lane.hi = Math.max(lane.hi, hi);
+          } else {
+            lanesAcc.push({ lo, hi, nodes: [z] });
+          }
+        }
+        lanesAcc.sort((a, b) => a.lo - b.lo);
+
+        // Flatten to (lane asc, main asc) with lane index; tag data.lane.
+        const laneOf = new Map<string, number>();
+        const items: { id: string; lane: number }[] = [];
+        lanesAcc.forEach((r, laneIdx) => {
+          r.nodes
+            .slice()
+            .sort((a, b) => mainPos(a) - mainPos(b))
+            .forEach((z) => {
+              laneOf.set(z.id, laneIdx);
+              items.push({ id: z.id.replace(/^zone-/, ''), lane: laneIdx });
+            });
+        });
+        setZoneArrangement(items);
+
+        const withLane = moved.map((n) =>
+          n.type === 'zoneLane' && laneOf.has(n.id)
+            ? { ...n, data: { ...n.data, lane: laneOf.get(n.id) } }
+            : n,
+        );
+        const reflowed = reflowZoneLanes(withLane, stackH);
+        reflowed.forEach((n) => {
+          if (n.type === 'zoneLane') {
+            zoneLayoutRef.current[n.id] = {
+              x: n.position.x, y: n.position.y,
+              width: n.style?.width as number, height: n.style?.height as number,
+            };
+          }
+        });
+        return reflowed;
+      });
+      return;
+    }
+
+    // Server node dragged inside a zone lane → normalize the content block to a
+    // padded origin so the zone grows symmetrically in every direction
+    // (drag left/top resizes the zone just like drag right/bottom), then
+    // re-stack the other zones to keep spacing.
+    if (parentId && filters.showZones) {
+      const parent = nodesRef.current.find((n) => n.id === parentId);
+      if (parent?.type === 'zoneLane') {
+        // Dropped over a DIFFERENT zone lane → reassign the server to that
+        // zone and persist it (otherwise the next recompute snaps it back to
+        // its IP-matched zone, so it appears to "jump" to another zone).
+        if (node.id.startsWith('server-')) {
+          const nW = (node.width as number) ?? (node.style?.width as number) ?? 200;
+          const nH = (node.height as number) ?? (node.style?.height as number) ?? 150;
+          const absX = parent.position.x + node.position.x + nW / 2;
+          const absY = parent.position.y + node.position.y + nH / 2;
+          const targetZone = nodesRef.current.find((n) =>
+            n.type === 'zoneLane' &&
+            n.id !== parentId &&
+            absX >= n.position.x &&
+            absX <= n.position.x + ((n.style?.width as number) ?? 0) &&
+            absY >= n.position.y &&
+            absY <= n.position.y + ((n.style?.height as number) ?? 0),
+          );
+          if (targetZone) {
+            delete userPositionsRef.current[node.id];
+            assignServer(node.id.replace(/^server-/, ''), targetZone.id.replace(/^zone-/, ''));
+            setLayoutRevision((r) => r + 1);
+            return;
+          }
+        }
+        const stackH = filters.layoutDirection === 'LR' || filters.layoutDirection === 'RL';
+        setNodes((nds) => {
+          const moved = nds.map((n) => (n.id === node.id ? { ...n, position: node.position } : n));
+          const reflowed = reflowZoneLanes(moved, stackH, true);
+          // Persist post-normalization geometry: lane size/pos AND every child's
+          // shifted position, so the merge-useMemo doesn't revert them.
+          reflowed.forEach((n) => {
+            if (n.type === 'zoneLane') {
+              zoneLayoutRef.current[n.id] = {
+                x: n.position.x, y: n.position.y,
+                width: n.style?.width as number, height: n.style?.height as number,
+              };
+            } else if (n.parentId) {
+              userPositionsRef.current[n.id] = { x: n.position.x, y: n.position.y };
+            }
+          });
+          return reflowed;
+        });
+        return;
+      }
+    }
+
     const GAP = 8;
     const { x, y } = node.position;
     const nW = node.width ?? 160;
     const nH = node.height ?? 44;
-    const topSiblings = nodesRef.current.filter((other) => other.id !== node.id && !other.parentNode);
+    // In zone mode servers have a zone lane parentId — collide only against zone siblings
+    const topSiblings = parentId
+      ? nodesRef.current.filter((other) => other.id !== node.id && other.parentId === parentId)
+      : nodesRef.current.filter((other) => other.id !== node.id && !other.parentId);
     const collidesAt = (tx: number, ty: number) => topSiblings.some((other) => {
       const oW = other.width ?? 160;
       const oH = other.height ?? 44;
@@ -321,20 +612,100 @@ function TopologyPageInner() {
       setNodes((nds) => nds.map((n) => n.id === node.id ? { ...n, position: bestPos! } : n));
       userPositionsRef.current[node.id] = bestPos;
     }
-  }, [setNodes]);
+  }, [setNodes, filters.showZones, filters.layoutDirection, setZoneArrangement, assignServer]);
+
+  // Live: while a server is dragged inside a zone, grow the zone right/bottom
+  // only (grow-only path) and re-stack the sibling zones to keep spacing.
+  // Left/top fitting is intentionally NOT done live — it is finalized once on
+  // drag stop (handleNodeDragStop normalizes) to avoid the dragged node
+  // shifting against the pointer.
+  const handleNodeDrag = useCallback((_evt: React.MouseEvent, node: Node) => {
+    if (!filters.showZones) return;
+
+    // Dragging a whole zone → show a dashed wrapper where it will land:
+    // over an existing lane it overlaps, or a new-lane band in empty space.
+    if (node.type === 'zoneLane') {
+      const stackH = filters.layoutDirection === 'LR' || filters.layoutDirection === 'RL';
+      const dh = (node.height as number) ?? (node.style?.height as number) ?? 200;
+      const dw = (node.style?.width as number) ?? (node.width as number) ?? 200;
+      // Cross-axis centre of the dragged zone (Y for rows, X for columns).
+      const cc = stackH ? node.position.y + dh / 2 : node.position.x + dw / 2;
+
+      const bands = new Map<number, { minX: number; minY: number; maxX: number; maxY: number }>();
+      for (const z of nodesRef.current) {
+        if (z.type !== 'zoneLane' || z.id === node.id) continue;
+        const lane = Number((z.data as { lane?: number } | undefined)?.lane ?? 0);
+        const zw = (z.style?.width as number) ?? (z.width as number) ?? 200;
+        const zh = (z.style?.height as number) ?? (z.height as number) ?? 200;
+        const b = bands.get(lane);
+        bands.set(lane, b
+          ? { minX: Math.min(b.minX, z.position.x), minY: Math.min(b.minY, z.position.y), maxX: Math.max(b.maxX, z.position.x + zw), maxY: Math.max(b.maxY, z.position.y + zh) }
+          : { minX: z.position.x, minY: z.position.y, maxX: z.position.x + zw, maxY: z.position.y + zh });
+      }
+      const lo = (bb: { minX: number; minY: number }) => (stackH ? bb.minY : bb.minX);
+      const hi = (bb: { maxX: number; maxY: number }) => (stackH ? bb.maxY : bb.maxX);
+      const sorted = [...bands.values()].sort((a, b) => lo(a) - lo(b));
+
+      const PAD = 18;
+      let target: { minX: number; minY: number; maxX: number; maxY: number } | null = null;
+      let displayIdx = 0;
+      for (let i = 0; i < sorted.length; i++) {
+        const band = sorted[i];
+        if (cc >= lo(band) - 24 && cc <= hi(band) + 24) { target = band; displayIdx = i; break; }
+        if (cc > hi(band) + 24) displayIdx = i + 1;
+      }
+
+      let hint: Node;
+      if (target) {
+        // Join an existing lane: extend the lane band along the MAIN axis to
+        // include the dragged zone (X for rows, Y for columns).
+        const x0 = stackH ? Math.min(target.minX, node.position.x) : target.minX;
+        const y0 = stackH ? target.minY : Math.min(target.minY, node.position.y);
+        const x1 = stackH ? Math.max(target.maxX, node.position.x + dw) : target.maxX;
+        const y1 = stackH ? target.maxY : Math.max(target.maxY, node.position.y + dh);
+        hint = {
+          id: 'lanewrap-drophint', type: 'laneWrapper',
+          position: { x: x0 - PAD, y: y0 - PAD },
+          style: { width: (x1 - x0) + PAD * 2, height: (y1 - y0) + PAD * 2 },
+          data: { kind: 'hint', lane: displayIdx, isNewLane: false },
+          selectable: false, draggable: false, zIndex: 50,
+        };
+      } else {
+        hint = {
+          id: 'lanewrap-drophint', type: 'laneWrapper',
+          position: { x: node.position.x - PAD, y: node.position.y - PAD },
+          style: { width: dw + PAD * 2, height: dh + PAD * 2 },
+          data: { kind: 'hint', lane: displayIdx, isNewLane: true },
+          selectable: false, draggable: false, zIndex: 50,
+        };
+      }
+      setNodes((nds) => [...nds.filter((n) => n.id !== 'lanewrap-drophint'), hint]);
+      return;
+    }
+
+    if (!node.parentId) return;
+    const parent = nodesRef.current.find((n) => n.id === node.parentId);
+    if (parent?.type !== 'zoneLane') return;
+    const stackH = filters.layoutDirection === 'LR' || filters.layoutDirection === 'RL';
+    setNodes((nds) => {
+      const live = nds.map((n) => (n.id === node.id ? { ...n, position: node.position } : n));
+      return reflowZoneLanes(live, stackH);
+    });
+  }, [setNodes, filters.showZones, filters.layoutDirection]);
 
   const handleNodesChange = useCallback((changes: NodeChange[]) => {
     const ALIGN_THRESHOLD = 14;
     const alignedChanges = changes.map((change) => {
       if (change.type !== 'position' || change.dragging !== false || !change.position) return change;
       const draggedNode = nodesRef.current.find((n) => n.id === change.id);
-      const parentId = draggedNode?.parentNode;
+      const parentId = draggedNode?.parentId;
       let { x, y } = change.position;
       let snappedX = false;
       let snappedY = false;
       for (const other of nodesRef.current) {
         if (other.id === change.id) continue;
-        const isSibling = parentId ? other.parentNode === parentId : !other.parentNode;
+        if (other.type === 'laneWrapper') continue;
+        const isSibling = parentId ? other.parentId === parentId : !other.parentId;
         if (!isSibling) continue;
         if (!snappedX && Math.abs(other.position.x - x) <= ALIGN_THRESHOLD) { x = other.position.x; snappedX = true; }
         if (!snappedY && Math.abs(other.position.y - y) <= ALIGN_THRESHOLD) { y = other.position.y; snappedY = true; }
@@ -349,6 +720,27 @@ function TopologyPageInner() {
   // ─── Auto-arrange ─────────────────────────────────────────────
   const handleAutoArrange = useCallback(async () => {
     if (renderEngine === 'visnetwork') { visNetworkViewRef.current?.autoArrange(); return; }
+
+    // Zone mode: distribute zones into the column count that best fills the
+    // viewport, persist it, then bump revision so computeZoneLaneLayout
+    // re-applies the optimal grid.
+    if (filters.showZones) {
+      const vp = containerRef.current;
+      const stackH = filters.layoutDirection === 'LR' || filters.layoutDirection === 'RL';
+      const arrangement = optimalZoneLaneArrangement(
+        nodesRef.current,
+        vp?.clientWidth ?? window.innerWidth,
+        vp?.clientHeight ?? window.innerHeight,
+        stackH,
+      );
+      if (arrangement.length) setZoneArrangement(arrangement);
+      setLayoutRevision((r) => r + 1);
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        reactFlowRef.current?.fitView({ padding: 0.2, duration: 500, minZoom: 0.15, maxZoom: 1.5, includeHiddenNodes: false });
+      }));
+      return;
+    }
+
     userPositionsRef.current = {};
     let arranged: Node[];
     if (filters.layoutAlgorithm !== 'dagre') {
@@ -364,7 +756,7 @@ function TopologyPageInner() {
     requestAnimationFrame(() => requestAnimationFrame(() => {
       reactFlowRef.current?.fitView({ padding: 0.2, duration: 500, minZoom: 0.25, maxZoom: 1.5, includeHiddenNodes: false });
     }));
-  }, [renderEngine, nodes, edges, filters.layoutAlgorithm, filters.layoutDirection, setNodes]);
+  }, [renderEngine, filters.showZones, filters.layoutAlgorithm, filters.layoutDirection, nodes, edges, setNodes, setZoneArrangement]);
 
   const handleAutoArrangeRef = useRef(handleAutoArrange);
   useEffect(() => { handleAutoArrangeRef.current = handleAutoArrange; }, [handleAutoArrange]);
@@ -456,7 +848,7 @@ function TopologyPageInner() {
 
   // ─── Export helpers ───────────────────────────────────────────
   const { exportAsJSON, exportAsMermaid, exportAsPNG, exportAsSVG } = useTopologyExport(
-    data?.topology,
+    effectiveTopology,
     filters.environment,
     (msg) => message.error(msg),
     (msg) => message.success(msg),
@@ -464,7 +856,43 @@ function TopologyPageInner() {
 
   const handleSaveSnapshot = async () => {
     try {
-      await createSnapshot.mutateAsync({ label: snapshotLabel || undefined, environment: filters.environment });
+      const res: any = await createSnapshot.mutateAsync({ label: snapshotLabel || undefined, environment: filters.environment });
+      const newId: string | undefined = res?.data?.id ?? res?.id;
+      // Capture the current canvas arrangement so loading this snapshot later
+      // re-presents the exact layout (snapshots themselves are logical-only).
+      if (newId) {
+        const positions: Record<string, { x: number; y: number }> = {};
+        const zones: Record<string, { x: number; y: number; width: number; height: number }> = {};
+        nodesRef.current.forEach((n) => {
+          if (n.type === 'laneWrapper') {
+            // Wrappers are derived from the layout — not persisted.
+            return;
+          }
+          if (n.type === 'zoneLane') {
+            zones[n.id] = {
+              x: n.position.x, y: n.position.y,
+              width: (n.style?.width as number) ?? 0, height: (n.style?.height as number) ?? 0,
+            };
+          } else {
+            positions[n.id] = { x: n.position.x, y: n.position.y };
+          }
+        });
+        const edgeLabelOffsets: Record<string, { x: number; y: number }> = {};
+        edgesRef.current.forEach((e) => {
+          const ox = e.data?.labelOffsetX ?? 0;
+          const oy = e.data?.labelOffsetY ?? 0;
+          if (ox !== 0 || oy !== 0) edgeLabelOffsets[e.id] = { x: ox, y: oy };
+        });
+        saveSnapshotLayout(newId, {
+          filters,
+          viewMode,
+          renderEngine,
+          showImplied,
+          positions,
+          zones,
+          edgeLabelOffsets,
+        });
+      }
       message.success('Snapshot saved');
       setSaveModalOpen(false);
       setSnapshotLabel('');
@@ -477,8 +905,8 @@ function TopologyPageInner() {
     else document.exitFullscreen().catch(() => {});
   }, []);
 
-  const serverCount = data?.topology?.servers?.length ?? 0;
-  const connectionCount = data?.topology?.connections?.length ?? 0;
+  const serverCount = effectiveTopology?.servers?.length ?? 0;
+  const connectionCount = effectiveTopology?.connections?.length ?? 0;
   const CANVAS_H = 'calc(100vh - 64px - 48px - 48px - 72px - 48px)';
 
   return (
@@ -526,6 +954,29 @@ function TopologyPageInner() {
 
       {error && <Alert type="error" message="Không thể tải sơ đồ" description={error.message} style={{ margin: '0 24px 8px' }} showIcon />}
 
+      {snapshotView && (
+        <Alert
+          type="warning"
+          showIcon
+          icon={<HistoryOutlined />}
+          style={{ margin: '0 24px 8px' }}
+          message={
+            <span>
+              Đang xem bản chụp{' '}
+              <Text strong>{snapshotView.meta.label ?? snapshotView.meta.id.slice(0, 8)}</Text>
+              {' · '}
+              {dayjs(snapshotView.meta.created_at).format('YYYY-MM-DD HH:mm')}
+              {' '}(chỉ đọc, không phản ánh dữ liệu hiện tại)
+            </span>
+          }
+          action={
+            <Button size="small" onClick={() => { setSnapshotView(null); edgeLabelOffsetsRef.current = {}; setLayoutRevision((r) => r + 1); }}>
+              Thoát xem bản chụp
+            </Button>
+          }
+        />
+      )}
+
       <TopologyFilterPanel
         filters={filters}
         onChange={setFilters}
@@ -539,6 +990,13 @@ function TopologyPageInner() {
         appOptions={appOptions}
         serverGroupsMap={serverGroupsMap}
         serverAppsMap={serverAppsMap}
+        zoneConfigNode={
+          <ZoneConfigPanel
+            zones={allTopologyZones}
+            onReorder={reorderZones}
+            onReset={resetZones}
+          />
+        }
       />
 
       <div ref={containerRef} style={{ position: 'relative', height: isFullscreen ? '100vh' : CANVAS_H, minHeight: 400 }}>
@@ -557,7 +1015,7 @@ function TopologyPageInner() {
               onNodesChange={handleNodesChange} onEdgesChange={onEdgesChange}
               onConnect={onConnect} onNodeClick={onNodeClick} onEdgeClick={onEdgeClick}
               onPaneClick={() => { setSelectedNode(null); setSelectedConnection(null); setSelectedImplied(null); setFocusedNodeId(null); }}
-              onNodeDragStop={handleNodeDragStop}
+              onNodeDrag={handleNodeDrag} onNodeDragStop={handleNodeDragStop}
               nodeTypes={nodeTypes} edgeTypes={edgeTypes}
               fitView fitViewOptions={{ padding: 0.25 }} elevateEdgesOnSelect
               onInit={(instance) => { reactFlowRef.current = instance; }}
@@ -586,23 +1044,23 @@ function TopologyPageInner() {
         )}
 
         {/* ── VisNetwork ── */}
-        {viewMode === '2D' && renderEngine === 'visnetwork' && data?.topology && (
+        {viewMode === '2D' && renderEngine === 'visnetwork' && effectiveTopology && (
           <>
             <TopologyVisNetworkView
               ref={visNetworkViewRef}
               servers={filteredData.serversForEdgeResolution}
               connections={filteredData.connectionsForEdgeResolution}
-              impliedConnections={data.topology.impliedConnections ?? []}
+              impliedConnections={effectiveTopology.impliedConnections ?? []}
               showImplied={showImplied}
               nodeType={filters.nodeType}
               layout={filters.layout === 'hierarchical' ? 'hierarchical' : 'physics'}
               onNodeClick={(payload) => {
                 setSelectedConnection(null);
                 if (payload.type === 'server') {
-                  const s = data.topology.servers.find((x) => x.id === payload.id);
+                  const s = effectiveTopology?.servers.find((x) => x.id === payload.id);
                   if (s) setSelectedNode({ type: 'server', ...s });
                 } else {
-                  const dep = data.topology.servers.flatMap((s) => s.deployments.map((d) => ({ d, s }))).find(({ d }) => d.application.id === payload.id);
+                  const dep = (effectiveTopology?.servers ?? []).flatMap((s) => s.deployments.map((d) => ({ d, s }))).find(({ d }) => d.application.id === payload.id);
                   if (dep) setSelectedNode({ type: 'app', id: dep.d.application.id, name: dep.d.application.name, code: dep.d.application.code, deploymentStatus: dep.d.status, environment: dep.d.environment, serverName: dep.s.name });
                 }
               }}
@@ -621,7 +1079,7 @@ function TopologyPageInner() {
         )}
 
         {/* ── 3D ── */}
-        {viewMode === '3D' && data?.topology && (
+        {viewMode === '3D' && effectiveTopology && (
           <Topology3DView servers={filteredData.servers} connections={filteredData.connections} onNodeSelect={(node) => { if (!node) { setSelectedNode(null); return; } setSelectedNode({ type: node.type, ...node.data }); }} />
         )}
         {viewMode === '3D' && selectedNode && <NodeDetailPanel node={selectedNode} onClose={() => setSelectedNode(null)} />}
@@ -636,11 +1094,51 @@ function TopologyPageInner() {
 
       <CreateConnectionModal open={createConnModalVisible} sourceApp={connectionDraft?.sourceApp} targetApp={connectionDraft?.targetApp} onCancel={() => { setCreateConnModalVisible(false); setConnectionDraft(null); }} onSubmit={handleCreateConnectionSubmit} />
 
-      <SnapshotBrowser open={showSnapshots} onClose={() => setShowSnapshots(false)} currentEnvironment={filters.environment} />
+      <SnapshotBrowser
+        open={showSnapshots}
+        onClose={() => setShowSnapshots(false)}
+        currentEnvironment={filters.environment}
+        onLoad={(payload, meta) => {
+          setSnapshotView({ payload, meta });
+          setSelectedNode(null);
+          setSelectedConnection(null);
+          setSelectedImplied(null);
+          setFocusedNodeId(null);
+
+          const saved = loadSnapshotLayouts()[meta.id];
+          if (saved) {
+            // Re-present exactly what the user saw: restore every option, the
+            // render engine / view mode, node positions, zone geometry and
+            // dragged edge-label offsets. Prime the refs and freeze the
+            // merge-pass mode/revision so it doesn't wipe them.
+            if (saved.filters) setFilters(saved.filters);
+            if (saved.viewMode) setViewMode(saved.viewMode);
+            if (saved.renderEngine) setRenderEngine(saved.renderEngine);
+            if (typeof saved.showImplied === 'boolean') setShowImplied(saved.showImplied);
+            userPositionsRef.current = { ...(saved.positions ?? {}) };
+            zoneLayoutRef.current = { ...(saved.zones ?? {}) };
+            edgeLabelOffsetsRef.current = { ...(saved.edgeLabelOffsets ?? {}) };
+            const sf = saved.filters ?? filters;
+            positionsModeRef.current = sf.nodeType + (sf.showZones ? ':zone' : '');
+            appliedRevisionRef.current = layoutRevision;
+          } else {
+            // Older snapshot without a saved layout → lay out fresh.
+            userPositionsRef.current = {};
+            zoneLayoutRef.current = {};
+            edgeLabelOffsetsRef.current = {};
+            setLayoutRevision((r) => r + 1);
+          }
+
+          // Visible confirmation: re-fit the canvas once nodes have settled.
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            reactFlowRef.current?.fitView({ padding: 0.2, duration: 500, minZoom: 0.15, maxZoom: 1.5 });
+          }));
+        }}
+      />
 
       <ConnectionHealthDrawer
         open={healthDrawerOpen} onClose={() => setHealthDrawerOpen(false)}
-        servers={data?.topology?.servers ?? []} connections={data?.topology?.connections ?? []}
+        servers={effectiveTopology?.servers ?? []} connections={effectiveTopology?.connections ?? []}
         onFocusNode={(nodeId) => { setFocusedNodeId(nodeId); if (renderEngine !== 'reactflow') setRenderEngine('reactflow'); }}
       />
     </div>

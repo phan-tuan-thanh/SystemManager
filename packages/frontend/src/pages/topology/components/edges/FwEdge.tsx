@@ -1,22 +1,38 @@
-import { EdgeLabelRenderer, getBezierPath, type EdgeProps } from 'reactflow';
+import { EdgeLabelRenderer, getBezierPath, getSmoothStepPath, Position, type EdgeProps } from 'reactflow';
 
 export function FwEdge({
-  id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, data, markerEnd, selected,
+  id,
+  sourceX: propSourceX, sourceY: propSourceY,
+  targetX: propTargetX, targetY: propTargetY,
+  sourcePosition, targetPosition,
+  data, markerEnd, selected,
 }: EdgeProps) {
   const action = data?.action ?? 'ALLOW';
   const isAllow = action === 'ALLOW';
   const actionColor = isAllow ? '#389e0d' : '#cf1322';
   const flowDur = selected ? 0.9 : 1.5;
-  const dotR = selected ? 3.5 : 2.5;
+  const dotR = selected ? 7 : 5;
   const PARTICLE_COUNT = 3;
 
-  const [edgePath, labelX, labelY] = getBezierPath({ sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition });
+  // Backward edges connect via bot-s / bot-t handles; React Flow passes their
+  // live coordinates so the arc tracks the nodes after drag / re-layout.
+  const isBackward = !!(data?._isBackward);
+  const sourceX = propSourceX;
+  const sourceY = propSourceY;
+  const targetX = propTargetX;
+  const targetY = propTargetY;
+
+  // Deeper offset than the faint gray APP_CONN smoothstep (offset 28) so the
+  // colored ALLOW/DENY arc sits clearly apart and is never hidden by it.
+  const [edgePath, labelX, labelY] = isBackward
+    ? getSmoothStepPath({ sourceX, sourceY, sourcePosition: Position.Bottom, targetX, targetY, targetPosition: Position.Bottom, borderRadius: 12, offset: 58 })
+    : getBezierPath({ sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition });
 
   const pathStyle: React.CSSProperties = {
     stroke: actionColor,
-    strokeWidth: selected ? 3 : 2,
+    strokeWidth: selected ? 3.5 : 2.5,
     strokeDasharray: isAllow ? undefined : '7,4',
-    opacity: 0.9,
+    opacity: 1,
     filter: selected ? `drop-shadow(0 0 5px ${actionColor})` : undefined,
   };
 
