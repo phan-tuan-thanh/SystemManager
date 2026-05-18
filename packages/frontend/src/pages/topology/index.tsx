@@ -115,7 +115,7 @@ function TopologyPageInner() {
     if (v !== 'reactflow') setFilters((f) => f.connectionMode ? { ...f, connectionMode: false } : f);
   }, []);
 
-  const [filters, setFilters] = useState<TopologyFilters>({ nodeType: 'server', showMiniMap: true, layout: 'force', layoutAlgorithm: 'elk-layered', layoutDirection: 'LR', connectionMode: false, edgeStyle: 'bezier', visibleGroupNames: [], visibleServerIds: [], visibleAppIds: [], showZones: false });
+  const [filters, setFilters] = useState<TopologyFilters>({ environment: 'PROD', nodeType: 'server', showMiniMap: true, layout: 'force', layoutAlgorithm: 'elk-layered', layoutDirection: 'TB', connectionMode: false, edgeStyle: 'bezier', visibleGroupNames: [], visibleServerIds: [], visibleAppIds: [], showZones: true });
 
   const [selectedNode, setSelectedNode] = useState<any>(null);
   const [selectedConnection, setSelectedConnection] = useState<ConnectionEdge | null>(null);
