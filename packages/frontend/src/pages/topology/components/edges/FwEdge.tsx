@@ -22,10 +22,11 @@ export function FwEdge({
   const targetX = propTargetX;
   const targetY = propTargetY;
 
-  // Deeper offset than the faint gray APP_CONN smoothstep (offset 28) so the
-  // colored ALLOW/DENY arc sits clearly apart and is never hidden by it.
+  // Dynamic offset computed at layout time to route the arc below all zone
+  // lane containers between source and target (see routeEdgesAfterLayout).
+  const backwardOffset = data?._backwardOffset ?? 58;
   const [edgePath, labelX, labelY] = isBackward
-    ? getSmoothStepPath({ sourceX, sourceY, sourcePosition: Position.Bottom, targetX, targetY, targetPosition: Position.Bottom, borderRadius: 12, offset: 58 })
+    ? getSmoothStepPath({ sourceX, sourceY, sourcePosition: Position.Bottom, targetX, targetY, targetPosition: Position.Bottom, borderRadius: 12, offset: backwardOffset })
     : getBezierPath({ sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition });
 
   const pathStyle: React.CSSProperties = {
