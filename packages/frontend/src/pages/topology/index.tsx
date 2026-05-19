@@ -472,27 +472,61 @@ function TopologyPageInner() {
         };
         const mainPos = (n: Node) => (stackH ? n.position.x : n.position.y);
 
-        const sorted = [...zoneNodes].sort((a, b) => crossLo(a) - crossLo(b));
-        const lanesAcc: { lo: number; hi: number; nodes: Node[] }[] = [];
-        for (const z of sorted) {
-          const lo = crossLo(z);
-          const hi = crossHi(z);
-          const lane = lanesAcc.find((r) => lo < r.hi && hi > r.lo);
-          if (lane) {
-            lane.nodes.push(z);
-            lane.lo = Math.min(lane.lo, lo);
-            lane.hi = Math.max(lane.hi, hi);
+        const dragged = zoneNodes.find((n) => n.id === node.id);
+        const others = zoneNodes.filter((n) => n.id !== node.id);
+
+        // Keep EXISTING lanes intact by grouping the non-dragged zones on
+        // their stable data.lane. A naive overlap re-cluster of all zones
+        // chain-merges: a zone dropped in the gap bridges two lanes, its
+        // expanded bounds then swallow the next lane, and so on. Holding the
+        // other lanes fixed and only re-homing the dragged zone avoids that.
+        const laneGroups = new Map<number, Node[]>();
+        for (const z of others) {
+          const ln = Number((z.data as { lane?: number } | undefined)?.lane ?? 0);
+          const arr = laneGroups.get(ln);
+          if (arr) arr.push(z);
+          else laneGroups.set(ln, [z]);
+        }
+
+        const laneBands = [...laneGroups.values()]
+          .map((zs) => ({
+            lo: Math.min(...zs.map(crossLo)),
+            hi: Math.max(...zs.map(crossHi)),
+            zones: [...zs],
+          }))
+          .sort((a, b) => a.lo - b.lo);
+
+        // Home the dragged zone into the existing lane it overlaps MOST on
+        // the cross axis. Require ≥50% of its own cross size to actually
+        // join; a drop landing mostly in a gap becomes its own new lane,
+        // slotted into position by cross-axis order.
+        if (dragged) {
+          const dLo = crossLo(dragged);
+          const dHi = crossHi(dragged);
+          const dSize = Math.max(1, dHi - dLo);
+          let best: { lo: number; hi: number; zones: Node[] } | null = null;
+          let bestOverlap = 0;
+          for (const band of laneBands) {
+            const overlap = Math.min(dHi, band.hi) - Math.max(dLo, band.lo);
+            if (overlap > bestOverlap) {
+              bestOverlap = overlap;
+              best = band;
+            }
+          }
+          if (best && bestOverlap >= dSize * 0.5) {
+            best.zones.push(dragged);
           } else {
-            lanesAcc.push({ lo, hi, nodes: [z] });
+            laneBands.push({ lo: dLo, hi: dHi, zones: [dragged] });
           }
         }
-        lanesAcc.sort((a, b) => a.lo - b.lo);
+
+        laneBands.sort((a, b) => a.lo - b.lo);
 
         // Flatten to (lane asc, main asc) with lane index; tag data.lane.
         const laneOf = new Map<string, number>();
         const items: { id: string; lane: number }[] = [];
-        lanesAcc.forEach((r, laneIdx) => {
-          r.nodes
+        laneBands.forEach((r, laneIdx) => {
+          r.zones
             .slice()
             .sort((a, b) => mainPos(a) - mainPos(b))
             .forEach((z) => {
@@ -698,8 +732,6 @@ function TopologyPageInner() {
       const stackH = filters.layoutDirection === 'LR' || filters.layoutDirection === 'RL';
       const dh = (node.height as number) ?? (node.style?.height as number) ?? 200;
       const dw = (node.style?.width as number) ?? (node.width as number) ?? 200;
-      // Cross-axis centre of the dragged zone (Y for rows, X for columns).
-      const cc = stackH ? node.position.y + dh / 2 : node.position.x + dw / 2;
 
       const bands = new Map<number, { minX: number; minY: number; maxX: number; maxY: number }>();
       for (const z of nodesRef.current) {
@@ -717,12 +749,26 @@ function TopologyPageInner() {
       const sorted = [...bands.values()].sort((a, b) => lo(a) - lo(b));
 
       const PAD = 18;
+      // Match the drop logic exactly: pick the lane the dragged zone overlaps
+      // MOST on the cross axis, requiring ≥50% of its own cross size to join.
+      // Otherwise preview a brand-new lane slotted in by cross-axis order.
+      const dLo = stackH ? node.position.y : node.position.x;
+      const dHi = stackH ? node.position.y + dh : node.position.x + dw;
+      const dSize = Math.max(1, dHi - dLo);
       let target: { minX: number; minY: number; maxX: number; maxY: number } | null = null;
-      let displayIdx = 0;
+      let bestOverlap = 0;
+      let bestIdx = -1;
       for (let i = 0; i < sorted.length; i++) {
         const band = sorted[i];
-        if (cc >= lo(band) - 24 && cc <= hi(band) + 24) { target = band; displayIdx = i; break; }
-        if (cc > hi(band) + 24) displayIdx = i + 1;
+        const overlap = Math.min(dHi, hi(band)) - Math.max(dLo, lo(band));
+        if (overlap > bestOverlap) { bestOverlap = overlap; target = band; bestIdx = i; }
+      }
+      let displayIdx: number;
+      if (target && bestOverlap >= dSize * 0.5) {
+        displayIdx = bestIdx;
+      } else {
+        target = null;
+        displayIdx = sorted.filter((b) => lo(b) < dLo).length;
       }
 
       let hint: Node;
