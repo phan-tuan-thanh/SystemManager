@@ -13,7 +13,7 @@ import {
 import {
   DownloadOutlined, ReloadOutlined, HistoryOutlined, SaveOutlined,
   ThunderboltOutlined, FullscreenOutlined, FullscreenExitOutlined,
-  MedicineBoxOutlined, ApiOutlined,
+  MedicineBoxOutlined, ApiOutlined, CompressOutlined,
 } from '@ant-design/icons';
 
 import NodeDetailPanel from './components/NodeDetailPanel';
@@ -898,6 +898,20 @@ function TopologyPageInner() {
     onNodesChange(alignedChanges);
   }, [onNodesChange]);
 
+  // ─── Fit view (zoom to show the whole diagram, no re-layout) ──────
+  const handleFitView = useCallback(() => {
+    if (renderEngine === 'visnetwork') {
+      visNetworkViewRef.current?.fit();
+      return;
+    }
+    if (renderEngine === 'reactflow') {
+      reactFlowRef.current?.fitView({
+        padding: 0.2, duration: 500, minZoom: 0.1, maxZoom: 1.5,
+        includeHiddenNodes: false,
+      });
+    }
+  }, [renderEngine]);
+
   // ─── Auto-arrange ─────────────────────────────────────────────
   const handleAutoArrange = useCallback(async () => {
     if (renderEngine === 'visnetwork') { visNetworkViewRef.current?.autoArrange(); return; }
@@ -1113,6 +1127,11 @@ function TopologyPageInner() {
                 Implied
               </Button>
             </Tooltip>
+            {viewMode === '2D' && (renderEngine === 'reactflow' || renderEngine === 'visnetwork') && (
+              <Tooltip title="Hiển thị toàn sơ đồ">
+                <Button icon={<CompressOutlined />} onClick={handleFitView}>Vừa màn hình</Button>
+              </Tooltip>
+            )}
             <Button icon={<ReloadOutlined />} onClick={() => refetch()} loading={loading}>Làm mới</Button>
             <Button icon={<SaveOutlined />} onClick={() => setSaveModalOpen(true)}>Lưu bản chụp</Button>
             <Badge count={0} showZero={false}>
