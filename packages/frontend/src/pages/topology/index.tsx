@@ -528,41 +528,57 @@ function TopologyPageInner() {
     if (parentId && filters.showZones) {
       const parent = nodesRef.current.find((n) => n.id === parentId);
       if (parent?.type === 'zoneLane') {
+        const stackH = filters.layoutDirection === 'LR' || filters.layoutDirection === 'RL';
         // Dropped over a DIFFERENT zone lane → reassign the server to that
         // zone and persist it (otherwise the next recompute snaps it back to
         // its IP-matched zone, so it appears to "jump" to another zone).
         if (node.id.startsWith('server-')) {
-          const stackH = filters.layoutDirection === 'LR' || filters.layoutDirection === 'RL';
           const nW = (node.width as number) ?? (node.style?.width as number) ?? 200;
           const nH = (node.height as number) ?? (node.style?.height as number) ?? 150;
           const absX = parent.position.x + node.position.x + nW / 2;
           const absY = parent.position.y + node.position.y + nH / 2;
 
-          // Calculate lane bands from all zone lanes (same logic as zone drag).
-          // This prioritizes dropping into a lane band over raw pixel position.
-          const bands = new Map<number, { minX: number; minY: number; maxX: number; maxY: number; zones: Node[] }>();
-          for (const z of nodesRef.current) {
-            if (z.type !== 'zoneLane') continue;
-            const lane = Number((z.data as { lane?: number } | undefined)?.lane ?? 0);
+          // Calculate lane bands using overlap detection (same logic as zone drag stop).
+          // Group zones into lanes by cross-axis overlap, not by zone.data.lane.
+          const zoneNodes = nodesRef.current.filter((n) => n.type === 'zoneLane');
+          const crossLo = (n: Node) => (stackH ? n.position.y : n.position.x);
+          const crossHi = (n: Node) => {
+            const sz = stackH
+              ? (n.style?.height as number) ?? (n.height as number) ?? 200
+              : (n.style?.width as number) ?? (n.width as number) ?? 200;
+            return crossLo(n) + sz;
+          };
+          const sorted = [...zoneNodes].sort((a, b) => crossLo(a) - crossLo(b));
+          const bandsAcc: { lo: number; hi: number; minX: number; minY: number; maxX: number; maxY: number; zones: Node[] }[] = [];
+          for (const z of sorted) {
+            const lo = crossLo(z);
+            const hi = crossHi(z);
             const zw = (z.style?.width as number) ?? (z.width as number) ?? 200;
             const zh = (z.style?.height as number) ?? (z.height as number) ?? 200;
-            const b = bands.get(lane);
-            const newBand = b
-              ? { minX: Math.min(b.minX, z.position.x), minY: Math.min(b.minY, z.position.y), maxX: Math.max(b.maxX, z.position.x + zw), maxY: Math.max(b.maxY, z.position.y + zh), zones: [...b.zones, z] }
-              : { minX: z.position.x, minY: z.position.y, maxX: z.position.x + zw, maxY: z.position.y + zh, zones: [z] };
-            bands.set(lane, newBand);
+            const band = bandsAcc.find((r) => lo < r.hi && hi > r.lo);
+            if (band) {
+              band.zones.push(z);
+              band.lo = Math.min(band.lo, lo);
+              band.hi = Math.max(band.hi, hi);
+              band.minX = Math.min(band.minX, z.position.x);
+              band.minY = Math.min(band.minY, z.position.y);
+              band.maxX = Math.max(band.maxX, z.position.x + zw);
+              band.maxY = Math.max(band.maxY, z.position.y + zh);
+            } else {
+              bandsAcc.push({ lo, hi, minX: z.position.x, minY: z.position.y, maxX: z.position.x + zw, maxY: z.position.y + zh, zones: [z] });
+            }
           }
 
           // Get cross-axis center of the server (Y for row layout, X for column layout).
           const cc = stackH ? absY : absX;
-          const lo = (bb: any) => (stackH ? bb.minY : bb.minX);
-          const hi = (bb: any) => (stackH ? bb.maxY : bb.maxX);
-          const sorted = [...bands.values()].sort((a, b) => lo(a) - lo(b));
+          const lo = (bb: { lo: number; hi: number; minX: number; minY: number; maxX: number; maxY: number }) => (stackH ? bb.minY : bb.minX);
+          const hi = (bb: { lo: number; hi: number; minX: number; minY: number; maxX: number; maxY: number }) => (stackH ? bb.maxY : bb.maxX);
+          const sortedBands = [...bandsAcc].sort((a, b) => lo(a) - lo(b));
 
           // Find which lane band the server belongs to (with tolerance).
-          let targetBand = null;
-          for (let i = 0; i < sorted.length; i++) {
-            const band = sorted[i];
+          let targetBand: typeof bandsAcc[number] | null = null;
+          for (let i = 0; i < sortedBands.length; i++) {
+            const band = sortedBands[i];
             if (cc >= lo(band) - 24 && cc <= hi(band) + 24) {
               targetBand = band;
               break;
@@ -602,7 +618,7 @@ function TopologyPageInner() {
             return;
           }
         }
-        const stackH = filters.layoutDirection === 'LR' || filters.layoutDirection === 'RL';
+        // Normalize zone geometry when server stops dragging.
         setNodes((nds) => {
           const moved = nds.map((n) => (n.id === node.id ? { ...n, position: node.position } : n));
           const reflowed = reflowZoneLanes(moved, stackH, true);
