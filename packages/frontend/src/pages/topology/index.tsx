@@ -663,6 +663,9 @@ function TopologyPageInner() {
       setNodes((nds) => nds.map((n) => n.id === node.id ? { ...n, position: bestPos! } : n));
       userPositionsRef.current[node.id] = bestPos;
     }
+
+    // Clean up drop hints when drag stops.
+    setNodes((nds) => nds.filter((n) => n.id !== 'lanewrap-drophint' && n.id !== 'lanewrap-server-hint'));
   }, [setNodes, filters.showZones, filters.layoutDirection, setZoneArrangement, assignServer]);
 
   // Live: while a server is dragged inside a zone, grow the zone right/bottom
@@ -730,7 +733,8 @@ function TopologyPageInner() {
           selectable: false, draggable: false, zIndex: 50,
         };
       }
-      setNodes((nds) => [...nds.filter((n) => n.id !== 'lanewrap-drophint'), hint]);
+      // Remove server hint when dropping zone into a lane.
+      setNodes((nds) => [...nds.filter((n) => n.id !== 'lanewrap-drophint' && n.id !== 'lanewrap-server-hint'), hint]);
       return;
     }
 
@@ -738,6 +742,70 @@ function TopologyPageInner() {
     const parent = nodesRef.current.find((n) => n.id === node.parentId);
     if (parent?.type !== 'zoneLane') return;
     const stackH = filters.layoutDirection === 'LR' || filters.layoutDirection === 'RL';
+
+    // When dragging a server, show a lane wrapper hint indicating which lane
+    // it would drop into (similar to zone drag).
+    if (node.id.startsWith('server-')) {
+      const nW = (node.width as number) ?? (node.style?.width as number) ?? 200;
+      const nH = (node.height as number) ?? (node.style?.height as number) ?? 150;
+      const absX = parent.position.x + node.position.x + nW / 2;
+      const absY = parent.position.y + node.position.y + nH / 2;
+      const cc = stackH ? absY : absX;
+
+      // Calculate lane bands (same as in drag drop).
+      const bands = new Map<number, { minX: number; minY: number; maxX: number; maxY: number; idx: number }>();
+      const zoneNodes = nodesRef.current.filter((z) => z.type === 'zoneLane');
+      for (const z of zoneNodes) {
+        const lane = Number((z.data as { lane?: number } | undefined)?.lane ?? 0);
+        const zw = (z.style?.width as number) ?? (z.width as number) ?? 200;
+        const zh = (z.style?.height as number) ?? (z.height as number) ?? 200;
+        const b = bands.get(lane);
+        bands.set(lane, b
+          ? { minX: Math.min(b.minX, z.position.x), minY: Math.min(b.minY, z.position.y), maxX: Math.max(b.maxX, z.position.x + zw), maxY: Math.max(b.maxY, z.position.y + zh), idx: b.idx }
+          : { minX: z.position.x, minY: z.position.y, maxX: z.position.x + zw, maxY: z.position.y + zh, idx: lane });
+      }
+
+      const lo = (bb: any) => (stackH ? bb.minY : bb.minX);
+      const hi = (bb: any) => (stackH ? bb.maxY : bb.maxX);
+      const sorted = [...bands.values()].sort((a, b) => lo(a) - lo(b));
+
+      let targetBand = null;
+      let displayIdx = 0;
+      for (let i = 0; i < sorted.length; i++) {
+        const band = sorted[i];
+        if (cc >= lo(band) - 24 && cc <= hi(band) + 24) { targetBand = band; displayIdx = i; break; }
+        if (cc > hi(band) + 24) displayIdx = i + 1;
+      }
+
+      const PAD = 18;
+      let hint: Node;
+      if (targetBand) {
+        // Show wrapper for existing lane band.
+        const x0 = targetBand.minX;
+        const y0 = targetBand.minY;
+        const x1 = targetBand.maxX;
+        const y1 = targetBand.maxY;
+        hint = {
+          id: 'lanewrap-server-hint', type: 'laneWrapper',
+          position: { x: x0 - PAD, y: y0 - PAD },
+          style: { width: (x1 - x0) + PAD * 2, height: (y1 - y0) + PAD * 2 },
+          data: { kind: 'hint', lane: displayIdx, isNewLane: false },
+          selectable: false, draggable: false, zIndex: 49,
+        };
+      } else {
+        // Show wrapper for a hypothetical new lane in the current area.
+        hint = {
+          id: 'lanewrap-server-hint', type: 'laneWrapper',
+          position: { x: parent.position.x - PAD, y: parent.position.y - PAD },
+          style: { width: (parent.style?.width as number ?? 400) + PAD * 2, height: 120 },
+          data: { kind: 'hint', lane: displayIdx, isNewLane: false },
+          selectable: false, draggable: false, zIndex: 49,
+        };
+      }
+      setNodes((nds) => [...nds.filter((n) => n.id !== 'lanewrap-server-hint'), hint]);
+    }
+
+    // Live resize zone when dragging server inside.
     setNodes((nds) => {
       const live = nds.map((n) => (n.id === node.id ? { ...n, position: node.position } : n));
       return reflowZoneLanes(live, stackH);
