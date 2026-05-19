@@ -532,10 +532,61 @@ function TopologyPageInner() {
         // zone and persist it (otherwise the next recompute snaps it back to
         // its IP-matched zone, so it appears to "jump" to another zone).
         if (node.id.startsWith('server-')) {
+          const stackH = filters.layoutDirection === 'LR' || filters.layoutDirection === 'RL';
           const nW = (node.width as number) ?? (node.style?.width as number) ?? 200;
           const nH = (node.height as number) ?? (node.style?.height as number) ?? 150;
           const absX = parent.position.x + node.position.x + nW / 2;
           const absY = parent.position.y + node.position.y + nH / 2;
+
+          // Calculate lane bands from all zone lanes (same logic as zone drag).
+          // This prioritizes dropping into a lane band over raw pixel position.
+          const bands = new Map<number, { minX: number; minY: number; maxX: number; maxY: number; zones: Node[] }>();
+          for (const z of nodesRef.current) {
+            if (z.type !== 'zoneLane') continue;
+            const lane = Number((z.data as { lane?: number } | undefined)?.lane ?? 0);
+            const zw = (z.style?.width as number) ?? (z.width as number) ?? 200;
+            const zh = (z.style?.height as number) ?? (z.height as number) ?? 200;
+            const b = bands.get(lane);
+            const newBand = b
+              ? { minX: Math.min(b.minX, z.position.x), minY: Math.min(b.minY, z.position.y), maxX: Math.max(b.maxX, z.position.x + zw), maxY: Math.max(b.maxY, z.position.y + zh), zones: [...b.zones, z] }
+              : { minX: z.position.x, minY: z.position.y, maxX: z.position.x + zw, maxY: z.position.y + zh, zones: [z] };
+            bands.set(lane, newBand);
+          }
+
+          // Get cross-axis center of the server (Y for row layout, X for column layout).
+          const cc = stackH ? absY : absX;
+          const lo = (bb: any) => (stackH ? bb.minY : bb.minX);
+          const hi = (bb: any) => (stackH ? bb.maxY : bb.maxX);
+          const sorted = [...bands.values()].sort((a, b) => lo(a) - lo(b));
+
+          // Find which lane band the server belongs to (with tolerance).
+          let targetBand = null;
+          for (let i = 0; i < sorted.length; i++) {
+            const band = sorted[i];
+            if (cc >= lo(band) - 24 && cc <= hi(band) + 24) {
+              targetBand = band;
+              break;
+            }
+          }
+
+          // Drop server into the nearest zone in the target lane band.
+          if (targetBand && targetBand.zones.length > 0) {
+            const targetZone = targetBand.zones.reduce((best, z) => {
+              if (z.id === parentId) return best;
+              const dist = Math.abs((stackH ? z.position.y + (z.style?.height as number ?? z.height ?? 200) / 2 : z.position.x + (z.style?.width as number ?? z.width ?? 200) / 2) - (stackH ? absY : absX));
+              const bestDist = best ? Math.abs((stackH ? best.position.y + (best.style?.height as number ?? best.height ?? 200) / 2 : best.position.x + (best.style?.width as number ?? best.width ?? 200) / 2) - (stackH ? absY : absX)) : Infinity;
+              return dist < bestDist ? z : best;
+            });
+
+            if (targetZone && targetZone.id !== parentId) {
+              delete userPositionsRef.current[node.id];
+              assignServer(node.id.replace(/^server-/, ''), targetZone.id.replace(/^zone-/, ''));
+              setLayoutRevision((r) => r + 1);
+              return;
+            }
+          }
+
+          // Fallback: if no lane band found, check pixel position (old behavior).
           const targetZone = nodesRef.current.find((n) =>
             n.type === 'zoneLane' &&
             n.id !== parentId &&
