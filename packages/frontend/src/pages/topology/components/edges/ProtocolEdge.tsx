@@ -45,12 +45,13 @@ export function ProtocolEdge({
   let spread: number;
 
   if (isBackward) {
-    // Deeper offset than the faint gray APP_CONN smoothstep (offset 28) so the
-    // colored arc sits clearly apart; spread is ignored for backward edges.
+    // Dynamic offset computed at layout time to route the arc below all zone
+    // lane containers between source and target (see routeEdgesAfterLayout).
+    const backwardOffset = data?._backwardOffset ?? 58;
     [edgePath, labelX, labelY] = getSmoothStepPath({
       sourceX, sourceY, sourcePosition: Position.Bottom,
       targetX, targetY, targetPosition: Position.Bottom,
-      borderRadius: 12, offset: 58,
+      borderRadius: 12, offset: backwardOffset,
     });
     spread = 0;
   } else if (edgeStyle === 'step') {

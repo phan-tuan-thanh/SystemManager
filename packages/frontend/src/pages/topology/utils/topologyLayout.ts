@@ -173,7 +173,7 @@ export function buildGraph(
 export function applyDagreLayout(nodes: Node[], edges: Edge[], direction: 'TB' | 'BT' | 'LR' | 'RL'): Node[] {
   const g = new dagre.graphlib.Graph();
   g.setDefaultEdgeLabel(() => ({}));
-  g.setGraph({ rankdir: direction, nodesep: 140, ranksep: 200, edgesep: 40, marginx: 60, marginy: 60 });
+  g.setGraph({ rankdir: direction, nodesep: 180, ranksep: 260, edgesep: 50, marginx: 60, marginy: 60 });
 
   const topNodes = nodes.filter((n) => !n.parentId);
   const nodeIdsWithEdges = new Set<string>();
@@ -276,10 +276,12 @@ export async function applyElkLayout(
     layoutOptions: {
       'algorithm': ELK_ALGO_MAP[algorithm] ?? 'org.eclipse.elk.layered',
       'elk.direction': ELK_DIR_MAP[direction] ?? 'DOWN',
-      'spacing.nodeNode': '80',
-      'spacing.edgeNode': '40',
-      'spacing.edgeEdge': '20',
-      'org.eclipse.elk.layered.spacing.nodeNodeBetweenLayers': '140',
+      'spacing.nodeNode': '100',
+      'spacing.edgeNode': '60',
+      'spacing.edgeEdge': '30',
+      'org.eclipse.elk.layered.spacing.nodeNodeBetweenLayers': '180',
+      'org.eclipse.elk.layered.crossingMinimization.strategy': 'LAYER_SWEEP',
+      'org.eclipse.elk.layered.nodePlacement.strategy': 'NETWORK_SIMPLEX',
     },
     children: elkChildren,
     edges: elkEdges,
@@ -362,6 +364,43 @@ function routeEdgesAfterLayout(nodes: Node[], edges: Edge[]): Edge[] {
     const route = getBackwardRoute(edge.source, edge.target, nodeMap);
     if (!route) return edge;
 
+    // Compute dynamic arc offset so the U-arc clears all zone lane containers
+    // that span between source and target. The getSmoothStepPath `offset` for
+    // bottom→bottom routing = how far the arc descends below the handle Y.
+    // We need: handleY + offset > bottom edge of every overlapping zone.
+    let dynProtocolOffset = 58;
+    const srcNode = nodeMap.get(edge.source);
+    const tgtNode = nodeMap.get(edge.target);
+    if (srcNode && tgtNode) {
+      const srcAbs = getAbsTopLeft(srcNode, nodeMap);
+      const tgtAbs = getAbsTopLeft(tgtNode, nodeMap);
+      const srcH = (srcNode.style?.height as number) ?? SERVER_NODE_H;
+      const tgtH = (tgtNode.style?.height as number) ?? SERVER_NODE_H;
+      const srcW = (srcNode.style?.width as number) ?? SERVER_NODE_W;
+      const tgtW = (tgtNode.style?.width as number) ?? SERVER_NODE_W;
+      const srcHandleY = srcAbs.y + srcH;
+      const tgtHandleY = tgtAbs.y + tgtH;
+      const maxHandleY = Math.max(srcHandleY, tgtHandleY);
+      const srcCenterX = srcAbs.x + srcW / 2;
+      const tgtCenterX = tgtAbs.x + tgtW / 2;
+      const xMin = Math.min(srcCenterX, tgtCenterX);
+      const xMax = Math.max(srcCenterX, tgtCenterX);
+
+      // Find the lowest bottom edge of any zone/wrapper container crossing this span
+      let maxZoneBottom = maxHandleY;
+      for (const node of nodeMap.values()) {
+        if (node.type !== 'zoneLane' && node.type !== 'laneWrapper') continue;
+        const pos = getAbsTopLeft(node, nodeMap);
+        const h = (node.style?.height as number) ?? 0;
+        const w = (node.style?.width as number) ?? 0;
+        if (pos.x < xMax && pos.x + w > xMin) {
+          maxZoneBottom = Math.max(maxZoneBottom, pos.y + h);
+        }
+      }
+      dynProtocolOffset = Math.max(58, maxZoneBottom - maxHandleY + 32);
+    }
+    const dynAppConnOffset = Math.max(28, dynProtocolOffset - 30);
+
     const isCustomEdge = edge.type === 'protocolEdge' || edge.type === 'fwEdge';
     if (isCustomEdge) {
       // ProtocolEdge/FwEdge use the injected coords directly when
@@ -372,21 +411,20 @@ function routeEdgesAfterLayout(nodes: Node[], edges: Edge[]): Edge[] {
         sourceHandle: 'bot-s',
         targetHandle: 'bot-t',
         zIndex: Math.max((edge.zIndex as number | undefined) ?? 0, 6),
-        data: { ...edge.data, ...route },
+        data: { ...edge.data, ...route, _backwardOffset: dynProtocolOffset },
       };
     }
 
     // Plain APP_CONN server edge: a generic app connection (no ALLOW/DENY).
     // Render it as a faint dashed background smoothstep with a SHALLOW offset
-    // (28) so it stays well clear of the colored ALLOW/DENY firewall arcs,
-    // which use a deeper offset (58) and a higher z-index.
+    // so it stays well clear of the colored ALLOW/DENY firewall arcs.
     return {
       ...edge,
       type: 'smoothstep',
       sourceHandle: 'bot-s',
       targetHandle: 'bot-t',
       zIndex: 3,
-      pathOptions: { borderRadius: 10, offset: 28 },
+      pathOptions: { borderRadius: 10, offset: dynAppConnOffset },
       style: {
         ...edge.style,
         stroke: '#b0b0b0',
