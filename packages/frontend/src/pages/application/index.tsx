@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Button, Tabs, Input, Select, Space, App, Popconfirm, Tag } from 'antd';
-import { PlusOutlined, SearchOutlined, EditOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons';
+import { Button, Tabs, Input, Select, Space, App, Popconfirm, Tag, Drawer } from 'antd';
+import { PlusOutlined, SearchOutlined, EditOutlined, DeleteOutlined, EyeOutlined, TableOutlined, SnippetsOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import PageHeader from '../../components/common/PageHeader';
 import DataTable from '../../components/common/DataTable';
 import StatusBadge from '../../components/common/StatusBadge';
 import ApplicationForm from './components/ApplicationForm';
 import AppGroupList from './components/AppGroupList';
-import { useApplicationList, useDeleteApplication } from '../../hooks/useApplications';
+import EditableTable, { type EditableColumnDef } from '../../components/common/EditableTable';
+import PasteImportDrawer, { type PasteImportConfig } from '../../components/common/PasteImportDrawer';
+import { useApplicationList, useDeleteApplication, useCreateApplication } from '../../hooks/useApplications';
 import { useAppGroupList } from '../../hooks/useAppGroups';
 import type { Application } from '../../types/application';
 import dayjs from 'dayjs';
@@ -23,8 +25,10 @@ function BusinessTab() {
   const [formOpen, setFormOpen] = useState(false);
   const [editApp, setEditApp] = useState<Application | null>(null);
   const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
+  const [batchAddOpen, setBatchAddOpen] = useState(false);
+  const [pasteImportOpen, setPasteImportOpen] = useState(false);
 
-  const { data, isLoading } = useApplicationList({
+  const { data, isLoading, refetch } = useApplicationList({
     page, limit,
     search: search || undefined,
     group_id: groupFilter,
@@ -32,6 +36,48 @@ function BusinessTab() {
   });
   const { data: groups } = useAppGroupList({ limit: 100, group_type: 'BUSINESS' });
   const deleteApp = useDeleteApplication();
+  const createApp = useCreateApplication();
+
+  const groupOptions = (groups?.items ?? []).map((g) => ({ value: g.id, label: `${g.code} — ${g.name}` }));
+
+  const appEditableCols: EditableColumnDef[] = [
+    { key: 'code', title: 'Mã', type: 'text', required: true, placeholder: 'CORE_BANKING', width: 140 },
+    { key: 'name', title: 'Tên ứng dụng', type: 'text', required: true, width: 200 },
+    { key: 'group_id', title: 'Nhóm', type: 'select', required: true, width: 200, options: groupOptions },
+    { key: 'status', title: 'Trạng thái', type: 'select', width: 130, options: [
+      { value: 'ACTIVE', label: 'Active' },
+      { value: 'INACTIVE', label: 'Inactive' },
+      { value: 'DEPRECATED', label: 'Deprecated' },
+    ]},
+    { key: 'version', title: 'Phiên bản', type: 'text', width: 100, placeholder: '1.0.0' },
+    { key: 'owner_team', title: 'Team', type: 'text', width: 140 },
+    { key: 'tech_stack', title: 'Tech Stack', type: 'text', width: 180 },
+  ];
+
+  const appPasteConfig: PasteImportConfig = {
+    title: 'Dán & Nhập Ứng dụng nghiệp vụ',
+    editableColumns: appEditableCols,
+    targetFields: [
+      { key: 'code', label: 'Mã ứng dụng', required: true, aliases: ['ma', 'app_code', 'ma_ung_dung'] },
+      { key: 'name', label: 'Tên ứng dụng', required: true, aliases: ['ten', 'app_name', 'ten_ung_dung'] },
+      { key: 'group_id', label: 'Nhóm ứng dụng', required: true, aliases: ['group', 'nhom', 'group_name'], options: groupOptions },
+      { key: 'status', label: 'Trạng thái', aliases: ['trang_thai'], options: [
+        { value: 'ACTIVE', label: 'Active' }, { value: 'INACTIVE', label: 'Inactive' }, { value: 'DEPRECATED', label: 'Deprecated' },
+      ], valueAliases: { active: 'ACTIVE', inactive: 'INACTIVE', deprecated: 'DEPRECATED' } },
+      { key: 'version', label: 'Phiên bản', aliases: ['phien_ban', 'ver'] },
+      { key: 'owner_team', label: 'Team phụ trách', aliases: ['team', 'owner'] },
+      { key: 'tech_stack', label: 'Tech Stack', aliases: ['tech', 'stack'] },
+    ],
+    onImport: async (rows) => {
+      const payload = rows.map((r) => ({ ...r, application_type: 'BUSINESS' }));
+      const results = await Promise.allSettled(
+        payload.map((r) => createApp.mutateAsync(r as Parameters<typeof createApp.mutateAsync>[0])),
+      );
+      const failed = results.filter((r) => r.status === 'rejected').length;
+      if (failed > 0) throw new Error(`${failed} ứng dụng không tạo được`);
+      refetch();
+    },
+  };
 
   const handleDelete = async (id: string) => {
     try {
@@ -148,6 +194,8 @@ function BusinessTab() {
               </Button>
             </Popconfirm>
           )}
+          <Button icon={<SnippetsOutlined />} onClick={() => setPasteImportOpen(true)}>Dán & Nhập</Button>
+          <Button icon={<TableOutlined />} onClick={() => setBatchAddOpen(true)}>Nhập bảng</Button>
           <Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditApp(null); setFormOpen(true); }}>
             Thêm ứng dụng
           </Button>
@@ -170,6 +218,37 @@ function BusinessTab() {
       />
 
       <ApplicationForm open={formOpen} app={editApp} onClose={() => setFormOpen(false)} initialType="BUSINESS" />
+
+      <Drawer
+        title="Nhập ứng dụng theo bảng"
+        open={batchAddOpen}
+        onClose={() => setBatchAddOpen(false)}
+        width="90%"
+        destroyOnClose
+      >
+        <EditableTable
+          columns={appEditableCols}
+          onSave={async (rows) => {
+            const payload = rows.map((r) => ({ ...r, application_type: 'BUSINESS' }));
+            const results = await Promise.allSettled(
+              payload.map((r) => createApp.mutateAsync(r as Parameters<typeof createApp.mutateAsync>[0])),
+            );
+            const failed = results.filter((r) => r.status === 'rejected').length;
+            const succeeded = results.length - failed;
+            if (succeeded > 0) { message.success(`Đã tạo ${succeeded} ứng dụng`); refetch(); }
+            if (failed > 0) message.error(`${failed} ứng dụng không tạo được`);
+            if (failed === 0) setBatchAddOpen(false);
+          }}
+          saveLabel="Tạo tất cả ứng dụng"
+        />
+      </Drawer>
+
+      <PasteImportDrawer
+        open={pasteImportOpen}
+        onClose={() => setPasteImportOpen(false)}
+        config={appPasteConfig}
+        onSuccess={() => refetch()}
+      />
     </>
   );
 }

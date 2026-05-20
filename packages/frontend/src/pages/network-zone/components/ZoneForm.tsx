@@ -84,7 +84,7 @@ export default function ZoneForm({
         label="Loại zone"
         rules={[{ required: true, message: 'Vui lòng chọn loại zone' }]}
       >
-        <Select placeholder="Chọn loại zone" options={ZONE_TYPES} />
+        <Select placeholder="Chọn loại zone" options={ZONE_TYPES} showSearch optionFilterProp="label" />
       </Form.Item>
 
       <Form.Item

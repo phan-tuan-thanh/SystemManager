@@ -26,6 +26,7 @@ import {
 } from '@ant-design/icons';
 import Papa from 'papaparse';
 import apiClient from '../../api/client';
+import { parseSpreadsheet } from '../../utils/parseSpreadsheet';
 import ColumnMapper, {
   autoDetect,
   applyAllMappings,
@@ -125,94 +126,95 @@ export default function SimpleImportContent({
     return form;
   };
 
-  const handleQuickImport = () => {
+  const handleQuickImport = async () => {
     const file = fileList[0]?.originFileObj as File | undefined;
     if (!file) { message.error('Vui lòng chọn file.'); return; }
 
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: async (results) => {
-        const rows = results.data as Record<string, any>[];
-        const cols = (results.meta.fields ?? []).filter(Boolean) as string[];
-        if (!cols.length) { message.error('Không đọc được tiêu đề cột.'); return; }
+    let rows: Record<string, any>[];
+    let cols: string[];
+    try {
+      const parsed = await parseSpreadsheet(file);
+      rows = parsed.rows;
+      cols = parsed.columns;
+    } catch (err) {
+      message.error((err as Error).message);
+      return;
+    }
 
-        const autoMapping = autoDetect(cols, targetFields);
-        const mappedTargets = new Set(Object.values(autoMapping).filter(Boolean));
-        const missing = targetFields.filter((t) => t.required && !mappedTargets.has(t.key));
+    const autoMapping = autoDetect(cols, targetFields);
+    const mappedTargets = new Set(Object.values(autoMapping).filter(Boolean));
+    const missing = targetFields.filter((t) => t.required && !mappedTargets.has(t.key));
 
-        if (missing.length > 0) {
-          message.warning(
-            `Không nhận diện được cột: ${missing.map((t) => t.label).join(', ')}. Chuyển sang wizard.`,
-          );
+    if (missing.length > 0) {
+      message.warning(
+        `Không nhận diện được cột: ${missing.map((t) => t.label).join(', ')}. Chuyển sang wizard.`,
+      );
+      setCsvColumns(cols);
+      setCsvRows(rows);
+      setMapping(autoMapping);
+      setStep(1);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const mappedRows = applyAllMappings(rows, autoMapping, {});
+      const blob = new Blob([Papa.unparse(mappedRows)], { type: 'text/csv' });
+      const form = new FormData();
+      form.append('file', new File([blob], 'mapped.csv', { type: 'text/csv' }));
+
+      const { data } = await apiClient.post(`/import/preview?type=${type}`, form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      const previewResult: PreviewResult = data.data ?? data;
+
+      modal.confirm({
+        title: 'Xác nhận Nhập nhanh',
+        icon: <ThunderboltOutlined style={{ color: '#faad14' }} />,
+        content: (
+          <div>
+            <p>
+              Phát hiện <strong>{previewResult.valid}</strong> dòng hợp lệ
+              {previewResult.invalid > 0 && (
+                <span style={{ color: '#ff4d4f' }}>
+                  , <strong>{previewResult.invalid}</strong> dòng lỗi sẽ bỏ qua
+                </span>
+              )}
+              .
+            </p>
+            <p>Tiếp tục nhập {title}?</p>
+          </div>
+        ),
+        okText: 'Xác nhận',
+        cancelText: 'Xem chi tiết',
+        onOk: async () => {
+          try {
+            const { data: execData } = await apiClient.post('/import/execute', {
+              session_id: previewResult.session_id,
+            });
+            const execResult: ExecuteResult = execData.data ?? execData;
+            setResult(execResult);
+            setStep(2);
+            message.success(
+              `Import thành công: ${execResult.summary.succeeded}/${execResult.summary.total} bản ghi`,
+            );
+          } catch {
+            message.error('Không thể thực thi import.');
+          }
+        },
+        onCancel: () => {
           setCsvColumns(cols);
           setCsvRows(rows);
           setMapping(autoMapping);
+          setPreview(previewResult);
           setStep(1);
-          return;
-        }
-
-        setLoading(true);
-        try {
-          const mappedRows = applyAllMappings(rows, autoMapping, {});
-          const blob = new Blob([Papa.unparse(mappedRows)], { type: 'text/csv' });
-          const form = new FormData();
-          form.append('file', new File([blob], 'mapped.csv', { type: 'text/csv' }));
-
-          const { data } = await apiClient.post(`/import/preview?type=${type}`, form, {
-            headers: { 'Content-Type': 'multipart/form-data' },
-          });
-          const previewResult: PreviewResult = data.data ?? data;
-
-          modal.confirm({
-            title: 'Xác nhận Nhập nhanh',
-            icon: <ThunderboltOutlined style={{ color: '#faad14' }} />,
-            content: (
-              <div>
-                <p>
-                  Phát hiện <strong>{previewResult.valid}</strong> dòng hợp lệ
-                  {previewResult.invalid > 0 && (
-                    <span style={{ color: '#ff4d4f' }}>
-                      , <strong>{previewResult.invalid}</strong> dòng lỗi sẽ bỏ qua
-                    </span>
-                  )}
-                  .
-                </p>
-                <p>Tiếp tục nhập {title}?</p>
-              </div>
-            ),
-            okText: 'Xác nhận',
-            cancelText: 'Xem chi tiết',
-            onOk: async () => {
-              try {
-                const { data: execData } = await apiClient.post('/import/execute', {
-                  session_id: previewResult.session_id,
-                });
-                const execResult: ExecuteResult = execData.data ?? execData;
-                setResult(execResult);
-                setStep(2);
-                message.success(
-                  `Import thành công: ${execResult.summary.succeeded}/${execResult.summary.total} bản ghi`,
-                );
-              } catch {
-                message.error('Không thể thực thi import.');
-              }
-            },
-            onCancel: () => {
-              setCsvColumns(cols);
-              setCsvRows(rows);
-              setMapping(autoMapping);
-              setPreview(previewResult);
-              setStep(1);
-            },
-          });
-        } catch {
-          message.error('Không thể preview file.');
-        } finally {
-          setLoading(false);
-        }
-      },
-    });
+        },
+      });
+    } catch {
+      message.error('Không thể preview file.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handlePreview = async () => {
@@ -316,7 +318,7 @@ export default function SimpleImportContent({
       {step === 0 && (
         <div>
           <Dragger
-            accept=".csv"
+            accept=".csv,.xls,.xlsx"
             maxCount={1}
             fileList={fileList}
             beforeUpload={() => false}
@@ -327,9 +329,9 @@ export default function SimpleImportContent({
             <p className="ant-upload-drag-icon">
               <InboxOutlined />
             </p>
-            <p className="ant-upload-text">Kéo thả hoặc chọn file CSV để tải lên</p>
+            <p className="ant-upload-text">Kéo thả hoặc chọn file CSV / Excel để tải lên</p>
             <p className="ant-upload-hint">
-              Nhập {title} từ CSV. Hỗ trợ ký tự Unicode (UTF-8).
+              Nhập {title} từ CSV, XLS hoặc XLSX · Dòng đầu là tiêu đề cột · UTF-8
             </p>
           </Dragger>
 
@@ -362,21 +364,18 @@ export default function SimpleImportContent({
             </Button>
             <Button
               disabled={!fileList.length}
-              onClick={() => {
+              onClick={async () => {
                 const file = fileList[0]?.originFileObj as File | undefined;
                 if (!file) return;
-                Papa.parse(file, {
-                  header: true,
-                  skipEmptyLines: true,
-                  complete: (r) => {
-                    const cols = (r.meta.fields ?? []).filter(Boolean) as string[];
-                    const rows = r.data as Record<string, any>[];
-                    setCsvColumns(cols);
-                    setCsvRows(rows);
-                    setMapping(autoDetect(cols, targetFields));
-                    setStep(1);
-                  },
-                });
+                try {
+                  const { rows, columns: cols } = await parseSpreadsheet(file);
+                  setCsvColumns(cols);
+                  setCsvRows(rows);
+                  setMapping(autoDetect(cols, targetFields));
+                  setStep(1);
+                } catch (err) {
+                  message.error((err as Error).message);
+                }
               }}
             >
               Ánh xạ cột thủ công

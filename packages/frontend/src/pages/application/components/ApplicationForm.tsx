@@ -115,6 +115,9 @@ export default function ApplicationForm({ open, app, onClose, initialType }: Pro
             <Form.Item label="Nhóm ứng dụng" name="group_id" rules={[{ required: true, message: 'Chọn nhóm' }]}>
               <Select
                 placeholder={`Nhóm ${isSystem ? 'hạ tầng' : 'nghiệp vụ'}`}
+                showSearch
+                optionFilterProp="label"
+                allowClear
                 options={(groups?.items ?? []).map((g) => ({ value: g.id, label: `${g.code} — ${g.name}` }))}
               />
             </Form.Item>
@@ -140,6 +143,9 @@ export default function ApplicationForm({ open, app, onClose, initialType }: Pro
               <Form.Item label="Loại phần mềm" name="sw_type">
                 <Select
                   placeholder="Chọn loại"
+                  showSearch
+                  optionFilterProp="label"
+                  allowClear
                   options={[
                     { value: 'OS', label: 'OS' },
                     { value: 'DATABASE', label: 'Database' },

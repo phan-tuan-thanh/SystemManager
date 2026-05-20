@@ -32,6 +32,7 @@ import {
 } from '@ant-design/icons';
 import Papa from 'papaparse';
 import apiClient from '../../api/client';
+import { parseSpreadsheet } from '../../utils/parseSpreadsheet';
 import ColumnMapper, {
   autoDetect,
   applyAllMappings,
@@ -199,25 +200,17 @@ export default function ServerUploadPage() {
     setPreviewPageSize(20);
   };
 
-  const handleFileParsed = (file: File) => {
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: (results) => {
-        const rows = results.data as any[];
-        const cols = (results.meta.fields ?? []).filter(Boolean) as string[];
-        if (!cols.length) {
-          message.error('Không đọc được tiêu đề cột từ file CSV.');
-          return;
-        }
-        setAllRows(rows);
-        setCsvColumns(cols);
-        setPreviewData(rows.slice(0, 10));
-        setMapping({});
-        setStep(1);
-      },
-      error: (err) => message.error(`Không thể đọc file: ${err.message}`),
-    });
+  const handleFileParsed = async (file: File) => {
+    try {
+      const { rows, columns: cols } = await parseSpreadsheet(file);
+      setAllRows(rows);
+      setCsvColumns(cols);
+      setPreviewData(rows.slice(0, 10));
+      setMapping({});
+      setStep(1);
+    } catch (err) {
+      message.error((err as Error).message);
+    }
   };
 
   const handleGoToMapping = () => {
@@ -226,91 +219,91 @@ export default function ServerUploadPage() {
     handleFileParsed(file);
   };
 
-  const handleQuickImport = () => {
+  const handleQuickImport = async () => {
     const file = fileList[0]?.originFileObj as File | undefined;
     if (!file) { message.error('Vui lòng chọn file.'); return; }
 
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: async (results) => {
-        const rows = results.data as any[];
-        const cols = (results.meta.fields ?? []).filter(Boolean) as string[];
-        if (!cols.length) { message.error('Không đọc được tiêu đề cột.'); return; }
+    let rows: any[];
+    let cols: string[];
+    try {
+      const result = await parseSpreadsheet(file);
+      rows = result.rows;
+      cols = result.columns;
+    } catch (err) {
+      message.error((err as Error).message);
+      return;
+    }
 
-        const autoMapping = autoDetect(cols, SERVER_TARGETS);
-        const mappedTargets = new Set(Object.values(autoMapping).filter(Boolean));
-        const missing = SERVER_TARGETS.filter((t) => t.required && !mappedTargets.has(t.key));
+    const autoMapping = autoDetect(cols, SERVER_TARGETS);
+    const mappedTargets = new Set(Object.values(autoMapping).filter(Boolean));
+    const missing = SERVER_TARGETS.filter((t) => t.required && !mappedTargets.has(t.key));
 
-        if (missing.length > 0) {
-          message.warning(`Không nhận diện được cột: ${missing.map((t) => t.label).join(', ')}. Chuyển sang wizard.`);
+    if (missing.length > 0) {
+      message.warning(`Không nhận diện được cột: ${missing.map((t) => t.label).join(', ')}. Chuyển sang wizard.`);
+      setAllRows(rows);
+      setCsvColumns(cols);
+      setPreviewData(rows.slice(0, 10));
+      setMapping(autoMapping);
+      setStep(1);
+      return;
+    }
+
+    setServerLoading(true);
+    try {
+      const mappedRows = applyAllMappings(rows, autoMapping, {});
+      const blob = new Blob([Papa.unparse(mappedRows)], { type: 'text/csv' });
+      const form = new FormData();
+      form.append('file', new File([blob], 'mapped.csv', { type: 'text/csv' }));
+
+      const { data } = await apiClient.post('/import/preview?type=server', form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      const previewResult: GenericPreviewResult = data.data ?? data;
+      const newOsCount = previewResult.os_resolution?.filter((o) => o.is_new).length ?? 0;
+
+      modal.confirm({
+        title: 'Xác nhận Import nhanh',
+        icon: <ThunderboltOutlined style={{ color: '#faad14' }} />,
+        content: (
+          <div>
+            <p>Nhận diện tự động <b>{previewResult.total}</b> server:</p>
+            <ul style={{ marginBottom: 0 }}>
+              <li style={{ color: '#52c41a' }}>✓ {previewResult.valid} server hợp lệ</li>
+              {previewResult.invalid > 0 && (
+                <li style={{ color: '#ff4d4f' }}>✗ {previewResult.invalid} dòng lỗi (sẽ bị bỏ qua)</li>
+              )}
+              {newOsCount > 0 && (
+                <li style={{ color: '#fa8c16' }}>⚠ {newOsCount} OS mới sẽ được tự động tạo</li>
+              )}
+            </ul>
+          </div>
+        ),
+        okText: `Import ${previewResult.valid} server`,
+        okButtonProps: { disabled: previewResult.valid === 0 },
+        cancelText: 'Xem chi tiết',
+        onOk: async () => {
+          const { data: execData } = await apiClient.post('/import/execute', {
+            session_id: previewResult.session_id,
+            os_resolution: {},
+          });
+          setServerResult(execData.data ?? execData);
+          setStep(3);
+        },
+        onCancel: () => {
           setAllRows(rows);
           setCsvColumns(cols);
           setPreviewData(rows.slice(0, 10));
           setMapping(autoMapping);
-          setStep(1);
-          return;
-        }
-
-        setServerLoading(true);
-        try {
-          const mappedRows = applyAllMappings(rows, autoMapping, {});
-          const blob = new Blob([Papa.unparse(mappedRows)], { type: 'text/csv' });
-          const form = new FormData();
-          form.append('file', new File([blob], 'mapped.csv', { type: 'text/csv' }));
-
-          const { data } = await apiClient.post('/import/preview?type=server', form, {
-            headers: { 'Content-Type': 'multipart/form-data' },
-          });
-          const previewResult: GenericPreviewResult = data.data ?? data;
-          const newOsCount = previewResult.os_resolution?.filter((o) => o.is_new).length ?? 0;
-
-          modal.confirm({
-            title: 'Xác nhận Import nhanh',
-            icon: <ThunderboltOutlined style={{ color: '#faad14' }} />,
-            content: (
-              <div>
-                <p>Nhận diện tự động <b>{previewResult.total}</b> server:</p>
-                <ul style={{ marginBottom: 0 }}>
-                  <li style={{ color: '#52c41a' }}>✓ {previewResult.valid} server hợp lệ</li>
-                  {previewResult.invalid > 0 && (
-                    <li style={{ color: '#ff4d4f' }}>✗ {previewResult.invalid} dòng lỗi (sẽ bị bỏ qua)</li>
-                  )}
-                  {newOsCount > 0 && (
-                    <li style={{ color: '#fa8c16' }}>⚠ {newOsCount} OS mới sẽ được tự động tạo</li>
-                  )}
-                </ul>
-              </div>
-            ),
-            okText: `Import ${previewResult.valid} server`,
-            okButtonProps: { disabled: previewResult.valid === 0 },
-            cancelText: 'Xem chi tiết',
-            onOk: async () => {
-              const { data: execData } = await apiClient.post('/import/execute', {
-                session_id: previewResult.session_id,
-                os_resolution: {},
-              });
-              setServerResult(execData.data ?? execData);
-              setStep(3);
-            },
-            onCancel: () => {
-              setAllRows(rows);
-              setCsvColumns(cols);
-              setPreviewData(rows.slice(0, 10));
-              setMapping(autoMapping);
-              setServerPreview(previewResult);
-              fetchOsCatalog();
-              setStep(2);
-            },
-          });
-        } catch (err: unknown) {
-          message.error((err as any)?.response?.data?.error?.message || 'Import nhanh thất bại.');
-        } finally {
-          setServerLoading(false);
-        }
-      },
-      error: (err) => message.error(`Không thể đọc file: ${err.message}`),
-    });
+          setServerPreview(previewResult);
+          fetchOsCatalog();
+          setStep(2);
+        },
+      });
+    } catch (err: unknown) {
+      message.error((err as any)?.response?.data?.error?.message || 'Import nhanh thất bại.');
+    } finally {
+      setServerLoading(false);
+    }
   };
 
   const handleServerPreview = async () => {
@@ -449,7 +442,7 @@ export default function ServerUploadPage() {
         {step === 0 && (
           <Space direction="vertical" style={{ width: '100%' }} size={16}>
             <Dragger
-              accept=".csv"
+              accept=".csv,.xls,.xlsx"
               maxCount={1}
               fileList={fileList}
               beforeUpload={() => false}
@@ -465,10 +458,10 @@ export default function ServerUploadPage() {
                 <InboxOutlined />
               </p>
               <p className="ant-upload-text">
-                Kéo thả hoặc chọn file CSV để tải lên
+                Kéo thả hoặc chọn file CSV / Excel để tải lên
               </p>
               <p className="ant-upload-hint">
-                Dòng đầu tiên phải là tiêu đề cột. Dung lượng tối đa: 20MB.
+                Hỗ trợ: .csv, .xls, .xlsx · Dòng đầu tiên phải là tiêu đề cột · Tối đa 20MB
               </p>
             </Dragger>
 

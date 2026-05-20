@@ -1,14 +1,87 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Tabs, Input, Select, Space, App, Popconfirm, Tag } from 'antd';
-import { PlusOutlined, SearchOutlined, EditOutlined, DeleteOutlined, EyeOutlined, UploadOutlined } from '@ant-design/icons';
+import { Button, Tabs, Input, Select, Space, App, Popconfirm, Tag, Drawer } from 'antd';
+import { PlusOutlined, SearchOutlined, EditOutlined, DeleteOutlined, EyeOutlined, UploadOutlined, TableOutlined, SnippetsOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import PageHeader from '../../components/common/PageHeader';
 import DataTable from '../../components/common/DataTable';
 import StatusBadge from '../../components/common/StatusBadge';
 import ServerForm from './components/ServerForm';
-import { useServerList, useDeleteServer } from '../../hooks/useServers';
+import EditableTable, { type EditableColumnDef } from '../../components/common/EditableTable';
+import PasteImportDrawer, { type PasteImportConfig } from '../../components/common/PasteImportDrawer';
+import { useServerList, useDeleteServer, useCreateServer } from '../../hooks/useServers';
 import type { Server, Environment } from '../../types/server';
+
+const SERVER_EDITABLE_COLUMNS: EditableColumnDef[] = [
+  { key: 'code', title: 'Mã server', type: 'text', required: true, placeholder: 'SRV-PROD-001', width: 140 },
+  { key: 'name', title: 'Tên server', type: 'text', required: true, placeholder: 'App Server 01', width: 160 },
+  { key: 'hostname', title: 'Hostname', type: 'text', required: true, placeholder: 'app-01.internal', width: 180 },
+  { key: 'environment', title: 'Môi trường', type: 'select', required: true, width: 110, options: [
+    { value: 'DEV', label: 'DEV' },
+    { value: 'UAT', label: 'UAT' },
+    { value: 'PROD', label: 'PROD' },
+  ]},
+  { key: 'status', title: 'Trạng thái', type: 'select', width: 120, options: [
+    { value: 'ACTIVE', label: 'Hoạt động' },
+    { value: 'INACTIVE', label: 'Không hoạt động' },
+    { value: 'MAINTENANCE', label: 'Bảo trì' },
+  ]},
+  { key: 'purpose', title: 'Mục đích', type: 'select', width: 140, options: [
+    { value: 'APP_SERVER', label: 'App Server' },
+    { value: 'DB_SERVER', label: 'DB Server' },
+    { value: 'PROXY', label: 'Proxy' },
+    { value: 'LOAD_BALANCER', label: 'Load Balancer' },
+    { value: 'CACHE', label: 'Cache' },
+    { value: 'MESSAGE_QUEUE', label: 'Message Queue' },
+    { value: 'OTHER', label: 'Khác' },
+  ]},
+  { key: 'infra_type', title: 'Loại HT', type: 'select', width: 140, options: [
+    { value: 'VIRTUAL_MACHINE', label: 'Virtual Machine' },
+    { value: 'PHYSICAL_SERVER', label: 'Physical Server' },
+    { value: 'CONTAINER', label: 'Container' },
+    { value: 'CLOUD_INSTANCE', label: 'Cloud Instance' },
+  ]},
+  { key: 'site', title: 'Site', type: 'select', width: 100, options: [
+    { value: 'DC', label: 'DC' },
+    { value: 'DR', label: 'DR' },
+    { value: 'TEST', label: 'TEST' },
+  ]},
+  { key: 'description', title: 'Mô tả', type: 'text', width: 200 },
+];
+
+const SERVER_PASTE_CONFIG: Omit<PasteImportConfig, 'onImport'> = {
+  title: 'Dán & Nhập Server',
+  editableColumns: SERVER_EDITABLE_COLUMNS,
+  targetFields: [
+    { key: 'code', label: 'Mã server', required: true, aliases: ['server_code', 'ma_server', 'ma'] },
+    { key: 'name', label: 'Tên server', required: true, aliases: ['ten_server', 'ten', 'server_name'] },
+    { key: 'hostname', label: 'Hostname', required: true, aliases: ['host', 'ip', 'host_name'] },
+    { key: 'environment', label: 'Môi trường', required: true, aliases: ['env', 'moi_truong'], options: [
+      { value: 'DEV', label: 'DEV' },
+      { value: 'UAT', label: 'UAT' },
+      { value: 'PROD', label: 'PROD' },
+    ], valueAliases: { dev: 'DEV', uat: 'UAT', prod: 'PROD', production: 'PROD', development: 'DEV' } },
+    { key: 'status', label: 'Trạng thái', aliases: ['trang_thai'], options: [
+      { value: 'ACTIVE', label: 'Hoạt động' },
+      { value: 'INACTIVE', label: 'Không hoạt động' },
+      { value: 'MAINTENANCE', label: 'Bảo trì' },
+    ], valueAliases: { active: 'ACTIVE', inactive: 'INACTIVE', maintenance: 'MAINTENANCE', 'hoat dong': 'ACTIVE' } },
+    { key: 'purpose', label: 'Mục đích', aliases: ['muc_dich', 'loai'], options: [
+      { value: 'APP_SERVER', label: 'App Server' }, { value: 'DB_SERVER', label: 'DB Server' },
+      { value: 'PROXY', label: 'Proxy' }, { value: 'LOAD_BALANCER', label: 'Load Balancer' },
+      { value: 'CACHE', label: 'Cache' }, { value: 'MESSAGE_QUEUE', label: 'Message Queue' },
+      { value: 'OTHER', label: 'Khác' },
+    ]},
+    { key: 'infra_type', label: 'Loại hạ tầng', aliases: ['loai_ha_tang', 'infra'], options: [
+      { value: 'VIRTUAL_MACHINE', label: 'Virtual Machine' }, { value: 'PHYSICAL_SERVER', label: 'Physical Server' },
+      { value: 'CONTAINER', label: 'Container' }, { value: 'CLOUD_INSTANCE', label: 'Cloud Instance' },
+    ], valueAliases: { vm: 'VIRTUAL_MACHINE', physical: 'PHYSICAL_SERVER', container: 'CONTAINER', cloud: 'CLOUD_INSTANCE' } },
+    { key: 'site', label: 'Site', options: [
+      { value: 'DC', label: 'DC' }, { value: 'DR', label: 'DR' }, { value: 'TEST', label: 'TEST' },
+    ]},
+    { key: 'description', label: 'Mô tả', aliases: ['mo_ta', 'desc', 'ghi_chu'] },
+  ],
+};
 
 const ENV_TABS: { key: Environment | 'ALL'; label: string }[] = [
   { key: 'ALL', label: 'Tất cả' },
@@ -46,6 +119,8 @@ export default function ServerListPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [editServer, setEditServer] = useState<Server | null>(null);
   const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
+  const [batchAddOpen, setBatchAddOpen] = useState(false);
+  const [pasteImportOpen, setPasteImportOpen] = useState(false);
 
   const params = {
     page,
@@ -55,8 +130,9 @@ export default function ServerListPage() {
     environment: envTab === 'ALL' ? undefined : envTab,
   };
 
-  const { data, isLoading } = useServerList(params);
+  const { data, isLoading, refetch } = useServerList(params);
   const deleteServer = useDeleteServer();
+  const createServer = useCreateServer();
 
   const handleDelete = async (id: string) => {
     try {
@@ -215,6 +291,12 @@ export default function ServerListPage() {
                 </Button>
               </Popconfirm>
             )}
+            <Button icon={<SnippetsOutlined />} onClick={() => setPasteImportOpen(true)}>
+              Dán & Nhập
+            </Button>
+            <Button icon={<TableOutlined />} onClick={() => setBatchAddOpen(true)}>
+              Nhập bảng
+            </Button>
             <Button icon={<UploadOutlined />} onClick={() => navigate('/infra-upload')}>
               Nhập CSV
             </Button>
@@ -272,6 +354,46 @@ export default function ServerListPage() {
 
       <ServerForm open={createOpen} onClose={() => setCreateOpen(false)} />
       <ServerForm open={!!editServer} onClose={() => setEditServer(null)} initial={editServer} />
+
+      <Drawer
+        title="Nhập server theo bảng"
+        open={batchAddOpen}
+        onClose={() => setBatchAddOpen(false)}
+        width="90%"
+        destroyOnClose
+      >
+        <EditableTable
+          columns={SERVER_EDITABLE_COLUMNS}
+          onSave={async (rows) => {
+            const results = await Promise.allSettled(
+              rows.map((r) => createServer.mutateAsync(r as Parameters<typeof createServer.mutateAsync>[0])),
+            );
+            const failed = results.filter((r) => r.status === 'rejected').length;
+            const succeeded = results.length - failed;
+            if (succeeded > 0) { message.success(`Đã tạo ${succeeded} server`); refetch(); }
+            if (failed > 0) message.error(`${failed} server không tạo được`);
+            if (failed === 0) setBatchAddOpen(false);
+          }}
+          saveLabel="Tạo tất cả server"
+        />
+      </Drawer>
+
+      <PasteImportDrawer
+        open={pasteImportOpen}
+        onClose={() => setPasteImportOpen(false)}
+        config={{
+          ...SERVER_PASTE_CONFIG,
+          onImport: async (rows) => {
+            const results = await Promise.allSettled(
+              rows.map((r) => createServer.mutateAsync(r as Parameters<typeof createServer.mutateAsync>[0])),
+            );
+            const failed = results.filter((r) => r.status === 'rejected').length;
+            if (failed > 0) throw new Error(`${failed} server không tạo được`);
+            refetch();
+          },
+        }}
+        onSuccess={() => refetch()}
+      />
     </App>
   );
 }

@@ -131,15 +131,15 @@ export default function ServerForm({ open, onClose, initial }: ServerFormProps) 
         <Row gutter={16}>
           <Col span={12}>
             <Form.Item name="purpose" label="Mục đích">
-              <Select>
-                <Option value="APP_SERVER">App Server</Option>
-                <Option value="DB_SERVER">DB Server</Option>
-                <Option value="PROXY">Proxy</Option>
-                <Option value="LOAD_BALANCER">Load Balancer</Option>
-                <Option value="CACHE">Cache</Option>
-                <Option value="MESSAGE_QUEUE">Message Queue</Option>
-                <Option value="OTHER">Khác</Option>
-              </Select>
+              <Select showSearch optionFilterProp="label" options={[
+                { value: 'APP_SERVER', label: 'App Server' },
+                { value: 'DB_SERVER', label: 'DB Server' },
+                { value: 'PROXY', label: 'Proxy' },
+                { value: 'LOAD_BALANCER', label: 'Load Balancer' },
+                { value: 'CACHE', label: 'Cache' },
+                { value: 'MESSAGE_QUEUE', label: 'Message Queue' },
+                { value: 'OTHER', label: 'Khác' },
+              ]} />
             </Form.Item>
           </Col>
           <Col span={12}>
@@ -158,6 +158,8 @@ export default function ServerForm({ open, onClose, initial }: ServerFormProps) 
           <Select
             placeholder="Chọn hệ thống (tùy chọn)"
             allowClear
+            showSearch
+            optionFilterProp="label"
             options={
               infraSystems?.items?.map((sys) => ({
                 label: `${sys.name} (${sys.code})`,

@@ -25,6 +25,7 @@ import {
 } from '@ant-design/icons';
 import Papa from 'papaparse';
 import apiClient from '../../api/client';
+import { parseSpreadsheet } from '../../utils/parseSpreadsheet';
 
 const { Dragger } = Upload;
 const { Text } = Typography;
@@ -67,6 +68,7 @@ export default function FirewallImportContent() {
   const { message, modal } = App.useApp();
   const [step, setStep] = useState(0);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [parsedRawRows, setParsedRawRows] = useState<Record<string, string>[]>([]);
   const [previewRows, setPreviewRows] = useState<PreviewRow[]>([]);
   const [result, setResult] = useState<ImportResult | null>(null);
   const [loading, setLoading] = useState(false);
@@ -75,51 +77,54 @@ export default function FirewallImportContent() {
   const handleReset = () => {
     setStep(0);
     setFileList([]);
+    setParsedRawRows([]);
     setPreviewRows([]);
     setResult(null);
     setLoading(false);
     setShowOnlyErrors(false);
   };
 
-  const parseAndPreview = () => {
+  const parseAndPreview = async () => {
     const file = fileList[0]?.originFileObj as File | undefined;
     if (!file) { message.error('Vui lòng chọn file.'); return; }
 
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: (results) => {
-        const rows = results.data as Record<string, any>[];
-        const parsed: PreviewRow[] = rows.map((r, idx) => {
-          const errors: string[] = [];
-          if (!r.name) errors.push('Thiếu name');
-          if (!r.environment) errors.push('Thiếu environment');
-          if (!r.server_code && !r.destination_server_id) errors.push('Thiếu server_code');
-          if (!r.port_number) errors.push('Thiếu port_number');
-          if (!r.action) errors.push('Thiếu action');
-          return {
-            row: idx + 2,
-            name: r.name ?? '',
-            environment: r.environment ?? '',
-            source_ip: r.source_ip ?? '',
-            server_code: r.server_code ?? r.destination_server_id ?? '',
-            port_number: r.port_number ?? '',
-            protocol: r.protocol ?? '',
-            action: r.action ?? '',
-            status: r.status ?? '',
-            valid: errors.length === 0,
-            error: errors.join('; ') || undefined,
-          };
-        });
-        setPreviewRows(parsed);
-        setStep(1);
-      },
+    let rows: Record<string, string>[];
+    try {
+      const result = await parseSpreadsheet(file);
+      rows = result.rows;
+    } catch (err) {
+      message.error((err as Error).message);
+      return;
+    }
+
+    setParsedRawRows(rows);
+    const parsed: PreviewRow[] = rows.map((r, idx) => {
+      const errors: string[] = [];
+      if (!r.name) errors.push('Thiếu name');
+      if (!r.environment) errors.push('Thiếu environment');
+      if (!r.server_code && !r.destination_server_id) errors.push('Thiếu server_code');
+      if (!r.port_number) errors.push('Thiếu port_number');
+      if (!r.action) errors.push('Thiếu action');
+      return {
+        row: idx + 2,
+        name: r.name ?? '',
+        environment: r.environment ?? '',
+        source_ip: r.source_ip ?? '',
+        server_code: r.server_code ?? r.destination_server_id ?? '',
+        port_number: r.port_number ?? '',
+        protocol: r.protocol ?? '',
+        action: r.action ?? '',
+        status: r.status ?? '',
+        valid: errors.length === 0,
+        error: errors.join('; ') || undefined,
+      };
     });
+    setPreviewRows(parsed);
+    setStep(1);
   };
 
   const handleImport = async () => {
-    const file = fileList[0]?.originFileObj as File | undefined;
-    if (!file) return;
+    if (!parsedRawRows.length) return;
 
     const validCount = previewRows.filter((r) => r.valid).length;
     const invalidCount = previewRows.filter((r) => !r.valid).length;
@@ -144,8 +149,9 @@ export default function FirewallImportContent() {
       onOk: async () => {
         setLoading(true);
         try {
+          const csvBlob = new Blob([Papa.unparse(parsedRawRows)], { type: 'text/csv' });
           const form = new FormData();
-          form.append('file', file);
+          form.append('file', new File([csvBlob], 'firewall.csv', { type: 'text/csv' }));
           const { data } = await apiClient.post('/firewall-rules/import', form, {
             headers: { 'Content-Type': 'multipart/form-data' },
           });
@@ -216,17 +222,17 @@ export default function FirewallImportContent() {
       {step === 0 && (
         <div>
           <Dragger
-            accept=".csv"
+            accept=".csv,.xls,.xlsx"
             maxCount={1}
             fileList={fileList}
             beforeUpload={() => false}
             onChange={({ fileList: list }) => setFileList(list)}
-            onRemove={() => setFileList([])}
+            onRemove={() => { setFileList([]); setParsedRawRows([]); setPreviewRows([]); }}
             style={{ marginBottom: 16 }}
           >
             <p className="ant-upload-drag-icon"><InboxOutlined /></p>
-            <p className="ant-upload-text">Kéo thả hoặc chọn file CSV để tải lên</p>
-            <p className="ant-upload-hint">Nhập Firewall Rules từ file CSV (UTF-8).</p>
+            <p className="ant-upload-text">Kéo thả hoặc chọn file CSV / Excel để tải lên</p>
+            <p className="ant-upload-hint">Nhập Firewall Rules từ CSV, XLS hoặc XLSX (UTF-8).</p>
           </Dragger>
 
           <Alert

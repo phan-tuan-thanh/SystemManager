@@ -30,6 +30,7 @@ import {
 } from '@ant-design/icons';
 import Papa from 'papaparse';
 import apiClient from '../../api/client';
+import { parseSpreadsheet } from '../../utils/parseSpreadsheet';
 
 const { Dragger } = Upload;
 const { Text, Title } = Typography;
@@ -82,26 +83,19 @@ interface FileEntry {
 
 type AggregateByType = Record<ImportType, { total: number; succeeded: number; failed: number; skipped: number }>;
 
-function reserializeCSV(file: File): Promise<File> {
-  return new Promise((resolve, reject) => {
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: (results) => {
-        const csv = Papa.unparse(results.data as object[]);
-        const blob = new Blob([csv], { type: 'text/csv' });
-        resolve(new File([blob], file.name, { type: 'text/csv' }));
-      },
-      error: (err) => reject(err),
-    });
-  });
+async function normalizeToCSV(file: File): Promise<File> {
+  const { rows } = await parseSpreadsheet(file);
+  const csv = Papa.unparse(rows);
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const baseName = file.name.replace(/\.(xls|xlsx)$/i, '.csv');
+  return new File([blob], baseName, { type: 'text/csv' });
 }
 
 async function importFile(entry: FileEntry): Promise<FileResult> {
   // Re-serialize through Papa to normalize quoting, BOM, and line endings
   // before sending to the backend. This prevents csv-parse from choking on
   // fields containing commas that are not wrapped in double quotes.
-  const cleanFile = await reserializeCSV(entry.file);
+  const cleanFile = await normalizeToCSV(entry.file);
 
   const form = new FormData();
   form.append('file', cleanFile);
@@ -449,7 +443,7 @@ export default function QuickImportContent() {
           />
 
           <Dragger
-            accept=".csv"
+            accept=".csv,.xls,.xlsx"
             multiple
             showUploadList={false}
             beforeUpload={(file) => {
@@ -459,8 +453,8 @@ export default function QuickImportContent() {
             style={{ marginBottom: 16 }}
           >
             <p className="ant-upload-drag-icon"><InboxOutlined /></p>
-            <p className="ant-upload-text">Kéo thả hoặc click để chọn nhiều file CSV</p>
-            <p className="ant-upload-hint">Hỗ trợ: Nhóm ứng dụng, Server, Network Zone, Zone IP, Firewall Rules</p>
+            <p className="ant-upload-text">Kéo thả hoặc click để chọn nhiều file CSV / Excel</p>
+            <p className="ant-upload-hint">Hỗ trợ .csv, .xls, .xlsx · Nhóm ứng dụng, Server, Network Zone, Zone IP, Firewall Rules</p>
           </Dragger>
 
           {entries.length > 0 && (
