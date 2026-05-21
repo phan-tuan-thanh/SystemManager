@@ -1,18 +1,20 @@
-import { Row, Col, Card, Statistic, Button, List, Tag, Skeleton, Progress } from 'antd';
+import { Row, Col, Card, Statistic, Button, Tag, Skeleton, Progress, Space, List } from 'antd';
 import {
   CloudServerOutlined,
   AppstoreOutlined,
   DeploymentUnitOutlined,
   ApiOutlined,
   ClusterOutlined,
-  RightOutlined,
-  ShareAltOutlined,
   AuditOutlined,
   SettingOutlined,
   WarningOutlined,
   HistoryOutlined,
+  PlusOutlined,
+  NodeIndexOutlined,
+  ImportOutlined,
+  DiffOutlined,
 } from '@ant-design/icons';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import apiClient from '../../api/client';
 import type { ApiResponse } from '../../types/auth';
@@ -55,17 +57,17 @@ const STATUS_COLORS: Record<string, string> = {
   FAILED: '#ff4d4f',
 };
 
-const quickLinks = [
-  { label: 'Hệ thống', path: '/infra-systems', icon: <ClusterOutlined />, desc: 'Quản lý hệ thống hạ tầng' },
-  { label: 'Servers', path: '/servers', icon: <CloudServerOutlined />, desc: 'Quản lý server' },
-  { label: 'Ứng dụng', path: '/applications', icon: <AppstoreOutlined />, desc: 'Quản lý ứng dụng' },
-  { label: 'Deployments', path: '/deployments', icon: <DeploymentUnitOutlined />, desc: 'Quản lý triển khai' },
-  { label: 'Topology', path: '/topology', icon: <ShareAltOutlined />, desc: 'Sơ đồ kết nối hệ thống' },
-  { label: 'Audit Log', path: '/audit-logs', icon: <AuditOutlined />, desc: 'Nhật ký hoạt động' },
-  { label: 'Quản trị', path: '/admin/modules', icon: <SettingOutlined />, desc: 'Cấu hình modules, users' },
+const quickActions = [
+  { label: 'Thêm Server', path: '/servers', icon: <PlusOutlined />, type: 'primary' as const },
+  { label: 'Tạo Deployment', path: '/deployments', icon: <PlusOutlined />, type: 'default' as const },
+  { label: 'PROD Topology', path: '/topology?env=PROD', icon: <NodeIndexOutlined />, type: 'default' as const },
+  { label: 'Import CSV', path: '/infra-import', icon: <ImportOutlined />, type: 'default' as const },
+  { label: 'Tạo ChangeSet', path: '/changesets', icon: <DiffOutlined />, type: 'default' as const },
+  { label: 'Audit Log', path: '/audit-logs', icon: <AuditOutlined />, type: 'default' as const },
 ];
 
 export default function DashboardPage() {
+  const navigate = useNavigate();
   const { data: status, isLoading } = useQuery<SystemStatus>({
     queryKey: ['system-status'],
     queryFn: async () => {
@@ -232,29 +234,22 @@ export default function DashboardPage() {
           </Card>
         </Col>
 
-        {/* Quick Links */}
+        {/* Quick Actions */}
         <Col xs={24} md={8}>
-          <Card title="Truy cập nhanh" size="small">
-            <List
-              size="small"
-              dataSource={quickLinks}
-              renderItem={(item) => (
-                <List.Item
-                  style={{ padding: '8px 0' }}
-                  actions={[
-                    <Link to={item.path} key="go">
-                      <Button type="link" size="small" icon={<RightOutlined />} />
-                    </Link>,
-                  ]}
+          <Card title="Thao tác nhanh" size="small">
+            <Space direction="vertical" style={{ width: '100%' }} size={8}>
+              {quickActions.map((action) => (
+                <Button
+                  key={action.path}
+                  type={action.type}
+                  block
+                  icon={action.icon}
+                  onClick={() => navigate(action.path)}
                 >
-                  <List.Item.Meta
-                    avatar={<span style={{ fontSize: 16, color: '#1677ff' }}>{item.icon}</span>}
-                    title={<Link to={item.path} style={{ fontSize: 13 }}>{item.label}</Link>}
-                    description={<span style={{ fontSize: 12 }}>{item.desc}</span>}
-                  />
-                </List.Item>
-              )}
-            />
+                  {action.label}
+                </Button>
+              ))}
+            </Space>
           </Card>
         </Col>
       </Row>
@@ -265,7 +260,7 @@ export default function DashboardPage() {
           <Card
             title={<span><WarningOutlined style={{ color: '#faad14', marginRight: 8 }} />System Alerts</span>}
             size="small"
-            extra={<Link to="/system-software" style={{ fontSize: 12 }}>View all</Link>}
+            extra={<Link to="/applications?tab=infra" style={{ fontSize: 12 }}>View all</Link>}
           >
             <AlertPanel />
           </Card>
