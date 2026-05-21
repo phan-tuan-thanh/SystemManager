@@ -1,0 +1,11 @@
+zone_code,environment,ip_address,label,is_range,description
+DMZ_PROD,PROD,192.168.10.10,web-srv-01,false,Web Server 01
+DMZ_PROD,PROD,192.168.10.20,proxy-lb-01,false,Proxy / Load Balancer
+DMZ_PROD,PROD,192.168.10.0/24,,true,Toàn bộ dải mạng DMZ Production
+LOCAL_PROD,PROD,10.10.0.10,app-srv-01,false,App Server 01
+LOCAL_PROD,PROD,10.10.0.20,app-srv-02,false,App Server 02
+LOCAL_PROD,PROD,10.10.0.0/24,,true,Dải mạng LAN Production
+DB_PROD,PROD,10.20.0.10,db-srv-01,false,DB Server 01
+DB_PROD,PROD,10.20.0.20,db-dr-01,false,DB Server DR
+LOCAL_UAT,UAT,10.0.10.10,app-uat-01,false,App Server UAT
+LOCAL_DEV,DEV,172.16.0.10,dev-srv-01,false,Dev Server 01

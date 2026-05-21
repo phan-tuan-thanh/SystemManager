@@ -1,0 +1,11 @@
+code,name,group_code,version,owner_team,application_type,description
+CORE_FE,Core Banking Frontend,CORE_BANKING_GRP,3.2.1,Team Core,BUSINESS,Giao diện web Core Banking
+CORE_API,Core Banking API,CORE_BANKING_GRP,3.2.1,Team Core,BUSINESS,API backend Core Banking
+CORE_BATCH,Core Banking Batch,CORE_BANKING_GRP,3.2.1,Team Core,BUSINESS,Xử lý batch cuối ngày
+IBANK_WEB,Internet Banking Web,INTERNET_BANKING_GRP,2.5.0,Team E-Banking,BUSINESS,Cổng Internet Banking khách hàng
+IBANK_API,Internet Banking API,INTERNET_BANKING_GRP,2.5.0,Team E-Banking,BUSINESS,API cho Internet Banking
+MOBILE_IOS,Mobile Banking iOS,MOBILE_BANKING_GRP,1.8.3,Team Mobile,BUSINESS,Ứng dụng iOS Mobile Banking
+MOBILE_ANDROID,Mobile Banking Android,MOBILE_BANKING_GRP,1.8.3,Team Mobile,BUSINESS,Ứng dụng Android Mobile Banking
+PAYMENT_GW,Payment Gateway,PAYMENT_GRP,4.1.0,Team Payment,BUSINESS,Cổng thanh toán trung tâm
+PROMETHEUS,Prometheus Monitoring,MONITORING_GRP,2.45.0,Ops Team,SYSTEM,Hệ thống giám sát Prometheus
+GRAFANA,Grafana Dashboard,MONITORING_GRP,10.2.0,Ops Team,SYSTEM,Dashboard giám sát Grafana

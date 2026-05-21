@@ -26,6 +26,7 @@ import {
 import Papa from 'papaparse';
 import apiClient from '../../api/client';
 import { parseSpreadsheet } from '../../utils/parseSpreadsheet';
+import TemplateDownloadBar from '../../components/common/TemplateDownloadBar';
 
 const { Dragger } = Upload;
 const { Text } = Typography;
@@ -235,10 +236,15 @@ export default function FirewallImportContent() {
             <p className="ant-upload-hint">Nhập Firewall Rules từ CSV, XLS hoặc XLSX (UTF-8).</p>
           </Dragger>
 
+          <TemplateDownloadBar
+            templates={[{ label: 'firewall_rules_template.csv', filename: 'firewall_rules_template.csv' }]}
+            message="Tải file mẫu — điền dữ liệu rồi upload"
+          />
+
           <Alert
             type="info"
             showIcon
-            style={{ marginBottom: 16 }}
+            style={{ marginTop: 12, marginBottom: 16 }}
             message="Cấu trúc CSV Firewall Rules"
             description={
               <Space wrap>

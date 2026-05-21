@@ -184,6 +184,7 @@ const TAB_ITEMS = [
         type="network_zone"
         title="Phân vùng mạng (Network Zone)"
         targetFields={NETWORK_ZONE_FIELDS}
+        templateFilename="network_zone_template.csv"
       />
     ),
   },
@@ -199,6 +200,7 @@ const TAB_ITEMS = [
         type="zone_ip"
         title="Zone IPs (Zone IP Entries)"
         targetFields={ZONE_IP_FIELDS}
+        templateFilename="zone_ip_template.csv"
       />
     ),
   },
@@ -214,6 +216,7 @@ const TAB_ITEMS = [
         type="app_group"
         title="Nhóm ứng dụng (App Group)"
         targetFields={APP_GROUP_FIELDS}
+        templateFilename="app_group_template.csv"
       />
     ),
   },

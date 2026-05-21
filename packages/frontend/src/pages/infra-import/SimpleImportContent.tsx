@@ -27,6 +27,7 @@ import {
 import Papa from 'papaparse';
 import apiClient from '../../api/client';
 import { parseSpreadsheet } from '../../utils/parseSpreadsheet';
+import TemplateDownloadBar from '../../components/common/TemplateDownloadBar';
 import ColumnMapper, {
   autoDetect,
   applyAllMappings,
@@ -64,13 +65,14 @@ export interface SimpleImportContentProps {
   type: 'network_zone' | 'zone_ip' | 'app_group';
   title: string;
   targetFields: TargetField[];
-  templateLink?: string;
+  templateFilename?: string;
 }
 
 export default function SimpleImportContent({
   type,
   title,
   targetFields,
+  templateFilename,
 }: SimpleImportContentProps) {
   const { message, modal } = App.useApp();
   const [step, setStep] = useState(0);
@@ -334,6 +336,13 @@ export default function SimpleImportContent({
               Nhập {title} từ CSV, XLS hoặc XLSX · Dòng đầu là tiêu đề cột · UTF-8
             </p>
           </Dragger>
+
+          {templateFilename && (
+            <TemplateDownloadBar
+              templates={[{ label: templateFilename, filename: templateFilename }]}
+              message="Tải file mẫu — điền dữ liệu rồi upload"
+            />
+          )}
 
           <Alert
             type="info"

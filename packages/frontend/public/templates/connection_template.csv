@@ -1,0 +1,11 @@
+source_app,target_app,environment,connection_type,target_port,description
+CORE_FE,CORE_API,PROD,HTTPS,8443,Frontend gọi API backend Core Banking
+IBANK_WEB,IBANK_API,PROD,HTTPS,8081,Internet Banking web gọi API
+IBANK_API,CORE_API,PROD,HTTPS,8443,Internet Banking API tích hợp Core
+IBANK_API,PAYMENT_GW,PROD,HTTPS,8445,Internet Banking gọi Payment Gateway
+MOBILE_IOS,IBANK_API,PROD,HTTPS,8081,Mobile iOS gọi API Internet Banking
+MOBILE_ANDROID,IBANK_API,PROD,HTTPS,8081,Mobile Android gọi API Internet Banking
+CORE_API,PAYMENT_GW,PROD,HTTPS,8445,Core Banking gọi Payment Gateway
+CORE_FE,CORE_API,UAT,HTTP,8080,Frontend UAT gọi API
+IBANK_WEB,IBANK_API,UAT,HTTP,8081,Internet Banking UAT
+PROMETHEUS,GRAFANA,DEV,HTTP,3000,Prometheus đẩy metrics vào Grafana
