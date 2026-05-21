@@ -12,12 +12,12 @@ import {
   ApiOutlined,
   ClusterOutlined,
   DatabaseOutlined,
-  CodeOutlined,
   DiffOutlined,
   QuestionCircleOutlined,
-  UploadOutlined,
   SafetyCertificateOutlined,
   GlobalOutlined,
+  NodeIndexOutlined,
+  ImportOutlined,
 } from '@ant-design/icons';
 
 const { Sider } = Layout;
@@ -32,20 +32,17 @@ const menuItems = [
     icon: <DashboardOutlined />,
     label: 'Dashboard',
   },
-  {
-    type: 'divider' as const,
-  },
+  { type: 'divider' as const },
   {
     key: 'infra-group',
     icon: <DatabaseOutlined />,
     label: 'Hạ tầng (Infrastructure)',
     children: [
-      { key: '/infra-systems', icon: <ClusterOutlined />, label: 'Infra Systems' },
+      { key: '/infra-systems', icon: <ClusterOutlined />, label: 'Hệ thống' },
       { key: '/servers', icon: <CloudServerOutlined />, label: 'Servers' },
-      { key: '/networks', icon: <ApartmentOutlined />, label: 'Network Configs' },
-      { key: '/network-zones', icon: <GlobalOutlined />, label: 'Network Zones' },
+      { key: '/networks', icon: <ApartmentOutlined />, label: 'Cấu hình mạng' },
+      { key: '/network-zones', icon: <GlobalOutlined />, label: 'Vùng mạng' },
       { key: '/firewall-rules', icon: <SafetyCertificateOutlined />, label: 'Firewall Rules' },
-      { key: '/infra-import', icon: <UploadOutlined />, label: 'Nhập CSV' },
     ],
   },
   {
@@ -54,25 +51,34 @@ const menuItems = [
     label: 'Ứng dụng (Applications)',
     children: [
       { key: '/applications', icon: <AppstoreOutlined />, label: 'Applications' },
-      { key: '/applications?tab=infra', icon: <CodeOutlined />, label: 'Infra Software' },
       { key: '/deployments', icon: <DeploymentUnitOutlined />, label: 'Deployments' },
       { key: '/connections', icon: <ApiOutlined />, label: 'Connections' },
-      { key: '/app-import', icon: <UploadOutlined />, label: 'Nhập CSV' },
     ],
   },
   {
-    key: 'monitor-group',
-    icon: <ShareAltOutlined />,
-    label: 'Giám sát (Monitoring)',
+    key: 'topology-group',
+    icon: <NodeIndexOutlined />,
+    label: 'Topology & ChangeSet',
     children: [
       { key: '/topology', icon: <ShareAltOutlined />, label: 'Topology 2D' },
       { key: '/changesets', icon: <DiffOutlined />, label: 'ChangeSets' },
-      { key: '/audit-logs', icon: <AuditOutlined />, label: 'Audit Log' },
     ],
   },
   {
-    type: 'divider' as const,
+    key: '/audit-logs',
+    icon: <AuditOutlined />,
+    label: 'Audit Log',
   },
+  {
+    key: 'import-group',
+    icon: <ImportOutlined />,
+    label: 'Import dữ liệu',
+    children: [
+      { key: '/infra-import', icon: <CloudServerOutlined />, label: 'Hạ tầng & Mạng' },
+      { key: '/app-import', icon: <AppstoreOutlined />, label: 'Ứng dụng' },
+    ],
+  },
+  { type: 'divider' as const },
   {
     key: 'admin-group',
     icon: <SettingOutlined />,
@@ -85,13 +91,11 @@ const menuItems = [
       { key: '/admin/doc-types', label: 'Doc Types' },
     ],
   },
-  {
-    type: 'divider' as const,
-  },
+  { type: 'divider' as const },
   {
     key: '/guide',
     icon: <QuestionCircleOutlined />,
-    label: 'Hướng dẫn (Guide)',
+    label: 'Hướng dẫn',
   },
 ];
 
@@ -103,9 +107,10 @@ export default function Sidebar({ collapsed }: SidebarProps) {
   const openKeys = (() => {
     const path = location.pathname;
     const keys: string[] = [];
-    if (['/infra-systems', '/servers', '/networks', '/network-zones', '/firewall-rules', '/infra-import', '/infra-upload'].some((p) => path.startsWith(p))) keys.push('infra-group');
-    if (['/applications', '/deployments', '/connections', '/app-upload', '/deployment-upload', '/connection-upload', '/app-import'].some((p) => path.startsWith(p))) keys.push('app-group');
-    if (['/topology', '/changesets', '/audit-logs'].some((p) => path.startsWith(p))) keys.push('monitor-group');
+    if (['/infra-systems', '/servers', '/networks', '/network-zones', '/firewall-rules'].some((p) => path.startsWith(p))) keys.push('infra-group');
+    if (['/applications', '/deployments', '/connections'].some((p) => path.startsWith(p))) keys.push('app-group');
+    if (['/topology', '/changesets'].some((p) => path.startsWith(p))) keys.push('topology-group');
+    if (['/infra-import', '/infra-upload', '/app-import', '/app-upload', '/deployment-upload', '/connection-upload'].some((p) => path.startsWith(p))) keys.push('import-group');
     if (path.startsWith('/admin')) keys.push('admin-group');
     return keys;
   })();
