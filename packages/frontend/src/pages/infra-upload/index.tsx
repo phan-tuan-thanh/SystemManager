@@ -33,6 +33,7 @@ import {
 import Papa from 'papaparse';
 import apiClient from '../../api/client';
 import { parseSpreadsheet } from '../../utils/parseSpreadsheet';
+import TemplateDownloadBar from '../../components/common/TemplateDownloadBar';
 import ColumnMapper, {
   autoDetect,
   applyAllMappings,
@@ -465,13 +466,18 @@ export default function ServerUploadPage() {
               </p>
             </Dragger>
 
+            <TemplateDownloadBar
+              templates={[{ label: 'server_template.csv', filename: 'server_template.csv' }]}
+              message="Tải file mẫu — điền dữ liệu rồi upload"
+            />
+
             <Alert
               type="info"
               showIcon
               message="Cột bắt buộc cho Server"
               description={
                 <span>
-                  Bắt buộc: <b>IP</b> và <b>Tên Server</b>. Tùy chọn: hostname, hệ điều hành (OS), CPU cores, RAM (GB), storage (GB), environment, site, system, purpose.
+                  Bắt buộc: <b>IP</b> và <b>Tên Server</b>. Tùy chọn: hostname, hệ điều hành (OS), CPU cores, RAM (GB), storage (GB), environment, site, system, purpose, infra_type.
                   Dữ liệu được <b>Upsert</b> theo mã Server hoặc IP Address.
                 </span>
               }

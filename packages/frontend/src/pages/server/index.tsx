@@ -8,23 +8,23 @@ import DataTable from '../../components/common/DataTable';
 import StatusBadge from '../../components/common/StatusBadge';
 import ServerForm from './components/ServerForm';
 import EditableTable, { type EditableColumnDef } from '../../components/common/EditableTable';
-import PasteImportDrawer, { type PasteImportConfig } from '../../components/common/PasteImportDrawer';
+import ServerPasteImportDrawer from './components/ServerPasteImportDrawer';
 import { useServerList, useDeleteServer, useCreateServer } from '../../hooks/useServers';
 import type { Server, Environment } from '../../types/server';
 
 const SERVER_EDITABLE_COLUMNS: EditableColumnDef[] = [
   { key: 'code', title: 'Mã server', type: 'text', required: true, placeholder: 'SRV-PROD-001', width: 140 },
   { key: 'name', title: 'Tên server', type: 'text', required: true, placeholder: 'App Server 01', width: 160 },
-  { key: 'hostname', title: 'Hostname', type: 'text', required: true, placeholder: 'app-01.internal', width: 180 },
-  { key: 'environment', title: 'Môi trường', type: 'select', required: true, width: 110, options: [
+  { key: 'hostname', title: 'Hostname', type: 'text', required: true, placeholder: 'app-01.internal', width: 160 },
+  { key: 'environment', title: 'Môi trường', type: 'select', required: true, width: 100, options: [
     { value: 'DEV', label: 'DEV' },
     { value: 'UAT', label: 'UAT' },
     { value: 'PROD', label: 'PROD' },
   ]},
-  { key: 'status', title: 'Trạng thái', type: 'select', width: 120, options: [
-    { value: 'ACTIVE', label: 'Hoạt động' },
-    { value: 'INACTIVE', label: 'Không hoạt động' },
-    { value: 'MAINTENANCE', label: 'Bảo trì' },
+  { key: 'site', title: 'Site', type: 'select', width: 90, options: [
+    { value: 'DC', label: 'DC' },
+    { value: 'DR', label: 'DR' },
+    { value: 'TEST', label: 'TEST' },
   ]},
   { key: 'purpose', title: 'Mục đích', type: 'select', width: 140, options: [
     { value: 'APP_SERVER', label: 'App Server' },
@@ -35,53 +35,20 @@ const SERVER_EDITABLE_COLUMNS: EditableColumnDef[] = [
     { value: 'MESSAGE_QUEUE', label: 'Message Queue' },
     { value: 'OTHER', label: 'Khác' },
   ]},
-  { key: 'infra_type', title: 'Loại HT', type: 'select', width: 140, options: [
+  { key: 'infra_type', title: 'Loại hạ tầng', type: 'select', width: 150, options: [
     { value: 'VIRTUAL_MACHINE', label: 'Virtual Machine' },
     { value: 'PHYSICAL_SERVER', label: 'Physical Server' },
     { value: 'CONTAINER', label: 'Container' },
     { value: 'CLOUD_INSTANCE', label: 'Cloud Instance' },
   ]},
-  { key: 'site', title: 'Site', type: 'select', width: 100, options: [
-    { value: 'DC', label: 'DC' },
-    { value: 'DR', label: 'DR' },
-    { value: 'TEST', label: 'TEST' },
+  { key: 'status', title: 'Trạng thái', type: 'select', width: 130, options: [
+    { value: 'ACTIVE', label: 'Hoạt động' },
+    { value: 'INACTIVE', label: 'Không hoạt động' },
+    { value: 'MAINTENANCE', label: 'Bảo trì' },
   ]},
   { key: 'description', title: 'Mô tả', type: 'text', width: 200 },
 ];
 
-const SERVER_PASTE_CONFIG: Omit<PasteImportConfig, 'onImport'> = {
-  title: 'Dán & Nhập Server',
-  editableColumns: SERVER_EDITABLE_COLUMNS,
-  targetFields: [
-    { key: 'code', label: 'Mã server', required: true, aliases: ['server_code', 'ma_server', 'ma'] },
-    { key: 'name', label: 'Tên server', required: true, aliases: ['ten_server', 'ten', 'server_name'] },
-    { key: 'hostname', label: 'Hostname', required: true, aliases: ['host', 'ip', 'host_name'] },
-    { key: 'environment', label: 'Môi trường', required: true, aliases: ['env', 'moi_truong'], options: [
-      { value: 'DEV', label: 'DEV' },
-      { value: 'UAT', label: 'UAT' },
-      { value: 'PROD', label: 'PROD' },
-    ], valueAliases: { dev: 'DEV', uat: 'UAT', prod: 'PROD', production: 'PROD', development: 'DEV' } },
-    { key: 'status', label: 'Trạng thái', aliases: ['trang_thai'], options: [
-      { value: 'ACTIVE', label: 'Hoạt động' },
-      { value: 'INACTIVE', label: 'Không hoạt động' },
-      { value: 'MAINTENANCE', label: 'Bảo trì' },
-    ], valueAliases: { active: 'ACTIVE', inactive: 'INACTIVE', maintenance: 'MAINTENANCE', 'hoat dong': 'ACTIVE' } },
-    { key: 'purpose', label: 'Mục đích', aliases: ['muc_dich', 'loai'], options: [
-      { value: 'APP_SERVER', label: 'App Server' }, { value: 'DB_SERVER', label: 'DB Server' },
-      { value: 'PROXY', label: 'Proxy' }, { value: 'LOAD_BALANCER', label: 'Load Balancer' },
-      { value: 'CACHE', label: 'Cache' }, { value: 'MESSAGE_QUEUE', label: 'Message Queue' },
-      { value: 'OTHER', label: 'Khác' },
-    ]},
-    { key: 'infra_type', label: 'Loại hạ tầng', aliases: ['loai_ha_tang', 'infra'], options: [
-      { value: 'VIRTUAL_MACHINE', label: 'Virtual Machine' }, { value: 'PHYSICAL_SERVER', label: 'Physical Server' },
-      { value: 'CONTAINER', label: 'Container' }, { value: 'CLOUD_INSTANCE', label: 'Cloud Instance' },
-    ], valueAliases: { vm: 'VIRTUAL_MACHINE', physical: 'PHYSICAL_SERVER', container: 'CONTAINER', cloud: 'CLOUD_INSTANCE' } },
-    { key: 'site', label: 'Site', options: [
-      { value: 'DC', label: 'DC' }, { value: 'DR', label: 'DR' }, { value: 'TEST', label: 'TEST' },
-    ]},
-    { key: 'description', label: 'Mô tả', aliases: ['mo_ta', 'desc', 'ghi_chu'] },
-  ],
-};
 
 const ENV_TABS: { key: Environment | 'ALL'; label: string }[] = [
   { key: 'ALL', label: 'Tất cả' },
@@ -378,20 +345,9 @@ export default function ServerListPage() {
         />
       </Drawer>
 
-      <PasteImportDrawer
+      <ServerPasteImportDrawer
         open={pasteImportOpen}
         onClose={() => setPasteImportOpen(false)}
-        config={{
-          ...SERVER_PASTE_CONFIG,
-          onImport: async (rows) => {
-            const results = await Promise.allSettled(
-              rows.map((r) => createServer.mutateAsync(r as Parameters<typeof createServer.mutateAsync>[0])),
-            );
-            const failed = results.filter((r) => r.status === 'rejected').length;
-            if (failed > 0) throw new Error(`${failed} server không tạo được`);
-            refetch();
-          },
-        }}
         onSuccess={() => refetch()}
       />
     </App>

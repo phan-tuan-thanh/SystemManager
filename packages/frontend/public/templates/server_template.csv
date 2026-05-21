@@ -1,0 +1,11 @@
+ip,name,hostname,code,system,system_name,description,environment,site,os,cpu,ram,total_storage_gb,purpose,status,infra_type
+192.168.10.10,Web Server 01,web-srv-01,SRV_WEB_01,CORE_BANKING,Hệ thống Core Banking,Máy chủ ứng dụng web chính,PROD,DC,Ubuntu 22.04 LTS,8,32,500,APP_SERVER,ACTIVE,VIRTUAL_MACHINE
+192.168.10.20,DB Server 01,db-srv-01,SRV_DB_01,CORE_BANKING,Hệ thống Core Banking,Máy chủ cơ sở dữ liệu Oracle RAC,PROD,DC,Oracle Linux 8,16,128,4000,DB_SERVER,ACTIVE,PHYSICAL_SERVER
+192.168.10.30,DB Server DR,db-dr-01,SRV_DB_DR_01,CORE_BANKING,Hệ thống Core Banking,Máy chủ DB Disaster Recovery,PROD,DR,Oracle Linux 8,16,128,4000,DB_SERVER,ACTIVE,PHYSICAL_SERVER
+192.168.10.40,Proxy / Load Balancer,proxy-lb-01,SRV_PROXY_01,INTERNET_GW,Internet Gateway,Máy chủ proxy và cân bằng tải,PROD,DC,Ubuntu 22.04 LTS,4,16,200,PROXY,ACTIVE,VIRTUAL_MACHINE
+192.168.10.50,Message Queue 01,mq-srv-01,SRV_MQ_01,MSG_BROKER,Message Broker,Máy chủ RabbitMQ,PROD,DC,Ubuntu 20.04 LTS,4,16,500,MESSAGE_QUEUE,ACTIVE,VIRTUAL_MACHINE
+192.168.10.60,Cache Server 01,cache-srv-01,SRV_CACHE_01,INTERNET_GW,Internet Gateway,Máy chủ Redis Cache,PROD,DC,Ubuntu 22.04 LTS,2,8,100,CACHE,ACTIVE,VIRTUAL_MACHINE
+10.0.10.10,App Server UAT,app-uat-01,SRV_APP_UAT_01,CORE_BANKING,Hệ thống Core Banking,Máy chủ UAT,UAT,TEST,Windows Server 2019,4,16,300,APP_SERVER,ACTIVE,VIRTUAL_MACHINE
+10.0.10.20,DB Server UAT,db-uat-01,SRV_DB_UAT_01,CORE_BANKING,Hệ thống Core Banking,Máy chủ DB UAT,UAT,TEST,Oracle Linux 8,4,16,500,DB_SERVER,ACTIVE,VIRTUAL_MACHINE
+172.16.0.10,Dev Server 01,dev-srv-01,SRV_DEV_01,,,Máy chủ phát triển tổng hợp,DEV,TEST,Ubuntu 22.04 LTS,4,8,200,APP_SERVER,ACTIVE,VIRTUAL_MACHINE
+172.16.0.20,Cloud App Server,cloud-app-01,SRV_CLOUD_01,E_BANKING,Internet Banking,Máy chủ cloud application,PROD,DC,Ubuntu 22.04 LTS,8,32,1000,APP_SERVER,ACTIVE,CLOUD_INSTANCE

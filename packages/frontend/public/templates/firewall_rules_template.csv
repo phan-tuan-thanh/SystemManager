@@ -1,0 +1,8 @@
+name,environment,source_ip,server_code,port_number,protocol,action,status,source_zone_code,destination_zone_code,notes
+Allow HTTP from DMZ to App,PROD,192.168.10.0/24,SRV_WEB_01,80,TCP,ALLOW,ACTIVE,DMZ_PROD,LOCAL_PROD,Cho phép HTTP từ DMZ vào LAN
+Allow HTTPS from Internet to DMZ,PROD,,SRV_PROXY_01,443,TCP,ALLOW,ACTIVE,INTERNET_PROD,DMZ_PROD,Cho phép HTTPS từ Internet vào DMZ
+Allow DB from App to DB Zone,PROD,10.10.0.0/24,SRV_DB_01,1521,TCP,ALLOW,ACTIVE,LOCAL_PROD,DB_PROD,Cho phép kết nối Oracle DB từ App Zone
+Deny All from Internet to DB,PROD,,SRV_DB_01,1521,TCP,DENY,ACTIVE,INTERNET_PROD,DB_PROD,Chặn truy cập DB từ Internet
+Allow SSH Management,PROD,10.100.0.0/24,SRV_WEB_01,22,TCP,ALLOW,PENDING_APPROVAL,MGMT_PROD,LOCAL_PROD,SSH từ vùng quản trị
+Allow HTTP UAT,UAT,10.0.0.0/8,SRV_APP_UAT_01,80,TCP,ALLOW,ACTIVE,,,Cho phép HTTP trong môi trường UAT
+Allow ICMP Monitoring,PROD,10.100.0.10,SRV_WEB_01,0,ICMP,ALLOW,ACTIVE,MGMT_PROD,LOCAL_PROD,Ping kiểm tra từ hệ thống giám sát

@@ -1,0 +1,8 @@
+code,name,group_type,description
+CORE_BANKING_GRP,Nhóm Core Banking,BUSINESS,Các ứng dụng nghiệp vụ ngân hàng lõi
+INTERNET_BANKING_GRP,Nhóm Internet Banking,BUSINESS,Ứng dụng ngân hàng điện tử dành cho khách hàng
+MOBILE_BANKING_GRP,Nhóm Mobile Banking,BUSINESS,Ứng dụng ngân hàng di động
+PAYMENT_GRP,Nhóm Thanh toán,BUSINESS,Hệ thống xử lý thanh toán và giao dịch
+INFRA_GRP,Nhóm Hạ tầng,INFRASTRUCTURE,Phần mềm hạ tầng và vận hành
+SECURITY_GRP,Nhóm Bảo mật,INFRASTRUCTURE,Phần mềm bảo mật và kiểm soát truy cập
+MONITORING_GRP,Nhóm Giám sát,INFRASTRUCTURE,Hệ thống giám sát và cảnh báo

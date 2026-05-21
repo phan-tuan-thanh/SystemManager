@@ -1,0 +1,11 @@
+code,name,zone_type,environment,color,description
+DMZ_PROD,DMZ Production,DMZ,PROD,#fa8c16,Vùng DMZ môi trường Production
+LOCAL_PROD,LAN Production,LOCAL,PROD,#52c41a,Vùng mạng nội bộ Production
+DB_PROD,Database Zone Production,DB,PROD,#1677ff,Vùng mạng cơ sở dữ liệu Production
+MGMT_PROD,Management Zone Production,MANAGEMENT,PROD,#722ed1,Vùng quản trị hạ tầng Production
+INTERNET_PROD,Internet Zone,INTERNET,PROD,#ff4d4f,Vùng Internet kết nối bên ngoài
+LOCAL_UAT,LAN UAT,LOCAL,UAT,#73d13d,Vùng mạng nội bộ UAT
+DB_UAT,Database Zone UAT,DB,UAT,#4096ff,Vùng mạng cơ sở dữ liệu UAT
+LOCAL_DEV,LAN DEV,LOCAL,DEV,#95de64,Vùng mạng nội bộ Development
+BACKUP_PROD,Backup Zone,BACKUP,PROD,#8c8c8c,Vùng lưu trữ backup
+STORAGE_PROD,Storage Zone,STORAGE,PROD,#69b1ff,Vùng NAS/SAN lưu trữ

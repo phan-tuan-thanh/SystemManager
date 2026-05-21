@@ -30,6 +30,14 @@ import {
 } from '@ant-design/icons';
 import Papa from 'papaparse';
 import apiClient from '../../api/client';
+import TemplateDownloadBar from '../../components/common/TemplateDownloadBar';
+
+const APP_TEMPLATES = [
+  { label: 'Nhóm ứng dụng', filename: 'app_group_template.csv' },
+  { label: 'Ứng dụng (Application)', filename: 'application_template.csv' },
+  { label: 'Triển khai (Deployment)', filename: 'deployment_template.csv' },
+  { label: 'Kết nối (Connection)', filename: 'connection_template.csv' },
+];
 
 const { Dragger } = Upload;
 const { Text, Title } = Typography;
@@ -417,11 +425,16 @@ export default function AppQuickImportContent() {
       {/* ── Setup Phase ── */}
       {phase === 'setup' && (
         <>
+          <TemplateDownloadBar
+            templates={APP_TEMPLATES}
+            message="Tải file mẫu — điền dữ liệu rồi upload"
+          />
+
           <Alert
             type="info"
             showIcon
             icon={<ThunderboltOutlined />}
-            style={{ marginBottom: 16 }}
+            style={{ marginTop: 12, marginBottom: 16 }}
             message="Nhập nhanh nhiều file cùng lúc"
             description="Tải lên nhiều file CSV, chọn loại dữ liệu cho từng file, rồi bấm Bắt đầu nhập. Hệ thống tự động nhập theo thứ tự phụ thuộc: Nhóm ứng dụng → Ứng dụng → Triển khai → Kết nối."
           />
