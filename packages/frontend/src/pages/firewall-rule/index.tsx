@@ -234,6 +234,8 @@ export default function FirewallRulePage() {
           <Tag>
             {r.destination_port.port_number}/{r.destination_port.protocol}
           </Tag>
+        ) : r.destination_port_number ? (
+          <Tag color="default">{r.destination_port_number}</Tag>
         ) : (
           <span style={{ color: '#bfbfbf' }}>—</span>
         ),

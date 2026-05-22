@@ -1,6 +1,7 @@
 import {
-  IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength, IsIn, IsDateString, IsBoolean,
+  IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength, IsIn, IsDateString, IsBoolean, IsInt, Min, Max,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 const ENVIRONMENTS = ['DEV','UAT','PROD'] as const;
@@ -49,6 +50,14 @@ export class CreateFirewallRuleDto {
   @IsOptional()
   @IsUUID()
   destination_port_id?: string;
+
+  @ApiPropertyOptional({ example: 8080, description: 'Số port thủ công khi chưa có Port entity' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(65535)
+  destination_port_number?: number;
 
   @ApiPropertyOptional({ example: 'TCP', default: 'TCP' })
   @IsOptional()

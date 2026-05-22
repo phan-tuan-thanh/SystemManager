@@ -762,9 +762,10 @@ model FirewallRule {
   source_zone_id        String?            @db.Uuid
   source_ip             String?            @db.VarChar(50)
   destination_zone_id   String?            @db.Uuid
-  destination_server_id String             @db.Uuid
-  destination_port_id   String?            @db.Uuid
-  protocol              String             @default("TCP") @db.VarChar(10)
+  destination_server_id   String             @db.Uuid
+  destination_port_id     String?            @db.Uuid
+  destination_port_number Int?
+  protocol                String             @default("TCP") @db.VarChar(10)
   action                FirewallAction     @default(ALLOW)
   status                FirewallRuleStatus @default(PENDING_APPROVAL)
   request_date          DateTime?

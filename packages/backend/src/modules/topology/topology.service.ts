@@ -186,8 +186,6 @@ export class TopologyService {
         }
       }
 
-      if (targetApps.length === 0) continue;
-
       // Find source servers by IP or zone
       const sourceServers: typeof allServers = [];
 
@@ -218,8 +216,73 @@ export class TopologyService {
 
       if (sourceServers.length === 0) continue;
 
+      const targetPortInfo = rule.destination_port
+        ? {
+            id: rule.destination_port.id,
+            port_number: rule.destination_port.port_number,
+            protocol: rule.destination_port.protocol,
+            service_name: rule.destination_port.service_name ?? undefined,
+          }
+        : rule.destination_port_number
+        ? {
+            id: `manual-${rule.id}`,
+            port_number: rule.destination_port_number,
+            protocol: rule.protocol,
+            service_name: undefined,
+          }
+        : undefined;
+
+      // If destination server has no app deployments, emit server-to-server implied edges
+      if (targetApps.length === 0) {
+        for (const srcSrv of sourceServers) {
+          const srvPairKey = `${rule.action}::${srcSrv.id}::${rule.destination_server_id}`;
+          const seenSrv = rule.action === 'DENY' ? seenDeny : seenAllow;
+          if (seenSrv.has(srvPairKey)) continue;
+          seenSrv.add(srvPairKey);
+          implied.push({
+            id: `implied-${rule.action}-${rule.id}-srv-${srcSrv.id}`,
+            sourceAppId: '',
+            targetAppId: '',
+            sourceAppName: srcSrv.name,
+            targetAppName: rule.destination_server.name,
+            sourceServerId: srcSrv.id,
+            targetServerId: rule.destination_server_id,
+            environment,
+            firewallRuleId: rule.id,
+            firewallRuleName: rule.name,
+            action: rule.action,
+            targetPort: targetPortInfo,
+          });
+        }
+        continue;
+      }
+
       // Generate one implied edge per (sourceApp × targetApp) pair
       for (const srcSrv of sourceServers) {
+        // When source server itself has no app deployments, emit server-to-server edges per target app's server
+        if (srcSrv.app_deployments.length === 0) {
+          const srvPairKey = `${rule.action}::${srcSrv.id}::${rule.destination_server_id}`;
+          const seenSrv = rule.action === 'DENY' ? seenDeny : seenAllow;
+          if (!seenSrv.has(srvPairKey)) {
+            seenSrv.add(srvPairKey);
+            implied.push({
+              id: `implied-${rule.action}-${rule.id}-srv-${srcSrv.id}`,
+              sourceAppId: '',
+              targetAppId: targetApps[0].appId,
+              sourceAppName: srcSrv.name,
+              targetAppName: targetApps[0].appName,
+              sourceServerId: srcSrv.id,
+              targetServerId: rule.destination_server_id,
+              environment,
+              firewallRuleId: rule.id,
+              firewallRuleName: rule.name,
+              action: rule.action,
+              targetPort: targetPortInfo,
+            });
+          }
+          continue;
+        }
+
         for (const srcDep of srcSrv.app_deployments) {
           for (const tgt of targetApps) {
             const sourceAppId = srcDep.application_id;
@@ -247,14 +310,7 @@ export class TopologyService {
               firewallRuleId: rule.id,
               firewallRuleName: rule.name,
               action: rule.action,
-              targetPort: rule.destination_port
-                ? {
-                    id: rule.destination_port.id,
-                    port_number: rule.destination_port.port_number,
-                    protocol: rule.destination_port.protocol,
-                    service_name: rule.destination_port.service_name ?? undefined,
-                  }
-                : undefined,
+              targetPort: targetPortInfo,
             });
           }
         }
@@ -286,6 +342,7 @@ export class TopologyService {
       description: c.description ?? undefined,
       targetPort: c.target_port
         ? {
+            id: c.target_port.id,
             port_number: c.target_port.port_number,
             protocol: c.target_port.protocol,
             service_name: c.target_port.service_name ?? undefined,

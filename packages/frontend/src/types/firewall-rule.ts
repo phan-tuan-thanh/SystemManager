@@ -27,6 +27,7 @@ export interface FirewallRule {
   destination_zone_id?: string;
   destination_server_id: string;
   destination_port_id?: string;
+  destination_port_number?: number;
   protocol: string;
   action: FirewallAction;
   status: FirewallRuleStatus;

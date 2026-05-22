@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Button, Input, Select, Space, App, Popconfirm, Tag } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons';
+import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, SnippetsOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import DataTable from '../../../components/common/DataTable';
 import AppGroupModal from './AppGroupModal';
-import { useAppGroupList, useDeleteAppGroup } from '../../../hooks/useAppGroups';
+import PasteImportDrawer, { type PasteImportConfig } from '../../../components/common/PasteImportDrawer';
+import type { EditableColumnDef } from '../../../components/common/EditableTable';
+import { useAppGroupList, useDeleteAppGroup, useCreateAppGroup } from '../../../hooks/useAppGroups';
 import type { ApplicationGroup, GroupType } from '../../../types/application';
 
 export default function AppGroupList() {
@@ -16,13 +18,47 @@ export default function AppGroupList() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editGroup, setEditGroup] = useState<ApplicationGroup | null>(null);
   const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
+  const [pasteImportOpen, setPasteImportOpen] = useState(false);
 
-  const { data, isLoading } = useAppGroupList({
+  const { data, isLoading, refetch } = useAppGroupList({
     page, limit,
     search: search || undefined,
     group_type: groupTypeFilter,
   });
   const deleteGroup = useDeleteAppGroup();
+  const createGroup = useCreateAppGroup();
+
+  const groupEditableCols: EditableColumnDef[] = [
+    { key: 'code', title: 'Mã nhóm', type: 'text', required: true, placeholder: 'BANKING', width: 140 },
+    { key: 'name', title: 'Tên nhóm', type: 'text', required: true, width: 220 },
+    { key: 'group_type', title: 'Loại nhóm', type: 'select', required: true, width: 150, options: [
+      { value: 'BUSINESS', label: 'Nghiệp vụ' },
+      { value: 'INFRASTRUCTURE', label: 'Hạ tầng' },
+    ]},
+    { key: 'description', title: 'Mô tả', type: 'text', width: 260 },
+  ];
+
+  const groupPasteConfig: PasteImportConfig = {
+    title: 'Dán & Nhập Nhóm ứng dụng',
+    editableColumns: groupEditableCols,
+    targetFields: [
+      { key: 'code', label: 'Mã nhóm', required: true, aliases: ['ma', 'group_code', 'ma_nhom'] },
+      { key: 'name', label: 'Tên nhóm', required: true, aliases: ['ten', 'group_name', 'ten_nhom'] },
+      { key: 'group_type', label: 'Loại nhóm', required: true, aliases: ['loai', 'type', 'loai_nhom'], options: [
+        { value: 'BUSINESS', label: 'Nghiệp vụ' },
+        { value: 'INFRASTRUCTURE', label: 'Hạ tầng' },
+      ], valueAliases: { business: 'BUSINESS', nghiep_vu: 'BUSINESS', ha_tang: 'INFRASTRUCTURE', infrastructure: 'INFRASTRUCTURE', infra: 'INFRASTRUCTURE', system: 'INFRASTRUCTURE' } },
+      { key: 'description', label: 'Mô tả', aliases: ['mo_ta', 'desc'] },
+    ],
+    onImport: async (rows) => {
+      const results = await Promise.allSettled(
+        rows.map((r) => createGroup.mutateAsync(r as Partial<ApplicationGroup>)),
+      );
+      const failed = results.filter((r) => r.status === 'rejected').length;
+      if (failed > 0) throw new Error(`${failed} nhóm không tạo được`);
+      refetch();
+    },
+  };
 
   const handleDelete = async (id: string) => {
     try {
@@ -146,6 +182,7 @@ export default function AppGroupList() {
               </Button>
             </Popconfirm>
           )}
+          <Button icon={<SnippetsOutlined />} onClick={() => setPasteImportOpen(true)}>Dán & Nhập</Button>
           <Button
             type="primary"
             icon={<PlusOutlined />}
@@ -175,6 +212,13 @@ export default function AppGroupList() {
         open={modalOpen}
         group={editGroup}
         onClose={() => setModalOpen(false)}
+      />
+
+      <PasteImportDrawer
+        open={pasteImportOpen}
+        onClose={() => setPasteImportOpen(false)}
+        config={groupPasteConfig}
+        onSuccess={() => refetch()}
       />
     </>
   );
