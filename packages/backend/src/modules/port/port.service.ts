@@ -13,6 +13,7 @@ export class PortService {
 
     if (query.application_id) where.application_id = query.application_id;
     if (query.deployment_id) where.deployment_id = query.deployment_id;
+    if (query.server_id) where.deployment = { server_id: query.server_id, deleted_at: null };
     if (query.protocol) where.protocol = { contains: query.protocol, mode: 'insensitive' };
     if (query.port_number) where.port_number = query.port_number;
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
-  Form, Input, Select, Radio, Button, Space, DatePicker, Alert,
+  Form, Input, InputNumber, Select, Radio, Button, Space, DatePicker, Alert,
 } from 'antd';
 import dayjs from 'dayjs';
 import { useQuery } from '@tanstack/react-query';
@@ -36,6 +36,7 @@ export interface FirewallRuleFormValues {
   destination_zone_id?: string;
   destination_server_id: string;
   destination_port_id?: string;
+  destination_port_number?: number;
   protocol: string;
   action: FirewallAction;
   status: FirewallRuleStatus;
@@ -102,12 +103,23 @@ export default function FirewallRuleForm({
   useEffect(() => {
     if (initialValues) {
       form.setFieldsValue({
-        ...initialValues,
-        request_date: undefined,
+        name: initialValues.name,
+        description: initialValues.description,
+        environment: initialValues.environment,
+        source_zone_id: initialValues.source_zone_id,
+        source_ip: initialValues.source_ip,
+        destination_zone_id: initialValues.destination_zone_id,
+        destination_server_id: initialValues.destination_server_id,
+        destination_port_id: initialValues.destination_port_id,
+        destination_port_number: initialValues.destination_port_number,
+        protocol: initialValues.protocol,
+        action: initialValues.action,
+        status: initialValues.status,
+        approved_by: initialValues.approved_by,
+        notes: initialValues.notes,
+        never_expires: initialValues.never_expires,
+        request_date: initialValues.request_date ? dayjs(initialValues.request_date) : undefined,
       });
-      if (initialValues.request_date) {
-        form.setFieldValue('request_date', initialValues.request_date);
-      }
       // Restore expiry mode from saved data
       if (initialValues.never_expires || !initialValues.expires_at) {
         setExpiryMode('never');
@@ -146,13 +158,13 @@ export default function FirewallRuleForm({
     enabled: true,
   });
 
-  // ─── Ports for selected server ──────────────────────────────────────────────
+  // ─── Ports for selected server (filtered by server_id via deployment) ────────
 
   const { data: portsData, isLoading: portsLoading } = useQuery<PortOption[]>({
     queryKey: ['ports-dropdown', destServerId],
     queryFn: async () => {
       const { data } = await apiClient.get<ApiResponse<PortOption[]>>('/ports', {
-        params: { limit: 500 },
+        params: { server_id: destServerId, limit: 500 },
       });
       return data.data;
     },
@@ -162,7 +174,6 @@ export default function FirewallRuleForm({
   // ─── Submit ─────────────────────────────────────────────────────────────────
 
   const handleFinish = async (values: FirewallRuleFormValues) => {
-    // DatePicker returns dayjs object — convert to ISO string if present
     let expiresAt: string | null = null;
     let neverExpires = true;
 
@@ -175,8 +186,14 @@ export default function FirewallRuleForm({
       neverExpires = false;
     }
 
+    // Mutual exclusivity: if both port fields set, prefer port_id (entity link)
+    const portId = values.destination_port_id || undefined;
+    const portNum = portId ? undefined : (values.destination_port_number || undefined);
+
     const payload: FirewallRuleFormValues = {
       ...values,
+      destination_port_id: portId,
+      destination_port_number: portNum,
       request_date: values.request_date
         ? (dayjs.isDayjs(values.request_date as unknown)
           ? (values.request_date as unknown as ReturnType<typeof dayjs>).format('YYYY-MM-DD')
@@ -218,6 +235,7 @@ export default function FirewallRuleForm({
           onChange={() => {
             form.setFieldValue('destination_server_id', undefined);
             form.setFieldValue('destination_port_id', undefined);
+            form.setFieldValue('destination_port_number', undefined);
           }}
         />
       </Form.Item>
@@ -269,7 +287,10 @@ export default function FirewallRuleForm({
           allowClear
           showSearch
           optionFilterProp="label"
-          onChange={() => form.setFieldValue('destination_port_id', undefined)}
+          onChange={() => {
+            form.setFieldValue('destination_port_id', undefined);
+            form.setFieldValue('destination_port_number', undefined);
+          }}
           options={(serversData ?? []).map((s) => ({
             value: s.id,
             label: `[${s.code}] ${s.name}`,
@@ -277,19 +298,48 @@ export default function FirewallRuleForm({
         />
       </Form.Item>
 
-      {/* Destination Port */}
-      <Form.Item name="destination_port_id" label="Port đích">
+      {/* Destination Port — select from registered ports of this server */}
+      <Form.Item
+        name="destination_port_id"
+        label="Port đích"
+        extra={!destServerId ? 'Chọn server đích trước' : undefined}
+      >
         <Select
-          placeholder="Chọn port đích"
+          placeholder={destServerId ? 'Chọn port đang lắng nghe trên server…' : 'Chọn server đích trước'}
           loading={portsLoading}
           allowClear
           showSearch
           optionFilterProp="label"
           disabled={!destServerId}
+          onChange={(val) => {
+            if (val) {
+              form.setFieldValue('destination_port_number', undefined);
+              const port = (portsData ?? []).find((p) => p.id === val);
+              if (port) form.setFieldValue('protocol', port.protocol);
+            }
+          }}
           options={(portsData ?? []).map((p) => ({
             value: p.id,
-            label: `${p.port_number}/${p.protocol}${p.service_name ? ` (${p.service_name})` : ''}`,
+            label: `${p.port_number}/${p.protocol}${p.service_name ? ` — ${p.service_name}` : ''}`,
           }))}
+        />
+      </Form.Item>
+
+      {/* Custom port number — when port is not registered as a Port entity */}
+      <Form.Item
+        name="destination_port_number"
+        label="Hoặc nhập số port thủ công"
+        extra="Dùng khi port chưa được đăng ký trên server đích"
+      >
+        <InputNumber
+          min={1}
+          max={65535}
+          placeholder="VD: 8080"
+          style={{ width: '100%' }}
+          disabled={!destServerId}
+          onChange={(val) => {
+            if (val) form.setFieldValue('destination_port_id', undefined);
+          }}
         />
       </Form.Item>
 

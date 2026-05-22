@@ -35,10 +35,7 @@ export default function ApplicationForm({ open, app, onClose, initialType }: Pro
               code: '',
               name: '',
               group_id: '',
-              status: 'ACTIVE',
               application_type: initialType ?? 'BUSINESS',
-              tech_stack: '',
-              repo_url: '',
               description: '',
               version: '',
               owner_team: '',
@@ -171,51 +168,20 @@ export default function ApplicationForm({ open, app, onClose, initialType }: Pro
           </Form.Item>
         )}
 
-        {!isSystem && (
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item label="Trạng thái" name="status" rules={[{ required: true }]}>
-                <Select options={[
-                  { value: 'ACTIVE', label: 'Active' },
-                  { value: 'INACTIVE', label: 'Inactive' },
-                  { value: 'DEPRECATED', label: 'Deprecated' },
-                ]} />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item label="Phiên bản" name="version">
-                <Input placeholder="2.1.0" />
-              </Form.Item>
-            </Col>
-          </Row>
-        )}
-
-        {isSystem && (
-          <Form.Item label="Phiên bản" name="version">
-            <Input placeholder="VD: 2.1.0" />
-          </Form.Item>
-        )}
-
-        {!isSystem && (
-          <Row gutter={16}>
+        <Row gutter={16}>
+          <Col span={12}>
+            <Form.Item label="Phiên bản" name="version">
+              <Input placeholder="2.1.0" />
+            </Form.Item>
+          </Col>
+          {!isSystem && (
             <Col span={12}>
               <Form.Item label="Team phụ trách" name="owner_team">
                 <Input placeholder="Platform Team" />
               </Form.Item>
             </Col>
-            <Col span={12}>
-              <Form.Item label="Tech Stack" name="tech_stack">
-                <Input placeholder="Java 17, Spring Boot..." />
-              </Form.Item>
-            </Col>
-          </Row>
-        )}
-
-        {!isSystem && (
-          <Form.Item label="Repo URL" name="repo_url">
-            <Input placeholder="https://git.internal/core-banking" />
-          </Form.Item>
-        )}
+          )}
+        </Row>
 
         <Form.Item label="Mô tả" name="description">
           <Input.TextArea rows={3} />

@@ -29,7 +29,7 @@ import { CreateConnectionModal } from './components/CreateConnectionModal';
 import ConnectionHealthDrawer from './components/ConnectionHealthDrawer';
 import FirewallTopologyView from './components/FirewallTopologyView';
 import { nodeTypes, edgeTypes } from './components/edges';
-import { computeLayout, applyDagreLayout, applyElkLayout, computeZoneLaneLayout, getBackwardRoute, reflowZoneLanes, optimalZoneLaneArrangement } from './utils/topologyLayout';
+import { computeLayout, applyDagreLayout, applyElkLayout, computeZoneLaneLayout, getBackwardRoute, reflowZoneLanes, reflowZoneNodes, optimalZoneLaneArrangement } from './utils/topologyLayout';
 import { useTopologyFilters } from './hooks/useTopologyFilters';
 import { useTopologyExport } from './hooks/useTopologyExport';
 import { useTopologyQuery, useCreateSnapshot, type ServerNode, type ConnectionEdge, type ImpliedConnectionEdge, type TopologyData, type Snapshot } from './hooks/useTopology';
@@ -652,12 +652,11 @@ function TopologyPageInner() {
             return;
           }
         }
-        // Normalize zone geometry when server stops dragging.
+        // Snap all siblings in this zone to column-stack grid, then resize lanes.
         setNodes((nds) => {
           const moved = nds.map((n) => (n.id === node.id ? { ...n, position: node.position } : n));
-          const reflowed = reflowZoneLanes(moved, stackH, true);
-          // Persist post-normalization geometry: lane size/pos AND every child's
-          // shifted position, so the merge-useMemo doesn't revert them.
+          const snapped = reflowZoneNodes(moved, parentId);
+          const reflowed = reflowZoneLanes(snapped, stackH, true);
           reflowed.forEach((n) => {
             if (n.type === 'zoneLane') {
               zoneLayoutRef.current[n.id] = {

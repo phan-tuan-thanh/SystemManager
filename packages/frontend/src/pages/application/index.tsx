@@ -44,14 +44,9 @@ function BusinessTab() {
     { key: 'code', title: 'Mã', type: 'text', required: true, placeholder: 'CORE_BANKING', width: 140 },
     { key: 'name', title: 'Tên ứng dụng', type: 'text', required: true, width: 200 },
     { key: 'group_id', title: 'Nhóm', type: 'select', required: true, width: 200, options: groupOptions },
-    { key: 'status', title: 'Trạng thái', type: 'select', width: 130, options: [
-      { value: 'ACTIVE', label: 'Active' },
-      { value: 'INACTIVE', label: 'Inactive' },
-      { value: 'DEPRECATED', label: 'Deprecated' },
-    ]},
     { key: 'version', title: 'Phiên bản', type: 'text', width: 100, placeholder: '1.0.0' },
     { key: 'owner_team', title: 'Team', type: 'text', width: 140 },
-    { key: 'tech_stack', title: 'Tech Stack', type: 'text', width: 180 },
+    { key: 'description', title: 'Mô tả', type: 'text', width: 200 },
   ];
 
   const appPasteConfig: PasteImportConfig = {
@@ -60,13 +55,10 @@ function BusinessTab() {
     targetFields: [
       { key: 'code', label: 'Mã ứng dụng', required: true, aliases: ['ma', 'app_code', 'ma_ung_dung'] },
       { key: 'name', label: 'Tên ứng dụng', required: true, aliases: ['ten', 'app_name', 'ten_ung_dung'] },
-      { key: 'group_id', label: 'Nhóm ứng dụng', required: true, aliases: ['group', 'nhom', 'group_name'], options: groupOptions },
-      { key: 'status', label: 'Trạng thái', aliases: ['trang_thai'], options: [
-        { value: 'ACTIVE', label: 'Active' }, { value: 'INACTIVE', label: 'Inactive' }, { value: 'DEPRECATED', label: 'Deprecated' },
-      ], valueAliases: { active: 'ACTIVE', inactive: 'INACTIVE', deprecated: 'DEPRECATED' } },
+      { key: 'group_id', label: 'Nhóm ứng dụng', required: true, aliases: ['group', 'nhom', 'group_name', 'group_code'], options: groupOptions },
       { key: 'version', label: 'Phiên bản', aliases: ['phien_ban', 'ver'] },
       { key: 'owner_team', label: 'Team phụ trách', aliases: ['team', 'owner'] },
-      { key: 'tech_stack', label: 'Tech Stack', aliases: ['tech', 'stack'] },
+      { key: 'description', label: 'Mô tả', aliases: ['mo_ta', 'desc'] },
     ],
     onImport: async (rows) => {
       const payload = rows.map((r) => ({ ...r, application_type: 'BUSINESS' }));
@@ -263,8 +255,9 @@ function InfraTab() {
   const [formOpen, setFormOpen] = useState(false);
   const [editApp, setEditApp] = useState<Application | null>(null);
   const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
+  const [pasteImportOpen, setPasteImportOpen] = useState(false);
 
-  const { data, isLoading } = useApplicationList({
+  const { data, isLoading, refetch } = useApplicationList({
     page, limit,
     search: search || undefined,
     group_id: groupFilter,
@@ -273,6 +266,50 @@ function InfraTab() {
   });
   const { data: groups } = useAppGroupList({ limit: 100, group_type: 'INFRASTRUCTURE' });
   const deleteApp = useDeleteApplication();
+  const createApp = useCreateApplication();
+
+  const infraGroupOptions = (groups?.items ?? []).map((g) => ({ value: g.id, label: `${g.code} — ${g.name}` }));
+
+  const infraEditableCols: EditableColumnDef[] = [
+    { key: 'code', title: 'Mã', type: 'text', required: true, placeholder: 'SW_POSTGRESQL_15', width: 160 },
+    { key: 'name', title: 'Tên phần mềm', type: 'text', required: true, width: 200 },
+    { key: 'group_id', title: 'Nhóm', type: 'select', required: true, width: 200, options: infraGroupOptions },
+    { key: 'sw_type', title: 'Loại', type: 'select', width: 130, options: [
+      { value: 'OS', label: 'OS' }, { value: 'DATABASE', label: 'Database' },
+      { value: 'MIDDLEWARE', label: 'Middleware' }, { value: 'RUNTIME', label: 'Runtime' },
+      { value: 'WEB_SERVER', label: 'Web Server' }, { value: 'OTHER', label: 'Khác' },
+    ]},
+    { key: 'version', title: 'Phiên bản', type: 'text', width: 110, placeholder: '15.4' },
+    { key: 'vendor', title: 'Vendor', type: 'text', width: 130 },
+  ];
+
+  const infraPasteConfig: PasteImportConfig = {
+    title: 'Dán & Nhập Phần mềm hạ tầng',
+    editableColumns: infraEditableCols,
+    targetFields: [
+      { key: 'code', label: 'Mã phần mềm', required: true, aliases: ['ma', 'sw_code', 'app_code'] },
+      { key: 'name', label: 'Tên phần mềm', required: true, aliases: ['ten', 'sw_name', 'ten_phan_mem'] },
+      { key: 'group_id', label: 'Nhóm hạ tầng', required: true, aliases: ['group', 'nhom', 'group_name', 'group_code'], options: infraGroupOptions },
+      { key: 'sw_type', label: 'Loại phần mềm', aliases: ['loai', 'type', 'software_type'], options: [
+        { value: 'OS', label: 'OS' }, { value: 'DATABASE', label: 'Database' },
+        { value: 'MIDDLEWARE', label: 'Middleware' }, { value: 'RUNTIME', label: 'Runtime' },
+        { value: 'WEB_SERVER', label: 'Web Server' }, { value: 'OTHER', label: 'Khác' },
+      ], valueAliases: { os: 'OS', database: 'DATABASE', db: 'DATABASE', middleware: 'MIDDLEWARE', runtime: 'RUNTIME', web_server: 'WEB_SERVER', other: 'OTHER' } },
+      { key: 'version', label: 'Phiên bản', aliases: ['phien_ban', 'ver'] },
+      { key: 'vendor', label: 'Nhà cung cấp', aliases: ['nha_cung_cap', 'publisher'] },
+      { key: 'eol_date', label: 'EOL Date', aliases: ['end_of_life', 'eol', 'ngay_eol'] },
+      { key: 'description', label: 'Mô tả', aliases: ['mo_ta', 'desc'] },
+    ],
+    onImport: async (rows) => {
+      const payload = rows.map((r) => ({ ...r, application_type: 'SYSTEM' }));
+      const results = await Promise.allSettled(
+        payload.map((r) => createApp.mutateAsync(r as Parameters<typeof createApp.mutateAsync>[0])),
+      );
+      const failed = results.filter((r) => r.status === 'rejected').length;
+      if (failed > 0) throw new Error(`${failed} phần mềm không tạo được`);
+      refetch();
+    },
+  };
 
   const handleDelete = async (id: string) => {
     try {
@@ -411,6 +448,7 @@ function InfraTab() {
               </Button>
             </Popconfirm>
           )}
+          <Button icon={<SnippetsOutlined />} onClick={() => setPasteImportOpen(true)}>Dán & Nhập</Button>
           <Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditApp(null); setFormOpen(true); }}>
             Thêm phần mềm
           </Button>
@@ -433,6 +471,13 @@ function InfraTab() {
       />
 
       <ApplicationForm open={formOpen} app={editApp} onClose={() => setFormOpen(false)} initialType="SYSTEM" />
+
+      <PasteImportDrawer
+        open={pasteImportOpen}
+        onClose={() => setPasteImportOpen(false)}
+        config={infraPasteConfig}
+        onSuccess={() => refetch()}
+      />
     </>
   );
 }

@@ -170,10 +170,40 @@ export function buildGraph(
 
 // ─── Dagre layout ─────────────────────────────────────────────────
 
-export function applyDagreLayout(nodes: Node[], edges: Edge[], direction: 'TB' | 'BT' | 'LR' | 'RL'): Node[] {
+interface DagreOptions {
+  nodesep?: number;
+  ranksep?: number;
+  edgesep?: number;
+  marginx?: number;
+  marginy?: number;
+  gridGap?: number;
+  /** Gap inserted between connected-node cluster and isolated-node grid.
+   *  Set to 0 for zone-internal layouts where all nodes are usually isolated. */
+  isolatedGap?: number;
+  /** Width multiplier for isolated grid columns (1 = square, >1 = wider). */
+  gridAspect?: number;
+}
+
+export function applyDagreLayout(
+  nodes: Node[],
+  edges: Edge[],
+  direction: 'TB' | 'BT' | 'LR' | 'RL',
+  opts: DagreOptions = {},
+): Node[] {
+  const {
+    nodesep = 180,
+    ranksep = 260,
+    edgesep = 50,
+    marginx = 60,
+    marginy = 60,
+    gridGap = 40,
+    isolatedGap = 120,
+    gridAspect = 1.5,
+  } = opts;
+
   const g = new dagre.graphlib.Graph();
   g.setDefaultEdgeLabel(() => ({}));
-  g.setGraph({ rankdir: direction, nodesep: 180, ranksep: 260, edgesep: 50, marginx: 60, marginy: 60 });
+  g.setGraph({ rankdir: direction, nodesep, ranksep, edgesep, marginx, marginy });
 
   const topNodes = nodes.filter((n) => !n.parentId);
   const nodeIdsWithEdges = new Set<string>();
@@ -213,9 +243,8 @@ export function applyDagreLayout(nodes: Node[], edges: Edge[], direction: 'TB' |
   });
 
   if (isolatedNodes.length > 0) {
-    const COLS = Math.ceil(Math.sqrt(isolatedNodes.length * 1.5));
-    const GRID_GAP = 40;
-    const START_Y = maxBottom + 120;
+    const COLS = Math.ceil(Math.sqrt(isolatedNodes.length * gridAspect));
+    const START_Y = maxBottom > 0 ? maxBottom + isolatedGap : 0;
     isolatedNodes.forEach((node, idx) => {
       const col = idx % COLS;
       const row = Math.floor(idx / COLS);
@@ -223,7 +252,7 @@ export function applyDagreLayout(nodes: Node[], edges: Edge[], direction: 'TB' |
       const nodeH = (node.style?.height as number) ?? (node.type === 'serverNode' ? SERVER_NODE_H : APP_NODE_H);
       const targetNode = laidOutNodes.find((n) => n.id === node.id);
       if (targetNode) {
-        targetNode.position = { x: col * (nodeW + GRID_GAP), y: START_Y + row * (nodeH + GRID_GAP) };
+        targetNode.position = { x: col * (nodeW + gridGap), y: START_Y + row * (nodeH + gridGap) };
       }
     });
   }
@@ -453,11 +482,106 @@ export function computeLayout(
 // ─── Zone lane layout ─────────────────────────────────────────────
 
 export const ZONE_HEADER_H = 32;
-const ZONE_PADDING_X = 28;
-const ZONE_PADDING_Y = 20;
-const ZONE_GAP = 48;
+const ZONE_PADDING_X = 20;
+const ZONE_PADDING_Y = 16;
+const ZONE_GAP = 32;
 // Padding of the lane wrapper panel around the zones it contains
-const LANE_WRAP_PAD = 18;
+const LANE_WRAP_PAD = 14;
+
+export const ZONE_COL_GAP = 24;
+export const ZONE_ROW_GAP = 20;
+
+// ─── Zone column-stack layout ────────────────────────────────────
+//
+// Replaces dagre for arranging nodes inside a zone lane.
+// Nodes are placed left→right across COLS columns, stacking down per column.
+// Positions start at (0, 0) — the caller adds ZONE_PADDING_X / ZONE_HEADER_H offset.
+
+export function computeZoneColumnLayout(nodes: Node[]): Node[] {
+  const topNodes = nodes.filter((n) => !n.parentId);
+  const N = topNodes.length;
+  if (N === 0) return nodes;
+
+  const COLS = Math.max(1, Math.ceil(Math.sqrt(N)));
+  const nodeW = Math.max(...topNodes.map((n) => (n.style?.width as number) ?? SERVER_NODE_W));
+  const nodeH = Math.max(...topNodes.map((n) => (n.style?.height as number) ?? SERVER_NODE_H));
+  const COL_SLOT_W = nodeW + ZONE_COL_GAP;
+  const ROW_SLOT_H = nodeH + ZONE_ROW_GAP;
+
+  // Place nodes left→right, top→bottom into a uniform (col × row) grid
+  // so every column shares the same row y-coordinates from the start.
+  const posMap = new Map<string, { x: number; y: number }>();
+  topNodes.forEach((node, i) => {
+    const col = i % COLS;
+    const row = Math.floor(i / COLS);
+    posMap.set(node.id, { x: col * COL_SLOT_W, y: row * ROW_SLOT_H });
+  });
+
+  return nodes.map((n) => {
+    if (n.parentId) return n;
+    const pos = posMap.get(n.id);
+    return pos ? { ...n, position: pos } : n;
+  });
+}
+
+// Re-stack all server nodes inside a zone lane onto a shared (col × row) grid.
+//
+// x  — snapped to the nearest column slot (columns stay flush).
+// y  — snapped to the nearest row slot so every column shares the same row
+//      y-coordinates and nodes align horizontally across columns.
+//      Placing a node at row 2 leaves rows 0-1 of that column empty; the node
+//      is NOT forced back to row 0.
+//      Slot collision (two nodes on the same cell) is resolved by pushing the
+//      later arrival to the next free row in the same column.
+export function reflowZoneNodes(nodes: Node[], zoneId: string): Node[] {
+  const ORIGIN_X = ZONE_PADDING_X;
+  const ORIGIN_Y = ZONE_HEADER_H + ZONE_PADDING_Y;
+
+  const kids = nodes.filter((n) => n.parentId === zoneId);
+  const N = kids.length;
+  if (N === 0) return nodes;
+
+  const nodeW = (kids[0]?.style?.width as number) ?? SERVER_NODE_W;
+  const nodeH = Math.max(...kids.map((n) => (n.style?.height as number) ?? SERVER_NODE_H));
+  const TOTAL_COLS = Math.max(1, Math.ceil(Math.sqrt(N)));
+  const COL_SLOT_W = nodeW + ZONE_COL_GAP;
+  const ROW_SLOT_H = nodeH + ZONE_ROW_GAP;
+
+  // Snap each node to (col, row) nearest its drop position
+  const withSlot = kids.map((node) => {
+    const col = Math.max(0, Math.min(TOTAL_COLS - 1, Math.round((node.position.x - ORIGIN_X) / COL_SLOT_W)));
+    const row = Math.max(0, Math.round((node.position.y - ORIGIN_Y) / ROW_SLOT_H));
+    return { node, col, row };
+  });
+
+  // Resolve (col, row) collisions: earlier-by-row node wins, late arrival pushed to next free row
+  const sorted = [...withSlot].sort((a, b) => a.row - b.row || a.col - b.col);
+  const occupied = new Set<string>();
+  const resolved = sorted.map((item) => {
+    let row = item.row;
+    while (occupied.has(`${item.col},${row}`)) row++;
+    occupied.add(`${item.col},${row}`);
+    return { node: item.node, col: item.col, row };
+  });
+
+  // Compact empty columns: preserve left-to-right order, close gaps
+  const usedCols = [...new Set(resolved.map((i) => i.col))].sort((a, b) => a - b);
+  const colRemap = new Map(usedCols.map((c, i) => [c, i]));
+
+  const posMap = new Map<string, { x: number; y: number }>();
+  resolved.forEach(({ node, col, row }) => {
+    posMap.set(node.id, {
+      x: ORIGIN_X + colRemap.get(col)! * COL_SLOT_W,
+      y: ORIGIN_Y + row * ROW_SLOT_H,
+    });
+  });
+
+  return nodes.map((n) => {
+    if (n.parentId !== zoneId) return n;
+    const pos = posMap.get(n.id);
+    return pos ? { ...n, position: pos } : n;
+  });
+}
 
 // Build the background wrapper panel that visually contains every zone in a
 // lane. It sits behind the zones (zIndex -2) and ignores pointer events.
@@ -492,10 +616,8 @@ export function computeZoneLaneLayout(
   const allNodes: Node[] = [];
   const allEdges: Edge[] = [];
 
-  // LR/RL: zones stacked left-to-right (vertical bands, servers arranged TB inside)
-  // TB/BT: zones stacked top-to-bottom (horizontal bands, servers arranged LR inside)
+  // LR/RL: zones stacked left-to-right (vertical bands); TB/BT: horizontal bands.
   const stackHorizontally = direction === 'LR' || direction === 'RL';
-  const innerDirection: 'LR' | 'TB' = stackHorizontally ? 'TB' : 'LR';
 
   // ── Pass 1: build & size each zone's content ─────────────────────
   type ZoneBuild = {
@@ -512,7 +634,7 @@ export function computeZoneLaneLayout(
     if (zoneServers.length === 0) continue;
 
     const { nodes: subNodes, edges: subEdges } = buildGraph(zoneServers, connections, nodeType, edgeStyle);
-    const laidSubNodes = applyDagreLayout(subNodes, subEdges, innerDirection);
+    const laidSubNodes = computeZoneColumnLayout(subNodes);
 
     let maxX = 0;
     let maxY = 0;

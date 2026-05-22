@@ -14,6 +14,11 @@ export class QueryPortDto extends PaginationDto {
   @IsUUID()
   deployment_id?: string;
 
+  @ApiPropertyOptional({ description: 'Filter ports by server (via deployment)' })
+  @IsOptional()
+  @IsUUID()
+  server_id?: string;
+
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
