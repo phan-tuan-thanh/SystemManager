@@ -2,10 +2,9 @@ import { Modal, Skeleton, Tag, Typography, Divider, Empty, Tooltip } from 'antd'
 import { ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
 import { useAppDependencies, useConnectionFirewallCoverage } from '../../../hooks/useConnections';
 import type { DependencyItem, FirewallCoverageResult } from '../../../types/connection';
+import EnvironmentTag from '../../../components/common/EnvironmentTag';
 
 const { Text } = Typography;
-
-const ENV_COLOR: Record<string, string> = { DEV: 'green', UAT: 'blue', PROD: 'red' };
 
 function CoverageBadge({ coverage }: { coverage: FirewallCoverageResult | undefined }) {
   if (!coverage) return null;
@@ -27,7 +26,7 @@ function DependencyRow({ item, coverage }: { item: DependencyItem; coverage?: Fi
         borderBottom: '1px solid #f0f0f0',
       }}
     >
-      <Tag color={ENV_COLOR[item.environment]}>{item.environment}</Tag>
+      <EnvironmentTag code={item.environment} />
       <Tag>{item.connection_type}</Tag>
       <Text strong>{item.app.name}</Text>
       <Text type="secondary" style={{ fontSize: 12 }}>

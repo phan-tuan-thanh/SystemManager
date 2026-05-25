@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  Button, Tabs, Descriptions, Tag, Space, App, Skeleton,
+  Button, Tabs, Descriptions, Space, App, Skeleton,
   Table, Popconfirm,
 } from 'antd';
 import {
@@ -19,9 +19,7 @@ import {
   useDeleteApplication,
 } from '../../hooks/useApplications';
 import { useDeploymentList } from '../../hooks/useDeployments';
-import type { Environment } from '../../types/server';
-
-const ENV_COLOR: Record<string, string> = { DEV: 'green', UAT: 'blue', PROD: 'red' };
+import EnvironmentTag from '../../components/common/EnvironmentTag';
 
 export default function ApplicationDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -135,7 +133,7 @@ export default function ApplicationDetailPage() {
                     dataIndex: 'environment',
                     key: 'env',
                     width: 100,
-                    render: (env: Environment) => <Tag color={ENV_COLOR[env]}>{env}</Tag>,
+                    render: (env: string) => <EnvironmentTag code={env} />,
                   },
                   {
                     title: 'Version',
@@ -182,9 +180,7 @@ export default function ApplicationDetailPage() {
                 )}
                 {(whereData ?? []).map((env) => (
                   <div key={env.environment} style={{ marginBottom: 16 }}>
-                    <Tag color={ENV_COLOR[env.environment]} style={{ marginBottom: 8, fontSize: 14 }}>
-                      {env.environment}
-                    </Tag>
+                    <EnvironmentTag code={env.environment} style={{ marginBottom: 8, fontSize: 14 }} />
                     <Table
                       size="small"
                       dataSource={env.servers}

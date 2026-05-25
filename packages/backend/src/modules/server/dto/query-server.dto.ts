@@ -1,8 +1,8 @@
 import { IsOptional, IsString, IsIn } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { PaginationDto } from '../../../common/dto/pagination.dto';
+import { IsValidEnvironment } from '../../../common/validators/is-valid-environment.validator';
 
-const ENVIRONMENTS = ['DEV', 'UAT', 'PROD'] as const;
 const SERVER_STATUSES = ['ACTIVE', 'INACTIVE', 'MAINTENANCE'] as const;
 const INFRA_TYPES = ['VIRTUAL_MACHINE', 'PHYSICAL_SERVER', 'CONTAINER', 'CLOUD_INSTANCE'] as const;
 const SITES = ['DC', 'DR'] as const;
@@ -13,10 +13,11 @@ export class QueryServerDto extends PaginationDto {
   @IsString()
   search?: string;
 
-  @ApiPropertyOptional({ enum: ENVIRONMENTS })
+  @ApiPropertyOptional({ description: 'Environment code (e.g. PROD, UAT, DEV1)' })
   @IsOptional()
-  @IsIn(ENVIRONMENTS)
-  environment?: typeof ENVIRONMENTS[number];
+  @IsString()
+  @IsValidEnvironment()
+  environment?: string;
 
   @ApiPropertyOptional({ enum: SERVER_STATUSES })
   @IsOptional()

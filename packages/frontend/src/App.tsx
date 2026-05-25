@@ -12,6 +12,7 @@ import UserGroupsPage from './pages/admin/UserGroupsPage';
 import ModulesPage from './pages/admin/ModulesPage';
 import SystemConfigPage from './pages/admin/SystemConfigPage';
 import DeploymentDocTypePage from './pages/admin/DeploymentDocTypePage';
+import EnvironmentConfigPage from './pages/admin/EnvironmentConfigPage';
 import ServerListPage from './pages/server/index';
 import ServerDetailPage from './pages/server/[id]';
 import NetworkListPage from './pages/network/index';
@@ -79,6 +80,7 @@ export default function App() {
                 <Route path="/admin/modules" element={<ModulesPage />} />
                 <Route path="/admin/system-config" element={<SystemConfigPage />} />
                 <Route path="/admin/doc-types" element={<DeploymentDocTypePage />} />
+                <Route path="/admin/environments" element={<EnvironmentConfigPage />} />
 
                 {/* Server routes */}
                 <Route path="/servers" element={<ServerListPage />} />

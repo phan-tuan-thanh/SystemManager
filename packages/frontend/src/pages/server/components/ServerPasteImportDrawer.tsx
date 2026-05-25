@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Drawer,
   Steps,
@@ -31,6 +31,7 @@ import {
 } from '@ant-design/icons';
 import Papa from 'papaparse';
 import apiClient from '../../../api/client';
+import { useActiveEnvironments } from '../../../hooks/useEnvironments';
 import ColumnMapper, {
   autoDetect,
   applyAllMappings,
@@ -44,13 +45,7 @@ const { Text } = Typography;
 
 // ── Field definitions (same as infra-upload, extended with ip) ──────────────
 
-const ENV_OPTIONS = [
-  { value: 'DEV', label: 'DEV' },
-  { value: 'UAT', label: 'UAT' },
-  { value: 'PROD', label: 'PROD' },
-];
-
-const SERVER_TARGETS: TargetField[] = [
+const SERVER_TARGETS_STATIC: TargetField[] = [
   { key: 'ip', label: 'Địa chỉ IP *', required: true, aliases: ['ip_address', 'private_ip', 'server_ip', 'dia_chi_ip'] },
   { key: 'name', label: 'Tên server *', required: true, aliases: ['server_name', 'ten', 'ten_server'] },
   { key: 'hostname', label: 'Hostname', aliases: ['host'] },
@@ -58,7 +53,6 @@ const SERVER_TARGETS: TargetField[] = [
   { key: 'system', label: 'Mã hệ thống', aliases: ['he_thong', 'system_code'] },
   { key: 'system_name', label: 'Tên hệ thống', aliases: ['ten_he_thong'] },
   { key: 'environment', label: 'Môi trường', aliases: ['env', 'moi_truong'],
-    options: ENV_OPTIONS,
     valueAliases: { dev: 'DEV', development: 'DEV', uat: 'UAT', staging: 'UAT', prod: 'PROD', production: 'PROD', live: 'PROD' },
   },
   { key: 'site', label: 'Site', aliases: ['trung_tam'],
@@ -94,10 +88,6 @@ const SERVER_TARGETS: TargetField[] = [
   { key: 'description', label: 'Mô tả', aliases: ['desc', 'mo_ta', 'ghi_chu'] },
 ];
 
-const SERVER_TARGET_BY_KEY = SERVER_TARGETS.reduce(
-  (acc, t) => ({ ...acc, [t.key]: t }),
-  {} as Record<string, TargetField>,
-);
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -190,6 +180,19 @@ type Step = 'paste' | 'map-columns' | 'map-values' | 'preview' | 'result';
 
 export default function ServerPasteImportDrawer({ open, onClose, onSuccess }: Props) {
   const { message, modal } = App.useApp();
+  const { data: envConfigs = [] } = useActiveEnvironments();
+
+  const SERVER_TARGETS = useMemo<TargetField[]>(() => {
+    const envOptions = envConfigs.map((e) => ({ label: e.label, value: e.code }));
+    return SERVER_TARGETS_STATIC.map((t) =>
+      t.key === 'environment' ? { ...t, options: envOptions } : t,
+    );
+  }, [envConfigs]);
+
+  const SERVER_TARGET_BY_KEY = useMemo<Record<string, TargetField>>(() =>
+    SERVER_TARGETS.reduce((acc, t) => ({ ...acc, [t.key]: t }), {} as Record<string, TargetField>),
+    [SERVER_TARGETS],
+  );
 
   const [step, setStep] = useState<Step>('paste');
   const [pasteText, setPasteText] = useState('');

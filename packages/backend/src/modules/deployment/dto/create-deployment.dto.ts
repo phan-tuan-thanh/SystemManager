@@ -2,6 +2,7 @@ import {
   IsNotEmpty, IsOptional, IsString, IsUUID, IsIn, IsDateString, MaxLength,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsValidEnvironment } from '../../../common/validators/is-valid-environment.validator';
 
 export class CreateDeploymentDto {
   @ApiProperty({ example: 'uuid-of-application' })
@@ -14,9 +15,10 @@ export class CreateDeploymentDto {
   @IsNotEmpty()
   server_id: string;
 
-  @ApiProperty({ enum: ['DEV', 'UAT', 'PROD'] })
-  @IsIn(['DEV', 'UAT', 'PROD'])
+  @ApiProperty({ example: 'PROD', description: 'Environment code (e.g. PROD, UAT, DEV1)' })
+  @IsString()
   @IsNotEmpty()
+  @IsValidEnvironment()
   environment: string;
 
   @ApiProperty({ example: '2.1.0' })

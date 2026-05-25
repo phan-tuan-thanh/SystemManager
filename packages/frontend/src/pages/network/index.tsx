@@ -6,9 +6,8 @@ import type { ColumnsType } from 'antd/es/table';
 import PageHeader from '../../components/common/PageHeader';
 import DataTable from '../../components/common/DataTable';
 import { useNetworkConfigList, useDeleteNetworkConfig } from '../../hooks/useNetworkConfigs';
+import EnvironmentTag from '../../components/common/EnvironmentTag';
 import type { NetworkConfig } from '../../types/server';
-
-const ENV_COLOR: Record<string, string> = { DEV: 'blue', UAT: 'orange', PROD: 'red' };
 
 export default function NetworkListPage() {
   const navigate = useNavigate();
@@ -63,7 +62,7 @@ export default function NetworkListPage() {
       key: 'env',
       width: 100,
       render: (_: unknown, r: NetworkConfig) => r.server ? (
-        <Tag color={ENV_COLOR[r.server.environment]}>{r.server.environment}</Tag>
+        <EnvironmentTag code={r.server.environment} />
       ) : '—',
     },
     { title: 'Interface', dataIndex: 'interface', key: 'interface', width: 80 },

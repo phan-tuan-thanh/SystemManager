@@ -17,13 +17,15 @@ import {
 } from '../../hooks/useConnections';
 import { useApplicationList } from '../../hooks/useApplications';
 import type { AppConnection } from '../../types/connection';
+import { useActiveEnvironments } from '../../hooks/useEnvironments';
+import { toSelectOptions } from '../../utils/environmentUtils';
+import EnvironmentTag from '../../components/common/EnvironmentTag';
 
-const ENV_COLOR: Record<string, string> = { DEV: 'green', UAT: 'blue', PROD: 'red' };
-const ENVIRONMENTS = ['DEV', 'UAT', 'PROD'];
 const CONNECTION_TYPES = ['HTTP', 'HTTPS', 'TCP', 'GRPC', 'AMQP', 'KAFKA', 'DATABASE'];
 
 export default function ConnectionListPage() {
   const { message } = App.useApp();
+  const { data: envConfigs = [] } = useActiveEnvironments();
   const [search, setSearch] = useState('');
   const [envFilter, setEnvFilter] = useState<string | undefined>();
   const [typeFilter, setTypeFilter] = useState<string | undefined>();
@@ -106,7 +108,7 @@ export default function ConnectionListPage() {
       dataIndex: 'environment',
       key: 'environment',
       width: 90,
-      render: (env: string) => <Tag color={ENV_COLOR[env]}>{env}</Tag>,
+      render: (env: string) => <EnvironmentTag code={env} />,
     },
     {
       title: 'Source App',
@@ -261,7 +263,7 @@ export default function ConnectionListPage() {
           style={{ width: 120 }}
           value={envFilter}
           onChange={(v) => { setEnvFilter(v); setPage(1); }}
-          options={ENVIRONMENTS.map((e) => ({ label: e, value: e }))}
+          options={toSelectOptions(envConfigs)}
         />
         <Select
           allowClear

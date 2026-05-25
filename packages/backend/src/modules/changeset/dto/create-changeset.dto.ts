@@ -1,5 +1,6 @@
-import { IsString, IsNotEmpty, IsOptional, MaxLength, IsIn } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, MaxLength } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsValidEnvironment } from '../../../common/validators/is-valid-environment.validator';
 
 export class CreateChangeSetDto {
   @ApiProperty({ example: 'Add new PROD server SRV-09' })
@@ -13,8 +14,9 @@ export class CreateChangeSetDto {
   @IsString()
   description?: string;
 
-  @ApiPropertyOptional({ enum: ['DEV', 'UAT', 'PROD'] })
+  @ApiPropertyOptional({ description: 'Environment code (e.g. PROD, UAT, DEV1)' })
   @IsOptional()
-  @IsIn(['DEV', 'UAT', 'PROD'])
+  @IsString()
+  @IsValidEnvironment()
   environment?: string;
 }

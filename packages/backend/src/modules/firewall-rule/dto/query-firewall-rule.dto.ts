@@ -1,15 +1,16 @@
 import { IsOptional, IsString, IsIn, IsUUID } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { PaginationDto } from '../../../common/dto/pagination.dto';
+import { IsValidEnvironment } from '../../../common/validators/is-valid-environment.validator';
 
-const ENVIRONMENTS = ['DEV','UAT','PROD'] as const;
 const ACTIONS = ['ALLOW','DENY'] as const;
 const STATUSES = ['ACTIVE','INACTIVE','PENDING_APPROVAL','REJECTED'] as const;
 
 export class QueryFirewallRuleDto extends PaginationDto {
-  @ApiPropertyOptional({ enum: ENVIRONMENTS })
+  @ApiPropertyOptional({ description: 'Environment code (e.g. PROD, UAT, DEV1)' })
   @IsOptional()
-  @IsIn(ENVIRONMENTS)
+  @IsString()
+  @IsValidEnvironment()
   environment?: string;
 
   @ApiPropertyOptional({ enum: ACTIONS })

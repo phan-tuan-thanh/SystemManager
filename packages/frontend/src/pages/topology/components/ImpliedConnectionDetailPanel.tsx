@@ -1,6 +1,7 @@
 import { Drawer, Descriptions, Tag, Typography, Space, Badge } from 'antd';
-import { CloseOutlined, FireOutlined, ArrowRightOutlined } from '@ant-design/icons';
+import { CloseOutlined, FireOutlined, ArrowRightOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import type { ImpliedConnectionEdge, ServerNode } from '../hooks/useTopology';
+import dayjs from 'dayjs';
 
 const { Text } = Typography;
 
@@ -10,11 +11,16 @@ interface Props {
   onClose: () => void;
 }
 
+function isExpired(conn: ImpliedConnectionEdge): boolean {
+  return !conn.neverExpires && !!conn.expiresAt && new Date(conn.expiresAt) < new Date();
+}
+
 export default function ImpliedConnectionDetailPanel({ connection, servers = [], onClose }: Props) {
   if (!connection) return null;
 
   const isAllow = connection.action === 'ALLOW';
-  const actionColor = isAllow ? '#389e0d' : '#cf1322';
+  const expired = isExpired(connection);
+  const actionColor = expired ? '#8c8c8c' : isAllow ? '#389e0d' : '#cf1322';
 
   const srcServer = servers.find((s) => s.id === connection.sourceServerId);
   const tgtServer = servers.find((s) => s.id === connection.targetServerId);
@@ -30,7 +36,10 @@ export default function ImpliedConnectionDetailPanel({ connection, servers = [],
         <Space>
           <FireOutlined style={{ color: actionColor }} />
           <Text strong>Firewall Rule</Text>
-          <Tag color={isAllow ? 'success' : 'error'}>{connection.action}</Tag>
+          {expired
+            ? <Tag color="default">EXPIRED</Tag>
+            : <Tag color={isAllow ? 'success' : 'error'}>{connection.action}</Tag>
+          }
         </Space>
       }
       placement="right"
@@ -44,11 +53,11 @@ export default function ImpliedConnectionDetailPanel({ connection, servers = [],
       {/* Action badge */}
       <div
         style={{
-          background: isAllow ? '#f6ffed' : '#fff1f0',
-          border: `1px solid ${isAllow ? '#b7eb8f' : '#ffa39e'}`,
+          background: expired ? '#f5f5f5' : isAllow ? '#f6ffed' : '#fff1f0',
+          border: `1px solid ${expired ? '#d9d9d9' : isAllow ? '#b7eb8f' : '#ffa39e'}`,
           borderRadius: 6,
           padding: '10px 14px',
-          marginBottom: 16,
+          marginBottom: expired ? 8 : 16,
           display: 'flex',
           alignItems: 'center',
           gap: 8,
@@ -56,9 +65,30 @@ export default function ImpliedConnectionDetailPanel({ connection, servers = [],
       >
         <Badge color={actionColor} />
         <Text strong style={{ color: actionColor }}>
-          {isAllow ? 'Traffic ALLOWED by firewall rule' : 'Traffic DENIED by firewall rule'}
+          {expired
+            ? `Rule đã hết hạn (${connection.action})`
+            : isAllow ? 'Traffic ALLOWED by firewall rule' : 'Traffic DENIED by firewall rule'}
         </Text>
       </div>
+      {expired && (
+        <div
+          style={{
+            background: '#fffbe6',
+            border: '1px solid #ffe58f',
+            borderRadius: 6,
+            padding: '8px 14px',
+            marginBottom: 16,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+          }}
+        >
+          <ClockCircleOutlined style={{ color: '#faad14' }} />
+          <Text style={{ color: '#d48806', fontSize: 12 }}>
+            Rule này đã hết hạn và không còn hiệu lực
+          </Text>
+        </div>
+      )}
 
       {/* Source → Target flow */}
       <div
@@ -94,7 +124,25 @@ export default function ImpliedConnectionDetailPanel({ connection, servers = [],
           <Text strong>{connection.firewallRuleName}</Text>
         </Descriptions.Item>
         <Descriptions.Item label="Action">
-          <Tag color={isAllow ? 'success' : 'error'}>{connection.action}</Tag>
+          {expired
+            ? <Tag color="default">EXPIRED</Tag>
+            : <Tag color={isAllow ? 'success' : 'error'}>{connection.action}</Tag>
+          }
+        </Descriptions.Item>
+        <Descriptions.Item label="Ngày hết hạn">
+          {connection.neverExpires
+            ? <Tag color="blue">Không hết hạn</Tag>
+            : connection.expiresAt
+              ? (
+                <Space size={4}>
+                  <Text style={{ color: expired ? '#cf1322' : undefined }}>
+                    {dayjs(connection.expiresAt).format('DD/MM/YYYY HH:mm')}
+                  </Text>
+                  {expired && <Tag color="default" style={{ marginLeft: 0 }}>Đã hết hạn</Tag>}
+                </Space>
+              )
+              : <Text type="secondary">—</Text>
+          }
         </Descriptions.Item>
         <Descriptions.Item label="Environment">
           <Tag>{connection.environment}</Tag>

@@ -19,6 +19,8 @@ import { EyeOutlined, DiffOutlined, ImportOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { useSnapshotList, useSnapshotDetail, Snapshot, type TopologyData } from '../hooks/useTopology';
 import apiClient from '../../../api/client';
+import { useActiveEnvironments } from '../../../hooks/useEnvironments';
+import { toSelectOptions } from '../../../utils/environmentUtils';
 
 const { Text } = Typography;
 
@@ -248,6 +250,8 @@ export default function SnapshotBrowser({ open, onClose, currentEnvironment, onL
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [compareA, setCompareA] = useState<string | null>(null);
   const [compareB, setCompareB] = useState<string | null>(null);
+  const { data: envConfigs = [] } = useActiveEnvironments();
+  const envOptions = toSelectOptions(envConfigs);
   const [compareOpen, setCompareOpen] = useState(false);
 
   const handleLoad = async (record: Snapshot) => {
@@ -345,11 +349,7 @@ export default function SnapshotBrowser({ open, onClose, currentEnvironment, onL
               setPage(1);
             }}
             style={{ width: 160 }}
-            options={[
-              { label: 'DEV', value: 'DEV' },
-              { label: 'UAT', value: 'UAT' },
-              { label: 'PROD', value: 'PROD' },
-            ]}
+            options={envOptions}
           />
           <Button
             icon={<DiffOutlined />}

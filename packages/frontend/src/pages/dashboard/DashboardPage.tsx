@@ -20,6 +20,9 @@ import apiClient from '../../api/client';
 import type { ApiResponse } from '../../types/auth';
 import PageHeader from '../../components/common/PageHeader';
 import AlertPanel from './components/AlertPanel';
+import EnvironmentTag from '../../components/common/EnvironmentTag';
+import { getEnvColor } from '../../utils/environmentUtils';
+import { useActiveEnvironments } from '../../hooks/useEnvironments';
 
 interface SystemStatus {
   initialized: boolean;
@@ -44,11 +47,6 @@ interface RecentChange {
   snapshot: { action?: string; name?: string; code?: string };
 }
 
-const ENV_COLORS: Record<string, string> = {
-  DEV: 'blue',
-  UAT: 'orange',
-  PROD: 'red',
-};
 
 const STATUS_COLORS: Record<string, string> = {
   RUNNING: '#52c41a',
@@ -68,6 +66,7 @@ const quickActions = [
 
 export default function DashboardPage() {
   const navigate = useNavigate();
+  const { data: envConfigs = [] } = useActiveEnvironments();
   const { data: status, isLoading } = useQuery<SystemStatus>({
     queryKey: ['system-status'],
     queryFn: async () => {
@@ -189,13 +188,13 @@ export default function DashboardPage() {
                 {(status?.serversByEnv ?? []).map(({ environment, count }) => (
                   <div key={environment} style={{ marginBottom: 12 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                      <Tag color={ENV_COLORS[environment] ?? 'default'}>{environment}</Tag>
+                      <EnvironmentTag code={environment} />
                       <span>{count} server{count !== 1 ? 's' : ''}</span>
                     </div>
                     <Progress
                       percent={totalServers > 0 ? Math.round((count / totalServers) * 100) : 0}
                       showInfo={false}
-                      strokeColor={ENV_COLORS[environment] === 'red' ? '#ff4d4f' : ENV_COLORS[environment] === 'orange' ? '#faad14' : '#1677ff'}
+                      strokeColor={getEnvColor(environment, envConfigs)}
                       size="small"
                     />
                   </div>

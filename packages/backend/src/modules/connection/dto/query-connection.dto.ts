@@ -1,14 +1,15 @@
 import { IsOptional, IsString, IsIn, IsUUID } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { PaginationDto } from '../../../common/dto/pagination.dto';
+import { IsValidEnvironment } from '../../../common/validators/is-valid-environment.validator';
 
-const ENVIRONMENTS = ['DEV', 'UAT', 'PROD'] as const;
 const CONNECTION_TYPES = ['HTTP', 'HTTPS', 'TCP', 'GRPC', 'AMQP', 'KAFKA', 'DATABASE'] as const;
 
 export class QueryConnectionDto extends PaginationDto {
-  @ApiPropertyOptional({ enum: ENVIRONMENTS })
+  @ApiPropertyOptional({ description: 'Environment code (e.g. PROD, UAT, DEV1)' })
   @IsOptional()
-  @IsIn(ENVIRONMENTS)
+  @IsString()
+  @IsValidEnvironment()
   environment?: string;
 
   @ApiPropertyOptional()

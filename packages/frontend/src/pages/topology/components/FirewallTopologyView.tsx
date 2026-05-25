@@ -16,6 +16,7 @@ import { useConnectionList } from '../../../hooks/useConnections';
 import { parseFirewallToMermaid } from '../../../utils/firewall-mermaid-parser';
 import MermaidExportModal from './MermaidExportModal';
 import FirewallFilterPanel, { type FirewallFilterState, DEFAULT_PHYSICS } from './FirewallFilterPanel';
+import EnvironmentTag from '../../../components/common/EnvironmentTag';
 
 // ── Mermaid inline render ─────────────────────────────────────────────
 import mermaid from 'mermaid';
@@ -1096,9 +1097,7 @@ export default function FirewallTopologyView() {
                             <span style={{ color: '#8c8c8c' }}>→</span>
                             <Tag color="green">{c.target_app?.name ?? c.target_app_id}</Tag>
                             <Tag>{c.connection_type}</Tag>
-                            <Tag color={c.environment === 'PROD' ? 'red' : c.environment === 'UAT' ? 'blue' : 'green'}>
-                              {c.environment}
-                            </Tag>
+                            <EnvironmentTag code={c.environment} />
                           </Space>
                         </List.Item>
                       )}

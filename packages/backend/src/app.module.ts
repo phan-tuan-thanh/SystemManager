@@ -32,6 +32,8 @@ import { AlertModule } from './modules/alert/alert.module';
 import { HelpModule } from './modules/help/help.module';
 import { NetworkZoneModule } from './modules/network-zone/network-zone.module';
 import { FirewallRuleModule } from './modules/firewall-rule/firewall-rule.module';
+import { EnvironmentConfigModule } from './modules/environment-config/environment-config.module';
+import { IsValidEnvironmentConstraint } from './common/validators/is-valid-environment.validator';
 
 @Module({
   imports: [
@@ -76,10 +78,12 @@ import { FirewallRuleModule } from './modules/firewall-rule/firewall-rule.module
     HelpModule,
     NetworkZoneModule,
     FirewallRuleModule,
+    EnvironmentConfigModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
+    IsValidEnvironmentConstraint,
   ],
 })
 export class AppModule {}

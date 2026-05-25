@@ -109,6 +109,7 @@ export class NetworkZoneService {
         ...(dto.zone_type && { zone_type: dto.zone_type as any }),
         ...(dto.description !== undefined && { description: dto.description }),
         ...(dto.color !== undefined && { color: dto.color }),
+        ...(dto.environment !== undefined && { environment: dto.environment as any }),
       },
     });
     return { data: zone };

@@ -83,6 +83,8 @@ export interface ImpliedConnectionEdge {
   firewallRuleId: string;
   firewallRuleName: string;
   action: 'ALLOW' | 'DENY';
+  expiresAt?: string;
+  neverExpires: boolean;
   targetPort?: {
     id: string;
     portNumber: number;

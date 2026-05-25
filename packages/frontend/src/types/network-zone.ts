@@ -11,7 +11,7 @@ export type NetworkZoneType =
   | 'BACKUP'
   | 'CUSTOM';
 
-export type FirewallEnvironment = 'DEV' | 'UAT' | 'PROD';
+export type FirewallEnvironment = string;
 
 export interface ZoneIpEntry {
   id: string;

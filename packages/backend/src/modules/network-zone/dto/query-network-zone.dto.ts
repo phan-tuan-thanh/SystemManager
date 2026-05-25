@@ -1,14 +1,15 @@
 import { IsOptional, IsString, IsIn } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { PaginationDto } from '../../../common/dto/pagination.dto';
+import { IsValidEnvironment } from '../../../common/validators/is-valid-environment.validator';
 
-const ENVIRONMENTS = ['DEV','UAT','PROD'] as const;
 const ZONE_TYPES = ['LOCAL','DMZ','DB','DEV','UAT','PROD','INTERNET','MANAGEMENT','STORAGE','BACKUP','CUSTOM'] as const;
 
 export class QueryNetworkZoneDto extends PaginationDto {
-  @ApiPropertyOptional({ enum: ENVIRONMENTS })
+  @ApiPropertyOptional({ description: 'Environment code (e.g. PROD, UAT, DEV1)' })
   @IsOptional()
-  @IsIn(ENVIRONMENTS)
+  @IsString()
+  @IsValidEnvironment()
   environment?: string;
 
   @ApiPropertyOptional({ enum: ZONE_TYPES })

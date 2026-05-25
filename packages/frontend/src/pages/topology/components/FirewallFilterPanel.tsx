@@ -4,6 +4,8 @@ import {
   Checkbox, Badge, Divider, Tag, Switch, Popover, Tooltip,
 } from 'antd';
 import { PartitionOutlined, FilterOutlined, SearchOutlined, SettingOutlined, RedoOutlined } from '@ant-design/icons';
+import { useActiveEnvironments } from '../../../hooks/useEnvironments';
+import { toSelectOptions } from '../../../utils/environmentUtils';
 
 const { Text } = Typography;
 
@@ -281,6 +283,8 @@ export default function FirewallFilterPanel({
   const [physicsPopoverOpen, setPhysicsPopoverOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [localZones, setLocalZones] = useState<string[]>([]);
+  const { data: envConfigs = [] } = useActiveEnvironments();
+  const envOptions = toSelectOptions(envConfigs);
   const [localServers, setLocalServers] = useState<string[]>([]);
 
   const activeFilterCount = filters.visibleSourceZoneIds.length + filters.visibleDestServerIds.length;
@@ -416,11 +420,7 @@ export default function FirewallFilterPanel({
               allowClear size="small" placeholder="Tất cả" style={{ width: 90 }}
               value={filters.environment}
               onChange={(v) => onChange({ ...filters, environment: v })}
-              options={[
-                { label: 'DEV', value: 'DEV' },
-                { label: 'UAT', value: 'UAT' },
-                { label: 'PROD', value: 'PROD' },
-              ]}
+              options={envOptions}
             />
           </div>
 

@@ -89,6 +89,7 @@ const menuItems = [
       { key: '/admin/modules', label: 'Modules' },
       { key: '/admin/system-config', label: 'System Config' },
       { key: '/admin/doc-types', label: 'Doc Types' },
+      { key: '/admin/environments', label: 'Environments' },
     ],
   },
   { type: 'divider' as const },

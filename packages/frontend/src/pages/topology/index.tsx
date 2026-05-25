@@ -235,7 +235,7 @@ function TopologyPageInner() {
             animated: false,
             zIndex: 10,
             markerEnd: { type: MarkerType.ArrowClosed, color: cfg.color },
-            data: { type: 'IMPLIED', action, firewallRuleId: ic.firewallRuleId, firewallRuleName: ic.firewallRuleName, portNum, _implied: ic },
+            data: { type: 'IMPLIED', action, firewallRuleId: ic.firewallRuleId, firewallRuleName: ic.firewallRuleName, portNum, expiresAt: ic.expiresAt, neverExpires: ic.neverExpires, _implied: ic },
           };
           const pushServerPair = (srcId: string, tgtId: string) => {
             if (srcId === tgtId) return;

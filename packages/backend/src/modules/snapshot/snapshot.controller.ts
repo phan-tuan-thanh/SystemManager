@@ -20,7 +20,7 @@ import { RequireModule } from '../../common/decorators/require-module.decorator'
 @ApiBearerAuth()
 @UseGuards(ModuleGuard)
 @RequireModule('TOPOLOGY_2D')
-@Controller('api/v1/topology-snapshots')
+@Controller('topology-snapshots')
 export class SnapshotController {
   constructor(private readonly snapshotService: SnapshotService) {}
 

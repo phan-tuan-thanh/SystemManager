@@ -184,6 +184,12 @@ export class ImpliedConnectionEdge {
 
   @Field()
   action: string; // 'ALLOW' | 'DENY'
+
+  @Field({ nullable: true })
+  expiresAt?: string;
+
+  @Field()
+  neverExpires: boolean;
 }
 
 @ObjectType()

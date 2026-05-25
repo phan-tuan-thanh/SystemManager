@@ -1,4 +1,5 @@
 import { Form, Input, Select, Button, Space } from 'antd';
+import EnvironmentSelect from '../../../components/common/EnvironmentSelect';
 import type { NetworkZone, NetworkZoneType, FirewallEnvironment } from '../../../types/network-zone';
 
 const ZONE_TYPES: { value: NetworkZoneType; label: string }[] = [
@@ -13,12 +14,6 @@ const ZONE_TYPES: { value: NetworkZoneType; label: string }[] = [
   { value: 'STORAGE', label: 'STORAGE' },
   { value: 'BACKUP', label: 'BACKUP' },
   { value: 'CUSTOM', label: 'CUSTOM' },
-];
-
-const ENV_OPTIONS: { value: FirewallEnvironment; label: string }[] = [
-  { value: 'DEV', label: 'DEV' },
-  { value: 'UAT', label: 'UAT' },
-  { value: 'PROD', label: 'PROD' },
 ];
 
 export interface ZoneFormValues {
@@ -92,7 +87,7 @@ export default function ZoneForm({
         label="Môi trường"
         rules={[{ required: true, message: 'Vui lòng chọn môi trường' }]}
       >
-        <Select placeholder="Chọn môi trường" options={ENV_OPTIONS} />
+        <EnvironmentSelect placeholder="Chọn môi trường" />
       </Form.Item>
 
       <Form.Item name="description" label="Mô tả">

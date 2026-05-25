@@ -33,6 +33,7 @@ import {
 } from '@ant-design/icons';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '../../api/client';
+import EnvironmentTag from '../../components/common/EnvironmentTag';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -116,7 +117,6 @@ const DEMO_SERVERS_PREVIEW = [
   { code: 'SVR-PROD-LB-01', env: 'PROD', purpose: 'LOAD_BALANCER', infra: 'Physical' },
 ];
 
-const ENV_COLOR: Record<string, string> = { DEV: 'cyan', UAT: 'orange', PROD: 'red' };
 
 export default function SetupPage() {
   const [currentStep, setCurrentStep] = useState(0);
@@ -366,12 +366,7 @@ export default function SetupPage() {
                                       {s.code}
                                     </Text>
                                     <Space style={{ marginLeft: 'auto' }}>
-                                      <Tag
-                                        color={ENV_COLOR[s.env]}
-                                        style={{ fontSize: 10, margin: 0 }}
-                                      >
-                                        {s.env}
-                                      </Tag>
+                                      <EnvironmentTag code={s.env} style={{ fontSize: 10, margin: 0 }} />
                                       <Tag style={{ fontSize: 10, margin: 0 }}>{s.purpose}</Tag>
                                     </Space>
                                   </List.Item>

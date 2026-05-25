@@ -23,14 +23,9 @@ import type { FirewallRuleListParams } from './hooks/useFirewallRules';
 import type { FirewallRule, FirewallAction, FirewallRuleStatus } from '../../types/firewall-rule';
 import type { FirewallEnvironment } from '../../types/network-zone';
 import { useAuthStore } from '../../stores/authStore';
-
-// ─── Constants ─────────────────────────────────────────────────────────────────
-
-const ENV_COLOR: Record<FirewallEnvironment, string> = {
-  DEV: 'blue',
-  UAT: 'orange',
-  PROD: 'red',
-};
+import { useActiveEnvironments } from '../../hooks/useEnvironments';
+import { toSelectOptions } from '../../utils/environmentUtils';
+import EnvironmentTag from '../../components/common/EnvironmentTag';
 
 const STATUS_COLOR: Record<FirewallRuleStatus, string> = {
   ACTIVE: 'green',
@@ -76,6 +71,7 @@ export default function FirewallRulePage() {
   const { message } = App.useApp();
   const user = useAuthStore((s) => s.user);
   const canMutate = user?.roles?.some((r) => r === 'ADMIN' || r === 'OPERATOR') ?? false;
+  const { data: envConfigs = [] } = useActiveEnvironments();
 
   // ─── Filters ────────────────────────────────────────────────────────────────
 
@@ -185,7 +181,7 @@ export default function FirewallRulePage() {
       key: 'environment',
       width: 100,
       render: (env: FirewallEnvironment) => (
-        <Tag color={ENV_COLOR[env]}>{env}</Tag>
+        <EnvironmentTag code={env} />
       ),
     },
     {
@@ -371,11 +367,8 @@ export default function FirewallRulePage() {
           onChange={(v) => { setEnvFilter(v); setPage(1); }}
           allowClear
           style={{ width: 130 }}
-        >
-          <Select.Option value="DEV">DEV</Select.Option>
-          <Select.Option value="UAT">UAT</Select.Option>
-          <Select.Option value="PROD">PROD</Select.Option>
-        </Select>
+          options={toSelectOptions(envConfigs)}
+        />
         <Select
           placeholder="Hành động"
           value={actionFilter}

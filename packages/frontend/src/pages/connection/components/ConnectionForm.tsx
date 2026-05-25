@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Modal, Form, Select, Input } from 'antd';
 import type { AppConnection } from '../../../types/connection';
+import EnvironmentSelect from '../../../components/common/EnvironmentSelect';
 
 interface Props {
   open: boolean;
@@ -11,7 +12,6 @@ interface Props {
   loading?: boolean;
 }
 
-const ENVIRONMENTS = ['DEV', 'UAT', 'PROD'];
 const CONNECTION_TYPES = ['HTTP', 'HTTPS', 'TCP', 'GRPC', 'AMQP', 'KAFKA', 'DATABASE'];
 
 export default function ConnectionForm({ open, editing, applications, onSubmit, onCancel, loading }: Props) {
@@ -89,7 +89,7 @@ export default function ConnectionForm({ open, editing, applications, onSubmit, 
           label="Môi trường"
           rules={[{ required: true, message: 'Vui lòng chọn môi trường' }]}
         >
-          <Select options={ENVIRONMENTS.map((e) => ({ label: e, value: e }))} />
+          <EnvironmentSelect placeholder="Chọn môi trường" />
         </Form.Item>
 
         <Form.Item

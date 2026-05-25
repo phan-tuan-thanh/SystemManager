@@ -24,6 +24,7 @@ import {
 import type { UploadFile } from 'antd';
 import apiClient from '../../api/client';
 import HelpGuide from './HelpGuide';
+import EnvironmentSelect from './EnvironmentSelect';
 
 const { Dragger } = Upload;
 const { Text } = Typography;
@@ -234,17 +235,13 @@ export default function BulkImportModal({ open, onClose, defaultType = 'server',
             {importType !== 'deployment' && (
               <div>
                 <Text strong style={{ marginRight: 8 }}>Môi trường (tùy chọn):</Text>
-                <Select
+                <EnvironmentSelect
                   allowClear
+                  allowAll
                   value={environment}
                   onChange={setEnvironment}
-                  style={{ width: 120 }}
+                  style={{ width: 140 }}
                   placeholder="Tất cả"
-                  options={[
-                    { value: 'DEV', label: 'DEV' },
-                    { value: 'UAT', label: 'UAT' },
-                    { value: 'PROD', label: 'PROD' },
-                  ]}
                 />
               </div>
             )}

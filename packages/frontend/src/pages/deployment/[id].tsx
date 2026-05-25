@@ -12,9 +12,7 @@ import StatusBadge from '../../components/common/StatusBadge';
 import DeploymentForm from './components/DeploymentForm';
 import DocUploadCard from './components/DocUploadCard';
 import { useDeploymentDetail, useDeleteDeployment } from '../../hooks/useDeployments';
-import type { Environment } from '../../types/server';
-
-const ENV_COLOR: Record<string, string> = { DEV: 'green', UAT: 'blue', PROD: 'red' };
+import EnvironmentTag from '../../components/common/EnvironmentTag';
 
 export default function DeploymentDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -46,7 +44,7 @@ export default function DeploymentDetailPage() {
         title={deployment.title ?? `${deployment.application?.code} — v${deployment.version}`}
         subtitle={
           <Space>
-            <Tag color={ENV_COLOR[deployment.environment as Environment]}>{deployment.environment}</Tag>
+            <EnvironmentTag code={deployment.environment} />
             <span>{deployment.server?.name}</span>
           </Space>
         }
@@ -135,7 +133,7 @@ export default function DeploymentDetailPage() {
                     </Button>
                   </Descriptions.Item>
                   <Descriptions.Item label="Môi trường">
-                    <Tag color={ENV_COLOR[deployment.environment as Environment]}>{deployment.environment}</Tag>
+                    <EnvironmentTag code={deployment.environment} />
                   </Descriptions.Item>
                   <Descriptions.Item label="Version">{deployment.version}</Descriptions.Item>
                   <Descriptions.Item label="Trạng thái">

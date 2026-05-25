@@ -21,6 +21,9 @@ import {
 import type { ZoneFormValues } from './components/ZoneForm';
 import type { NetworkZone, NetworkZoneType, FirewallEnvironment } from '../../types/network-zone';
 import { useAuthStore } from '../../stores/authStore';
+import { useActiveEnvironments } from '../../hooks/useEnvironments';
+import { toSelectOptions } from '../../utils/environmentUtils';
+import EnvironmentTag from '../../components/common/EnvironmentTag';
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
 
@@ -36,12 +39,6 @@ const ZONE_TYPE_COLOR: Record<NetworkZoneType, string> = {
   STORAGE: '#EB2F96',
   BACKUP: '#FAAD14',
   CUSTOM: '#8C8C8C',
-};
-
-const ENV_ANTD_COLOR: Record<FirewallEnvironment, string> = {
-  DEV: 'blue',
-  UAT: 'orange',
-  PROD: 'red',
 };
 
 const ZONE_TYPE_OPTIONS: { value: NetworkZoneType; label: string }[] = [
@@ -116,6 +113,7 @@ export default function NetworkZonePage() {
   const { message } = App.useApp();
   const user = useAuthStore((s) => s.user);
   const canMutate = user?.roles?.some((r) => r === 'ADMIN' || r === 'OPERATOR') ?? false;
+  const { data: envConfigs = [] } = useActiveEnvironments();
 
   // Filters
   const [search, setSearch] = useState('');
@@ -211,7 +209,7 @@ export default function NetworkZonePage() {
       key: 'environment',
       width: 110,
       render: (env: FirewallEnvironment) => (
-        <Tag color={ENV_ANTD_COLOR[env]}>{env}</Tag>
+        <EnvironmentTag code={env} />
       ),
     },
     {
@@ -328,11 +326,8 @@ export default function NetworkZonePage() {
           onChange={(v) => { setEnvFilter(v); setPage(1); }}
           allowClear
           style={{ width: 130 }}
-        >
-          <Select.Option value="DEV">DEV</Select.Option>
-          <Select.Option value="UAT">UAT</Select.Option>
-          <Select.Option value="PROD">PROD</Select.Option>
-        </Select>
+          options={toSelectOptions(envConfigs)}
+        />
         <Select
           placeholder="Loại zone"
           value={typeFilter}

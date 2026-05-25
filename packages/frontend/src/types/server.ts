@@ -1,4 +1,4 @@
-export type Environment = 'DEV' | 'UAT' | 'PROD';
+export type Environment = string;
 export type ServerStatus = 'ACTIVE' | 'INACTIVE' | 'MAINTENANCE';
 export type ServerPurpose = 'APP_SERVER' | 'DB_SERVER' | 'PROXY' | 'LOAD_BALANCER' | 'CACHE' | 'MESSAGE_QUEUE' | 'OTHER';
 export type InfraType = 'VIRTUAL_MACHINE' | 'PHYSICAL_SERVER' | 'CONTAINER' | 'CLOUD_INSTANCE';

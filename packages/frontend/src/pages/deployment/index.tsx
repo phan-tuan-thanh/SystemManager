@@ -7,11 +7,10 @@ import PageHeader from '../../components/common/PageHeader';
 import DataTable from '../../components/common/DataTable';
 import StatusBadge from '../../components/common/StatusBadge';
 import DeploymentForm from './components/DeploymentForm';
+import EnvironmentTag from '../../components/common/EnvironmentTag';
+import EnvironmentSelect from '../../components/common/EnvironmentSelect';
 import { useDeploymentList, useDeleteDeployment } from '../../hooks/useDeployments';
 import type { AppDeployment } from '../../types/deployment';
-import type { Environment } from '../../types/server';
-
-const ENV_COLOR: Record<string, string> = { DEV: 'green', UAT: 'blue', PROD: 'red' };
 
 export default function DeploymentListPage() {
   const navigate = useNavigate();
@@ -59,7 +58,7 @@ export default function DeploymentListPage() {
       dataIndex: 'environment',
       key: 'env',
       width: 90,
-      render: (env: Environment) => <Tag color={ENV_COLOR[env]}>{env}</Tag>,
+      render: (env: string) => <EnvironmentTag code={env} />,
     },
     {
       title: 'Ứng dụng',
@@ -156,17 +155,13 @@ export default function DeploymentListPage() {
           style={{ width: 260 }}
           allowClear
         />
-        <Select
+        <EnvironmentSelect
           placeholder="Môi trường"
           value={envFilter}
           onChange={(v) => { setEnvFilter(v); setPage(1); }}
           allowClear
+          allowAll
           style={{ width: 130 }}
-          options={[
-            { value: 'DEV', label: 'DEV' },
-            { value: 'UAT', label: 'UAT' },
-            { value: 'PROD', label: 'PROD' },
-          ]}
         />
         <Select
           placeholder="Trạng thái"

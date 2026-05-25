@@ -252,6 +252,8 @@ export class TopologyService {
             firewallRuleName: rule.name,
             action: rule.action,
             targetPort: targetPortInfo,
+            expiresAt: rule.expires_at ? rule.expires_at.toISOString() : undefined,
+            neverExpires: rule.never_expires ?? !rule.expires_at,
           });
         }
         continue;
@@ -278,6 +280,8 @@ export class TopologyService {
               firewallRuleName: rule.name,
               action: rule.action,
               targetPort: targetPortInfo,
+              expiresAt: rule.expires_at ? rule.expires_at.toISOString() : undefined,
+              neverExpires: rule.never_expires ?? !rule.expires_at,
             });
           }
           continue;
@@ -311,6 +315,8 @@ export class TopologyService {
               firewallRuleName: rule.name,
               action: rule.action,
               targetPort: targetPortInfo,
+              expiresAt: rule.expires_at ? rule.expires_at.toISOString() : undefined,
+              neverExpires: rule.never_expires ?? !rule.expires_at,
             });
           }
         }

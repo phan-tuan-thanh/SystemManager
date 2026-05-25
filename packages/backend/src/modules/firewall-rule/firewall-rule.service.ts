@@ -132,6 +132,7 @@ export class FirewallRuleService {
       data: {
         ...(dto.name !== undefined && { name: dto.name }),
         ...(dto.description !== undefined && { description: dto.description }),
+        ...(dto.environment !== undefined && { environment: dto.environment as any }),
         ...(dto.source_zone_id !== undefined && { source_zone_id: dto.source_zone_id }),
         ...(dto.source_ip !== undefined && { source_ip: dto.source_ip }),
         ...(dto.destination_zone_id !== undefined && { destination_zone_id: dto.destination_zone_id }),

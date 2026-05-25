@@ -1,5 +1,5 @@
 export type ConnectionType = 'HTTP' | 'HTTPS' | 'TCP' | 'GRPC' | 'AMQP' | 'KAFKA' | 'DATABASE';
-export type Environment = 'DEV' | 'UAT' | 'PROD';
+export type Environment = string;
 
 export interface AppRef {
   id: string;

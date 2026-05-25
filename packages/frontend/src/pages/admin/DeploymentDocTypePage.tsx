@@ -2,19 +2,14 @@ import { useState } from 'react';
 import {
   Button, Input, Space, App, Popconfirm, Tag, Modal, Form, Switch, Select, InputNumber,
 } from 'antd';
-import { PlusOutlined, SearchOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import PageHeader from '../../components/common/PageHeader';
 import DataTable from '../../components/common/DataTable';
 import { useDocTypeList, useCreateDocType, useUpdateDocType, useDeleteDocType } from '../../hooks/useDeployments';
+import EnvironmentSelect from '../../components/common/EnvironmentSelect';
+import EnvironmentTag from '../../components/common/EnvironmentTag';
 import type { DeploymentDocType } from '../../types/deployment';
-import type { Environment } from '../../types/server';
-
-const ENV_OPTIONS: { value: Environment; label: string }[] = [
-  { value: 'DEV', label: 'DEV' },
-  { value: 'UAT', label: 'UAT' },
-  { value: 'PROD', label: 'PROD' },
-];
 
 export default function DeploymentDocTypePage() {
   const { message } = App.useApp();
@@ -97,10 +92,10 @@ export default function DeploymentDocTypePage() {
       dataIndex: 'environments',
       key: 'environments',
       width: 180,
-      render: (envs: Environment[]) =>
+      render: (envs: string[]) =>
         envs.length === 0
           ? <Tag>Tất cả</Tag>
-          : envs.map((e) => <Tag key={e} color={e === 'PROD' ? 'red' : e === 'UAT' ? 'blue' : 'green'}>{e}</Tag>),
+          : envs.map((e) => <EnvironmentTag key={e} code={e} />),
     },
     {
       title: 'Trạng thái',
@@ -172,9 +167,8 @@ export default function DeploymentDocTypePage() {
             <Switch />
           </Form.Item>
           <Form.Item label="Áp dụng cho môi trường (để trống = tất cả)" name="environments">
-            <Select
+            <EnvironmentSelect
               mode="multiple"
-              options={ENV_OPTIONS}
               placeholder="Chọn môi trường hoặc để trống cho tất cả"
             />
           </Form.Item>

@@ -1,8 +1,7 @@
-import { IsOptional, IsString, IsIn, IsUUID } from 'class-validator';
+import { IsOptional, IsString, IsUUID } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { PaginationDto } from '../../../common/dto/pagination.dto';
-
-const ENVIRONMENTS = ['DEV', 'UAT', 'PROD'] as const;
+import { IsValidEnvironment } from '../../../common/validators/is-valid-environment.validator';
 
 export class QueryNetworkConfigDto extends PaginationDto {
   @ApiPropertyOptional({ description: 'Filter by server ID' })
@@ -10,10 +9,11 @@ export class QueryNetworkConfigDto extends PaginationDto {
   @IsUUID()
   server_id?: string;
 
-  @ApiPropertyOptional({ enum: ENVIRONMENTS })
+  @ApiPropertyOptional({ description: 'Environment code (e.g. PROD, UAT, DEV1)' })
   @IsOptional()
-  @IsIn(ENVIRONMENTS)
-  environment?: typeof ENVIRONMENTS[number];
+  @IsString()
+  @IsValidEnvironment()
+  environment?: string;
 
   @ApiPropertyOptional({ description: 'Filter by IP address (private, public, or NAT)' })
   @IsOptional()

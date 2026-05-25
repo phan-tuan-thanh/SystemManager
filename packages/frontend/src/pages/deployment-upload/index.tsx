@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Button,
   Upload,
@@ -30,6 +30,7 @@ import type { UploadFile } from 'antd';
 import Papa from 'papaparse';
 import apiClient from '../../api/client';
 import PageHeader from '../../components/common/PageHeader';
+import { useActiveEnvironments } from '../../hooks/useEnvironments';
 import ColumnMapper, {
   autoDetect,
   applyAllMappings,
@@ -69,11 +70,6 @@ interface ExecuteResult {
   errors: Array<{ row: number; name: string; ip: string; reason: string }>;
 }
 
-const ENV_OPTIONS = [
-  { label: 'DEV', value: 'DEV' },
-  { label: 'UAT', value: 'UAT' },
-  { label: 'PROD', value: 'PROD' },
-];
 const ENV_VALUE_ALIASES: Record<string, string> = {
   dev: 'DEV',
   development: 'DEV',
@@ -98,7 +94,7 @@ const STATUS_VALUE_ALIASES: Record<string, string> = {
   deprecated: 'DEPRECATED',
 };
 
-const DEPLOY_TARGETS: TargetField[] = [
+const DEPLOY_TARGETS_STATIC: TargetField[] = [
   {
     key: 'application_code',
     label: 'Mã ứng dụng (application_code)',
@@ -116,7 +112,6 @@ const DEPLOY_TARGETS: TargetField[] = [
     label: 'Môi trường (environment)',
     required: true,
     aliases: ['env', 'moi_truong'],
-    options: ENV_OPTIONS,
     valueAliases: ENV_VALUE_ALIASES,
   },
   {
@@ -144,13 +139,22 @@ const DEPLOY_TARGETS: TargetField[] = [
   },
 ];
 
-const DEPLOY_TARGET_BY_KEY: Record<string, TargetField> = DEPLOY_TARGETS.reduce(
-  (acc, t) => ({ ...acc, [t.key]: t }),
-  {} as Record<string, TargetField>,
-);
-
 export function DeploymentUploadContent() {
   const { message, modal } = App.useApp();
+  const { data: envConfigs = [] } = useActiveEnvironments();
+
+  const DEPLOY_TARGETS = useMemo<TargetField[]>(() => {
+    const envOptions = envConfigs.map((e) => ({ label: e.label, value: e.code }));
+    return DEPLOY_TARGETS_STATIC.map((t) =>
+      t.key === 'environment' ? { ...t, options: envOptions } : t,
+    );
+  }, [envConfigs]);
+
+  const DEPLOY_TARGET_BY_KEY = useMemo<Record<string, TargetField>>(() =>
+    DEPLOY_TARGETS.reduce((acc, t) => ({ ...acc, [t.key]: t }), {} as Record<string, TargetField>),
+    [DEPLOY_TARGETS],
+  );
+
   const [step, setStep] = useState(0);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [csvColumns, setCsvColumns] = useState<string[]>([]);

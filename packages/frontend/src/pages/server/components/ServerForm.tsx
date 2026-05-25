@@ -1,6 +1,8 @@
 import { Form, Input, Select, Modal, Space, Button, App, Row, Col } from 'antd';
 import { useCreateServer, useUpdateServer } from '../../../hooks/useServers';
 import { useInfraSystemList } from '../../../hooks/useInfraSystems';
+import { useActiveEnvironments } from '../../../hooks/useEnvironments';
+import EnvironmentSelect from '../../../components/common/EnvironmentSelect';
 import type { Server } from '../../../types/server';
 
 const { Option } = Select;
@@ -17,8 +19,10 @@ export default function ServerForm({ open, onClose, initial }: ServerFormProps) 
   const create = useCreateServer();
   const update = useUpdateServer();
   const { data: infraSystems } = useInfraSystemList({ limit: 100 });
+  const { data: envConfigs = [] } = useActiveEnvironments();
   const isEdit = !!initial;
   const environment = Form.useWatch('environment', form);
+  const envType = envConfigs.find((e) => e.code === environment)?.type;
 
   const onFinish = async (values: Record<string, unknown>) => {
     try {
@@ -27,7 +31,6 @@ export default function ServerForm({ open, onClose, initial }: ServerFormProps) 
       if (isEdit && initial) {
         // Remove immutable fields that the update DTO does not accept
         delete payload.code;
-        delete payload.environment;
         delete payload.hostname;
         await update.mutateAsync({ id: initial.id, ...payload } as Partial<Server> & { id: string });
         message.success('Cập nhật server thành công');
@@ -79,12 +82,8 @@ export default function ServerForm({ open, onClose, initial }: ServerFormProps) 
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item name="environment" label="Môi trường" rules={[{ required: !isEdit }]}>
-              <Select disabled={isEdit}>
-                <Option value="DEV">🔧 DEV</Option>
-                <Option value="UAT">🧪 UAT</Option>
-                <Option value="PROD">🚀 PROD</Option>
-              </Select>
+            <Form.Item name="environment" label="Môi trường" rules={[{ required: true }]}>
+              <EnvironmentSelect onChange={() => form.setFieldValue('site', undefined)} />
             </Form.Item>
           </Col>
         </Row>
@@ -100,12 +99,12 @@ export default function ServerForm({ open, onClose, initial }: ServerFormProps) 
             </Form.Item>
           </Col>
           <Col span={12}>
-            {environment === 'PROD' ? (
+            {envType === 'PROD' || envType === 'LIVE' ? (
               <Form.Item
                 name="site"
                 label="Site"
-                rules={[{ required: true, message: 'Vui lòng chọn Site cho PROD' }]}
-                tooltip="PROD phải chỉ định DC hoặc DR"
+                rules={[{ required: true, message: 'Vui lòng chọn Site cho PROD/LIVE' }]}
+                tooltip="PROD/LIVE phải chỉ định DC hoặc DR"
               >
                 <Select placeholder="DC hoặc DR">
                   <Option value="DC">🏢 DC (Data Center)</Option>

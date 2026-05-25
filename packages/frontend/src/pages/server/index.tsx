@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Tabs, Input, Select, Space, App, Popconfirm, Tag, Drawer } from 'antd';
 import { PlusOutlined, SearchOutlined, EditOutlined, DeleteOutlined, EyeOutlined, UploadOutlined, TableOutlined, SnippetsOutlined } from '@ant-design/icons';
@@ -9,18 +9,16 @@ import StatusBadge from '../../components/common/StatusBadge';
 import ServerForm from './components/ServerForm';
 import EditableTable, { type EditableColumnDef } from '../../components/common/EditableTable';
 import ServerPasteImportDrawer from './components/ServerPasteImportDrawer';
+import EnvironmentTag from '../../components/common/EnvironmentTag';
 import { useServerList, useDeleteServer, useCreateServer } from '../../hooks/useServers';
+import { useActiveEnvironments } from '../../hooks/useEnvironments';
 import type { Server, Environment } from '../../types/server';
 
-const SERVER_EDITABLE_COLUMNS: EditableColumnDef[] = [
+const STATIC_EDITABLE_COLUMNS: EditableColumnDef[] = [
   { key: 'code', title: 'Mã server', type: 'text', required: true, placeholder: 'SRV-PROD-001', width: 140 },
   { key: 'name', title: 'Tên server', type: 'text', required: true, placeholder: 'App Server 01', width: 160 },
   { key: 'hostname', title: 'Hostname', type: 'text', required: true, placeholder: 'app-01.internal', width: 160 },
-  { key: 'environment', title: 'Môi trường', type: 'select', required: true, width: 100, options: [
-    { value: 'DEV', label: 'DEV' },
-    { value: 'UAT', label: 'UAT' },
-    { value: 'PROD', label: 'PROD' },
-  ]},
+  { key: 'environment', title: 'Môi trường', type: 'select', required: true, width: 100, options: [] },
   { key: 'site', title: 'Site', type: 'select', width: 90, options: [
     { value: 'DC', label: 'DC' },
     { value: 'DR', label: 'DR' },
@@ -49,14 +47,6 @@ const SERVER_EDITABLE_COLUMNS: EditableColumnDef[] = [
   { key: 'description', title: 'Mô tả', type: 'text', width: 200 },
 ];
 
-
-const ENV_TABS: { key: Environment | 'ALL'; label: string }[] = [
-  { key: 'ALL', label: 'Tất cả' },
-  { key: 'DEV', label: 'DEV' },
-  { key: 'UAT', label: 'UAT' },
-  { key: 'PROD', label: 'PROD' },
-];
-
 const PURPOSE_LABEL: Record<string, string> = {
   APP_SERVER: 'App',
   DB_SERVER: 'DB',
@@ -78,6 +68,8 @@ export default function ServerListPage() {
   const navigate = useNavigate();
   const { message } = App.useApp();
 
+  const { data: envConfigs = [] } = useActiveEnvironments();
+
   const [envTab, setEnvTab] = useState<Environment | 'ALL'>('ALL');
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string | undefined>();
@@ -88,6 +80,18 @@ export default function ServerListPage() {
   const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
   const [batchAddOpen, setBatchAddOpen] = useState(false);
   const [pasteImportOpen, setPasteImportOpen] = useState(false);
+
+  const envTabs = useMemo(() => [
+    { key: 'ALL' as const, label: 'Tất cả' },
+    ...envConfigs.map((e) => ({ key: e.code, label: e.label })),
+  ], [envConfigs]);
+
+  const serverEditableColumns = useMemo<EditableColumnDef[]>(() => {
+    const envOptions = envConfigs.map((e) => ({ value: e.code, label: e.label }));
+    return STATIC_EDITABLE_COLUMNS.map((col) =>
+      col.key === 'environment' ? { ...col, options: envOptions } : col,
+    );
+  }, [envConfigs]);
 
   const params = {
     page,
@@ -147,9 +151,7 @@ export default function ServerListPage() {
       dataIndex: 'environment',
       key: 'environment',
       width: 90,
-      render: (env: string) => (
-        <Tag color={env === 'PROD' ? 'red' : env === 'UAT' ? 'orange' : 'blue'}>{env}</Tag>
-      ),
+      render: (env: string) => <EnvironmentTag code={env} />,
     },
     {
       title: 'Loại',
@@ -277,7 +279,7 @@ export default function ServerListPage() {
       <Tabs
         activeKey={envTab}
         onChange={(k) => { setEnvTab(k as Environment | 'ALL'); setPage(1); }}
-        items={ENV_TABS.map((t) => ({ key: t.key, label: t.label }))}
+        items={envTabs.map((t) => ({ key: t.key, label: t.label }))}
         style={{ marginBottom: 16 }}
       />
 
@@ -330,7 +332,7 @@ export default function ServerListPage() {
         destroyOnClose
       >
         <EditableTable
-          columns={SERVER_EDITABLE_COLUMNS}
+          columns={serverEditableColumns}
           onSave={async (rows) => {
             const results = await Promise.allSettled(
               rows.map((r) => createServer.mutateAsync(r as Parameters<typeof createServer.mutateAsync>[0])),

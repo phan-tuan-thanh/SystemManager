@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsString, IsOptional, IsIn, MaxLength, IsUUID } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsValidEnvironment } from '../../../common/validators/is-valid-environment.validator';
 
-const ENVIRONMENTS = ['DEV', 'UAT', 'PROD'] as const;
 const SERVER_PURPOSES = ['APP_SERVER', 'DB_SERVER', 'PROXY', 'LOAD_BALANCER', 'CACHE', 'MESSAGE_QUEUE', 'OTHER'] as const;
 const SERVER_STATUSES = ['ACTIVE', 'INACTIVE', 'MAINTENANCE'] as const;
 const INFRA_TYPES = ['VIRTUAL_MACHINE', 'PHYSICAL_SERVER', 'CONTAINER', 'CLOUD_INSTANCE'] as const;
@@ -26,10 +26,11 @@ export class CreateServerDto {
   @MaxLength(255)
   hostname: string;
 
-  @ApiProperty({ enum: ENVIRONMENTS })
+  @ApiProperty({ example: 'PROD', description: 'Environment code (e.g. PROD, UAT, DEV1)' })
   @IsNotEmpty()
-  @IsIn(ENVIRONMENTS)
-  environment: typeof ENVIRONMENTS[number];
+  @IsString()
+  @IsValidEnvironment()
+  environment: string;
 
   @ApiPropertyOptional({ enum: SERVER_PURPOSES, default: 'APP_SERVER' })
   @IsOptional()

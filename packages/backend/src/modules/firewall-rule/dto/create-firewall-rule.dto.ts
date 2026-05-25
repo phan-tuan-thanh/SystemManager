@@ -3,8 +3,8 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsValidEnvironment } from '../../../common/validators/is-valid-environment.validator';
 
-const ENVIRONMENTS = ['DEV','UAT','PROD'] as const;
 const ACTIONS = ['ALLOW','DENY'] as const;
 const STATUSES = ['ACTIVE','INACTIVE','PENDING_APPROVAL','REJECTED'] as const;
 
@@ -20,9 +20,10 @@ export class CreateFirewallRuleDto {
   @IsString()
   description?: string;
 
-  @ApiProperty({ enum: ENVIRONMENTS })
+  @ApiProperty({ example: 'PROD', description: 'Environment code (e.g. PROD, UAT, DEV1)' })
   @IsNotEmpty()
-  @IsIn(ENVIRONMENTS)
+  @IsString()
+  @IsValidEnvironment()
   environment: string;
 
   @ApiPropertyOptional({ description: 'UUID của NetworkZone nguồn' })

@@ -2,9 +2,9 @@ import {
   IsNotEmpty, IsOptional, IsString, MaxLength, IsIn,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsValidEnvironment } from '../../../common/validators/is-valid-environment.validator';
 
 const ZONE_TYPES = ['LOCAL','DMZ','DB','DEV','UAT','PROD','INTERNET','MANAGEMENT','STORAGE','BACKUP','CUSTOM'] as const;
-const ENVIRONMENTS = ['DEV','UAT','PROD'] as const;
 
 export class CreateNetworkZoneDto {
   @ApiProperty({ example: 'DMZ Zone' })
@@ -35,8 +35,9 @@ export class CreateNetworkZoneDto {
   @MaxLength(20)
   color?: string;
 
-  @ApiProperty({ enum: ENVIRONMENTS })
+  @ApiProperty({ example: 'PROD', description: 'Environment code (e.g. PROD, UAT, DEV1)' })
   @IsNotEmpty()
-  @IsIn(ENVIRONMENTS)
+  @IsString()
+  @IsValidEnvironment()
   environment: string;
 }

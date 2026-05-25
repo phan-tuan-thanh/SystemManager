@@ -1,5 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Select, Switch, Button, Segmented, Typography, Space, Modal, Input, Checkbox, Badge, Divider, Tag } from 'antd';
+import { useActiveEnvironments } from '../../../hooks/useEnvironments';
+import { toSelectOptions } from '../../../utils/environmentUtils';
 import { PartitionOutlined, LinkOutlined, FilterOutlined, SearchOutlined, TableOutlined } from '@ant-design/icons';
 
 const { Text } = Typography;
@@ -169,6 +171,8 @@ export default function TopologyFilterPanel({
   const [localGroupNames, setLocalGroupNames] = useState<string[]>([]);
   const [localServerIds, setLocalServerIds] = useState<string[]>([]);
   const [localAppIds, setLocalAppIds] = useState<string[]>([]);
+  const { data: envConfigs = [] } = useActiveEnvironments();
+  const envOptions = toSelectOptions(envConfigs);
 
   // Cascade: server options filtered by selected groups
   const cascadedServerOptions = useMemo(() => {
@@ -389,11 +393,7 @@ export default function TopologyFilterPanel({
               value={filters.environment}
               onChange={(v) => onChange({ ...filters, environment: v })}
               getPopupContainer={(trigger) => trigger.parentElement!}
-              options={[
-                { label: 'DEV', value: 'DEV' },
-                { label: 'UAT', value: 'UAT' },
-                { label: 'PROD', value: 'PROD' },
-              ]}
+              options={envOptions}
             />
           </div>
 

@@ -174,8 +174,8 @@ const SERVER_HEADER_ALIASES: Record<string, string> = {
   'os_name': 'os',
 };
 
-// Environment alias: maps spreadsheet values to canonical enum
-const ENV_ALIASES: Record<string, 'DEV' | 'UAT' | 'PROD'> = {
+// Static bootstrap aliases kept for common well-known names; dynamic codes are loaded at runtime
+const STATIC_ENV_ALIASES: Record<string, string> = {
   live: 'PROD',
   prod: 'PROD',
   production: 'PROD',
@@ -229,6 +229,30 @@ function toInt(v: unknown): number | null {
 @Injectable()
 export class ImportService {
   constructor(private prisma: PrismaService) {}
+
+  private async buildEnvAliasMap(): Promise<Record<string, string>> {
+    const envs = await this.prisma.environmentConfig.findMany({
+      where: { is_active: true },
+      select: { code: true, label: true },
+    });
+    const map: Record<string, string> = { ...STATIC_ENV_ALIASES };
+    for (const env of envs) {
+      map[env.code.toLowerCase()] = env.code;
+      map[env.label.toLowerCase()] = env.code;
+      map[env.label.toLowerCase().replace(/\s+/g, '_')] = env.code;
+    }
+    return map;
+  }
+
+  private async resolveEnvCode(raw: string, aliasMap: Record<string, string>): Promise<string | null> {
+    const key = raw.trim().toLowerCase();
+    const resolved = aliasMap[key] ?? raw.trim().toUpperCase();
+    const exists = await this.prisma.environmentConfig.findUnique({
+      where: { code: resolved },
+      select: { is_active: true },
+    });
+    return exists?.is_active ? resolved : null;
+  }
 
   async previewFile(
     buffer: Buffer,
@@ -333,7 +357,8 @@ export class ImportService {
     const hostname = d['hostname'] ? String(d['hostname']) : name;
 
     const envRaw = d['environment'] ? String(d['environment']).toLowerCase() : '';
-    const environment = ENV_ALIASES[envRaw] ?? 'DEV';
+    const envAliasMap = await this.buildEnvAliasMap();
+    const environment = (await this.resolveEnvCode(envRaw, envAliasMap)) ?? 'DEV';
 
     const siteRaw = d['site'] ? String(d['site']).toLowerCase() : '';
     const site = SITE_ALIASES[siteRaw] ?? 'TEST';
@@ -524,7 +549,8 @@ export class ImportService {
     const server = await this.prisma.server.findUnique({ where: { code: serverCode, deleted_at: null } });
     if (!server) throw new Error(`Server '${serverCode}' not found`);
 
-    const environment = String(d['environment'] || 'DEV') as any;
+    const envAliasMap = await this.buildEnvAliasMap();
+    const environment = (await this.resolveEnvCode(String(d['environment'] || 'DEV'), envAliasMap)) ?? 'DEV';
     const version = String(d['version'] || '1.0.0');
     const status = String(d['status'] || 'RUNNING') as any;
     const deployer = d['deployer'] ? String(d['deployer']) : null;
@@ -587,8 +613,8 @@ export class ImportService {
     const sourceCode = String(d['source_app']);
     const targetCode = String(d['target_app']);
 
-    const envRaw = String(d['environment'] || 'PROD').toLowerCase();
-    const environment = (ENV_ALIASES[envRaw] ?? String(d['environment'] || 'PROD').toUpperCase()) as any;
+    const envAliasMap = await this.buildEnvAliasMap();
+    const environment = (await this.resolveEnvCode(String(d['environment'] || 'PROD'), envAliasMap)) ?? 'PROD';
 
     const rawType = String(d['connection_type'] || 'HTTP').toLowerCase();
     const connectionType = (CONN_TYPE_ALIASES[rawType] ?? String(d['connection_type'] || 'HTTP').toUpperCase()) as any;
@@ -650,7 +676,8 @@ export class ImportService {
     const d = row.data;
     const code = String(d['code']).toUpperCase().trim();
     const name = String(d['name']).trim();
-    const environment = String(d['environment']).toUpperCase() as any;
+    const envAliasMapNz = await this.buildEnvAliasMap();
+    const environment = (await this.resolveEnvCode(String(d['environment'] || ''), envAliasMapNz)) ?? 'DEV';
     const zone_type = d['zone_type'] ? String(d['zone_type']).toUpperCase() : 'CUSTOM';
     const color = d['color'] ? String(d['color']).trim() : null;
     const description = d['description'] ? String(d['description']).trim() : null;
@@ -782,7 +809,7 @@ export class ImportService {
       if (type === 'connection') {
         if (normalised['environment']) {
           const envRaw = String(normalised['environment']).toLowerCase();
-          normalised['environment'] = ENV_ALIASES[envRaw] ?? String(normalised['environment']).toUpperCase();
+          normalised['environment'] = STATIC_ENV_ALIASES[envRaw] ?? String(normalised['environment']).toUpperCase();
         }
         if (normalised['connection_type']) {
           const raw = String(normalised['connection_type']).toLowerCase();
@@ -802,12 +829,7 @@ export class ImportService {
       if (type === 'network_zone') {
         if (normalised['environment']) {
           const envUp = String(normalised['environment']).toUpperCase();
-          const canonical = ENV_ALIASES[envUp.toLowerCase()] ?? envUp;
-          if (!['DEV', 'UAT', 'PROD'].includes(canonical)) {
-            errors.push(`Invalid environment: must be DEV, UAT, or PROD`);
-          } else {
-            normalised['environment'] = canonical;
-          }
+          normalised['environment'] = STATIC_ENV_ALIASES[envUp.toLowerCase()] ?? envUp;
         }
         if (normalised['zone_type']) {
           const ztUp = String(normalised['zone_type']).toUpperCase();
@@ -823,7 +845,7 @@ export class ImportService {
       if (type === 'zone_ip') {
         if (normalised['environment']) {
           const envUp = String(normalised['environment']).toUpperCase();
-          normalised['environment'] = ENV_ALIASES[envUp.toLowerCase()] ?? envUp;
+          normalised['environment'] = STATIC_ENV_ALIASES[envUp.toLowerCase()] ?? envUp;
         }
         if (normalised['ip_address']) {
           const ip = String(normalised['ip_address']).trim();

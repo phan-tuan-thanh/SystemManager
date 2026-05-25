@@ -1,6 +1,7 @@
 import { IsOptional, IsString, IsUUID, IsIn } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { PaginationDto } from '../../../common/dto/pagination.dto';
+import { IsValidEnvironment } from '../../../common/validators/is-valid-environment.validator';
 
 export class QueryDeploymentDto extends PaginationDto {
   @ApiPropertyOptional()
@@ -13,9 +14,10 @@ export class QueryDeploymentDto extends PaginationDto {
   @IsUUID()
   server_id?: string;
 
-  @ApiPropertyOptional({ enum: ['DEV', 'UAT', 'PROD'] })
+  @ApiPropertyOptional({ description: 'Environment code (e.g. PROD, UAT, DEV1)' })
   @IsOptional()
-  @IsIn(['DEV', 'UAT', 'PROD'])
+  @IsString()
+  @IsValidEnvironment()
   environment?: string;
 
   @ApiPropertyOptional({ enum: ['RUNNING', 'STOPPED', 'DEPRECATED'] })

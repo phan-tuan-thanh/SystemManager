@@ -64,10 +64,30 @@ enum ApplicationType {
   SYSTEM
 }
 
-enum Environment {
+enum EnvironmentType {
   DEV
   UAT
   PROD
+  LIVE
+}
+
+// ─── Environment Config ──────────────────────────────────────────
+
+model EnvironmentConfig {
+  id          String          @id @default(uuid()) @db.Uuid
+  code        String          @unique @db.VarChar(20)
+  label       String          @db.VarChar(100)
+  type        EnvironmentType
+  color       String          @default("#1890ff") @db.VarChar(7)
+  sort_order  Int             @default(0)
+  is_active   Boolean         @default(true)
+  description String?         @db.Text
+  created_at  DateTime        @default(now())
+  updated_at  DateTime        @updatedAt
+
+  @@index([type])
+  @@index([is_active])
+  @@map("environment_configs")
 }
 
 enum ServerPurpose {
@@ -356,7 +376,7 @@ model Server {
   hostname         String        @db.VarChar(255)
   purpose          ServerPurpose @default(APP_SERVER)
   status           ServerStatus  @default(ACTIVE)
-  environment      Environment
+  environment      String        @db.VarChar(20)
   infra_type       InfraType     @default(VIRTUAL_MACHINE)
   site             Site          @default(DC)
   description      String?       @db.Text
@@ -489,7 +509,7 @@ model AppDeployment {
   id             String           @id @default(uuid()) @db.Uuid
   application_id String           @db.Uuid
   server_id      String           @db.Uuid
-  environment    Environment
+  environment    String           @db.VarChar(20)
   version        String           @db.VarChar(50)
   status         DeploymentStatus @default(RUNNING)
   title          String?          @db.VarChar(255)
@@ -604,7 +624,7 @@ model AppConnection {
   id              String         @id @default(uuid()) @db.Uuid
   source_app_id   String         @db.Uuid
   target_app_id   String         @db.Uuid
-  environment     Environment
+  environment     String         @db.VarChar(20)
   connection_type ConnectionType @default(HTTPS)
   description     String?        @db.Text
   target_port_id  String?        @db.Uuid
@@ -723,7 +743,7 @@ model NetworkZone {
   zone_type   NetworkZoneType @default(CUSTOM)
   description String?         @db.Text
   color       String?         @db.VarChar(20)
-  environment Environment
+  environment String          @db.VarChar(20)
   created_at  DateTime        @default(now())
   updated_at  DateTime        @updatedAt
   deleted_at  DateTime?
@@ -758,7 +778,7 @@ model FirewallRule {
   id                    String             @id @default(uuid()) @db.Uuid
   name                  String             @db.VarChar(200)
   description           String?            @db.Text
-  environment           Environment
+  environment           String             @db.VarChar(20)
   source_zone_id        String?            @db.Uuid
   source_ip             String?            @db.VarChar(50)
   destination_zone_id   String?            @db.Uuid

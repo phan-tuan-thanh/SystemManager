@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import {
   Form, Input, InputNumber, Select, Radio, Button, Space, DatePicker, Alert,
 } from 'antd';
+import EnvironmentSelect from '../../../components/common/EnvironmentSelect';
 import dayjs from 'dayjs';
 import { useQuery } from '@tanstack/react-query';
 import apiClient from '../../../api/client';
@@ -60,11 +61,6 @@ interface FirewallRuleFormProps {
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
 
-const ENV_OPTIONS: { value: FirewallEnvironment; label: string }[] = [
-  { value: 'DEV', label: 'DEV' },
-  { value: 'UAT', label: 'UAT' },
-  { value: 'PROD', label: 'PROD' },
-];
 
 const PROTOCOL_OPTIONS = [
   { value: 'TCP', label: 'TCP' },
@@ -229,9 +225,8 @@ export default function FirewallRuleForm({
         label="Môi trường"
         rules={[{ required: true, message: 'Vui lòng chọn môi trường' }]}
       >
-        <Select
+        <EnvironmentSelect
           placeholder="Chọn môi trường"
-          options={ENV_OPTIONS}
           onChange={() => {
             form.setFieldValue('destination_server_id', undefined);
             form.setFieldValue('destination_port_id', undefined);

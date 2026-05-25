@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Tabs } from 'antd';
 import {
@@ -10,6 +10,7 @@ import {
   AppstoreOutlined,
 } from '@ant-design/icons';
 import PageHeader from '../../components/common/PageHeader';
+import { useActiveEnvironments } from '../../hooks/useEnvironments';
 import { InfraUploadContent } from '../infra-upload/index';
 import SimpleImportContent from './SimpleImportContent';
 import FirewallImportContent from './FirewallImportContent';
@@ -31,12 +32,6 @@ const ZONE_TYPE_OPTIONS = [
   { label: 'STORAGE', value: 'STORAGE' },
   { label: 'BACKUP', value: 'BACKUP' },
   { label: 'CUSTOM', value: 'CUSTOM' },
-];
-
-const ENV_OPTIONS = [
-  { label: 'DEV', value: 'DEV' },
-  { label: 'UAT', value: 'UAT' },
-  { label: 'PROD', value: 'PROD' },
 ];
 
 const NETWORK_ZONE_FIELDS: TargetField[] = [
@@ -65,7 +60,6 @@ const NETWORK_ZONE_FIELDS: TargetField[] = [
     label: 'Môi trường (environment)',
     required: true,
     aliases: ['env', 'moi_truong'],
-    options: ENV_OPTIONS,
     valueAliases: { dev: 'DEV', development: 'DEV', uat: 'UAT', staging: 'UAT', prod: 'PROD', production: 'PROD' },
   },
   {
@@ -92,7 +86,6 @@ const ZONE_IP_FIELDS: TargetField[] = [
     label: 'Môi trường (environment)',
     required: true,
     aliases: ['env', 'moi_truong'],
-    options: ENV_OPTIONS,
     valueAliases: { dev: 'DEV', development: 'DEV', uat: 'UAT', staging: 'UAT', prod: 'PROD', production: 'PROD' },
   },
   {
@@ -233,8 +226,24 @@ const TAB_ITEMS = [
 
 export default function InfraImportPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { data: envConfigs = [] } = useActiveEnvironments();
   const tab = (searchParams.get('tab') as TabKey) ?? 'quick';
   const activeTab: TabKey = TAB_KEYS.includes(tab) ? tab : 'quick';
+
+  const tabItems = useMemo(() => {
+    const envOptions = envConfigs.map((e) => ({ label: e.label, value: e.code }));
+    const injectEnv = (fields: TargetField[]) =>
+      fields.map((f) => f.key === 'environment' ? { ...f, options: envOptions } : f);
+    return TAB_ITEMS.map((tab) => {
+      if (tab.key === 'network_zone') {
+        return { ...tab, children: <SimpleImportContent type="network_zone" title="Phân vùng mạng (Network Zone)" targetFields={injectEnv(NETWORK_ZONE_FIELDS)} templateFilename="network_zone_template.csv" /> };
+      }
+      if (tab.key === 'zone_ip') {
+        return { ...tab, children: <SimpleImportContent type="zone_ip" title="Zone IPs (Zone IP Entries)" targetFields={injectEnv(ZONE_IP_FIELDS)} templateFilename="zone_ip_template.csv" /> };
+      }
+      return tab;
+    });
+  }, [envConfigs]);
 
   useEffect(() => {
     if (!TAB_KEYS.includes(tab)) {
@@ -252,7 +261,7 @@ export default function InfraImportPage() {
       <Tabs
         activeKey={activeTab}
         onChange={(key) => setSearchParams({ tab: key }, { replace: true })}
-        items={TAB_ITEMS}
+        items={tabItems}
         destroyInactiveTabPane
         size="large"
         style={{ background: 'transparent' }}

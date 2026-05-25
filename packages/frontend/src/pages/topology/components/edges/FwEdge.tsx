@@ -1,5 +1,9 @@
 import { EdgeLabelRenderer, getBezierPath, getSmoothStepPath, Position, type EdgeProps } from 'reactflow';
 
+function isRuleExpired(data: any): boolean {
+  return !data?.neverExpires && !!data?.expiresAt && new Date(data.expiresAt) < new Date();
+}
+
 export function FwEdge({
   id,
   sourceX: propSourceX, sourceY: propSourceY,
@@ -9,7 +13,8 @@ export function FwEdge({
 }: EdgeProps) {
   const action = data?.action ?? 'ALLOW';
   const isAllow = action === 'ALLOW';
-  const actionColor = isAllow ? '#389e0d' : '#cf1322';
+  const expired = isRuleExpired(data);
+  const actionColor = expired ? '#8c8c8c' : isAllow ? '#389e0d' : '#cf1322';
   const flowDur = selected ? 0.9 : 1.5;
   const dotR = selected ? 7 : 5;
   const PARTICLE_COUNT = 3;
@@ -32,13 +37,15 @@ export function FwEdge({
   const pathStyle: React.CSSProperties = {
     stroke: actionColor,
     strokeWidth: selected ? 3.5 : 2.5,
-    strokeDasharray: isAllow ? undefined : '7,4',
-    opacity: 1,
-    filter: selected ? `drop-shadow(0 0 5px ${actionColor})` : undefined,
+    strokeDasharray: expired ? '4,4' : isAllow ? undefined : '7,4',
+    opacity: expired ? 0.45 : 1,
+    filter: selected && !expired ? `drop-shadow(0 0 5px ${actionColor})` : undefined,
   };
 
   const portNum = data?.portNum;
-  const labelText = portNum ? `${isAllow ? 'ALLOW' : 'DENY'} :${portNum}` : (isAllow ? 'ALLOW' : 'DENY');
+  const labelText = expired
+    ? `EXPIRED${portNum ? ` :${portNum}` : ''}`
+    : portNum ? `${isAllow ? 'ALLOW' : 'DENY'} :${portNum}` : (isAllow ? 'ALLOW' : 'DENY');
 
   return (
     <>
@@ -48,7 +55,7 @@ export function FwEdge({
           strokeOpacity={0.15} style={{ filter: 'blur(4px)' }} pointerEvents="none" />
       )}
       <path id={id} className="react-flow__edge-path" d={edgePath} markerEnd={markerEnd} style={pathStyle} />
-      {isAllow && Array.from({ length: PARTICLE_COUNT }, (_, i) => {
+      {isAllow && !expired && Array.from({ length: PARTICLE_COUNT }, (_, i) => {
         const begin = `-${((i / PARTICLE_COUNT) * flowDur).toFixed(2)}s`;
         return (
           <circle key={i} r={dotR} fill={actionColor} opacity={0} pointerEvents="none">

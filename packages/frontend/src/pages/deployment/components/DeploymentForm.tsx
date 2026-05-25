@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Drawer, Form, Input, Select, DatePicker, App } from 'antd';
+import EnvironmentSelect from '../../../components/common/EnvironmentSelect';
 import dayjs from 'dayjs';
 import { useCreateDeployment, useUpdateDeployment } from '../../../hooks/useDeployments';
 import { useApplicationList } from '../../../hooks/useApplications';
@@ -95,11 +96,7 @@ export default function DeploymentForm({ open, deployment, onClose }: Props) {
               />
             </Form.Item>
             <Form.Item label="Môi trường" name="environment" rules={[{ required: true }]}>
-              <Select options={[
-                { value: 'DEV', label: 'DEV' },
-                { value: 'UAT', label: 'UAT' },
-                { value: 'PROD', label: 'PROD' },
-              ]} />
+              <EnvironmentSelect />
             </Form.Item>
           </>
         )}

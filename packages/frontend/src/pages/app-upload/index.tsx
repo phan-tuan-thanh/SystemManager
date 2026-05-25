@@ -37,6 +37,7 @@ import ColumnMapper, {
   type TargetField,
 } from '../../components/common/ColumnMapper';
 import ValueMapper, { type ValueMappings } from '../../components/common/ValueMapper';
+import EnvironmentSelect from '../../components/common/EnvironmentSelect';
 
 const { Dragger } = Upload;
 const { Text } = Typography;
@@ -465,17 +466,13 @@ export function AppUploadContent() {
                 <Text strong style={{ marginRight: 8 }}>
                   Môi trường (tùy chọn):
                 </Text>
-                <Select
+                <EnvironmentSelect
                   allowClear
+                  allowAll
                   value={environment}
                   onChange={setEnvironment}
                   style={{ width: 160 }}
                   placeholder="Tất cả"
-                  options={[
-                    { value: 'DEV', label: 'DEV' },
-                    { value: 'UAT', label: 'UAT' },
-                    { value: 'PROD', label: 'PROD' },
-                  ]}
                 />
               </div>
             </Space>

@@ -71,6 +71,8 @@ export const TOPOLOGY_QUERY = gql`
         firewallRuleId
         firewallRuleName
         action
+        expiresAt
+        neverExpires
         targetPort {
           id
           port_number

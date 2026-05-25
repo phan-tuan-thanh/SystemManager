@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Button,
   Table,
@@ -33,6 +33,7 @@ import {
 import Papa from 'papaparse';
 import apiClient from '../../api/client';
 import { parseSpreadsheet } from '../../utils/parseSpreadsheet';
+import { useActiveEnvironments } from '../../hooks/useEnvironments';
 import TemplateDownloadBar from '../../components/common/TemplateDownloadBar';
 import ColumnMapper, {
   autoDetect,
@@ -45,11 +46,6 @@ import ValueMapper, { type ValueMappings } from '../../components/common/ValueMa
 const { Dragger } = Upload;
 const { Text } = Typography;
 
-const ENV_OPTIONS = [
-  { label: 'DEV', value: 'DEV' },
-  { label: 'UAT', value: 'UAT' },
-  { label: 'PROD', value: 'PROD' },
-];
 const ENV_VALUE_ALIASES: Record<string, string> = {
   live: 'PROD',
   prod: 'PROD',
@@ -98,7 +94,7 @@ const INFRA_TYPE_OPTIONS = [
   { label: 'CLOUD_INSTANCE', value: 'CLOUD_INSTANCE' },
 ];
 
-const SERVER_TARGETS: TargetField[] = [
+const SERVER_TARGETS_STATIC: TargetField[] = [
   { key: 'ip', label: 'Địa chỉ IP', required: true, aliases: ['ip_address', 'private_ip', 'server_ip'] },
   { key: 'name', label: 'Tên Server (Name)', required: true, aliases: ['server_name', 'ten', 'ten_server'] },
   { key: 'hostname', label: 'Hostname', aliases: ['host'] },
@@ -106,7 +102,7 @@ const SERVER_TARGETS: TargetField[] = [
   { key: 'system', label: 'Hệ thống (System)', aliases: ['he_thong', 'system_code'] },
   { key: 'system_name', label: 'Tên hệ thống (System Name)', aliases: ['he_thong_name', 'ten_he_thong'] },
   { key: 'description', label: 'Mô tả', aliases: ['desc', 'mo_ta'] },
-  { key: 'environment', label: 'Môi trường (Environment)', aliases: ['env', 'moi_truong'], options: ENV_OPTIONS, valueAliases: ENV_VALUE_ALIASES },
+  { key: 'environment', label: 'Môi trường (Environment)', aliases: ['env', 'moi_truong'], valueAliases: ENV_VALUE_ALIASES },
   { key: 'site', label: 'Site', aliases: ['trung_tam'], options: SITE_OPTIONS, valueAliases: SITE_VALUE_ALIASES },
   { key: 'os', label: 'Hệ điều hành (OS)', aliases: ['operating_system', 'he_dieu_hanh'] },
   { key: 'cpu', label: 'Số nhân CPU', aliases: ['cpu_cores', 'cores'] },
@@ -117,10 +113,6 @@ const SERVER_TARGETS: TargetField[] = [
   { key: 'infra_type', label: 'Loại hạ tầng', aliases: ['infra', 'loai_ha_tang'], options: INFRA_TYPE_OPTIONS },
 ];
 
-const SERVER_TARGET_BY_KEY: Record<string, TargetField> = SERVER_TARGETS.reduce(
-  (acc, t) => ({ ...acc, [t.key]: t }),
-  {} as Record<string, TargetField>,
-);
 
 interface GenericPreviewResult {
   session_id: string;
@@ -156,6 +148,19 @@ interface ImportResult {
 
 export default function ServerUploadPage() {
   const { message, modal } = App.useApp();
+  const { data: envConfigs = [] } = useActiveEnvironments();
+
+  const SERVER_TARGETS = useMemo<TargetField[]>(() => {
+    const envOptions = envConfigs.map((e) => ({ label: e.label, value: e.code }));
+    return SERVER_TARGETS_STATIC.map((t) =>
+      t.key === 'environment' ? { ...t, options: envOptions } : t,
+    );
+  }, [envConfigs]);
+
+  const SERVER_TARGET_BY_KEY = useMemo<Record<string, TargetField>>(() =>
+    SERVER_TARGETS.reduce((acc, t) => ({ ...acc, [t.key]: t }), {} as Record<string, TargetField>),
+    [SERVER_TARGETS],
+  );
 
   const [step, setStep] = useState(0);
   const [fileList, setFileList] = useState<UploadFile[]>([]);

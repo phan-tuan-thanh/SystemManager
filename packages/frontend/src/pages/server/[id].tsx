@@ -13,11 +13,10 @@ import NetworkTab from './components/NetworkTab';
 import OsLifecycleTab from './components/OsLifecycleTab';
 import ServerForm from './components/ServerForm';
 import { useServerDetail, useServerChangeHistory } from '../../hooks/useServers';
+import EnvironmentTag from '../../components/common/EnvironmentTag';
 import type { Server } from '../../types/server';
 
 const { Text } = Typography;
-
-const ENV_COLOR: Record<string, string> = { DEV: 'blue', UAT: 'orange', PROD: 'red' };
 const DEPLOY_STATUS_COLOR: Record<string, string> = {
   RUNNING: 'green',
   STOPPED: 'default',
@@ -44,7 +43,7 @@ export default function ServerDetailPage() {
       title: 'Môi trường',
       dataIndex: 'environment',
       key: 'env',
-      render: (e: string) => <Tag color={ENV_COLOR[e]}>{e}</Tag>,
+      render: (e: string) => <EnvironmentTag code={e} />,
     },
     {
       title: 'Trạng thái',
@@ -63,7 +62,7 @@ export default function ServerDetailPage() {
           <Descriptions.Item label="Mã server">{server.code}</Descriptions.Item>
           <Descriptions.Item label="Hostname">{server.hostname}</Descriptions.Item>
           <Descriptions.Item label="Môi trường">
-            <Tag color={ENV_COLOR[server.environment]}>{server.environment}</Tag>
+            <EnvironmentTag code={server.environment} />
           </Descriptions.Item>
           <Descriptions.Item label="Trạng thái">
             <StatusBadge status={server.status} />
@@ -148,7 +147,7 @@ export default function ServerDetailPage() {
         <Space>
           <Text type="secondary">Mã:</Text>
           <Text strong>{server.code}</Text>
-          <Tag color={ENV_COLOR[server.environment]}>{server.environment}</Tag>
+          <EnvironmentTag code={server.environment} />
           <StatusBadge status={server.status} />
         </Space>
       </div>

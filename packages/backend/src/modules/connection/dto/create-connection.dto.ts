@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsString, IsOptional, IsIn, IsUUID } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsValidEnvironment } from '../../../common/validators/is-valid-environment.validator';
 
-const ENVIRONMENTS = ['DEV', 'UAT', 'PROD'] as const;
 const CONNECTION_TYPES = ['HTTP', 'HTTPS', 'TCP', 'GRPC', 'AMQP', 'KAFKA', 'DATABASE'] as const;
 
 export class CreateConnectionDto {
@@ -15,9 +15,10 @@ export class CreateConnectionDto {
   @IsNotEmpty()
   target_app_id: string;
 
-  @ApiProperty({ enum: ENVIRONMENTS })
-  @IsIn(ENVIRONMENTS)
+  @ApiProperty({ example: 'PROD', description: 'Environment code (e.g. PROD, UAT, DEV1)' })
+  @IsString()
   @IsNotEmpty()
+  @IsValidEnvironment()
   environment: string;
 
   @ApiProperty({ enum: CONNECTION_TYPES })
