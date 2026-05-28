@@ -1,6 +1,6 @@
 # SystemManager — Agile Task List & Sprint Plan
 
-> **Trạng thái hiện tại:** Sprint 25 🔄 IN PROGRESS — Two-Layer Connectivity Model: Firewall Coverage & Implied Connections
+> **Trạng thái hiện tại:** Post-Sprint-25 Patches ✅ DONE — Bug fixes (ServerForm env, FirewallRule/NetworkZone update env) + Topology expired rule UX
 
 ---
 
@@ -676,6 +676,22 @@
 | S25-09 | `[FE]` App detail page: coverage badge ✅/⚠️ trên upstream/downstream connection list | 2 | ✅ | 4.5.1 |
 
 **Sprint 25 Total: 25 points**
+
+---
+
+## Post-Sprint-25 Patches — Bug Fixes & Expiry UX ✅ DONE
+
+**Ngày:** 2026-05-25  
+**Loại:** Hotfix + Minor Feature
+
+| # | Task | Loại | Status |
+|---|------|------|--------|
+| P25-01 | `[FE]` ServerForm: `environment` bị disabled khi edit — bật lại và xóa `delete payload.environment` | Bug Fix | ✅ |
+| P25-02 | `[FE]` ServerForm: dropdown môi trường hardcoded DEV/UAT/PROD → thay bằng `EnvironmentSelect` dynamic | Bug Fix | ✅ |
+| P25-03 | `[BE]` `FirewallRuleService.update()`: thiếu `environment` trong Prisma data block → update không có hiệu lực | Bug Fix | ✅ |
+| P25-04 | `[BE]` `NetworkZoneService.update()`: cùng lỗi thiếu `environment` trong Prisma data block | Bug Fix | ✅ |
+| P25-05 | `[FULL]` Topology: implied edges từ rule hết hạn hiển thị như ALLOW bình thường → fix GraphQL type + service + FE edge render + data path | Bug Fix | ✅ |
+| P25-06 | `[FE]` `ImpliedConnectionDetailPanel`: bổ sung thông tin ngày hết hạn + expired banner khi click connection | Feature | ✅ |
 
 ---
 

@@ -18,6 +18,7 @@ export function FwEdge({
   const flowDur = selected ? 0.9 : 1.5;
   const dotR = selected ? 7 : 5;
   const PARTICLE_COUNT = 3;
+  const edgeStyle: 'bezier' | 'step' = data?.edgeStyle ?? 'bezier';
 
   // Backward edges connect via bot-s / bot-t handles; React Flow passes their
   // live coordinates so the arc tracks the nodes after drag / re-layout.
@@ -30,9 +31,40 @@ export function FwEdge({
   // Dynamic offset computed at layout time to route the arc below all zone
   // lane containers between source and target (see routeEdgesAfterLayout).
   const backwardOffset = data?._backwardOffset ?? 58;
-  const [edgePath, labelX, labelY] = isBackward
-    ? getSmoothStepPath({ sourceX, sourceY, sourcePosition: Position.Bottom, targetX, targetY, targetPosition: Position.Bottom, borderRadius: 12, offset: backwardOffset })
-    : getBezierPath({ sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition });
+
+  const isVerticalRoute = (
+    (sourcePosition === Position.Bottom && targetPosition === Position.Top) ||
+    (sourcePosition === Position.Top && targetPosition === Position.Bottom)
+  );
+
+  let edgePath: string;
+  let labelX: number;
+  let labelY: number;
+
+  if (isBackward) {
+    if (edgeStyle === 'step') {
+      [edgePath, labelX, labelY] = getSmoothStepPath({ sourceX, sourceY, sourcePosition: Position.Bottom, targetX, targetY, targetPosition: Position.Bottom, borderRadius: 12, offset: backwardOffset });
+    } else {
+      [edgePath, labelX, labelY] = getBezierPath({ sourceX, sourceY, sourcePosition: Position.Bottom, targetX, targetY, targetPosition: Position.Bottom });
+    }
+  } else if (isVerticalRoute) {
+    if (edgeStyle === 'step') {
+      [edgePath, labelX, labelY] = getSmoothStepPath({ sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition, borderRadius: 6 });
+    } else {
+      // Safe curvature: curvature * dist must stay ≤ dyH so control points
+      // don't cross (crossing swings the arc above/below both handles).
+      // Factor 0.9 keeps a small margin below the crossing threshold.
+      const dxH = Math.abs(targetX - sourceX);
+      const dyH = Math.abs(targetY - sourceY);
+      const dist = Math.sqrt(dxH * dxH + dyH * dyH) || 1;
+      const curvature = Math.min(0.25, (dyH / dist) * 0.9);
+      [edgePath, labelX, labelY] = getBezierPath({ sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition, curvature });
+    }
+  } else if (edgeStyle === 'step') {
+    [edgePath, labelX, labelY] = getSmoothStepPath({ sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition, borderRadius: 8 });
+  } else {
+    [edgePath, labelX, labelY] = getBezierPath({ sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition });
+  }
 
   const pathStyle: React.CSSProperties = {
     stroke: actionColor,

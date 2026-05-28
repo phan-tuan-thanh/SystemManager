@@ -5,6 +5,46 @@ A chronological record of project milestones, updates, and sprint summaries.
 
 ---
 
+## 2026-05-25 — Post-Sprint-25 Bug Fixes & Expiry UX ✅ Hoàn thành
+
+### Bug Fixes
+
+- ✅ [BUG-FE] ServerForm: trường `environment` bị disabled khi edit → đã bật lại và xóa `delete payload.environment` khỏi submit handler
+- ✅ [BUG-FE] ServerForm: dropdown môi trường hardcoded DEV/UAT/PROD → thay bằng `EnvironmentSelect` component (tải động từ `/environments`)
+- ✅ [BUG-BE] `FirewallRuleService.update()`: thiếu `environment` trong Prisma `data` block → cập nhật thành công nhưng giá trị không thay đổi → đã fix
+- ✅ [BUG-BE] `NetworkZoneService.update()`: cùng lỗi thiếu `environment` trong Prisma `data` → đã fix
+- ✅ [BUG-FULL] Topology ReactFlow: implied edges từ rule đã hết hạn hiển thị như ALLOW bình thường (xanh) → fix toàn stack:
+  - BE: Thêm `expiresAt` + `neverExpires` vào `ImpliedConnectionEdge` GraphQL type (`topology.types.ts`) và populate trong `topology.service.ts`
+  - FE GraphQL: Thêm 2 fields vào `impliedConnections` fragment (`graphql/topology.ts`)
+  - FE Type: Cập nhật interface `ImpliedConnectionEdge` trong `useTopology.ts`
+  - FE `FwEdge.tsx`: Thêm `isRuleExpired()` helper; màu xám `#8c8c8c`, nét đứt `4,4`, opacity 0.45, label "EXPIRED", tắt particle animation
+  - FE `index.tsx` (data path fix): Spread `expiresAt` + `neverExpires` trực tiếp vào `data` của edge (không chỉ trong `data._implied`) để `FwEdge` đọc được
+
+### Feature
+
+- ✅ [FE] `ImpliedConnectionDetailPanel`: Bổ sung thông tin hết hạn khi click connection trong topology right pane:
+  - Tiêu đề Drawer: tag "EXPIRED" (xám) thay ALLOW/DENY khi rule hết hạn
+  - Action banner: nền xám + text "Rule đã hết hạn (ALLOW/DENY)" cho expired
+  - Warning box màu vàng: "Rule này đã hết hạn và không còn hiệu lực"
+  - Descriptions thêm row "Ngày hết hạn": hiển thị ngày `DD/MM/YYYY HH:mm` (đỏ nếu expired), tag "Không hết hạn" nếu `neverExpires`
+
+### Files thay đổi
+
+| File | Loại |
+|------|------|
+| `packages/frontend/src/pages/server/components/ServerForm.tsx` | bug fix |
+| `packages/backend/src/modules/firewall-rule/firewall-rule.service.ts` | bug fix |
+| `packages/backend/src/modules/network-zone/network-zone.service.ts` | bug fix |
+| `packages/backend/src/modules/topology/topology.types.ts` | bug fix |
+| `packages/backend/src/modules/topology/topology.service.ts` | bug fix |
+| `packages/frontend/src/graphql/topology.ts` | bug fix |
+| `packages/frontend/src/pages/topology/hooks/useTopology.ts` | bug fix |
+| `packages/frontend/src/pages/topology/components/edges/FwEdge.tsx` | bug fix |
+| `packages/frontend/src/pages/topology/index.tsx` | bug fix |
+| `packages/frontend/src/pages/topology/components/ImpliedConnectionDetailPanel.tsx` | feature |
+
+---
+
 ## 2026-05-08 — Sprint 25: Two-Layer Connectivity Model ✅ Hoàn thành
 
 - ✅ S25-01 [BE] `ConnectionService.getFirewallCoverageStatus()` + `getFirewallCoverageStatusBatch()` với CIDR matching
