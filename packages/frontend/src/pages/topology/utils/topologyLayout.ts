@@ -571,7 +571,7 @@ const ZONE_PADDING_X = 20;
 const ZONE_PADDING_Y = 16;
 const ZONE_GAP = 32;
 // Padding of the lane wrapper panel around the zones it contains
-const LANE_WRAP_PAD = 14;
+export const LANE_WRAP_PAD = 14;
 
 export const ZONE_COL_GAP = 24;
 export const ZONE_ROW_GAP = 20;
@@ -688,6 +688,84 @@ function makeLaneWrapper(
     draggable: false,
     zIndex: -2,
   };
+}
+
+// Re-derive laneWrapper nodes from the CURRENT zone positions without
+// re-stacking zones. Use this whenever zone nodes may have been repositioned
+// independently (e.g. user dragged them, or a filter/option change recomputed
+// nodes while zoneLayoutRef still holds custom positions) so that wrapper
+// panels always exactly enclose the zones they belong to.
+export function rebuildLaneWrappers(nodes: Node[]): Node[] {
+  const lanes = nodes.filter((n) => n.type === 'zoneLane');
+  if (lanes.length === 0) return nodes.filter((n) => n.type !== 'laneWrapper');
+
+  const laneOf = (n: Node): number =>
+    Number((n.data as { lane?: number } | undefined)?.lane ?? 0);
+
+  const groups = new Map<number, Node[]>();
+  for (const lane of lanes) {
+    const r = laneOf(lane);
+    const arr = groups.get(r);
+    if (arr) arr.push(lane);
+    else groups.set(r, [lane]);
+  }
+
+  const wrappers: Node[] = [];
+  for (const [lk, laneNodes] of groups) {
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (const l of laneNodes) {
+      const w = (l.style?.width as number) ?? (l.width as number) ?? 200;
+      const h = (l.style?.height as number) ?? (l.height as number) ?? 200;
+      minX = Math.min(minX, l.position.x);
+      minY = Math.min(minY, l.position.y);
+      maxX = Math.max(maxX, l.position.x + w);
+      maxY = Math.max(maxY, l.position.y + h);
+    }
+    if (minX === Infinity) continue;
+    wrappers.push(makeLaneWrapper(lk, minX, minY, maxX - minX, maxY - minY));
+  }
+
+  return [...wrappers, ...nodes.filter((n) => n.type !== 'laneWrapper')];
+}
+
+// Resize each zone lane to tightly encompass its CURRENT children without
+// moving any zone. Call this after restoring user-dragged child positions so
+// that zones always fit their servers — even when those positions differ from
+// the default layout (e.g. custom drag, or after a cross-zone server move).
+export function resizeZonesFromChildren(nodes: Node[]): Node[] {
+  const lanes = nodes.filter((n) => n.type === 'zoneLane');
+  if (lanes.length === 0) return nodes;
+
+  const childrenByParent = new Map<string, Node[]>();
+  for (const n of nodes) {
+    if (!n.parentId) continue;
+    const arr = childrenByParent.get(n.parentId);
+    if (arr) arr.push(n);
+    else childrenByParent.set(n.parentId, [n]);
+  }
+
+  const newSizes = new Map<string, { w: number; h: number }>();
+  for (const lane of lanes) {
+    const kids = childrenByParent.get(lane.id) ?? [];
+    let maxX = ZONE_MIN_CONTENT_W;
+    let maxY = ZONE_HEADER_H + ZONE_MIN_CONTENT_H;
+    for (const k of kids) {
+      const w = (k.style?.width as number) ?? (k.width as number) ?? SERVER_NODE_W;
+      const h = (k.style?.height as number) ?? (k.height as number) ?? SERVER_NODE_H;
+      // Use same clamping as the grow-only live-drag path.
+      const kx = Math.max(k.position.x, ZONE_CONTENT_ORIGIN.x);
+      const ky = Math.max(k.position.y, ZONE_CONTENT_ORIGIN.y);
+      maxX = Math.max(maxX, kx + w);
+      maxY = Math.max(maxY, ky + h);
+    }
+    newSizes.set(lane.id, { w: maxX + ZONE_PADDING_X, h: maxY + ZONE_PADDING_Y });
+  }
+
+  return nodes.map((n) => {
+    if (n.type !== 'zoneLane') return n;
+    const sz = newSizes.get(n.id);
+    return sz ? { ...n, style: { ...n.style, width: sz.w, height: sz.h } } : n;
+  });
 }
 
 export function computeZoneLaneLayout(

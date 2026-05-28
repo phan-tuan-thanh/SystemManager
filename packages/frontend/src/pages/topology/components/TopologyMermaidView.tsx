@@ -2,30 +2,42 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Tabs, Button, Space, Spin, Empty, Tooltip, message } from 'antd';
 import { CopyOutlined, DownloadOutlined, ZoomInOutlined, ZoomOutOutlined, CompressOutlined } from '@ant-design/icons';
 import mermaid from 'mermaid';
-import type { ServerNode, ConnectionEdge } from '../hooks/useTopology';
+import type { ServerNode, ConnectionEdge, ImpliedConnectionEdge } from '../hooks/useTopology';
 
 mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
 
 let renderCounter = 0;
 
+const FW_ACTION_COLOR = { ALLOW: '#389e0d', DENY: '#cf1322', EXPIRED: '#8c8c8c' };
+
+function isImpliedExpired(ic: ImpliedConnectionEdge): boolean {
+  return !ic.neverExpires && !!ic.expiresAt && new Date(ic.expiresAt) < new Date();
+}
+
 function buildMermaidSource(
   servers: ServerNode[],
   connections: ConnectionEdge[],
+  impliedConnections: ImpliedConnectionEdge[] = [],
+  showImplied = true,
   nodeType: 'all' | 'server' | 'app' = 'all',
 ): string {
   const safeId = (s: string) => s.replace(/[^a-zA-Z0-9_]/g, '_');
 
   if (nodeType === 'server') {
     // Build app→server lookup then emit server-to-server edges
-    const appToServer = new Map<string, { id: string; code: string; name: string }>();
+    const appToServer = new Map<string, ServerNode>();
     servers.forEach((s) =>
       s.deployments.forEach((d) => appToServer.set(d.application.id, s)),
     );
+    const serverById = new Map(servers.map((s) => [s.id, s]));
 
     const usedServerIds = new Set<string>();
-    const serverEdges: string[] = [];
-    const addedPairs = new Set<string>();
+    const edgeLines: string[] = [];
+    const linkStyles: string[] = [];
+    let edgeIndex = 0;
 
+    // Real AppConnection edges (default styling)
+    const addedPairs = new Set<string>();
     connections.forEach((c) => {
       const src = appToServer.get(c.sourceAppId);
       const tgt = appToServer.get(c.targetAppId);
@@ -38,8 +50,38 @@ function buildMermaidSource(
       const label = c.targetPort
         ? `${c.connectionType}:${c.targetPort.port_number}`
         : c.connectionType;
-      serverEdges.push(`  ${safeId(src.code)} -->|"${label}"| ${safeId(tgt.code)}`);
+      edgeLines.push(`  ${safeId(src.code)} -->|"${label}"| ${safeId(tgt.code)}`);
+      edgeIndex++;
     });
+
+    // Implied firewall edges (color by action, gray+dotted when expired)
+    if (showImplied) {
+      const addedImplied = new Set<string>();
+      impliedConnections.forEach((ic) => {
+        const action = ic.action ?? 'ALLOW';
+        const srcId = ic.sourceServerId ?? appToServer.get(ic.sourceAppId)?.id;
+        const tgtId = ic.targetServerId ?? appToServer.get(ic.targetAppId)?.id;
+        if (!srcId || !tgtId || srcId === tgtId) return;
+        const src = serverById.get(srcId);
+        const tgt = serverById.get(tgtId);
+        if (!src || !tgt) return;
+        const pairKey = `${action}::${srcId}::${tgtId}`;
+        if (addedImplied.has(pairKey)) return;
+        addedImplied.add(pairKey);
+        usedServerIds.add(srcId);
+        usedServerIds.add(tgtId);
+        const expired = isImpliedExpired(ic);
+        const portNum = ic.targetPort?.portNumber;
+        const label = expired
+          ? `EXPIRED${portNum ? ` :${portNum}` : ''}`
+          : `${action}${portNum ? ` :${portNum}` : ''}`;
+        const color = expired ? FW_ACTION_COLOR.EXPIRED : FW_ACTION_COLOR[action] ?? FW_ACTION_COLOR.ALLOW;
+        const dashed = expired || action === 'DENY';
+        edgeLines.push(`  ${safeId(src.code)} -->|"${label}"| ${safeId(tgt.code)}`);
+        linkStyles.push(`  linkStyle ${edgeIndex} stroke:${color},stroke-width:2px${dashed ? ',stroke-dasharray:5 5' : ''};`);
+        edgeIndex++;
+      });
+    }
 
     if (usedServerIds.size === 0) return '';
 
@@ -47,11 +89,11 @@ function buildMermaidSource(
     servers
       .filter((s) => usedServerIds.has(s.id))
       .forEach((s) => lines.push(`  ${safeId(s.code)}["🖥 ${s.name}"]`));
-    lines.push(...serverEdges);
+    lines.push(...edgeLines, ...linkStyles);
     return lines.join('\n');
   }
 
-  // App / All mode — original logic
+  // App / All mode
   const appMap = new Map<string, { code: string; name: string }>();
   servers.forEach((s) =>
     s.deployments.forEach((d) => {
@@ -68,6 +110,24 @@ function buildMermaidSource(
     usedIds.add(c.targetAppId);
   });
 
+  // Resolve implied edges that map to known app pairs (backend leaves app ids
+  // empty for server-only rules — those have no app node to attach to here).
+  const impliedToDraw: ImpliedConnectionEdge[] = [];
+  if (showImplied) {
+    const addedImplied = new Set<string>();
+    impliedConnections.forEach((ic) => {
+      if (!ic.sourceAppId || !ic.targetAppId || ic.sourceAppId === ic.targetAppId) return;
+      if (!appMap.has(ic.sourceAppId) || !appMap.has(ic.targetAppId)) return;
+      const action = ic.action ?? 'ALLOW';
+      const pairKey = `${action}::${ic.sourceAppId}::${ic.targetAppId}`;
+      if (addedImplied.has(pairKey)) return;
+      addedImplied.add(pairKey);
+      impliedToDraw.push(ic);
+      usedIds.add(ic.sourceAppId);
+      usedIds.add(ic.targetAppId);
+    });
+  }
+
   if (usedIds.size === 0) return '';
 
   const lines: string[] = ['graph LR'];
@@ -77,6 +137,10 @@ function buildMermaidSource(
     if (app) lines.push(`  ${safeId(app.code)}["${app.name}"]`);
   });
 
+  const edgeLines: string[] = [];
+  const linkStyles: string[] = [];
+  let edgeIndex = 0;
+
   connections.forEach((c) => {
     const src = appMap.get(c.sourceAppId);
     const tgt = appMap.get(c.targetAppId);
@@ -84,15 +148,36 @@ function buildMermaidSource(
     const label = c.targetPort
       ? `${c.connectionType}:${c.targetPort.port_number}`
       : c.connectionType;
-    lines.push(`  ${safeId(src.code)} -->|"${label}"| ${safeId(tgt.code)}`);
+    edgeLines.push(`  ${safeId(src.code)} -->|"${label}"| ${safeId(tgt.code)}`);
+    edgeIndex++;
   });
 
+  impliedToDraw.forEach((ic) => {
+    const src = appMap.get(ic.sourceAppId);
+    const tgt = appMap.get(ic.targetAppId);
+    if (!src || !tgt) return;
+    const action = ic.action ?? 'ALLOW';
+    const expired = isImpliedExpired(ic);
+    const portNum = ic.targetPort?.portNumber;
+    const label = expired
+      ? `EXPIRED${portNum ? ` :${portNum}` : ''}`
+      : `${action}${portNum ? ` :${portNum}` : ''}`;
+    const color = expired ? FW_ACTION_COLOR.EXPIRED : FW_ACTION_COLOR[action] ?? FW_ACTION_COLOR.ALLOW;
+    const dashed = expired || action === 'DENY';
+    edgeLines.push(`  ${safeId(src.code)} -->|"${label}"| ${safeId(tgt.code)}`);
+    linkStyles.push(`  linkStyle ${edgeIndex} stroke:${color},stroke-width:2px${dashed ? ',stroke-dasharray:5 5' : ''};`);
+    edgeIndex++;
+  });
+
+  lines.push(...edgeLines, ...linkStyles);
   return lines.join('\n');
 }
 
 interface Props {
   servers: ServerNode[];
   connections: ConnectionEdge[];
+  impliedConnections?: ImpliedConnectionEdge[];
+  showImplied?: boolean;
   nodeType?: 'all' | 'server' | 'app';
   environment?: string;
 }
@@ -105,7 +190,7 @@ function clampZoom(z: number) {
   return Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, z));
 }
 
-export default function TopologyMermaidView({ servers, connections, nodeType = 'all', environment }: Props) {
+export default function TopologyMermaidView({ servers, connections, impliedConnections = [], showImplied = true, nodeType = 'all', environment }: Props) {
   const [svg, setSvg] = useState('');
   const [rendering, setRendering] = useState(false);
   const [error, setError] = useState('');
@@ -120,7 +205,7 @@ export default function TopologyMermaidView({ servers, connections, nodeType = '
   // Reset zoom whenever the diagram changes
   useEffect(() => { setZoom(1); }, [svg]);
 
-  const source = buildMermaidSource(servers, connections, nodeType);
+  const source = buildMermaidSource(servers, connections, impliedConnections, showImplied, nodeType);
 
   useEffect(() => {
     if (!source) {
