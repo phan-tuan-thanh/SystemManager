@@ -105,6 +105,10 @@ const SERVER_ICONS: Record<string, string> = {
 
 const FW_ACTION_COLOR = { ALLOW: '#389e0d', DENY: '#cf1322' };
 
+function isImpliedExpired(ic: ImpliedConnectionEdge): boolean {
+  return !ic.neverExpires && !!ic.expiresAt && new Date(ic.expiresAt) < new Date();
+}
+
 interface Props {
   servers: ServerNode[];
   connections: ConnectionEdge[];
@@ -245,7 +249,8 @@ const TopologyVisNetworkView = forwardRef<TopologyVisNetworkHandle, Props>(funct
         const addedImpliedPairs = new Map<string, Set<string>>();
         impliedConnections.forEach((ic) => {
           const action = ic.action ?? 'ALLOW';
-          const color = FW_ACTION_COLOR[action as keyof typeof FW_ACTION_COLOR] ?? FW_ACTION_COLOR.ALLOW;
+          const expired = isImpliedExpired(ic);
+          const color = expired ? '#8c8c8c' : FW_ACTION_COLOR[action as keyof typeof FW_ACTION_COLOR] ?? FW_ACTION_COLOR.ALLOW;
           const isDeny = action === 'DENY';
           // Prefer direct server IDs from backend; fall back to app→server lookup
           const srcServerId = ic.sourceServerId ?? appToServer.get(ic.sourceAppId);
@@ -262,13 +267,15 @@ const TopologyVisNetworkView = forwardRef<TopologyVisNetworkHandle, Props>(funct
             id: edgeId,
             from: `server-${srcServerId}`,
             to: `server-${tgtServerId}`,
-            color: { color, highlight: color, hover: color },
-            width: isDeny ? 2 : 2.5,
-            dashes: isDeny ? [7, 4] : false,
+            color: expired
+              ? { color, highlight: color, hover: color, opacity: 0.55 }
+              : { color, highlight: color, hover: color },
+            width: expired ? 1.5 : isDeny ? 2 : 2.5,
+            dashes: expired ? [4, 4] : isDeny ? [7, 4] : false,
             arrows: { to: { enabled: true, scaleFactor: 0.7 } },
             smooth: { enabled: true, type: 'curvedCW', roundness: 0.35 } as any,
             title: `<div style="padding:6px 10px;min-width:140px">
-              <b style="color:${color}">${action}</b>${portLabel}<br/>
+              <b style="color:${color}">${expired ? 'EXPIRED' : action}</b>${portLabel}<br/>
               <span style="color:#555;font-size:11px">${ic.firewallRuleName}</span>
             </div>`,
           });
@@ -313,7 +320,8 @@ const TopologyVisNetworkView = forwardRef<TopologyVisNetworkHandle, Props>(funct
         const addedImpliedPairs = new Map<string, Set<string>>();
         impliedConnections.forEach((ic) => {
           const action = ic.action ?? 'ALLOW';
-          const color = FW_ACTION_COLOR[action as keyof typeof FW_ACTION_COLOR] ?? FW_ACTION_COLOR.ALLOW;
+          const expired = isImpliedExpired(ic);
+          const color = expired ? '#8c8c8c' : FW_ACTION_COLOR[action as keyof typeof FW_ACTION_COLOR] ?? FW_ACTION_COLOR.ALLOW;
           const isDeny = action === 'DENY';
           const srcServerId = ic.sourceServerId ?? appToServerFallback.get(ic.sourceAppId);
           const tgtServerId = ic.targetServerId ?? appToServerFallback.get(ic.targetAppId);
@@ -329,13 +337,15 @@ const TopologyVisNetworkView = forwardRef<TopologyVisNetworkHandle, Props>(funct
             id: edgeId,
             from: `server-${srcServerId}`,
             to: `server-${tgtServerId}`,
-            color: { color, highlight: color, hover: color },
-            width: isDeny ? 2 : 2.5,
-            dashes: isDeny ? [7, 4] : false,
+            color: expired
+              ? { color, highlight: color, hover: color, opacity: 0.55 }
+              : { color, highlight: color, hover: color },
+            width: expired ? 1.5 : isDeny ? 2 : 2.5,
+            dashes: expired ? [4, 4] : isDeny ? [7, 4] : false,
             arrows: { to: { enabled: true, scaleFactor: 0.7 } },
             smooth: { enabled: true, type: 'curvedCW', roundness: 0.35 } as any,
             title: `<div style="padding:6px 10px;min-width:140px">
-              <b style="color:${color}">${action}</b>${portLabel}<br/>
+              <b style="color:${color}">${expired ? 'EXPIRED' : action}</b>${portLabel}<br/>
               <span style="color:#555;font-size:11px">${ic.firewallRuleName}</span>
             </div>`,
           });

@@ -1,8 +1,8 @@
 import { useState, useMemo } from 'react';
-import { Select, Switch, Button, Segmented, Typography, Space, Modal, Input, Checkbox, Badge, Divider, Tag } from 'antd';
+import { Select, Switch, Button, Segmented, Typography, Space, Modal, Input, Checkbox, Badge, Divider, Tag, Tooltip } from 'antd';
 import { useActiveEnvironments } from '../../../hooks/useEnvironments';
 import { toSelectOptions } from '../../../utils/environmentUtils';
-import { PartitionOutlined, LinkOutlined, FilterOutlined, SearchOutlined, TableOutlined } from '@ant-design/icons';
+import { PartitionOutlined, LinkOutlined, FilterOutlined, SearchOutlined, TableOutlined, RollbackOutlined } from '@ant-design/icons';
 
 const { Text } = Typography;
 
@@ -42,6 +42,7 @@ interface Props {
   serverGroupsMap?: Record<string, string[]>;
   serverAppsMap?: Record<string, string[]>;
   zoneConfigNode?: React.ReactNode;
+  onReset?: () => void;
 }
 
 // ─── Filter section inside modal ──────────────────────────────────
@@ -165,6 +166,7 @@ export default function TopologyFilterPanel({
   serverGroupsMap = {},
   serverAppsMap = {},
   zoneConfigNode,
+  onReset,
 }: Props) {
   const [modalOpen, setModalOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -229,8 +231,20 @@ export default function TopologyFilterPanel({
   const pendingCount = localGroupNames.length + localServerIds.length + localAppIds.length;
 
   const sep = (
-    <div style={{ width: 1, height: 20, background: '#e8e8e8', flexShrink: 0, alignSelf: 'center' }} />
+    <div style={{ width: 1, height: 24, background: '#e8e8e8', flexShrink: 0, alignSelf: 'center' }} />
   );
+
+  const groupLabel = (txt: string) => (
+    <Text style={{ fontSize: 11, color: '#8c8c8c', fontWeight: 600, whiteSpace: 'nowrap', textTransform: 'uppercase', letterSpacing: 0.2 }}>
+      {txt}
+    </Text>
+  );
+
+  const clusterStyle: React.CSSProperties = { display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '6px 8px' };
+  const fieldStyle: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 6 };
+
+  // Layout controls only exist for interactive engines (ReactFlow / vis-network).
+  const showLayoutCluster = isInteractive;
 
   return (
     <>
@@ -242,154 +256,168 @@ export default function TopologyFilterPanel({
           display: 'flex',
           alignItems: 'center',
           flexWrap: 'wrap',
-          gap: '8px 12px',
+          gap: '8px 16px',
           flexShrink: 0,
         }}
       >
-        {/* ── View mode ── */}
-        <Segmented
-          size="small"
-          value={viewMode}
-          onChange={(v) => onViewModeChange(v as '2D' | '3D')}
-          options={[
-            { label: '2D', value: '2D' },
-            { label: '3D', value: '3D' },
-          ]}
-        />
-
-        {/* ── Render engine (2D only) ── */}
-        {is2D && (
+        {/* ── Cluster: Chế độ (view mode + render engine) ── */}
+        <div style={clusterStyle}>
+          {groupLabel('Chế độ')}
           <Segmented
             size="small"
-            value={renderEngine}
-            onChange={(v) => onRenderEngineChange(v as 'reactflow' | 'visnetwork' | 'mermaid')}
+            value={viewMode}
+            onChange={(v) => onViewModeChange(v as '2D' | '3D')}
             options={[
-              { label: 'React Flow', value: 'reactflow' },
-              { label: 'vis-network', value: 'visnetwork' },
-              { label: 'Mermaid', value: 'mermaid' },
+              { label: '2D', value: '2D' },
+              { label: '3D', value: '3D' },
             ]}
           />
-        )}
-
-        {/* ── Layout (vis-network only: physics vs hierarchical) ── */}
-        {isInteractive && !isReactFlow && (
-          <Segmented
-            size="small"
-            value={filters.layout}
-            onChange={(v) => onChange({ ...filters, layout: v as 'force' | 'hierarchical' })}
-            options={[
-              { label: 'Auto', value: 'force' },
-              { label: 'Phân cấp', value: 'hierarchical' },
-            ]}
-          />
-        )}
-
-        {/* ── Layout Algorithm (ReactFlow only) ── */}
-        {isReactFlow && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Text style={{ fontSize: 12, color: '#8c8c8c' }}>Thuật toán</Text>
-            <Select
+          {is2D && (
+            <Segmented
               size="small"
-              style={{ width: 130 }}
-              value={filters.layoutAlgorithm}
-              onChange={(v) => onChange({ ...filters, layoutAlgorithm: v })}
-              getPopupContainer={(trigger) => trigger.parentElement!}
+              value={renderEngine}
+              onChange={(v) => onRenderEngineChange(v as 'reactflow' | 'visnetwork' | 'mermaid')}
               options={[
-                { label: 'Dagre (DAG)', value: 'dagre' },
-                { label: 'ELK Layered', value: 'elk-layered' },
-                { label: 'ELK Force', value: 'elk-force' },
-                { label: 'ELK Tree', value: 'elk-tree' },
-                { label: 'ELK Radial', value: 'elk-radial' },
+                { label: 'React Flow', value: 'reactflow' },
+                { label: 'vis-network', value: 'visnetwork' },
+                { label: 'Mermaid', value: 'mermaid' },
               ]}
             />
+          )}
+        </div>
+
+        {/* ── Cluster: Bố cục (layout / arrange) ── */}
+        {showLayoutCluster && sep}
+        {showLayoutCluster && (
+          <div style={clusterStyle}>
+            {groupLabel('Bố cục')}
+
+            {/* Layout mode (vis-network only: physics vs hierarchical) */}
+            {!isReactFlow && (
+              <Segmented
+                size="small"
+                value={filters.layout}
+                onChange={(v) => onChange({ ...filters, layout: v as 'force' | 'hierarchical' })}
+                options={[
+                  { label: 'Auto', value: 'force' },
+                  { label: 'Phân cấp', value: 'hierarchical' },
+                ]}
+              />
+            )}
+
+            {/* Layout algorithm (ReactFlow only) */}
+            {isReactFlow && (
+              <div style={fieldStyle}>
+                <Text style={{ fontSize: 12, color: '#8c8c8c' }}>Thuật toán</Text>
+                <Select
+                  size="small"
+                  style={{ width: 140 }}
+                  popupMatchSelectWidth={false}
+                  value={filters.layoutAlgorithm}
+                  onChange={(v) => onChange({ ...filters, layoutAlgorithm: v })}
+                  getPopupContainer={(trigger) => trigger.parentElement!}
+                  options={[
+                    { label: 'Dagre (DAG)', value: 'dagre' },
+                    { label: 'ELK Layered', value: 'elk-layered' },
+                    { label: 'ELK Force', value: 'elk-force' },
+                    { label: 'ELK Tree', value: 'elk-tree' },
+                    { label: 'ELK Radial', value: 'elk-radial' },
+                  ]}
+                />
+              </div>
+            )}
+
+            {/* Layout direction (ReactFlow only) */}
+            {isReactFlow && (
+              <div style={fieldStyle}>
+                <Text style={{ fontSize: 12, color: '#8c8c8c' }}>Hướng</Text>
+                <Select
+                  size="small"
+                  style={{ width: 150 }}
+                  popupMatchSelectWidth={false}
+                  value={filters.layoutDirection}
+                  onChange={(v) => onChange({ ...filters, layoutDirection: v })}
+                  getPopupContainer={(trigger) => trigger.parentElement!}
+                  options={[
+                    { label: '↓ Trên → Dưới', value: 'TB' },
+                    { label: '↑ Dưới → Trên', value: 'BT' },
+                    { label: '→ Trái → Phải', value: 'LR' },
+                    { label: '← Phải → Trái', value: 'RL' },
+                  ]}
+                />
+              </div>
+            )}
+
+            {/* Edge style (ReactFlow only) */}
+            {isReactFlow && (
+              <Segmented
+                size="small"
+                value={filters.edgeStyle}
+                onChange={(v) => onChange({ ...filters, edgeStyle: v as 'bezier' | 'step' })}
+                options={[
+                  { label: 'Cong', value: 'bezier' },
+                  { label: 'Góc vuông', value: 'step' },
+                ]}
+              />
+            )}
+
+            {/* Connect mode (ReactFlow only) */}
+            {isReactFlow && (
+              <Button
+                size="small"
+                type={filters.connectionMode ? 'primary' : 'default'}
+                icon={<LinkOutlined />}
+                onClick={() => onChange({ ...filters, connectionMode: !filters.connectionMode })}
+                title={filters.connectionMode ? 'Đang bật: click source → target để tạo kết nối' : 'Bật chế độ tạo kết nối'}
+              >
+                Kết nối
+              </Button>
+            )}
+
+            {/* Zone mode (ReactFlow + server/all view only) */}
+            {isReactFlow && filters.nodeType !== 'app' && (
+              <>
+                <Button
+                  size="small"
+                  type={filters.showZones ? 'primary' : 'default'}
+                  icon={<TableOutlined />}
+                  onClick={() => onChange({ ...filters, showZones: !filters.showZones, connectionMode: false })}
+                  title={filters.showZones ? 'Tắt zone lane' : 'Bật hiển thị zone lane (swimlane)'}
+                >
+                  Zone
+                </Button>
+                {filters.showZones && zoneConfigNode}
+              </>
+            )}
+
+            {/* Auto arrange (ReactFlow + vis) */}
+            {onAutoArrange && (
+              <Button
+                size="small"
+                icon={<PartitionOutlined />}
+                onClick={onAutoArrange}
+                title="Sắp xếp tự động"
+              >
+                Sắp xếp
+              </Button>
+            )}
           </div>
-        )}
-
-        {/* ── Layout Direction (ReactFlow only) ── */}
-        {isReactFlow && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Text style={{ fontSize: 12, color: '#8c8c8c' }}>Hướng</Text>
-            <Select
-              size="small"
-              style={{ width: 120 }}
-              value={filters.layoutDirection}
-              onChange={(v) => onChange({ ...filters, layoutDirection: v })}
-              getPopupContainer={(trigger) => trigger.parentElement!}
-              options={[
-                { label: '↓ Trên → Dưới', value: 'TB' },
-                { label: '↑ Dưới → Trên', value: 'BT' },
-                { label: '→ Trái → Phải', value: 'LR' },
-                { label: '← Phải → Trái', value: 'RL' },
-              ]}
-            />
-          </div>
-        )}
-
-        {/* ── Edge style (ReactFlow only) ── */}
-        {isReactFlow && (
-          <Segmented
-            size="small"
-            value={filters.edgeStyle}
-            onChange={(v) => onChange({ ...filters, edgeStyle: v as 'bezier' | 'step' })}
-            options={[
-              { label: 'Cong', value: 'bezier' },
-              { label: 'Góc vuông', value: 'step' },
-            ]}
-          />
-        )}
-
-        {/* ── Connect Mode (ReactFlow only) ── */}
-        {isReactFlow && (
-          <Button
-            size="small"
-            type={filters.connectionMode ? 'primary' : 'default'}
-            icon={<LinkOutlined />}
-            onClick={() => onChange({ ...filters, connectionMode: !filters.connectionMode })}
-            title={filters.connectionMode ? 'Đang bật: click source → target để tạo kết nối' : 'Bật chế độ tạo kết nối'}
-          >
-            Kết nối
-          </Button>
-        )}
-
-        {/* ── Zone mode (ReactFlow + server/all view only) ── */}
-        {isReactFlow && filters.nodeType !== 'app' && (
-          <>
-            <Button
-              size="small"
-              type={filters.showZones ? 'primary' : 'default'}
-              icon={<TableOutlined />}
-              onClick={() => onChange({ ...filters, showZones: !filters.showZones, connectionMode: false })}
-              title={filters.showZones ? 'Tắt zone lane' : 'Bật hiển thị zone lane (swimlane)'}
-            >
-              Zone
-            </Button>
-            {filters.showZones && zoneConfigNode}
-          </>
-        )}
-
-        {/* ── Auto Arrange (ReactFlow + vis) ── */}
-        {isInteractive && onAutoArrange && (
-          <Button
-            size="small"
-            icon={<PartitionOutlined />}
-            onClick={onAutoArrange}
-            title="Sắp xếp tự động"
-          >
-            Sắp xếp
-          </Button>
         )}
 
         {sep}
 
-        {/* ── Data filters ── */}
-        <Space size={12} wrap>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        {/* ── Cluster: Dữ liệu (environment / view scope / filters) ── */}
+        <div style={clusterStyle}>
+          {groupLabel('Dữ liệu')}
+
+          <div style={fieldStyle}>
             <Text style={{ fontSize: 12, color: '#8c8c8c' }}>Môi trường</Text>
             <Select
               allowClear
               size="small"
               placeholder="Tất cả"
-              style={{ width: 90 }}
+              style={{ width: 150 }}
+              popupMatchSelectWidth={false}
               value={filters.environment}
               onChange={(v) => onChange({ ...filters, environment: v })}
               getPopupContainer={(trigger) => trigger.parentElement!}
@@ -397,11 +425,12 @@ export default function TopologyFilterPanel({
             />
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <div style={fieldStyle}>
             <Text style={{ fontSize: 12, color: '#8c8c8c' }}>Hiển thị</Text>
             <Select
               size="small"
-              style={{ width: 130 }}
+              style={{ width: 150 }}
+              popupMatchSelectWidth={false}
               value={filters.nodeType}
               onChange={(v) => onChange({ ...filters, nodeType: v })}
               getPopupContainer={(trigger) => trigger.parentElement!}
@@ -415,7 +444,7 @@ export default function TopologyFilterPanel({
 
           {/* Mini-map (ReactFlow + vis only) */}
           {isInteractive && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div style={fieldStyle}>
               <Text style={{ fontSize: 12, color: '#8c8c8c' }}>Mini-map</Text>
               <Switch
                 size="small"
@@ -425,7 +454,7 @@ export default function TopologyFilterPanel({
             </div>
           )}
 
-          {/* ── Node visibility filter button ── */}
+          {/* Node visibility filter button */}
           {hasOptions && (
             <Badge count={activeFilterCount} size="small" offset={[-3, 3]}>
               <Button
@@ -439,7 +468,7 @@ export default function TopologyFilterPanel({
             </Badge>
           )}
 
-          {/* Quick-clear badge */}
+          {/* Quick-clear */}
           {activeFilterCount > 0 && (
             <Button
               size="small"
@@ -451,7 +480,18 @@ export default function TopologyFilterPanel({
               Xóa bộ lọc
             </Button>
           )}
-        </Space>
+        </div>
+
+        {/* ── Reset (auto-saved prefs) ── */}
+        {onReset && (
+          <div style={{ marginLeft: 'auto' }}>
+            <Tooltip title="Đặt lại tất cả tuỳ chọn về mặc định. Các tuỳ chọn được lưu tự động trên trình duyệt này và khôi phục khi tải lại trang.">
+              <Button size="small" icon={<RollbackOutlined />} onClick={onReset}>
+                Đặt lại
+              </Button>
+            </Tooltip>
+          </div>
+        )}
       </div>
 
       {/* ── Node visibility modal ── */}

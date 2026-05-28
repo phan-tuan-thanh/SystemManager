@@ -6,9 +6,8 @@ import ReactFlow, {
   MarkerType, type ReactFlowInstance, type NodeChange,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { useState as useTabState } from 'react';
 import {
-  Button, Space, Spin, Alert, Typography, Dropdown, Input, Modal, Badge, App, Tag, Tabs, Tooltip,
+  Button, Space, Spin, Alert, Typography, Dropdown, Input, Modal, Badge, App, Tag, Tooltip,
 } from 'antd';
 import {
   DownloadOutlined, ReloadOutlined, HistoryOutlined, SaveOutlined,
@@ -27,9 +26,8 @@ import TopologyMermaidView from './components/TopologyMermaidView';
 import TopologyLegend from './components/TopologyLegend';
 import { CreateConnectionModal } from './components/CreateConnectionModal';
 import ConnectionHealthDrawer from './components/ConnectionHealthDrawer';
-import FirewallTopologyView from './components/FirewallTopologyView';
 import { nodeTypes, edgeTypes } from './components/edges';
-import { computeLayout, applyDagreLayout, applyElkLayout, computeZoneLaneLayout, getSmartRoute, reflowZoneLanes, reflowZoneNodes, optimalZoneLaneArrangement } from './utils/topologyLayout';
+import { computeLayout, applyDagreLayout, applyElkLayout, computeZoneLaneLayout, getSmartRoute, reflowZoneLanes, reflowZoneNodes, optimalZoneLaneArrangement, rebuildLaneWrappers, resizeZonesFromChildren, ZONE_CONTENT_ORIGIN } from './utils/topologyLayout';
 import { useTopologyFilters } from './hooks/useTopologyFilters';
 import { useTopologyExport } from './hooks/useTopologyExport';
 import { useTopologyQuery, useCreateSnapshot, type ServerNode, type ConnectionEdge, type ImpliedConnectionEdge, type TopologyData, type Snapshot } from './hooks/useTopology';
@@ -92,17 +90,49 @@ function saveSnapshotLayout(id: string, layout: SnapshotLayout) {
   } catch { /* ignore */ }
 }
 
+// ─── Persisted view preferences (per-browser) ─────────────────────
+// Every toolbar option (filters + view mode + render engine + implied
+// toggle) is auto-saved to localStorage so a reload re-presents the exact
+// view the user last chose. A reset restores DEFAULT_FILTERS.
+const DEFAULT_FILTERS: TopologyFilters = {
+  environment: 'PROD', nodeType: 'server', showMiniMap: true, layout: 'force',
+  layoutAlgorithm: 'elk-layered', layoutDirection: 'TB', connectionMode: false,
+  edgeStyle: 'bezier', visibleGroupNames: [], visibleServerIds: [], visibleAppIds: [], showZones: true,
+};
+
+interface ViewPrefs {
+  filters: TopologyFilters;
+  viewMode: '2D' | '3D';
+  renderEngine: 'reactflow' | 'visnetwork' | 'mermaid';
+  showImplied: boolean;
+}
+const VIEW_PREFS_KEY = 'topology.viewPrefs.v1';
+
+function loadViewPrefs(): Partial<ViewPrefs> {
+  try {
+    const raw = localStorage.getItem(VIEW_PREFS_KEY);
+    if (raw) return JSON.parse(raw) as Partial<ViewPrefs>;
+  } catch { /* ignore */ }
+  // Migrate the legacy single-key render-engine preference.
+  try {
+    const legacy = localStorage.getItem('topology.renderEngine');
+    if (legacy === 'visnetwork' || legacy === 'reactflow' || legacy === 'mermaid') {
+      return { renderEngine: legacy };
+    }
+  } catch { /* ignore */ }
+  return {};
+}
+
+function saveViewPrefs(prefs: ViewPrefs) {
+  try { localStorage.setItem(VIEW_PREFS_KEY, JSON.stringify(prefs)); } catch { /* ignore */ }
+}
+
 // ─── Main Component ───────────────────────────────────────────────
 
 function TopologyPageInner() {
-  const [viewMode, setViewMode] = useState<'2D' | '3D'>('2D');
-  const [renderEngine, setRenderEngine] = useState<'reactflow' | 'visnetwork' | 'mermaid'>(() => {
-    try {
-      const saved = localStorage.getItem('topology.renderEngine');
-      if (saved === 'visnetwork' || saved === 'reactflow' || saved === 'mermaid') return saved;
-    } catch { /* ignore */ }
-    return 'visnetwork';
-  });
+  const [bootPrefs] = useState(loadViewPrefs);
+  const [viewMode, setViewMode] = useState<'2D' | '3D'>(bootPrefs.viewMode ?? '2D');
+  const [renderEngine, setRenderEngine] = useState<'reactflow' | 'visnetwork' | 'mermaid'>(bootPrefs.renderEngine ?? 'visnetwork');
 
   const handleViewModeChange = useCallback((v: '2D' | '3D') => {
     setViewMode(v);
@@ -111,11 +141,12 @@ function TopologyPageInner() {
 
   const handleRenderEngineChange = useCallback((v: 'reactflow' | 'visnetwork' | 'mermaid') => {
     setRenderEngine(v);
-    try { localStorage.setItem('topology.renderEngine', v); } catch { /* ignore */ }
     if (v !== 'reactflow') setFilters((f) => f.connectionMode ? { ...f, connectionMode: false } : f);
   }, []);
 
-  const [filters, setFilters] = useState<TopologyFilters>({ environment: 'PROD', nodeType: 'server', showMiniMap: true, layout: 'force', layoutAlgorithm: 'elk-layered', layoutDirection: 'TB', connectionMode: false, edgeStyle: 'bezier', visibleGroupNames: [], visibleServerIds: [], visibleAppIds: [], showZones: true });
+  const [filters, setFilters] = useState<TopologyFilters>(
+    bootPrefs.filters ? { ...DEFAULT_FILTERS, ...bootPrefs.filters } : DEFAULT_FILTERS,
+  );
 
   const [selectedNode, setSelectedNode] = useState<any>(null);
   const [selectedConnection, setSelectedConnection] = useState<ConnectionEdge | null>(null);
@@ -130,7 +161,7 @@ function TopologyPageInner() {
   const [createConnModalVisible, setCreateConnModalVisible] = useState(false);
   const [connectionDraft, setConnectionDraft] = useState<any>(null);
   const [healthDrawerOpen, setHealthDrawerOpen] = useState(false);
-  const [showImplied, setShowImplied] = useState(true);
+  const [showImplied, setShowImplied] = useState(bootPrefs.showImplied ?? true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [layoutRevision, setLayoutRevision] = useState(0);
 
@@ -151,6 +182,39 @@ function TopologyPageInner() {
       if (e.id !== edgeId) return e;
       return { ...e, data: { ...e.data, labelOffsetX: (e.data?.labelOffsetX ?? 0) + dx, labelOffsetY: (e.data?.labelOffsetY ?? 0) + dy } };
     }));
+  }, []);
+
+  // Auto-persist toolbar options. Skipped while viewing a snapshot so the
+  // snapshot's temporary view never overwrites the live preferences.
+  useEffect(() => {
+    if (snapshotView) return;
+    saveViewPrefs({ filters, viewMode, renderEngine, showImplied });
+  }, [filters, viewMode, renderEngine, showImplied, snapshotView]);
+
+  const handleResetOptions = useCallback(() => {
+    setFilters(DEFAULT_FILTERS);
+    setViewMode('2D');
+    setRenderEngine('visnetwork');
+    setShowImplied(true);
+    userPositionsRef.current = {};
+    zoneLayoutRef.current = {};
+    edgeLabelOffsetsRef.current = {};
+    setLayoutRevision((r) => r + 1);
+  }, []);
+
+  // Exit snapshot view → restore the user's saved live options (persistence
+  // was paused during the snapshot, so localStorage still holds them).
+  const handleExitSnapshot = useCallback(() => {
+    const live = loadViewPrefs();
+    if (live.filters) setFilters({ ...DEFAULT_FILTERS, ...live.filters });
+    if (live.viewMode) setViewMode(live.viewMode);
+    if (live.renderEngine) setRenderEngine(live.renderEngine);
+    if (typeof live.showImplied === 'boolean') setShowImplied(live.showImplied);
+    setSnapshotView(null);
+    userPositionsRef.current = {};
+    zoneLayoutRef.current = {};
+    edgeLabelOffsetsRef.current = {};
+    setLayoutRevision((r) => r + 1);
   }, []);
 
   const { data, loading, error, refetch } = useTopologyQuery(filters.environment);
@@ -349,24 +413,38 @@ function TopologyPageInner() {
       zoneLayoutRef.current = {};
       positionsModeRef.current = modeKey;
     }
-    // layoutRevision bump (from zone auto-arrange) forces fresh positions — only once per bump
+    // Revision bump: clear server positions but NOT zone positions.
+    // Zone positions survive intentional server→zone reassignment so the user's
+    // custom zone arrangement is preserved. handleAutoArrange explicitly clears
+    // zoneLayoutRef before bumping the revision when a full reset is needed.
     if (layoutRevision > appliedRevisionRef.current) {
       userPositionsRef.current = {};
-      zoneLayoutRef.current = {};
       appliedRevisionRef.current = layoutRevision;
     }
-    const mergedNodes = computedNodes.map((node) => {
-      // Lane wrappers are always recomputed by the layout — never pin them.
-      if (node.type === 'laneWrapper') return node;
-      if (node.type === 'zoneLane') {
-        const z = zoneLayoutRef.current[node.id];
-        return z
-          ? { ...node, position: { x: z.x, y: z.y }, style: { ...node.style, width: z.width, height: z.height } }
-          : node;
-      }
-      const savedPos = userPositionsRef.current[node.id];
-      return savedPos ? { ...node, position: savedPos } : node;
-    });
+    // Skip laneWrapper nodes here — they will be rebuilt below from the
+    // actual (zoneLayoutRef-adjusted) zone positions so they always match.
+    const merged = computedNodes
+      .filter((node) => node.type !== 'laneWrapper')
+      .map((node) => {
+        if (node.type === 'zoneLane') {
+          const z = zoneLayoutRef.current[node.id];
+          // Restore saved position AND size. The size is then corrected by
+          // resizeZonesFromChildren so it always encompasses the actual
+          // server positions — including custom-dragged positions that differ
+          // from the default layout sizes stored here.
+          return z
+            ? { ...node, position: { x: z.x, y: z.y }, style: { ...node.style, width: z.width, height: z.height } }
+            : node;
+        }
+        const savedPos = userPositionsRef.current[node.id];
+        return savedPos ? { ...node, position: savedPos } : node;
+      });
+    // 1. Resize every zone to tightly fit its children at their ACTUAL
+    //    positions (custom-dragged or default). This corrects stale sizes in
+    //    zoneLayoutRef after server moves, and handles servers dragged to
+    //    positions that exceed the default-layout zone height/width.
+    // 2. Rebuild laneWrapper panels from the corrected zone geometry.
+    const mergedNodes = rebuildLaneWrappers(resizeZonesFromChildren(merged));
     setNodes(mergedNodes);
     const offs = edgeLabelOffsetsRef.current;
     const mergedEdges = Object.keys(offs).length === 0
@@ -586,103 +664,13 @@ function TopologyPageInner() {
       return;
     }
 
-    // Server node dragged inside a zone lane → normalize the content block to a
-    // padded origin so the zone grows symmetrically in every direction
-    // (drag left/top resizes the zone just like drag right/bottom), then
-    // re-stack the other zones to keep spacing.
+    // Server node dragged inside a zone lane → snap to grid within the same
+    // zone. Cross-zone reassignment via drag is intentionally disabled — nodes
+    // are always constrained to their own zone visually and on drop.
     if (parentId && filters.showZones) {
       const parent = nodesRef.current.find((n) => n.id === parentId);
       if (parent?.type === 'zoneLane') {
         const stackH = filters.layoutDirection === 'LR' || filters.layoutDirection === 'RL';
-        // Dropped over a DIFFERENT zone lane → reassign the server to that
-        // zone and persist it (otherwise the next recompute snaps it back to
-        // its IP-matched zone, so it appears to "jump" to another zone).
-        if (node.id.startsWith('server-')) {
-          const nW = (node.width as number) ?? (node.style?.width as number) ?? 200;
-          const nH = (node.height as number) ?? (node.style?.height as number) ?? 150;
-          const absX = parent.position.x + node.position.x + nW / 2;
-          const absY = parent.position.y + node.position.y + nH / 2;
-
-          // Calculate lane bands using overlap detection (same logic as zone drag stop).
-          // Group zones into lanes by cross-axis overlap, not by zone.data.lane.
-          const zoneNodes = nodesRef.current.filter((n) => n.type === 'zoneLane');
-          const crossLo = (n: Node) => (stackH ? n.position.y : n.position.x);
-          const crossHi = (n: Node) => {
-            const sz = stackH
-              ? (n.style?.height as number) ?? (n.height as number) ?? 200
-              : (n.style?.width as number) ?? (n.width as number) ?? 200;
-            return crossLo(n) + sz;
-          };
-          const sorted = [...zoneNodes].sort((a, b) => crossLo(a) - crossLo(b));
-          const bandsAcc: { lo: number; hi: number; minX: number; minY: number; maxX: number; maxY: number; zones: Node[] }[] = [];
-          for (const z of sorted) {
-            const lo = crossLo(z);
-            const hi = crossHi(z);
-            const zw = (z.style?.width as number) ?? (z.width as number) ?? 200;
-            const zh = (z.style?.height as number) ?? (z.height as number) ?? 200;
-            const band = bandsAcc.find((r) => lo < r.hi && hi > r.lo);
-            if (band) {
-              band.zones.push(z);
-              band.lo = Math.min(band.lo, lo);
-              band.hi = Math.max(band.hi, hi);
-              band.minX = Math.min(band.minX, z.position.x);
-              band.minY = Math.min(band.minY, z.position.y);
-              band.maxX = Math.max(band.maxX, z.position.x + zw);
-              band.maxY = Math.max(band.maxY, z.position.y + zh);
-            } else {
-              bandsAcc.push({ lo, hi, minX: z.position.x, minY: z.position.y, maxX: z.position.x + zw, maxY: z.position.y + zh, zones: [z] });
-            }
-          }
-
-          // Get cross-axis center of the server (Y for row layout, X for column layout).
-          const cc = stackH ? absY : absX;
-          const lo = (bb: { lo: number; hi: number; minX: number; minY: number; maxX: number; maxY: number }) => (stackH ? bb.minY : bb.minX);
-          const hi = (bb: { lo: number; hi: number; minX: number; minY: number; maxX: number; maxY: number }) => (stackH ? bb.maxY : bb.maxX);
-          const sortedBands = [...bandsAcc].sort((a, b) => lo(a) - lo(b));
-
-          // Find which lane band the server belongs to (with tolerance).
-          let targetBand: typeof bandsAcc[number] | null = null;
-          for (let i = 0; i < sortedBands.length; i++) {
-            const band = sortedBands[i];
-            if (cc >= lo(band) - 24 && cc <= hi(band) + 24) {
-              targetBand = band;
-              break;
-            }
-          }
-
-          // Drop server into the nearest zone in the target lane band.
-          if (targetBand && targetBand.zones.length > 0) {
-            const targetZone = targetBand.zones.reduce((best, z) => {
-              if (z.id === parentId) return best;
-              const dist = Math.abs((stackH ? z.position.y + (z.style?.height as number ?? z.height ?? 200) / 2 : z.position.x + (z.style?.width as number ?? z.width ?? 200) / 2) - (stackH ? absY : absX));
-              const bestDist = best ? Math.abs((stackH ? best.position.y + (best.style?.height as number ?? best.height ?? 200) / 2 : best.position.x + (best.style?.width as number ?? best.width ?? 200) / 2) - (stackH ? absY : absX)) : Infinity;
-              return dist < bestDist ? z : best;
-            });
-
-            if (targetZone && targetZone.id !== parentId) {
-              delete userPositionsRef.current[node.id];
-              assignServer(node.id.replace(/^server-/, ''), targetZone.id.replace(/^zone-/, ''));
-              setLayoutRevision((r) => r + 1);
-              return;
-            }
-          }
-
-          // Fallback: if no lane band found, check pixel position (old behavior).
-          const targetZone = nodesRef.current.find((n) =>
-            n.type === 'zoneLane' &&
-            n.id !== parentId &&
-            absX >= n.position.x &&
-            absX <= n.position.x + ((n.style?.width as number) ?? 0) &&
-            absY >= n.position.y &&
-            absY <= n.position.y + ((n.style?.height as number) ?? 0),
-          );
-          if (targetZone) {
-            delete userPositionsRef.current[node.id];
-            assignServer(node.id.replace(/^server-/, ''), targetZone.id.replace(/^zone-/, ''));
-            setLayoutRevision((r) => r + 1);
-            return;
-          }
-        }
         // Snap all siblings in this zone to column-stack grid, then resize lanes.
         setNodes((nds) => {
           const moved = nds.map((n) => (n.id === node.id ? { ...n, position: node.position } : n));
@@ -898,8 +886,14 @@ function TopologyPageInner() {
     }
 
     // Live resize zone when dragging server inside.
+    // Clamp the node to the padded content origin so it can't exit the zone
+    // through the left or top edge — the zone only grows right/bottom live.
+    const clampedPos = {
+      x: Math.max(node.position.x, ZONE_CONTENT_ORIGIN.x),
+      y: Math.max(node.position.y, ZONE_CONTENT_ORIGIN.y),
+    };
     setNodes((nds) => {
-      const live = nds.map((n) => (n.id === node.id ? { ...n, position: node.position } : n));
+      const live = nds.map((n) => (n.id === node.id ? { ...n, position: clampedPos } : n));
       return reflowZoneLanes(live, stackH);
     });
   }, [setNodes, filters.showZones, filters.layoutDirection]);
@@ -959,6 +953,9 @@ function TopologyPageInner() {
         stackH,
       );
       if (arrangement.length) setZoneArrangement(arrangement);
+      // Explicitly reset both refs so the recomputed zone grid is used fresh.
+      zoneLayoutRef.current = {};
+      userPositionsRef.current = {};
       setLayoutRevision((r) => r + 1);
       requestAnimationFrame(() => requestAnimationFrame(() => {
         reactFlowRef.current?.fitView({ padding: 0.2, duration: 500, minZoom: 0.15, maxZoom: 1.5, includeHiddenNodes: false });
@@ -1137,7 +1134,7 @@ function TopologyPageInner() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       <PageHeader
-        title="Topology"
+        title="Sơ đồ hệ thống"
         helpKey="topology"
         subtitle={!loading && data ? `${serverCount} server${serverCount !== 1 ? 's' : ''} · ${connectionCount} connection${connectionCount !== 1 ? 's' : ''}` : 'Loading...'}
         extra={
@@ -1200,7 +1197,7 @@ function TopologyPageInner() {
             </span>
           }
           action={
-            <Button size="small" onClick={() => { setSnapshotView(null); edgeLabelOffsetsRef.current = {}; setLayoutRevision((r) => r + 1); }}>
+            <Button size="small" onClick={handleExitSnapshot}>
               Thoát xem bản chụp
             </Button>
           }
@@ -1215,6 +1212,7 @@ function TopologyPageInner() {
         renderEngine={renderEngine}
         onRenderEngineChange={handleRenderEngineChange}
         onAutoArrange={handleAutoArrange}
+        onReset={handleResetOptions}
         groupOptions={groupOptions}
         serverOptions={serverOptions}
         appOptions={appOptions}
@@ -1304,7 +1302,7 @@ function TopologyPageInner() {
         {/* ── Mermaid ── */}
         {viewMode === '2D' && renderEngine === 'mermaid' && (
           <div style={{ position: 'absolute', inset: 0, overflow: 'auto', background: '#f0f2f5', padding: 16 }}>
-            <TopologyMermaidView servers={filteredData.serversForEdgeResolution} connections={filteredData.connectionsForEdgeResolution} nodeType={filters.nodeType} environment={filters.environment} />
+            <TopologyMermaidView servers={filteredData.serversForEdgeResolution} connections={filteredData.connectionsForEdgeResolution} impliedConnections={effectiveTopology?.impliedConnections ?? []} showImplied={showImplied} nodeType={filters.nodeType} environment={filters.environment} />
           </div>
         )}
 
@@ -1376,13 +1374,9 @@ function TopologyPageInner() {
 }
 
 export default function TopologyPage() {
-  const [activeTab, setActiveTab] = useTabState<'app' | 'firewall'>('app');
   return (
     <App>
-      <Tabs activeKey={activeTab} onChange={(k) => setActiveTab(k as 'app' | 'firewall')} style={{ padding: '0 24px' }}
-        items={[{ key: 'app', label: 'Sơ đồ ứng dụng' }, { key: 'firewall', label: '🔒 Firewall Topology' }]}
-      />
-      {activeTab === 'app' ? <TopologyPageInner /> : <FirewallTopologyView />}
+      <TopologyPageInner />
     </App>
   );
 }
