@@ -44,15 +44,49 @@ export function ProtocolEdge({
   let labelY: number;
   let spread: number;
 
+  const isVerticalRoute = (
+    (sourcePosition === Position.Bottom && targetPosition === Position.Top) ||
+    (sourcePosition === Position.Top && targetPosition === Position.Bottom)
+  );
+
   if (isBackward) {
     // Dynamic offset computed at layout time to route the arc below all zone
     // lane containers between source and target (see routeEdgesAfterLayout).
     const backwardOffset = data?._backwardOffset ?? 58;
-    [edgePath, labelX, labelY] = getSmoothStepPath({
-      sourceX, sourceY, sourcePosition: Position.Bottom,
-      targetX, targetY, targetPosition: Position.Bottom,
-      borderRadius: 12, offset: backwardOffset,
-    });
+    if (edgeStyle === 'step') {
+      [edgePath, labelX, labelY] = getSmoothStepPath({
+        sourceX, sourceY, sourcePosition: Position.Bottom,
+        targetX, targetY, targetPosition: Position.Bottom,
+        borderRadius: 12, offset: backwardOffset,
+      });
+    } else {
+      [edgePath, labelX, labelY] = getBezierPath({
+        sourceX, sourceY, sourcePosition: Position.Bottom,
+        targetX, targetY, targetPosition: Position.Bottom,
+      });
+    }
+    spread = 0;
+  } else if (isVerticalRoute) {
+    if (edgeStyle === 'step') {
+      [edgePath, labelX, labelY] = getSmoothStepPath({
+        sourceX, sourceY, sourcePosition,
+        targetX, targetY, targetPosition,
+        borderRadius: 6,
+      });
+    } else {
+      // Safe curvature: curvature * dist must stay ≤ dyH so control points
+      // don't cross (crossing swings the arc above/below both handles).
+      // Factor 0.9 keeps a small margin below the crossing threshold.
+      const dxH = Math.abs(targetX - sourceX);
+      const dyH = Math.abs(targetY - sourceY);
+      const dist = Math.sqrt(dxH * dxH + dyH * dyH) || 1;
+      const curvature = Math.min(0.25, (dyH / dist) * 0.9);
+      [edgePath, labelX, labelY] = getBezierPath({
+        sourceX, sourceY, sourcePosition,
+        targetX, targetY, targetPosition,
+        curvature,
+      });
+    }
     spread = 0;
   } else if (edgeStyle === 'step') {
     const offsetStep = pCount <= 1 ? 0 : (pIdx - (pCount - 1) / 2) * 24;

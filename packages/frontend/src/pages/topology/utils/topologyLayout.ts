@@ -134,12 +134,12 @@ export function buildGraph(
             id: edgeId,
             source: `server-${srcServer.id}`,
             target: `server-${tgtServer.id}`,
-            type: 'default',
+            type: edgeStyle === 'step' ? 'smoothstep' : 'default',
             animated: false,
             zIndex: 0,
             style: { stroke: '#d9d9d9', strokeWidth: 1.5, strokeDasharray: '4,3', opacity: 0.6 },
             markerEnd: { type: MarkerType.ArrowClosed, color: '#d9d9d9' },
-            data: { type: 'APP_CONN', _connection: conn },
+            data: { type: 'APP_CONN', edgeStyle, _connection: conn },
           });
         }
       }
@@ -337,6 +337,40 @@ function getNodeParentId(node: Node): string | undefined {
   return (node as any).parentId;
 }
 
+// Returns the absolute position of the parent zone lane for a server node.
+// In zone mode: serverNode.parentId = zone-{id} (type 'zoneLane').
+function getParentZonePos(nodeId: string, nodeMap: Map<string, Node>): { x: number; y: number } | null {
+  const node = nodeMap.get(nodeId);
+  if (!node) return null;
+  const parentId = getNodeParentId(node);
+  if (!parentId) return null;
+  const parent = nodeMap.get(parentId);
+  if (!parent) return null;
+  if (parent.type === 'zoneLane') return parent.position;
+  // App nodes nested: appNode → serverNode → zoneLane
+  const gpId = getNodeParentId(parent);
+  if (!gpId) return null;
+  const gp = nodeMap.get(gpId);
+  if (gp?.type === 'zoneLane') return gp.position;
+  return null;
+}
+
+// Returns true when source and target zones are primarily side by side (horizontal
+// separation dominates over vertical). Used to prefer left/right handles instead of
+// forcing top/bottom or backward U-arc routing between different-column zones.
+export function areZonesSideBySide(
+  sourceId: string,
+  targetId: string,
+  nodeMap: Map<string, Node>,
+): boolean {
+  const srcPos = getParentZonePos(sourceId, nodeMap);
+  const tgtPos = getParentZonePos(targetId, nodeMap);
+  if (!srcPos || !tgtPos) return false;
+  const dxZone = Math.abs(tgtPos.x - srcPos.x);
+  const dyZone = Math.abs(tgtPos.y - srcPos.y);
+  return dxZone > dyZone;
+}
+
 // Returns the absolute top-left position of a node in React Flow coordinates,
 // walking up the parent chain for nested nodes (zone lane children etc.).
 function getAbsTopLeft(node: Node, nodeMap: Map<string, Node>): { x: number; y: number } {
@@ -365,6 +399,16 @@ export interface BackwardRoute {
   _isBackward: true;
 }
 
+export interface VerticalRoute {
+  sourceHandle: 'bot-s' | 'top-s';
+  targetHandle: 'top-t' | 'bot-t';
+}
+
+export interface HorizontalRoute {
+  sourceHandle: 'left-s';
+  targetHandle: 'right-t';
+}
+
 // Decide whether a server→server edge runs backward (target left of source).
 // Returns { _isBackward: true } so the caller can redirect it to the bottom
 // handles, or null for forward edges / non-server nodes. The actual arc
@@ -387,80 +431,121 @@ export function getBackwardRoute(
   return { _isBackward: true };
 }
 
+export interface SmartRoute {
+  sourceHandle?: 'bot-s' | 'top-s' | 'left-s';
+  targetHandle?: 'top-t' | 'bot-t' | 'right-t';
+}
+
+// Smart handle selection based on relative position AND bounding-box gaps.
+// Direct routing only when nodes are aligned on the dominant axis with clear
+// gap; otherwise use a detour that goes AROUND the perpendicular offset so
+// the connection doesn't cut through other nodes between source and target.
+//
+// Rules (regardless of zone):
+//   dest dưới:       bot-s → top-t  | left-s → top-t  | left-s → right-t
+//   dest trên:       top-s → bot-t  | left-s → bot-t  | left-s → right-t
+//   ngang dest phải: right → left   | bot-s → bot-t   | top-s → top-t
+//   ngang dest trái: left-s→right-t | bot-s → bot-t   | top-s → top-t
+//
+// Returning {} means use ReactFlow defaults (right-source → left-target).
+export function getSmartRoute(
+  sourceId: string,
+  targetId: string,
+  nodeMap: Map<string, Node>,
+): SmartRoute {
+  const srcNode = nodeMap.get(sourceId);
+  const tgtNode = nodeMap.get(targetId);
+  if (!srcNode || !tgtNode) return {};
+  if (srcNode.type !== 'serverNode' || tgtNode.type !== 'serverNode') return {};
+
+  const srcAbs = getAbsTopLeft(srcNode, nodeMap);
+  const srcW = (srcNode.style?.width as number) ?? SERVER_NODE_W;
+  const srcH = (srcNode.style?.height as number) ?? SERVER_NODE_H;
+  const tgtAbs = getAbsTopLeft(tgtNode, nodeMap);
+  const tgtW = (tgtNode.style?.width as number) ?? SERVER_NODE_W;
+  const tgtH = (tgtNode.style?.height as number) ?? SERVER_NODE_H;
+
+  // Bounding-box gaps: positive = clear separation, negative = overlap.
+  const gapRight = tgtAbs.x - (srcAbs.x + srcW);
+  const gapLeft = srcAbs.x - (tgtAbs.x + tgtW);
+  const gapDown = tgtAbs.y - (srcAbs.y + srcH);
+  const gapUp = srcAbs.y - (tgtAbs.y + tgtH);
+  const horGap = Math.max(gapRight, gapLeft); // best horizontal clearance
+  const verGap = Math.max(gapDown, gapUp);    // best vertical clearance
+
+  // Direction (which side the target is on).
+  const dx = (tgtAbs.x + tgtW / 2) - (srcAbs.x + srcW / 2);
+  const dy = (tgtAbs.y + tgtH / 2) - (srcAbs.y + srcH / 2);
+
+  // Route along the axis with the LARGER gap — the direction in which the
+  // nodes are more separated. This gives the cleanest curve (minimal S-curve)
+  // and stays consistent regardless of node aspect ratio. When both axes
+  // overlap, fall back to center-distance dominance.
+  const routeVertical = (horGap < 0 && verGap < 0)
+    ? Math.abs(dy) >= Math.abs(dx)
+    : verGap >= horGap;
+
+  if (!routeVertical) {
+    // ── Horizontal routing: dest phải (dx>0) / dest trái (dx<0) ──
+    if (horGap >= 0) {
+      // PRIMARY: clean left↔right.
+      return dx > 0 ? {} : { sourceHandle: 'left-s', targetHandle: 'right-t' };
+    }
+    // ALTERNATIVE (overlap): vertical U-arc toward the target.
+    return dy >= 0
+      ? { sourceHandle: 'bot-s', targetHandle: 'bot-t' }
+      : { sourceHandle: 'top-s', targetHandle: 'top-t' };
+  }
+
+  // ── Vertical routing: dest dưới (dy>0) / dest trên (dy<0) ──────
+  if (verGap >= 0) {
+    // PRIMARY: clean top↔bottom. FwEdge/ProtocolEdge apply safe curvature so
+    // these never S-curve even with horizontal offset.
+    return dy > 0
+      ? { sourceHandle: 'bot-s', targetHandle: 'top-t' }
+      : { sourceHandle: 'top-s', targetHandle: 'bot-t' };
+  }
+  // ALTERNATIVE (overlap): horizontal C-curve around the side.
+  return { sourceHandle: 'left-s', targetHandle: 'right-t' };
+}
+
+// Kept for backward compatibility — delegates to getSmartRoute.
+export function getVerticalRoute(
+  sourceId: string,
+  targetId: string,
+  nodeMap: Map<string, Node>,
+): VerticalRoute | null {
+  const r = getSmartRoute(sourceId, targetId, nodeMap);
+  if ((r.sourceHandle === 'bot-s' || r.sourceHandle === 'top-s') &&
+      (r.targetHandle === 'top-t' || r.targetHandle === 'bot-t')) {
+    return { sourceHandle: r.sourceHandle, targetHandle: r.targetHandle };
+  }
+  return null;
+}
+
+export function getHorizontalBackwardRoute(
+  sourceId: string,
+  targetId: string,
+  nodeMap: Map<string, Node>,
+): HorizontalRoute | null {
+  const r = getSmartRoute(sourceId, targetId, nodeMap);
+  if (r.sourceHandle === 'left-s' && r.targetHandle === 'right-t') {
+    return { sourceHandle: 'left-s', targetHandle: 'right-t' };
+  }
+  return null;
+}
+
 function routeEdgesAfterLayout(nodes: Node[], edges: Edge[]): Edge[] {
   const nodeMap = new Map(nodes.map((n) => [n.id, n]));
   return edges.map((edge) => {
-    const route = getBackwardRoute(edge.source, edge.target, nodeMap);
-    if (!route) return edge;
-
-    // Compute dynamic arc offset so the U-arc clears all zone lane containers
-    // that span between source and target. The getSmoothStepPath `offset` for
-    // bottom→bottom routing = how far the arc descends below the handle Y.
-    // We need: handleY + offset > bottom edge of every overlapping zone.
-    let dynProtocolOffset = 58;
-    const srcNode = nodeMap.get(edge.source);
-    const tgtNode = nodeMap.get(edge.target);
-    if (srcNode && tgtNode) {
-      const srcAbs = getAbsTopLeft(srcNode, nodeMap);
-      const tgtAbs = getAbsTopLeft(tgtNode, nodeMap);
-      const srcH = (srcNode.style?.height as number) ?? SERVER_NODE_H;
-      const tgtH = (tgtNode.style?.height as number) ?? SERVER_NODE_H;
-      const srcW = (srcNode.style?.width as number) ?? SERVER_NODE_W;
-      const tgtW = (tgtNode.style?.width as number) ?? SERVER_NODE_W;
-      const srcHandleY = srcAbs.y + srcH;
-      const tgtHandleY = tgtAbs.y + tgtH;
-      const maxHandleY = Math.max(srcHandleY, tgtHandleY);
-      const srcCenterX = srcAbs.x + srcW / 2;
-      const tgtCenterX = tgtAbs.x + tgtW / 2;
-      const xMin = Math.min(srcCenterX, tgtCenterX);
-      const xMax = Math.max(srcCenterX, tgtCenterX);
-
-      // Find the lowest bottom edge of any zone/wrapper container crossing this span
-      let maxZoneBottom = maxHandleY;
-      for (const node of nodeMap.values()) {
-        if (node.type !== 'zoneLane' && node.type !== 'laneWrapper') continue;
-        const pos = getAbsTopLeft(node, nodeMap);
-        const h = (node.style?.height as number) ?? 0;
-        const w = (node.style?.width as number) ?? 0;
-        if (pos.x < xMax && pos.x + w > xMin) {
-          maxZoneBottom = Math.max(maxZoneBottom, pos.y + h);
-        }
-      }
-      dynProtocolOffset = Math.max(58, maxZoneBottom - maxHandleY + 32);
-    }
-    const dynAppConnOffset = Math.max(28, dynProtocolOffset - 30);
-
+    const route = getSmartRoute(edge.source, edge.target, nodeMap);
+    if (!route.sourceHandle && !route.targetHandle) return edge; // forward default
     const isCustomEdge = edge.type === 'protocolEdge' || edge.type === 'fwEdge';
-    if (isCustomEdge) {
-      // ProtocolEdge/FwEdge use the injected coords directly when
-      // _isBackward is true → bottom U-arc with ALLOW/DENY colors,
-      // flow-dot animation, and protocol labels preserved.
-      return {
-        ...edge,
-        sourceHandle: 'bot-s',
-        targetHandle: 'bot-t',
-        zIndex: Math.max((edge.zIndex as number | undefined) ?? 0, 6),
-        data: { ...edge.data, ...route, _backwardOffset: dynProtocolOffset },
-      };
-    }
-
-    // Plain APP_CONN server edge: a generic app connection (no ALLOW/DENY).
-    // Render it as a faint dashed background smoothstep with a SHALLOW offset
-    // so it stays well clear of the colored ALLOW/DENY firewall arcs.
     return {
       ...edge,
-      type: 'smoothstep',
-      sourceHandle: 'bot-s',
-      targetHandle: 'bot-t',
-      zIndex: 3,
-      pathOptions: { borderRadius: 10, offset: dynAppConnOffset },
-      style: {
-        ...edge.style,
-        stroke: '#b0b0b0',
-        strokeWidth: 1.5,
-        strokeDasharray: '5,4',
-        opacity: 0.5,
-      },
+      sourceHandle: route.sourceHandle,
+      targetHandle: route.targetHandle,
+      zIndex: isCustomEdge ? Math.max((edge.zIndex as number | undefined) ?? 0, 6) : 3,
     };
   });
 }

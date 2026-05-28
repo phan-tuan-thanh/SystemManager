@@ -29,7 +29,7 @@ import { CreateConnectionModal } from './components/CreateConnectionModal';
 import ConnectionHealthDrawer from './components/ConnectionHealthDrawer';
 import FirewallTopologyView from './components/FirewallTopologyView';
 import { nodeTypes, edgeTypes } from './components/edges';
-import { computeLayout, applyDagreLayout, applyElkLayout, computeZoneLaneLayout, getBackwardRoute, reflowZoneLanes, reflowZoneNodes, optimalZoneLaneArrangement } from './utils/topologyLayout';
+import { computeLayout, applyDagreLayout, applyElkLayout, computeZoneLaneLayout, getSmartRoute, reflowZoneLanes, reflowZoneNodes, optimalZoneLaneArrangement } from './utils/topologyLayout';
 import { useTopologyFilters } from './hooks/useTopologyFilters';
 import { useTopologyExport } from './hooks/useTopologyExport';
 import { useTopologyQuery, useCreateSnapshot, type ServerNode, type ConnectionEdge, type ImpliedConnectionEdge, type TopologyData, type Snapshot } from './hooks/useTopology';
@@ -235,7 +235,7 @@ function TopologyPageInner() {
             animated: false,
             zIndex: 10,
             markerEnd: { type: MarkerType.ArrowClosed, color: cfg.color },
-            data: { type: 'IMPLIED', action, firewallRuleId: ic.firewallRuleId, firewallRuleName: ic.firewallRuleName, portNum, expiresAt: ic.expiresAt, neverExpires: ic.neverExpires, _implied: ic },
+            data: { type: 'IMPLIED', action, firewallRuleId: ic.firewallRuleId, firewallRuleName: ic.firewallRuleName, portNum, expiresAt: ic.expiresAt, neverExpires: ic.neverExpires, edgeStyle: filters.edgeStyle, _implied: ic },
           };
           const pushServerPair = (srcId: string, tgtId: string) => {
             if (srcId === tgtId) return;
@@ -246,14 +246,13 @@ function TopologyPageInner() {
             if (!addedServerPairs.has(action)) addedServerPairs.set(action, new Set());
             if (addedServerPairs.get(action)!.has(pairKey)) return;
             addedServerPairs.get(action)!.add(pairKey);
-            const route = getBackwardRoute(srcNodeId, tgtNodeId, zoneNodeMap);
+            const handles = getSmartRoute(srcNodeId, tgtNodeId, zoneNodeMap);
             zoneImpliedEdges.push({
               id: `implied-srv-${action}-${srcId}-${tgtId}`,
               source: srcNodeId,
               target: tgtNodeId,
               ...commonEdgeProps,
-              ...(route ? { sourceHandle: 'bot-s', targetHandle: 'bot-t' } : {}),
-              data: { ...commonEdgeProps.data, ...(route ?? {}) },
+              ...handles,
             });
           };
           if (ic.sourceServerId && ic.targetServerId) {
@@ -297,7 +296,7 @@ function TopologyPageInner() {
           animated: false,
           zIndex: 10,
           markerEnd: { type: MarkerType.ArrowClosed, color: cfg.color },
-          data: { type: 'IMPLIED', action, firewallRuleId: ic.firewallRuleId, firewallRuleName: ic.firewallRuleName, portNum, _implied: ic },
+          data: { type: 'IMPLIED', action, firewallRuleId: ic.firewallRuleId, firewallRuleName: ic.firewallRuleName, portNum, expiresAt: ic.expiresAt, neverExpires: ic.neverExpires, edgeStyle: filters.edgeStyle, _implied: ic },
         };
 
         const pushServerPair = (srcId: string, tgtId: string) => {
@@ -309,14 +308,13 @@ function TopologyPageInner() {
           if (!addedServerPairs.has(action)) addedServerPairs.set(action, new Set());
           if (addedServerPairs.get(action)!.has(pairKey)) return;
           addedServerPairs.get(action)!.add(pairKey);
-          const route = getBackwardRoute(srcNodeId, tgtNodeId, nodeMap);
+          const handles = getSmartRoute(srcNodeId, tgtNodeId, nodeMap);
           impliedEdges.push({
             id: `implied-srv-${action}-${srcId}-${tgtId}`,
             source: srcNodeId,
             target: tgtNodeId,
             ...commonEdgeProps,
-            ...(route ? { sourceHandle: 'bot-s', targetHandle: 'bot-t' } : {}),
-            data: { ...commonEdgeProps.data, ...(route ?? {}) },
+            ...handles,
           });
         };
 
@@ -390,6 +388,8 @@ function TopologyPageInner() {
   useEffect(() => { nodesRef.current = nodes; }, [nodes]);
   const edgesRef = useRef(edges);
   useEffect(() => { edgesRef.current = edges; }, [edges]);
+  // Set by drag-stop; consumed by the reroute effect once node positions settle.
+  const pendingRerouteRef = useRef(false);
 
   // ─── Focus highlight ────────────────────────────────────────────
   const displayNodes = useMemo(() => {
@@ -427,8 +427,39 @@ function TopologyPageInner() {
     });
   }, [focusedNodeId, renderEngine]);
 
+  // Re-evaluate handle selection for every server↔server edge against the
+  // CURRENT node positions. Called after a drag settles so connections
+  // re-route per the smart rules when nodes (or zones) move.
+  const rerouteEdges = useCallback(() => {
+    const nodeMap = new Map(nodesRef.current.map((n) => [n.id, n]));
+    setEdges((eds) => eds.map((e) => {
+      const srcNode = nodeMap.get(e.source);
+      const tgtNode = nodeMap.get(e.target);
+      if (srcNode?.type !== 'serverNode' || tgtNode?.type !== 'serverNode') return e;
+      const route = getSmartRoute(e.source, e.target, nodeMap);
+      const newSrc = route.sourceHandle ?? null;
+      const newTgt = route.targetHandle ?? null;
+      if ((e.sourceHandle ?? null) === newSrc && (e.targetHandle ?? null) === newTgt) return e;
+      return { ...e, sourceHandle: newSrc, targetHandle: newTgt };
+    }));
+  }, [setEdges]);
+
+  // Reroute connections after node positions settle from a drag. The effect
+  // fires on the next `nodes` change (post setNodes in the branches below),
+  // by which point nodesRef holds the final snapped/reflowed coordinates.
+  useEffect(() => {
+    if (!pendingRerouteRef.current) return;
+    pendingRerouteRef.current = false;
+    rerouteEdges();
+  }, [nodes, rerouteEdges]);
+
   // ─── Drag & snap handlers ─────────────────────────────────────
   const handleNodeDragStop = useCallback((_evt: React.MouseEvent, node: Node) => {
+    // After a server/zone drag repositions nodes, flag a reroute so the effect
+    // above re-evaluates edge handles at the new positions.
+    if (node.type === 'serverNode' || node.type === 'zoneLane') {
+      pendingRerouteRef.current = true;
+    }
     const parentId = node.parentId;
 
     // App node inside server container → snap to vertical stack
