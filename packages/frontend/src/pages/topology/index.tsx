@@ -127,6 +127,49 @@ function saveViewPrefs(prefs: ViewPrefs) {
   try { localStorage.setItem(VIEW_PREFS_KEY, JSON.stringify(prefs)); } catch { /* ignore */ }
 }
 
+// ─── Edge handle balancing ────────────────────────────────────────
+// When multiple edges connect to the same node, distribute their handles
+// across available options (top/bottom) to prevent stacking.
+function balanceEdgeHandles(edges: Edge[]): Edge[] {
+  const edgesByTarget = new Map<string, Edge[]>();
+  for (const edge of edges) {
+    const key = edge.target as string;
+    const arr = edgesByTarget.get(key);
+    if (arr) arr.push(edge);
+    else edgesByTarget.set(key, [edge]);
+  }
+
+  // For each target node with multiple edges, reassign handles to spread them
+  for (const [_, targetEdges] of edgesByTarget) {
+    if (targetEdges.length <= 1) continue;
+    const handles: Array<'bot-t' | 'top-t'> = ['bot-t', 'top-t'];
+    targetEdges.forEach((edge, idx) => {
+      const handle = handles[idx % handles.length];
+      edge.targetHandle = handle;
+    });
+  }
+
+  // Similarly balance source handles
+  const edgesBySource = new Map<string, Edge[]>();
+  for (const edge of edges) {
+    const key = edge.source as string;
+    const arr = edgesBySource.get(key);
+    if (arr) arr.push(edge);
+    else edgesBySource.set(key, [edge]);
+  }
+
+  for (const [_, sourceEdges] of edgesBySource) {
+    if (sourceEdges.length <= 1) continue;
+    const handles: Array<'bot-s' | 'top-s'> = ['bot-s', 'top-s'];
+    sourceEdges.forEach((edge, idx) => {
+      const handle = handles[idx % handles.length];
+      edge.sourceHandle = handle;
+    });
+  }
+
+  return edges;
+}
+
 // ─── Main Component ───────────────────────────────────────────────
 
 function TopologyPageInner() {
@@ -461,7 +504,9 @@ function TopologyPageInner() {
           const o = offs[e.id];
           return o ? { ...e, data: { ...e.data, labelOffsetX: o.x, labelOffsetY: o.y } } : e;
         });
-    setEdges(mergedEdges);
+    // Balance handles when multiple edges connect to/from the same node
+    const balancedEdges = balanceEdgeHandles(mergedEdges);
+    setEdges(balancedEdges);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [computedNodes, computedEdges, filters.nodeType, filters.showZones, layoutRevision]);
 

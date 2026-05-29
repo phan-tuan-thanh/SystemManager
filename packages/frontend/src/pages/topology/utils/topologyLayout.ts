@@ -578,7 +578,7 @@ export function getHorizontalBackwardRoute(
 
 function routeEdgesAfterLayout(nodes: Node[], edges: Edge[]): Edge[] {
   const nodeMap = new Map(nodes.map((n) => [n.id, n]));
-  return edges.map((edge) => {
+  const routed = edges.map((edge) => {
     const route = getSmartRoute(edge.source, edge.target, nodeMap);
     if (!route.sourceHandle && !route.targetHandle) return edge; // forward default
     const isCustomEdge = edge.type === 'protocolEdge' || edge.type === 'fwEdge';
@@ -589,6 +589,52 @@ function routeEdgesAfterLayout(nodes: Node[], edges: Edge[]): Edge[] {
       zIndex: isCustomEdge ? Math.max((edge.zIndex as number | undefined) ?? 0, 6) : 3,
     };
   });
+  // Balance handles: distribute multiple edges to same node across different handles
+  return balanceEdgeHandles(routed);
+}
+
+// When multiple edges target the same node, distribute their target handles to
+// avoid stacking. Cycles through available handles (bot-t, top-t) for vertical
+// edges, ensuring they spread around the node instead of clustering.
+function balanceEdgeHandles(edges: Edge[]): Edge[] {
+  const edgesByTarget = new Map<string, Edge[]>();
+  for (const edge of edges) {
+    const key = edge.target as string;
+    const arr = edgesByTarget.get(key);
+    if (arr) arr.push(edge);
+    else edgesByTarget.set(key, [edge]);
+  }
+
+  // For each target node with multiple edges, reassign handles to spread them.
+  for (const [_, targetEdges] of edgesByTarget) {
+    if (targetEdges.length <= 1) continue;
+    // Alternate between available target handles: bot-t, top-t, bot-t, ...
+    const handles: Array<'bot-t' | 'top-t'> = ['bot-t', 'top-t'];
+    targetEdges.forEach((edge, idx) => {
+      const handle = handles[idx % handles.length];
+      (edge as any).targetHandle = handle;
+    });
+  }
+
+  // Similarly balance source handles
+  const edgesBySource = new Map<string, Edge[]>();
+  for (const edge of edges) {
+    const key = edge.source as string;
+    const arr = edgesBySource.get(key);
+    if (arr) arr.push(edge);
+    else edgesBySource.set(key, [edge]);
+  }
+
+  for (const [_, sourceEdges] of edgesBySource) {
+    if (sourceEdges.length <= 1) continue;
+    const handles: Array<'bot-s' | 'top-s'> = ['bot-s', 'top-s'];
+    sourceEdges.forEach((edge, idx) => {
+      const handle = handles[idx % handles.length];
+      (edge as any).sourceHandle = handle;
+    });
+  }
+
+  return edges;
 }
 
 // ─── Combined layout entry point ──────────────────────────────────
