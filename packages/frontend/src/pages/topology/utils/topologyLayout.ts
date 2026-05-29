@@ -588,18 +588,22 @@ export function computeZoneColumnLayout(nodes: Node[]): Node[] {
   if (N === 0) return nodes;
 
   const COLS = Math.max(1, Math.ceil(Math.sqrt(N)));
+  const ROWS = Math.ceil(N / COLS);
   const nodeW = Math.max(...topNodes.map((n) => (n.style?.width as number) ?? SERVER_NODE_W));
   const nodeH = Math.max(...topNodes.map((n) => (n.style?.height as number) ?? SERVER_NODE_H));
   const COL_SLOT_W = nodeW + ZONE_COL_GAP;
   const ROW_SLOT_H = nodeH + ZONE_ROW_GAP;
 
   // Place nodes left→right, top→bottom into a uniform (col × row) grid
-  // so every column shares the same row y-coordinates from the start.
+  // so every column shares the same row y-coordinates from the start. A final
+  // partial row is centered under the full rows instead of left-justified.
   const posMap = new Map<string, { x: number; y: number }>();
   topNodes.forEach((node, i) => {
     const col = i % COLS;
     const row = Math.floor(i / COLS);
-    posMap.set(node.id, { x: col * COL_SLOT_W, y: row * ROW_SLOT_H });
+    const nodesInRow = row === ROWS - 1 ? N - row * COLS : COLS;
+    const rowOffset = ((COLS - nodesInRow) * COL_SLOT_W) / 2;
+    posMap.set(node.id, { x: rowOffset + col * COL_SLOT_W, y: row * ROW_SLOT_H });
   });
 
   return nodes.map((n) => {
