@@ -509,6 +509,47 @@ export function getSmartRoute(
   return { sourceHandle: 'left-s', targetHandle: 'right-t' };
 }
 
+// For edges between zone-contained servers, calculate routing based on zone
+// centers instead of server centers — ensures balanced handle positioning when
+// zones have multiple servers that obscure the zone center.
+export function getSmartRouteWithZones(
+  sourceId: string,
+  targetId: string,
+  nodeMap: Map<string, Node>,
+): SmartRoute {
+  const srcNode = nodeMap.get(sourceId);
+  const tgtNode = nodeMap.get(targetId);
+  if (!srcNode || !tgtNode) return getSmartRoute(sourceId, targetId, nodeMap);
+
+  // If either node has no zone parent, delegate to standard routing.
+  const srcParentId = getNodeParentId(srcNode);
+  const tgtParentId = getNodeParentId(tgtNode);
+  if (!srcParentId || !tgtParentId) {
+    return getSmartRoute(sourceId, targetId, nodeMap);
+  }
+
+  const srcParent = nodeMap.get(srcParentId);
+  const tgtParent = nodeMap.get(tgtParentId);
+  if (!srcParent || !tgtParent) return getSmartRoute(sourceId, targetId, nodeMap);
+
+  // Calculate zone centers (treating zone geometry as the decision point).
+  const srcZoneH = (srcParent.style?.height as number) ?? 300;
+  const srcZoneCenterY = srcParent.position.y + srcZoneH / 2;
+
+  const tgtZoneH = (tgtParent.style?.height as number) ?? 300;
+  const tgtZoneCenterY = tgtParent.position.y + tgtZoneH / 2;
+
+  // Use zone centers for direction calculation (same logic as getSmartRoute).
+  const dy = tgtZoneCenterY - srcZoneCenterY;
+
+  // For zone-to-zone edges, always use vertical routing (zones stack vertically in TB/BT).
+  // The zone center position is used to ensure balanced handle selection regardless
+  // of individual server positions within the zones.
+  return dy > 0
+    ? { sourceHandle: 'bot-s', targetHandle: 'top-t' }
+    : { sourceHandle: 'top-s', targetHandle: 'bot-t' };
+}
+
 // Kept for backward compatibility — delegates to getSmartRoute.
 export function getVerticalRoute(
   sourceId: string,

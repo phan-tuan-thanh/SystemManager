@@ -27,7 +27,7 @@ import TopologyLegend from './components/TopologyLegend';
 import { CreateConnectionModal } from './components/CreateConnectionModal';
 import ConnectionHealthDrawer from './components/ConnectionHealthDrawer';
 import { nodeTypes, edgeTypes } from './components/edges';
-import { computeLayout, applyDagreLayout, applyElkLayout, computeZoneLaneLayout, getSmartRoute, reflowZoneLanes, reflowZoneNodes, optimalZoneLaneArrangement, rebuildLaneWrappers, resizeZonesFromChildren, ZONE_CONTENT_ORIGIN } from './utils/topologyLayout';
+import { computeLayout, applyDagreLayout, applyElkLayout, computeZoneLaneLayout, getSmartRoute, getSmartRouteWithZones, reflowZoneLanes, reflowZoneNodes, optimalZoneLaneArrangement, rebuildLaneWrappers, resizeZonesFromChildren, ZONE_CONTENT_ORIGIN } from './utils/topologyLayout';
 import { useTopologyFilters } from './hooks/useTopologyFilters';
 import { useTopologyExport } from './hooks/useTopologyExport';
 import { useTopologyQuery, useCreateSnapshot, type ServerNode, type ConnectionEdge, type ImpliedConnectionEdge, type TopologyData, type Snapshot } from './hooks/useTopology';
@@ -310,7 +310,11 @@ function TopologyPageInner() {
             if (!addedServerPairs.has(action)) addedServerPairs.set(action, new Set());
             if (addedServerPairs.get(action)!.has(pairKey)) return;
             addedServerPairs.get(action)!.add(pairKey);
-            const handles = getSmartRoute(srcNodeId, tgtNodeId, zoneNodeMap);
+            const srcNode = zoneNodeMap.get(srcNodeId);
+            const tgtNode = zoneNodeMap.get(tgtNodeId);
+            const handles = (srcNode?.parentId && tgtNode?.parentId)
+              ? getSmartRouteWithZones(srcNodeId, tgtNodeId, zoneNodeMap)
+              : getSmartRoute(srcNodeId, tgtNodeId, zoneNodeMap);
             zoneImpliedEdges.push({
               id: `implied-srv-${action}-${srcId}-${tgtId}`,
               source: srcNodeId,
@@ -372,7 +376,11 @@ function TopologyPageInner() {
           if (!addedServerPairs.has(action)) addedServerPairs.set(action, new Set());
           if (addedServerPairs.get(action)!.has(pairKey)) return;
           addedServerPairs.get(action)!.add(pairKey);
-          const handles = getSmartRoute(srcNodeId, tgtNodeId, nodeMap);
+          const srcNode = nodeMap.get(srcNodeId);
+          const tgtNode = nodeMap.get(tgtNodeId);
+          const handles = (srcNode?.parentId && tgtNode?.parentId)
+            ? getSmartRouteWithZones(srcNodeId, tgtNodeId, nodeMap)
+            : getSmartRoute(srcNodeId, tgtNodeId, nodeMap);
           impliedEdges.push({
             id: `implied-srv-${action}-${srcId}-${tgtId}`,
             source: srcNodeId,
@@ -514,7 +522,10 @@ function TopologyPageInner() {
       const srcNode = nodeMap.get(e.source);
       const tgtNode = nodeMap.get(e.target);
       if (srcNode?.type !== 'serverNode' || tgtNode?.type !== 'serverNode') return e;
-      const route = getSmartRoute(e.source, e.target, nodeMap);
+      // Use zone-aware routing if both nodes are in zones, else use standard routing.
+      const route = (srcNode.parentId && tgtNode.parentId)
+        ? getSmartRouteWithZones(e.source, e.target, nodeMap)
+        : getSmartRoute(e.source, e.target, nodeMap);
       const newSrc = route.sourceHandle ?? null;
       const newTgt = route.targetHandle ?? null;
       if ((e.sourceHandle ?? null) === newSrc && (e.targetHandle ?? null) === newTgt) return e;
